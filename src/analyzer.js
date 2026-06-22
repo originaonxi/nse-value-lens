@@ -305,7 +305,16 @@ async function analyzeSymbol(symbol, manual = {}) {
     throw new Error(`${symbol} was not found in the official Nifty 200 CSV. Try the exact NSE symbol, e.g. BANKBARODA, POLYCAB, MUTHOOTFIN.`);
   }
   const [quote, screener] = await Promise.all([
-    getYahooQuote(constituent.symbol),
+    getYahooQuote(constituent.symbol).catch((err) => ({
+      symbol: constituent.symbol,
+      cmp: null,
+      fiftyTwoWeekHigh: null,
+      fiftyTwoWeekLow: null,
+      dma50: null,
+      dma200: null,
+      rsi14: null,
+      source: `Yahoo failed: ${err.message}`,
+    })),
     getScreenerMetrics(constituent.symbol).catch((err) => ({ source: `Screener failed: ${err.message}`, raw: {} })),
   ]);
   const attainix = await getAttainixSummary(constituent.companyName, constituent.symbol).catch(() => null);

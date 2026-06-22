@@ -1,6 +1,9 @@
 'use strict';
 
 const cheerio = require('cheerio');
+const fs = require('fs');
+const path = require('path');
+
 
 const CACHE = new Map();
 const DAY = 24 * 60 * 60 * 1000;
@@ -68,10 +71,16 @@ function parseCsvLine(line) {
 async function getNifty200Constituents() {
   const cached = cacheGet('nifty200', DAY);
   if (cached) return cached;
-  const csv = await fetchText('https://www.niftyindices.com/IndexConstituent/ind_nifty200list.csv', {
-    headers: { accept: '*/*' },
-    timeoutMs: 20000,
-  });
+  let csv = '';
+  try {
+    csv = await fetchText('https://www.niftyindices.com/IndexConstituent/ind_nifty200list.csv', {
+      headers: { accept: '*/*' },
+      timeoutMs: 12000,
+    });
+  } catch (_err) {
+    const fallbackPath = path.join(__dirname, '..', 'data', 'nifty200.csv');
+    csv = fs.readFileSync(fallbackPath, 'utf8');
+  }
   const lines = csv.trim().split(/\r?\n/).filter(Boolean);
   const header = parseCsvLine(lines.shift());
   const rows = lines.map((line) => {
