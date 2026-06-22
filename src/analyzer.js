@@ -121,12 +121,29 @@ function classifyDiscount(constituent, metrics) {
   };
 }
 
+function finitePositive(n) {
+  return Number.isFinite(n) && n > 0;
+}
+
+function coerceNumber(value, key) {
+  if (value == null || value === '') return null;
+  const n = Number(String(value).replace(/[%₹,x×]/g, '').trim());
+  if (!Number.isFinite(n)) return null;
+  const percentFields = new Set(['roe', 'roce', 'dividendYield', 'gnpa', 'nnpa', 'pcr', 'car', 'nim', 'slippage', 'loanGrowth', 'earningsGrowth']);
+  if (percentFields.has(key) && n > 1000) return null;
+  if (['pe', 'pb', 'bookValue', 'marketCapCr', 'patCr'].includes(key) && n <= 0) return null;
+  return n;
+}
+
 function extractManual(manual = {}) {
   if (!manual || typeof manual !== 'object') return {};
+  const allowed = new Set(['pe', 'pb', 'bookValue', 'roe', 'roce', 'dividendYield', 'marketCapCr', 'gnpa', 'nnpa', 'pcr', 'car', 'nim', 'slippage', 'loanGrowth', 'patCr', 'earningsGrowth']);
   const normalized = {};
   for (const [k, v] of Object.entries(manual)) {
-    const key = k.trim();
-    normalized[key] = v;
+    const key = String(k).trim();
+    if (!allowed.has(key)) continue;
+    const n = coerceNumber(v, key);
+    if (n != null) normalized[key] = n;
   }
   return normalized;
 }
@@ -174,7 +191,7 @@ function targetPeFor(constituent, pe) {
 function lenderValuation(metrics, framework) {
   const roe = metrics.roe;
   const pb = metrics.pb;
-  if (roe == null || pb == null) return null;
+  if (!finitePositive(roe) || !finitePositive(pb)) return null;
   const coe = framework === 'bank' ? 12.5 : 13.0;
   const growth = framework === 'bank' ? 5.0 : 7.0;
   let fairPb = null;
@@ -187,9 +204,9 @@ function lenderValuation(metrics, framework) {
 }
 
 function industrialValuation(constituent, metrics) {
-  if (metrics.pe == null) return null;
+  if (!finitePositive(metrics.pe)) return null;
   const targetPe = targetPeFor(constituent, metrics.pe);
-  const earningsGrowth = metrics.earningsGrowth ?? 0;
+  const earningsGrowth = Number.isFinite(metrics.earningsGrowth) ? metrics.earningsGrowth : 0;
   const upside = (targetPe / metrics.pe) * (1 + earningsGrowth / 100) - 1;
   return { targetPe, earningsGrowth, upside };
 }
@@ -200,7 +217,7 @@ function formatMetricRows(framework, metrics, quote, screener, attainix) {
     ['52W Range', `${fmtMoney(quote.fiftyTwoWeekLow, 0)} – ${fmtMoney(quote.fiftyTwoWeekHigh, 0)}`, quote.source],
     ['50 DMA', fmtMoney(quote.dma50), 'Yahoo close series, computed'],
     ['200 DMA', fmtMoney(quote.dma200), 'Yahoo close series, computed'],
-    ['RSI (14d)', fmtNum(quote.rsi14, 2), 'Yahoo close series, computed'],
+    ['RSI (14d)', fmtNum(quote.rsi14, 2), 'Yahoo close series, simple approximation'],
     ['PE', metrics.pe == null ? 'n/a' : `~${fmtNum(metrics.pe, 2)}×`, screener.source],
     ['PB', metrics.pb == null ? 'n/a' : `~${fmtNum(metrics.pb, 2)}×`, metrics.bookValue ? 'CMP / Screener book value' : 'Manual/source'],
     ['ROE', fmtPct(metrics.roe), screener.source],
@@ -239,9 +256,11 @@ function buildReport({ constituent, quote, screener, attainix, manual = {} }) {
   if (framework === 'industrial') {
     const val = industrialValuation(constituent, metrics);
     if (val) {
-      const targetPrice = metrics.cmp * (1 + val.upside);
-      valuationText = `The simple re-rating math is: target PE ${fmtNum(val.targetPe, 1)}× / current PE ${fmtNum(metrics.pe, 2)}× × earnings growth factor ${(1 + val.earningsGrowth / 100).toFixed(2)} = implied upside ${pct(val.upside, 0)}. This is conditional on earnings being sustainable; for cyclicals, low PE can be peak-cycle earnings.`;
-      doubleScenario = `If earnings hold and the market assigns ${fmtNum(val.targetPe, 1)}× PE, implied price is roughly ${fmtMoney(targetPrice)}. A true 100% scenario needs either a higher target multiple, earnings growth, or both.`;
+      const targetPrice = finitePositive(metrics.cmp) ? metrics.cmp * (1 + val.upside) : null;
+      valuationText = `Rough PE sensitivity: target PE ${fmtNum(val.targetPe, 1)}× / current PE ${fmtNum(metrics.pe, 2)}× × earnings growth factor ${(1 + val.earningsGrowth / 100).toFixed(2)} = implied upside ${pct(val.upside, 0)}. This is conditional on earnings being sustainable; for cyclicals, low PE can be peak-cycle earnings.`;
+      doubleScenario = targetPrice
+        ? `If earnings hold and the market assigns ${fmtNum(val.targetPe, 1)}× PE, implied price is roughly ${fmtMoney(targetPrice)}. A true 100% scenario needs either a higher target multiple, earnings growth, or both.`
+        : `CMP is unavailable, so the app cannot translate PE sensitivity into a price target.`;
     } else {
       valuationText = 'PE was not available from free sources, so the app cannot compute a reliable PE re-rating case without manual input.';
       doubleScenario = 'Paste PE/EPS or EV/EBITDA data to compute a quantified double scenario.';
@@ -249,17 +268,19 @@ function buildReport({ constituent, quote, screener, attainix, manual = {} }) {
   } else {
     const val = lenderValuation(metrics, framework);
     if (val) {
-      const targetPrice = metrics.cmp * (1 + val.upside);
-      valuationText = `Using a Gordon-style PB model: fair PB ≈ (ROE ${fmtPct(metrics.roe)} - growth ${fmtPct(val.growth)}) / (cost of equity ${fmtPct(val.coe)} - growth ${fmtPct(val.growth)}) = ${fmtNum(val.fairPb, 2)}×. Current PB is ${fmtNum(metrics.pb, 2)}×, implying ${pct(val.upside, 0)} potential if ROE is sustainable.`;
-      doubleScenario = `If ROE persists and PB re-rates to ${fmtNum(val.fairPb, 2)}×, implied price is roughly ${fmtMoney(targetPrice)}. A 100% case requires ROE improvement, book-value growth, or a higher PB justified by cleaner asset quality.`;
+      const targetPrice = finitePositive(metrics.cmp) ? metrics.cmp * (1 + val.upside) : null;
+      valuationText = `Rough Gordon-style PB sensitivity: fair PB ≈ (ROE ${fmtPct(metrics.roe)} - growth ${fmtPct(val.growth)}) / (cost of equity ${fmtPct(val.coe)} - growth ${fmtPct(val.growth)}) = ${fmtNum(val.fairPb, 2)}×. Current PB is ${fmtNum(metrics.pb, 2)}×, implying ${pct(val.upside, 0)} potential if ROE, credit quality, and funding costs are sustainable.`;
+      doubleScenario = targetPrice
+        ? `If ROE persists and PB re-rates to ${fmtNum(val.fairPb, 2)}×, implied price is roughly ${fmtMoney(targetPrice)}. A 100% case requires ROE improvement, book-value growth, or a higher PB justified by cleaner asset quality.`
+        : `CMP is unavailable, so the app cannot translate PB sensitivity into a price target.`;
     } else {
-      valuationText = 'ROE/PB was not available from free sources, so the app cannot compute Gordon PB fair value without manual input.';
+      valuationText = 'ROE/PB was not available from free sources, so the app cannot compute Gordon PB sensitivity without manual input.';
       doubleScenario = 'Paste PB and ROE to compute a lender-specific double scenario.';
     }
   }
 
   const technical = quote.cmp && quote.dma200
-    ? `Technically, CMP is ${pct(quote.cmp / quote.dma200 - 1, 0)} versus the 200 DMA and ${pct(quote.cmp / quote.fiftyTwoWeekHigh - 1, 0)} from the 52-week high. RSI(14) is ${fmtNum(quote.rsi14, 1)}.`
+    ? `Technically, CMP is ${pct(quote.cmp / quote.dma200 - 1, 0)} versus the 200 DMA and ${pct(quote.cmp / quote.fiftyTwoWeekHigh - 1, 0)} from the 52-week high. Simple RSI(14) approximation is ${fmtNum(quote.rsi14, 1)}.`
     : 'Technical positioning could not be fully computed from Yahoo data.';
 
   const sourceNotes = [
