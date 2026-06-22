@@ -119,6 +119,12 @@ document.querySelectorAll('.tab[data-tab]').forEach(btn=>btn.addEventListener('c
   document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
   $('side').textContent = btn.dataset.tab==='prompt' ? (last?.prompt||'') : JSON.stringify(last?.data||{},null,2);
 }));
+
+window.addEventListener('DOMContentLoaded', () => {
+  $('symbol').value = 'BANKBARODA';
+  $('manual').value = '{\n  "gnpa": 1.89,\n  "nnpa": 0.45,\n  "pcr": 93.94,\n  "car": 14.7,\n  "nim": 2.89,\n  "loanGrowth": 13.9,\n  "patCr": 20021\n}';
+  analyze();
+});
 </script>
 </body>
 </html>
