@@ -14,6 +14,11 @@ try {
   preAnalyzedDb = require(path.join(__dirname, '..', 'data', 'pre_analyzed.json'));
 } catch (_e) {}
 
+let preBakedReports = {};
+try {
+  preBakedReports = require(path.join(__dirname, '..', 'data', 'pre_baked_reports.json'));
+} catch (_e) {}
+
 
 function fmtMoney(n, digits = 2) {
   if (n == null || Number.isNaN(n)) return 'n/a';
@@ -348,6 +353,28 @@ async function analyzeSymbol(symbol, manual = {}) {
   if (!constituent) {
     throw new Error(`${symbol} was not found in the official Nifty 200 CSV. Try the exact NSE symbol, e.g. BANKBARODA, POLYCAB, MUTHOOTFIN.`);
   }
+  const sym = constituent.symbol.toUpperCase();
+  const hasManual = manual && typeof manual === 'object' && Object.keys(manual).length > 0;
+  if (preBakedReports[sym] && !hasManual) {
+    const quote = { symbol: sym, cmp: null, source: 'Pre-baked' };
+    const screener = { source: 'Pre-baked', raw: {} };
+    const attainix = null;
+    const preBakedData = preAnalyzedDb[sym] || {};
+    const framework = classifyFramework(constituent);
+    const metrics = makeMetrics(constituent, quote, screener, preBakedData.manual || {});
+    const discount = classifyDiscount(constituent, metrics);
+    if (preBakedData.wording) {
+      discount.label = preBakedData.wording.discountLabel;
+      discount.reason = preBakedData.wording.discountReason;
+      discount.trap = preBakedData.wording.trap;
+    }
+    return {
+      markdown: preBakedReports[sym],
+      data: { constituent, quote, screener, attainix, framework, metrics, discount },
+      prompt: buildPrompt({ constituent, quote, screener, attainix, framework, metrics, discount })
+    };
+  }
+
   const [quote, screener] = await Promise.all([
     getYahooQuote(constituent.symbol).catch((err) => ({
       symbol: constituent.symbol,
@@ -362,7 +389,6 @@ async function analyzeSymbol(symbol, manual = {}) {
     getScreenerMetrics(constituent.symbol).catch((err) => ({ source: `Screener failed: ${err.message}`, raw: {} })),
   ]);
   const attainix = await getAttainixSummary(constituent.companyName, constituent.symbol).catch(() => null);
-  const sym = constituent.symbol.toUpperCase();
   const preBaked = preAnalyzedDb[sym];
   const mergedManual = preBaked && preBaked.manual
     ? { ...preBaked.manual, ...extractManual(manual) }
