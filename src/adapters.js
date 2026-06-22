@@ -153,6 +153,38 @@ function parseNumber(text) {
   return match ? Number(match[0]) : null;
 }
 
+function metricsToValue(metrics, source, usedUrl) {
+  return {
+    source: `${source} (${usedUrl})`,
+    raw: metrics,
+    marketCapCr: metrics['Market Cap']?.value ?? null,
+    currentPrice: metrics['Current Price']?.value ?? null,
+    highLow: metrics['High / Low']?.raw ?? null,
+    stockPE: metrics['Stock P/E']?.value ?? null,
+    bookValue: metrics['Book Value']?.value ?? null,
+    dividendYield: metrics['Dividend Yield']?.value ?? null,
+    roce: metrics.ROCE?.value ?? null,
+    roe: metrics.ROE?.value ?? null,
+    faceValue: metrics['Face Value']?.value ?? null,
+  };
+}
+
+function parseScreenerMarkdown(md) {
+  const metrics = {};
+  const keys = ['Market Cap', 'Current Price', 'High / Low', 'Stock P/E', 'Book Value', 'Dividend Yield', 'ROCE', 'ROE', 'Face Value'];
+  for (const key of keys) {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`${escaped}\\s+([^\\n]+)`, 'i');
+    const match = md.match(re);
+    if (match) {
+      const raw = match[1].replace(/\\s+/g, ' ').trim();
+      metrics[key] = { value: parseNumber(raw), raw };
+    }
+  }
+  return metrics;
+}
+
+
 async function getScreenerMetrics(symbol) {
   const normalized = String(symbol || '').trim().toUpperCase().replace(/\.NS$/, '');
   const key = `screener:${normalized}`;
@@ -174,30 +206,34 @@ async function getScreenerMetrics(symbol) {
       lastErr = err;
     }
   }
-  if (!html) throw lastErr || new Error(`Screener unavailable for ${normalized}`);
-  const $ = cheerio.load(html);
-  const metrics = {};
-  $('#top-ratios li').each((_, el) => {
-    const name = $(el).find('.name').text().replace(/\s+/g, ' ').trim();
-    const valueText = $(el).find('.value').text().replace(/\s+/g, ' ').trim();
-    const num = parseNumber(valueText);
-    if (name) metrics[name] = { value: num, raw: valueText };
-  });
+  if (html) {
+    const $ = cheerio.load(html);
+    const metrics = {};
+    $('#top-ratios li').each((_, el) => {
+      const name = $(el).find('.name').text().replace(/\s+/g, ' ').trim();
+      const valueText = $(el).find('.value').text().replace(/\s+/g, ' ').trim();
+      const num = parseNumber(valueText);
+      if (name) metrics[name] = { value: num, raw: valueText };
+    });
+    if (Object.keys(metrics).length && (metrics['Stock P/E'] || metrics.ROE || metrics['Book Value'])) {
+      return cacheSet(key, metricsToValue(metrics, 'Screener.in', usedUrl));
+    }
+  }
 
-  const value = {
-    source: `Screener.in (${usedUrl})`,
-    raw: metrics,
-    marketCapCr: metrics['Market Cap']?.value ?? null,
-    currentPrice: metrics['Current Price']?.value ?? null,
-    highLow: metrics['High / Low']?.raw ?? null,
-    stockPE: metrics['Stock P/E']?.value ?? null,
-    bookValue: metrics['Book Value']?.value ?? null,
-    dividendYield: metrics['Dividend Yield']?.value ?? null,
-    roce: metrics.ROCE?.value ?? null,
-    roe: metrics.ROE?.value ?? null,
-    faceValue: metrics['Face Value']?.value ?? null,
-  };
-  return cacheSet(key, value);
+  for (const url of urls) {
+    try {
+      const readerUrl = `https://r.jina.ai/${url}`;
+      const md = await fetchText(readerUrl, { timeoutMs: 25000 });
+      const metrics = parseScreenerMarkdown(md);
+      if (Object.keys(metrics).length) {
+        return cacheSet(key, metricsToValue(metrics, 'Screener via Jina Reader fallback', readerUrl));
+      }
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+
+  throw lastErr || new Error(`Screener unavailable for ${normalized}`);
 }
 
 async function getAttainixSummary(companyName, symbol) {
