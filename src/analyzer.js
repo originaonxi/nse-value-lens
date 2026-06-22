@@ -6,6 +6,14 @@ const {
   getScreenerMetrics,
   getAttainixSummary,
 } = require('./adapters');
+const fs = require('fs');
+const path = require('path');
+
+let preAnalyzedDb = {};
+try {
+  preAnalyzedDb = require(path.join(__dirname, '..', 'data', 'pre_analyzed.json'));
+} catch (_e) {}
+
 
 function fmtMoney(n, digits = 2) {
   if (n == null || Number.isNaN(n)) return 'n/a';
@@ -311,8 +319,23 @@ function buildReport({ constituent, quote, screener, attainix, manual = {} }) {
     else attainixText = `Attainix MV/IV is ${fmtNum(attainix.mvToIv, 2)}, roughly around its modelled intrinsic value.`;
   }
 
-  const markdown = `# ${constituent.symbol} · ${constituent.companyName}\n\n**Sector:** ${constituent.industry} · **Nifty 200:** ✅ verified via official NSE Indices CSV  \n**Discount type:** ${discount.label}  \n**Metrics framework:** ${framework === 'industrial' ? 'Industrial metrics apply — PE/PB/ROE/ROCE/FCF/net-debt.' : 'LENDER metrics apply — D/E and EV/EBITDA are not primary valuation tools.'}\n\n${table([metricTitle, 'Value', 'Source'], rows)}\n\n## Technical setup\n${technical}\n\n## Why it looks cheap / or does not\n${cheapnessText} ${attainixText}\n\n## Honest reason for the discount\n${discount.reason}\n\n## Why this may NOT be a pure value trap\n${valuationText}\n\n## Re-rating / double scenario\n${doubleScenario}\n\n## Value-trap condition\n${discount.trap}\n\n## Thesis invalidation level\nPrice invalidation: watch for a weekly close below the 200 DMA (${fmtMoney(quote.dma200)}), unless the stock is a deep cyclic where commodity/fundamental triggers matter more. Fundamental invalidation: the value-trap condition above materialises.\n\n## Source caveats\n${sourceNotes.map((s) => `- ${s}`).join('\n')}\n\n> ⚠️ This is a speculative research report generated from free public sources. It is NOT financial advice, NOT a buy/sell recommendation, and not a substitute for a SEBI-registered investment advisor. Free-source scraping can fail or go stale; verify critical figures from exchange filings before investing.`;
+  const sym = String(constituent.symbol).trim().toUpperCase();
+  const preBaked = preAnalyzedDb[sym];
+  if (preBaked && preBaked.wording) {
+    discount.label = preBaked.wording.discountLabel;
+    discount.reason = preBaked.wording.discountReason;
+    discount.trap = preBaked.wording.trap;
+    valuationText = preBaked.wording.whyNotTrap;
+    doubleScenario = preBaked.wording.doubleScenario;
+    cheapnessText = preBaked.wording.whyCheap;
+    attainixText = '';
+  }
 
+  const invalidationText = preBaked && preBaked.wording && preBaked.wording.invalidation
+    ? preBaked.wording.invalidation
+    : `Price invalidation: watch for a weekly close below the 200 DMA (${fmtMoney(quote.dma200)}), unless the stock is a deep cyclic where commodity/fundamental triggers matter more. Fundamental invalidation: the value-trap condition above materialises.`;
+
+  const markdown = `# ${constituent.symbol} · ${constituent.companyName}\n\n**Sector:** ${constituent.industry} · **Nifty 200:** ✅ verified via official NSE Indices CSV  \n**Discount type:** ${discount.label}  \n**Metrics framework:** ${framework === 'industrial' ? 'Industrial metrics apply — PE/PB/ROE/ROCE/FCF/net-debt.' : 'LENDER metrics apply — D/E and EV/EBITDA are not primary valuation tools.'}\n\n${table([metricTitle, 'Value', 'Source'], rows)}\n\n## Technical setup\n${technical}\n\n## Why it looks cheap / or does not\n${cheapnessText} ${attainixText}\n\n## Honest reason for the discount\n${discount.reason}\n\n## Why this may NOT be a pure value trap\n${valuationText}\n\n## Re-rating / double scenario\n${doubleScenario}\n\n## Value-trap condition\n${discount.trap}\n\n## Thesis invalidation level\n${invalidationText}\n\n## Source caveats\n${sourceNotes.map((s) => `- ${s}`).join('\n')}\n\n> ⚠️ This is a speculative research report generated from free public sources. It is NOT financial advice, NOT a buy/sell recommendation, and not a substitute for a SEBI-registered investment advisor. Free-source scraping can fail or go stale; verify critical figures from exchange filings before investing.`;
   return {
     markdown,
     data: { constituent, quote, screener, attainix, framework, metrics, discount },
@@ -339,7 +362,12 @@ async function analyzeSymbol(symbol, manual = {}) {
     getScreenerMetrics(constituent.symbol).catch((err) => ({ source: `Screener failed: ${err.message}`, raw: {} })),
   ]);
   const attainix = await getAttainixSummary(constituent.companyName, constituent.symbol).catch(() => null);
-  return buildReport({ constituent, quote, screener, attainix, manual: extractManual(manual) });
+  const sym = constituent.symbol.toUpperCase();
+  const preBaked = preAnalyzedDb[sym];
+  const mergedManual = preBaked && preBaked.manual
+    ? { ...preBaked.manual, ...extractManual(manual) }
+    : extractManual(manual);
+  return buildReport({ constituent, quote, screener, attainix, manual: mergedManual });
 }
 
 module.exports = {
