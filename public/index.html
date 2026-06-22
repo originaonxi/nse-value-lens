@@ -16,6 +16,8 @@
     #status{color:var(--warn)}#error{color:var(--danger);white-space:pre-wrap}.result{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:16px}@media(max-width:1050px){.result{grid-template-columns:1fr}}
     article{line-height:1.65}.markdown h1{font-size:30px}.markdown h2{border-top:1px solid var(--line);padding-top:18px;margin-top:24px}.markdown table{width:100%;border-collapse:collapse;display:block;overflow:auto}.markdown th,.markdown td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}.markdown th{background:#172240}.markdown blockquote{border-left:4px solid var(--warn);margin:16px 0;padding:8px 14px;background:#10182d;color:#dce6ff}
     pre{white-space:pre-wrap;background:#091020;border:1px solid var(--line);border-radius:14px;padding:14px;overflow:auto}.small{font-size:13px;color:var(--muted)}.tabs{display:flex;gap:8px;margin-bottom:10px}.tab{background:#0b1224;color:var(--muted);border:1px solid var(--line)}.tab.active{background:#203252;color:var(--text)}
+    .pill-btn{background:#16223d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:background 0.2s}
+    .pill-btn:hover{background:#243660}
   </style>
 </head>
 <body>
@@ -29,7 +31,25 @@
         <div>
           <label for="symbol">NSE Symbol</label>
           <input id="symbol" placeholder="BANKBARODA, POLYCAB, BPCL, MUTHOOTFIN..." value="BANKBARODA" />
-          <div class="hint">Only official Nifty 200 constituents are accepted. Example: <b>BANKBARODA</b>, <b>POLYCAB</b>, <b>BHARATFORG</b>, <b>BPCL</b>.</div>
+          <div class="hint">Only official Nifty 200 constituents are accepted. Example: <b>BANKBARODA</b>, <b>POLYCAB</b>.</div>
+          <div style="margin-top: 14px;">
+            <span style="font-size: 13px; color: var(--muted); display:block; margin-bottom: 6px;">Pre-Analyzed Value Picks:</span>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+              <button class="pill-btn" data-sym="BANKBARODA">Bank of Baroda</button>
+              <button class="pill-btn" data-sym="MUTHOOTFIN">Muthoot Finance</button>
+              <button class="pill-btn" data-sym="COALINDIA">Coal India</button>
+              <button class="pill-btn" data-sym="BPCL">BPCL</button>
+              <button class="pill-btn" data-sym="NMDC">NMDC</button>
+            </div>
+            <span style="font-size: 13px; color: var(--muted); display:block; margin-bottom: 6px;">Pre-Analyzed Momentum Picks:</span>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="pill-btn" data-sym="BHEL">BHEL</button>
+              <button class="pill-btn" data-sym="BSE">BSE Ltd</button>
+              <button class="pill-btn" data-sym="POLYCAB">Polycab</button>
+              <button class="pill-btn" data-sym="BHARATFORG">Bharat Forge</button>
+              <button class="pill-btn" data-sym="LAURUSLABS">Laurus Labs</button>
+            </div>
+          </div>
         </div>
         <div>
           <label for="manual">Optional manual filing metrics (JSON)</label>
@@ -61,6 +81,19 @@
     </section>
   </main>
 <script>
+document.querySelectorAll('.pill-btn[data-sym]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('symbol').value = btn.dataset.sym;
+    if (btn.dataset.sym === 'BANKBARODA') {
+      $('manual').value = '{\n  "gnpa": 1.89,\n  "nnpa": 0.45,\n  "pcr": 93.94,\n  "car": 14.7,\n  "nim": 2.89,\n  "loanGrowth": 13.9,\n  "patCr": 20021\n}';
+    } else if (btn.dataset.sym === 'MUTHOOTFIN') {
+      $('manual').value = '{\n  "gnpa": 1.69,\n  "car": 27.10,\n  "nim": 4.80,\n  "loanGrowth": 24.30,\n  "patCr": 10607\n}';
+    } else {
+      $('manual').value = '';
+    }
+    analyze();
+  });
+});
 let last = null;
 function $(id){ return document.getElementById(id); }
 function parseManual(){
