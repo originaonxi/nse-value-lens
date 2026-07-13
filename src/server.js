@@ -4,7 +4,7 @@ const path = require('path');
 const express = require('express');
 const { marked } = require('marked');
 const sanitizeHtml = require('sanitize-html');
-const { analyzeSymbol } = require('./analyzer');
+const { analyzeSymbol, BUDGET_THEMES, getShortlist } = require('./analyzer');
 const { getNifty200Constituents } = require('./adapters');
 
 const app = express();
@@ -53,6 +53,14 @@ app.get('/api/constituents', rateLimit, async (_req, res) => {
   } catch (err) {
     res.status(502).json({ ok: false, error: err.message });
   }
+});
+
+app.get('/api/themes', (_req, res) => {
+  res.json({ ok: true, themes: BUDGET_THEMES });
+});
+
+app.get('/api/shortlist', (_req, res) => {
+  res.json({ ok: true, shortlist: getShortlist() });
 });
 
 app.post('/api/analyze', rateLimit, async (req, res) => {
