@@ -684,7 +684,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 370.2,
-      "hi": 393.7,
+      "hi": 383.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 355.2,
@@ -698,8 +698,8 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       370.2,
-      393.7,
-      409.7
+      383.5,
+      393.7
      ],
      "hi_52w": 444.5,
      "lo_52w": 172.2,
@@ -1354,7 +1354,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 436.2,
-      "hi": 451.6,
+      "hi": 452.0,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 430.2,
@@ -1368,7 +1368,7 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       436.2,
-      451.6,
+      452.0,
       472.0
      ],
      "hi_52w": 491.2,
@@ -1512,7 +1512,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 67.8,
+    "overall_score": 66.9,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -1960,10 +1960,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Breakout / Breakdown Status",
       "formula": "Is price breaking key S/R levels in last 5 sessions?",
-      "value": "BREAKING OUT ↑",
+      "value": "RANGE-BOUND",
       "benchmark": "Breakout above resistance = fresh buy | Breakdown below support = exit",
-      "verdict": "STRONG BUY SIGNAL",
-      "score": 10
+      "verdict": "WAIT FOR BREAKOUT",
+      "score": 6
      },
      {
       "id": 46,
@@ -2010,10 +2010,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "67.8/100",
+      "value": "66.9/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
-      "score": 6.8
+      "score": 6.7
      }
     ],
     "price_zones": {
@@ -2046,7 +2046,7 @@ window.STOCK_DATA = {
      "near_resistance": 1172.9,
      "support_dist_pct": -5.2,
      "resistance_dist_pct": 1.3,
-     "breaking_out": true,
+     "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
       934.5,
@@ -2181,7 +2181,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 69.8,
+    "overall_score": 70.2,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -2539,7 +2539,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+3.3%",
+      "value": "+4.3%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -2609,10 +2609,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.85",
+      "value": "1.1",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
-      "score": 2
+      "score": 4
      },
      {
       "id": 44,
@@ -2679,7 +2679,7 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "69.8/100",
+      "value": "70.2/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
       "score": 7.0
@@ -2692,7 +2692,7 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 86.9,
+      "lo": 87.7,
       "hi": 93.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -2706,16 +2706,16 @@ window.STOCK_DATA = {
       75.3
      ],
      "resistance": [
-      86.9,
+      87.7,
       93.5,
       97.5
      ],
      "hi_52w": 97.5,
      "lo_52w": 64.8,
      "near_support": 80.8,
-     "near_resistance": 86.9,
+     "near_resistance": 87.7,
      "support_dist_pct": -3.9,
-     "resistance_dist_pct": 3.3,
+     "resistance_dist_pct": 4.3,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -3363,7 +3363,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 412.1,
-      "hi": 426.0,
+      "hi": 427.2,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 405.1,
@@ -3377,7 +3377,7 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       412.1,
-      426.0,
+      427.2,
       442.7
      ],
      "hi_52w": 486.5,
@@ -4033,7 +4033,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 1417.0,
-      "hi": 1495.3,
+      "hi": 1494.0,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1402.0,
@@ -4047,7 +4047,7 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       1417.0,
-      1495.3,
+      1494.0,
       1536.0
      ],
      "hi_52w": 1785.7,
@@ -4192,7 +4192,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 67.3,
+    "overall_score": 66.1,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -4540,7 +4540,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "-0.5%",
+      "value": "-1.4%",
       "benchmark": "How far price must fall to hit nearest support",
       "verdict": "TIGHT SUPPORT",
       "score": 8
@@ -4550,7 +4550,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+1.8%",
+      "value": "+1.5%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -4620,10 +4620,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "3.6",
+      "value": "1.07",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "EXCELLENT SETUP",
-      "score": 10
+      "verdict": "POOR",
+      "score": 4
      },
      {
       "id": 44,
@@ -4690,20 +4690,20 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "67.3/100",
+      "value": "66.1/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
-      "score": 6.7
+      "score": 6.6
      }
     ],
     "price_zones": {
      "buy_zone": {
       "lo": 439.7,
-      "hi": 453.9,
+      "hi": 449.7,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 464.5,
+      "lo": 463.1,
       "hi": 479.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -4712,21 +4712,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      453.9,
+      449.7,
       439.7,
       422.0
      ],
      "resistance": [
-      464.5,
+      463.1,
       479.8,
       493.2
      ],
      "hi_52w": 574.5,
      "lo_52w": 399.8,
-     "near_support": 453.9,
-     "near_resistance": 464.5,
-     "support_dist_pct": -0.5,
-     "resistance_dist_pct": 1.8,
+     "near_support": 449.7,
+     "near_resistance": 463.1,
+     "support_dist_pct": -1.4,
+     "resistance_dist_pct": 1.5,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -6201,8 +6201,8 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 61.0,
-    "overall_verdict": "BUY 🟡",
+    "overall_score": 59.2,
+    "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
       "id": 1,
@@ -6549,7 +6549,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "2.8%",
+      "value": "-2.3%",
       "benchmark": "How far price must fall to hit nearest support",
       "verdict": "TIGHT SUPPORT",
       "score": 8
@@ -6559,10 +6559,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+8.7%",
+      "value": "+2.8%",
       "benchmark": "How much upside before hitting selling pressure",
-      "verdict": "MODERATE ROOM",
-      "score": 5
+      "verdict": "NEAR RESISTANCE",
+      "score": 2
      },
      {
       "id": 37,
@@ -6629,10 +6629,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "3.11",
+      "value": "1.22",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "EXCELLENT SETUP",
-      "score": 10
+      "verdict": "POOR",
+      "score": 4
      },
      {
       "id": 44,
@@ -6699,21 +6699,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "61.0/100",
+      "value": "59.2/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
-      "verdict": "BUY 🟡",
-      "score": 6.1
+      "verdict": "NEUTRAL ⚪",
+      "score": 5.9
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 242.8,
-      "hi": 255.3,
+      "lo": 234.6,
+      "hi": 242.8,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 269.9,
-      "hi": 288.4,
+      "lo": 255.3,
+      "hi": 265.7,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 248.4,
@@ -6721,21 +6721,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      255.3,
       242.8,
-      234.6
+      234.6,
+      226.7
      ],
      "resistance": [
-      269.9,
-      288.4,
-      293.0
+      255.3,
+      265.7,
+      271.4
      ],
      "hi_52w": 307.5,
      "lo_52w": 219.4,
-     "near_support": 255.3,
-     "near_resistance": 269.9,
-     "support_dist_pct": 2.8,
-     "resistance_dist_pct": 8.7,
+     "near_support": 242.8,
+     "near_resistance": 255.3,
+     "support_dist_pct": -2.3,
+     "resistance_dist_pct": 2.8,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -9212,7 +9212,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+1.9%",
+      "value": "+2.2%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -9282,7 +9282,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.76",
+      "value": "0.88",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -9365,7 +9365,7 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 2690.9,
+      "lo": 2697.6,
       "hi": 2791.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -9379,16 +9379,16 @@ window.STOCK_DATA = {
       2464.6
      ],
      "resistance": [
-      2690.9,
+      2697.6,
       2791.8,
       2953.0
      ],
      "hi_52w": 3339.0,
      "lo_52w": 1963.7,
      "near_support": 2575.7,
-     "near_resistance": 2690.9,
+     "near_resistance": 2697.6,
      "support_dist_pct": -2.5,
-     "resistance_dist_pct": 1.9,
+     "resistance_dist_pct": 2.2,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -9868,7 +9868,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+0.8%",
+      "value": "+0.6%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -9938,7 +9938,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.14",
+      "value": "0.1",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -10021,7 +10021,7 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 4303.0,
+      "lo": 4293.9,
       "hi": 4712.4,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -10035,16 +10035,16 @@ window.STOCK_DATA = {
       3565.6
      ],
      "resistance": [
-      4303.0,
+      4293.9,
       4712.4,
       4955.9
      ],
      "hi_52w": 4955.9,
      "lo_52w": 2131.0,
      "near_support": 4016.9,
-     "near_resistance": 4303.0,
+     "near_resistance": 4293.9,
      "support_dist_pct": -5.9,
-     "resistance_dist_pct": 0.8,
+     "resistance_dist_pct": 0.6,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -11507,7 +11507,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 62.9,
+    "overall_score": 63.3,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -11855,17 +11855,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "8.5%",
+      "value": "-1.2%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+1.7%",
+      "value": "+1.2%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -11935,7 +11935,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.2",
+      "value": "1.0",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -12005,7 +12005,7 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "62.9/100",
+      "value": "63.3/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
       "score": 6.3
@@ -12013,12 +12013,12 @@ window.STOCK_DATA = {
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 4892.0,
-      "hi": 5370.9,
+      "lo": 4709.3,
+      "hi": 4892.0,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 5034.2,
+      "lo": 5011.6,
       "hi": 5174.4,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -12027,21 +12027,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      5370.9,
       4892.0,
-      4709.3
+      4709.3,
+      4114.8
      ],
      "resistance": [
-      5034.2,
+      5011.6,
       5174.4,
-      5381.1
+      5378.6
      ],
      "hi_52w": 6266.4,
      "lo_52w": 4055.6,
-     "near_support": 5370.9,
-     "near_resistance": 5034.2,
-     "support_dist_pct": 8.5,
-     "resistance_dist_pct": 1.7,
+     "near_support": 4892.0,
+     "near_resistance": 5011.6,
+     "support_dist_pct": -1.2,
+     "resistance_dist_pct": 1.2,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -13329,7 +13329,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 508.5,
-      "hi": 530.7,
+      "hi": 530.0,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 498.0,
@@ -13343,7 +13343,7 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       508.5,
-      530.7,
+      530.0,
       553.2
      ],
      "hi_52w": 758.8,
@@ -13493,7 +13493,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 60.0,
+    "overall_score": 60.8,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -13841,17 +13841,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "22.3%",
+      "value": "-3.3%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+5.0%",
+      "value": "+0.9%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -13921,7 +13921,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.22",
+      "value": "0.27",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -13991,21 +13991,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "60.0/100",
+      "value": "60.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
-      "score": 6.0
+      "score": 6.1
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 1065.9,
-      "hi": 1348.3,
+      "lo": 982.4,
+      "hi": 1065.9,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 1157.8,
-      "hi": 1181.3,
+      "lo": 1112.1,
+      "hi": 1157.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1102.6,
@@ -14013,21 +14013,20 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      1348.3,
       1065.9,
       982.4
      ],
      "resistance": [
+      1112.1,
       1157.8,
-      1181.3,
-      1264.5
+      1181.3
      ],
      "hi_52w": 1691.4,
      "lo_52w": 982.4,
-     "near_support": 1348.3,
-     "near_resistance": 1157.8,
-     "support_dist_pct": 22.3,
-     "resistance_dist_pct": 5.0,
+     "near_support": 1065.9,
+     "near_resistance": 1112.1,
+     "support_dist_pct": -3.3,
+     "resistance_dist_pct": 0.9,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -14165,7 +14164,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 64.7,
+    "overall_score": 65.9,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -14513,10 +14512,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "7.4%",
+      "value": "-0.6%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
@@ -14593,10 +14592,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.35",
+      "value": "4.33",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "EXCELLENT SETUP",
+      "score": 10
      },
      {
       "id": 44,
@@ -14613,10 +14612,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Breakout / Breakdown Status",
       "formula": "Is price breaking key S/R levels in last 5 sessions?",
-      "value": "BREAKING OUT ↑",
+      "value": "RANGE-BOUND",
       "benchmark": "Breakout above resistance = fresh buy | Breakdown below support = exit",
-      "verdict": "STRONG BUY SIGNAL",
-      "score": 10
+      "verdict": "WAIT FOR BREAKOUT",
+      "score": 6
      },
      {
       "id": 46,
@@ -14663,21 +14662,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "64.7/100",
+      "value": "65.9/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
-      "score": 6.5
+      "score": 6.6
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 389.1,
-      "hi": 420.6,
+      "lo": 377.2,
+      "hi": 389.1,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 401.6,
-      "hi": 416.3,
+      "hi": 417.7,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 391.6,
@@ -14685,22 +14684,22 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      420.6,
       389.1,
-      377.2
+      377.2,
+      358.4
      ],
      "resistance": [
       401.6,
-      416.3,
+      417.7,
       460.2
      ],
      "hi_52w": 508.5,
      "lo_52w": 316.2,
-     "near_support": 420.6,
+     "near_support": 389.1,
      "near_resistance": 401.6,
-     "support_dist_pct": 7.4,
+     "support_dist_pct": -0.6,
      "resistance_dist_pct": 2.6,
-     "breaking_out": true,
+     "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
       379.9,
@@ -15477,7 +15476,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 57.8,
+    "overall_score": 56.5,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -15835,10 +15834,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+5.2%",
+      "value": "+1.1%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
-      "score": 5
+      "score": 2
      },
      {
       "id": 37,
@@ -15905,7 +15904,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.37",
+      "value": "0.08",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -15935,10 +15934,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Zone Classification",
       "formula": "Current price vs support and resistance bands",
-      "value": "HOLD ZONE",
+      "value": "SELL ZONE",
       "benchmark": "Near support = accumulate | Near resistance = take profit",
-      "verdict": "HOLD",
-      "score": 7
+      "verdict": "BOOK PROFITS",
+      "score": 4
      },
      {
       "id": 47,
@@ -15975,10 +15974,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "57.8/100",
+      "value": "56.5/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 5.8
+      "score": 5.7
      }
     ],
     "price_zones": {
@@ -15988,12 +15987,12 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 9786.6,
-      "hi": 10126.0,
+      "lo": 9406.5,
+      "hi": 9786.6,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 9306.5,
-     "zone": "HOLD ZONE"
+     "zone": "SELL ZONE"
     },
     "support_resistance": {
      "support": [
@@ -16002,15 +16001,16 @@ window.STOCK_DATA = {
       7454.8
      ],
      "resistance": [
+      9406.5,
       9786.6,
       10126.0
      ],
      "hi_52w": 10126.0,
      "lo_52w": 6588.7,
      "near_support": 8001.4,
-     "near_resistance": 9786.6,
+     "near_resistance": 9406.5,
      "support_dist_pct": -14.0,
-     "resistance_dist_pct": 5.2,
+     "resistance_dist_pct": 1.1,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -16132,8 +16132,8 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 60.8,
-    "overall_verdict": "BUY 🟡",
+    "overall_score": 59.8,
+    "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
       "id": 1,
@@ -16490,10 +16490,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+10.8%",
+      "value": "+5.0%",
       "benchmark": "How much upside before hitting selling pressure",
-      "verdict": "MODERATE ROOM",
-      "score": 7
+      "verdict": "NEAR RESISTANCE",
+      "score": 2
      },
      {
       "id": 37,
@@ -16560,7 +16560,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "15.43",
+      "value": "7.14",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "EXCELLENT SETUP",
       "score": 10
@@ -16630,10 +16630,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "60.8/100",
+      "value": "59.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
-      "verdict": "BUY 🟡",
-      "score": 6.1
+      "verdict": "NEUTRAL ⚪",
+      "score": 6.0
      }
     ],
     "price_zones": {
@@ -16643,8 +16643,8 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 3854.3,
-      "hi": 3933.7,
+      "lo": 3653.0,
+      "hi": 3854.3,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 3477.8,
@@ -16657,15 +16657,16 @@ window.STOCK_DATA = {
       3191.7
      ],
      "resistance": [
+      3653.0,
       3854.3,
       3933.7
      ],
      "hi_52w": 3937.3,
      "lo_52w": 2826.0,
      "near_support": 3454.5,
-     "near_resistance": 3854.3,
+     "near_resistance": 3653.0,
      "support_dist_pct": -0.7,
-     "resistance_dist_pct": 10.8,
+     "resistance_dist_pct": 5.0,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -17135,7 +17136,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "2.2%",
+      "value": "-2.1%",
       "benchmark": "How far price must fall to hit nearest support",
       "verdict": "TIGHT SUPPORT",
       "score": 8
@@ -17215,7 +17216,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.82",
+      "value": "0.86",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -17293,12 +17294,12 @@ window.STOCK_DATA = {
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 402.2,
-      "hi": 419.7,
+      "lo": 391.3,
+      "hi": 402.2,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 418.1,
+      "lo": 418.2,
       "hi": 430.6,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -17307,20 +17308,20 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      419.7,
       402.2,
-      391.3
+      391.3,
+      377.2
      ],
      "resistance": [
-      418.1,
+      418.2,
       430.6,
       447.7
      ],
      "hi_52w": 473.5,
      "lo_52w": 359.7,
-     "near_support": 419.7,
-     "near_resistance": 418.1,
-     "support_dist_pct": 2.2,
+     "near_support": 402.2,
+     "near_resistance": 418.2,
+     "support_dist_pct": -2.1,
      "resistance_dist_pct": 1.8,
      "breaking_out": false,
      "breaking_down": false,
@@ -18109,7 +18110,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 61.8,
+    "overall_score": 63.9,
     "overall_verdict": "BUY 🟡",
     "equations": [
      {
@@ -18457,10 +18458,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "5.8%",
+      "value": "-0.6%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
@@ -18537,10 +18538,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.5",
+      "value": "4.83",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "EXCELLENT SETUP",
+      "score": 10
      },
      {
       "id": 44,
@@ -18607,21 +18608,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "61.8/100",
+      "value": "63.9/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "BUY 🟡",
-      "score": 6.2
+      "score": 6.4
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 154.7,
-      "hi": 164.7,
+      "lo": 152.2,
+      "hi": 154.7,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 160.1,
-      "hi": 165.5,
+      "hi": 165.2,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 155.6,
@@ -18629,20 +18630,20 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      164.7,
       154.7,
-      152.2
+      152.2,
+      147.6
      ],
      "resistance": [
       160.1,
-      165.5,
+      165.2,
       170.9
      ],
      "hi_52w": 200.1,
      "lo_52w": 141.6,
-     "near_support": 164.7,
+     "near_support": 154.7,
      "near_resistance": 160.1,
-     "support_dist_pct": 5.8,
+     "support_dist_pct": -0.6,
      "resistance_dist_pct": 2.9,
      "breaking_out": false,
      "breaking_down": false,
@@ -18780,7 +18781,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 54.3,
+    "overall_score": 53.7,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -19128,10 +19129,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "14.3%",
+      "value": "-5.7%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "MODERATE",
+      "score": 6
      },
      {
       "id": 36,
@@ -19208,7 +19209,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.2",
+      "value": "0.51",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -19238,10 +19239,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Zone Classification",
       "formula": "Current price vs support and resistance bands",
-      "value": "BUY ZONE",
+      "value": "SELL ZONE",
       "benchmark": "Near support = accumulate | Near resistance = take profit",
-      "verdict": "ACCUMULATE HERE",
-      "score": 9
+      "verdict": "BOOK PROFITS",
+      "score": 4
      },
      {
       "id": 47,
@@ -19278,7 +19279,7 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "54.3/100",
+      "value": "53.7/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
       "score": 5.4
@@ -19286,8 +19287,8 @@ window.STOCK_DATA = {
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 1151.6,
-      "hi": 1396.3,
+      "lo": 1094.8,
+      "hi": 1151.6,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
@@ -19296,24 +19297,24 @@ window.STOCK_DATA = {
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1221.2,
-     "zone": "BUY ZONE"
+     "zone": "SELL ZONE"
     },
     "support_resistance": {
      "support": [
-      1396.3,
       1151.6,
-      1094.8
+      1094.8,
+      1030.0
      ],
      "resistance": [
       1257.0,
       1361.4,
-      1448.7
+      1411.3
      ],
      "hi_52w": 1746.7,
      "lo_52w": 1030.0,
-     "near_support": 1396.3,
+     "near_support": 1151.6,
      "near_resistance": 1257.0,
-     "support_dist_pct": 14.3,
+     "support_dist_pct": -5.7,
      "resistance_dist_pct": 2.9,
      "breaking_out": false,
      "breaking_down": false,
@@ -22415,7 +22416,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+3.2%",
+      "value": "+3.1%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -22485,7 +22486,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "3.56",
+      "value": "3.44",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "EXCELLENT SETUP",
       "score": 10
@@ -22568,7 +22569,7 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 5274.0,
+      "lo": 5268.8,
       "hi": 5476.3,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -22582,16 +22583,16 @@ window.STOCK_DATA = {
       4505.0
      ],
      "resistance": [
-      5274.0,
+      5268.8,
       5476.3,
       5708.0
      ],
      "hi_52w": 5708.0,
      "lo_52w": 3607.7,
      "near_support": 5067.5,
-     "near_resistance": 5274.0,
+     "near_resistance": 5268.8,
      "support_dist_pct": -0.9,
-     "resistance_dist_pct": 3.2,
+     "resistance_dist_pct": 3.1,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -23877,7 +23878,7 @@ window.STOCK_DATA = {
      },
      "sell_zone": {
       "lo": 6787.0,
-      "hi": 7248.8,
+      "hi": 7307.9,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 6746.0,
@@ -23891,7 +23892,7 @@ window.STOCK_DATA = {
      ],
      "resistance": [
       6787.0,
-      7248.8,
+      7307.9,
       8449.5
      ],
      "hi_52w": 8714.0,
@@ -24036,7 +24037,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 57.8,
+    "overall_score": 57.1,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -24384,10 +24385,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "12.1%",
+      "value": "-7.4%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "MODERATE",
+      "score": 6
      },
      {
       "id": 36,
@@ -24464,7 +24465,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.26",
+      "value": "0.42",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -24494,10 +24495,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Zone Classification",
       "formula": "Current price vs support and resistance bands",
-      "value": "BUY ZONE",
+      "value": "SELL ZONE",
       "benchmark": "Near support = accumulate | Near resistance = take profit",
-      "verdict": "ACCUMULATE HERE",
-      "score": 9
+      "verdict": "BOOK PROFITS",
+      "score": 4
      },
      {
       "id": 47,
@@ -24534,42 +24535,42 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "57.8/100",
+      "value": "57.1/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 5.8
+      "score": 5.7
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 1540.3,
-      "hi": 1864.8,
+      "lo": 1483.0,
+      "hi": 1540.3,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 1714.0,
-      "hi": 2099.5,
+      "hi": 1864.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1662.9,
-     "zone": "BUY ZONE"
+     "zone": "SELL ZONE"
     },
     "support_resistance": {
      "support": [
-      1864.8,
       1540.3,
-      1483.0
+      1483.0,
+      1453.2
      ],
      "resistance": [
       1714.0,
-      2099.5,
-      2312.8
+      1864.8,
+      2099.5
      ],
      "hi_52w": 2497.5,
      "lo_52w": 1320.0,
-     "near_support": 1864.8,
+     "near_support": 1540.3,
      "near_resistance": 1714.0,
-     "support_dist_pct": 12.1,
+     "support_dist_pct": -7.4,
      "resistance_dist_pct": 3.1,
      "breaking_out": false,
      "breaking_down": false,
@@ -24706,7 +24707,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 54.3,
+    "overall_score": 56.3,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -25054,17 +25055,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "8.7%",
+      "value": "-1.3%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+4.4%",
+      "value": "+4.5%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -25134,10 +25135,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.51",
+      "value": "3.46",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "EXCELLENT SETUP",
+      "score": 10
      },
      {
       "id": 44,
@@ -25204,20 +25205,20 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "54.3/100",
+      "value": "56.3/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 5.4
+      "score": 5.6
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 247.3,
-      "hi": 272.4,
+      "lo": 239.4,
+      "hi": 247.3,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 261.6,
+      "lo": 261.9,
       "hi": 266.1,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -25226,21 +25227,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      272.4,
       247.3,
-      239.4
+      239.4,
+      233.4
      ],
      "resistance": [
-      261.6,
+      261.9,
       266.1,
-      280.3
+      274.8
      ],
      "hi_52w": 315.3,
      "lo_52w": 223.6,
-     "near_support": 272.4,
-     "near_resistance": 261.6,
-     "support_dist_pct": 8.7,
-     "resistance_dist_pct": 4.4,
+     "near_support": 247.3,
+     "near_resistance": 261.9,
+     "support_dist_pct": -1.3,
+     "resistance_dist_pct": 4.5,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -26674,7 +26675,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 50.4,
+    "overall_score": 49.8,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -27032,7 +27033,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+4.1%",
+      "value": "+2.1%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -27102,10 +27103,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "2.16",
+      "value": "1.11",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "GOOD",
-      "score": 7
+      "verdict": "POOR",
+      "score": 4
      },
      {
       "id": 44,
@@ -27172,7 +27173,7 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "50.4/100",
+      "value": "49.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
       "score": 5.0
@@ -27185,8 +27186,8 @@ window.STOCK_DATA = {
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 428.0,
-      "hi": 439.9,
+      "lo": 419.7,
+      "hi": 435.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 411.0,
@@ -27199,15 +27200,15 @@ window.STOCK_DATA = {
       378.1
      ],
      "resistance": [
-      428.0,
-      439.9
+      419.7,
+      435.8
      ],
      "hi_52w": 439.9,
      "lo_52w": 330.6,
      "near_support": 403.1,
-     "near_resistance": 428.0,
+     "near_resistance": 419.7,
      "support_dist_pct": -1.9,
-     "resistance_dist_pct": 4.1,
+     "resistance_dist_pct": 2.1,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -27677,7 +27678,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "0.0%",
+      "value": "-2.8%",
       "benchmark": "How far price must fall to hit nearest support",
       "verdict": "TIGHT SUPPORT",
       "score": 8
@@ -27687,7 +27688,7 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+1.9%",
+      "value": "+1.6%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -27757,7 +27758,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "N/A",
+      "value": "0.57",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -27835,12 +27836,12 @@ window.STOCK_DATA = {
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 3819.4,
-      "hi": 3930.3,
+      "lo": 3684.1,
+      "hi": 3819.4,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 4003.9,
+      "lo": 3990.7,
       "hi": 4110.8,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -27849,21 +27850,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      3930.3,
       3819.4,
-      3684.1
+      3684.1,
+      3580.0
      ],
      "resistance": [
-      4003.9,
+      3990.7,
       4110.8,
       4272.3
      ],
      "hi_52w": 4397.1,
      "lo_52w": 3256.3,
-     "near_support": 3930.3,
-     "near_resistance": 4003.9,
-     "support_dist_pct": 0.0,
-     "resistance_dist_pct": 1.9,
+     "near_support": 3819.4,
+     "near_resistance": 3990.7,
+     "support_dist_pct": -2.8,
+     "resistance_dist_pct": 1.6,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -27985,7 +27986,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 51.2,
+    "overall_score": 52.0,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -28333,10 +28334,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "13.2%",
+      "value": "-3.1%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
@@ -28413,7 +28414,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.07",
+      "value": "0.29",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -28483,21 +28484,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "51.2/100",
+      "value": "52.0/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 5.1
+      "score": 5.2
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 139.9,
-      "hi": 163.4,
+      "lo": 135.6,
+      "hi": 139.9,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 145.7,
-      "hi": 150.4,
+      "hi": 151.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 144.4,
@@ -28505,20 +28506,20 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      163.4,
       139.9,
-      135.6
+      135.6,
+      130.0
      ],
      "resistance": [
       145.7,
-      150.4,
+      151.5,
       155.1
      ],
      "hi_52w": 229.7,
      "lo_52w": 130.0,
-     "near_support": 163.4,
+     "near_support": 139.9,
      "near_resistance": 145.7,
-     "support_dist_pct": 13.2,
+     "support_dist_pct": -3.1,
      "resistance_dist_pct": 0.9,
      "breaking_out": false,
      "breaking_down": false,
@@ -28641,7 +28642,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 48.0,
+    "overall_score": 48.8,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -28989,17 +28990,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "14.4%",
+      "value": "-3.3%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+2.9%",
+      "value": "+2.2%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -29069,7 +29070,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.2",
+      "value": "0.67",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -29139,21 +29140,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "48.0/100",
+      "value": "48.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 4.8
+      "score": 4.9
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 2805.1,
-      "hi": 3316.7,
+      "lo": 2707.5,
+      "hi": 2805.1,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 2983.8,
-      "hi": 3399.7,
+      "lo": 2964.3,
+      "hi": 3316.7,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 2900.1,
@@ -29161,21 +29162,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      3316.7,
       2805.1,
-      2707.5
+      2707.5,
+      2665.6
      ],
      "resistance": [
-      2983.8,
-      3399.7,
-      4371.6
+      2964.3,
+      3316.7,
+      3399.7
      ],
      "hi_52w": 5665.6,
      "lo_52w": 2180.4,
-     "near_support": 3316.7,
-     "near_resistance": 2983.8,
-     "support_dist_pct": 14.4,
-     "resistance_dist_pct": 2.9,
+     "near_support": 2805.1,
+     "near_resistance": 2964.3,
+     "support_dist_pct": -3.3,
+     "resistance_dist_pct": 2.2,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -30605,7 +30606,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 50.0,
+    "overall_score": 52.0,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -30953,17 +30954,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "5.3%",
+      "value": "-0.9%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+2.6%",
+      "value": "+2.8%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -31033,10 +31034,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.49",
+      "value": "3.11",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "EXCELLENT SETUP",
+      "score": 10
      },
      {
       "id": 44,
@@ -31103,21 +31104,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "50.0/100",
+      "value": "52.0/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 5.0
+      "score": 5.2
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 2380.0,
-      "hi": 2528.9,
+      "lo": 2303.1,
+      "hi": 2380.0,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 2464.7,
-      "hi": 2567.8,
+      "lo": 2470.6,
+      "hi": 2556.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 2402.6,
@@ -31125,21 +31126,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      2528.9,
       2380.0,
-      2303.1
+      2303.1,
+      2125.9
      ],
      "resistance": [
-      2464.7,
-      2567.8,
-      2613.3
+      2470.6,
+      2556.5,
+      2607.9
      ],
      "hi_52w": 3130.0,
      "lo_52w": 2057.4,
-     "near_support": 2528.9,
-     "near_resistance": 2464.7,
-     "support_dist_pct": 5.3,
-     "resistance_dist_pct": 2.6,
+     "near_support": 2380.0,
+     "near_resistance": 2470.6,
+     "support_dist_pct": -0.9,
+     "resistance_dist_pct": 2.8,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -31261,7 +31262,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 46.1,
+    "overall_score": 47.8,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -31609,17 +31610,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "32.7%",
+      "value": "-0.7%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+2.7%",
+      "value": "+2.2%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -31689,10 +31690,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.08",
+      "value": "3.14",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "EXCELLENT SETUP",
+      "score": 10
      },
      {
       "id": 44,
@@ -31709,10 +31710,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Breakout / Breakdown Status",
       "formula": "Is price breaking key S/R levels in last 5 sessions?",
-      "value": "BREAKING OUT ↑",
+      "value": "RANGE-BOUND",
       "benchmark": "Breakout above resistance = fresh buy | Breakdown below support = exit",
-      "verdict": "STRONG BUY SIGNAL",
-      "score": 10
+      "verdict": "WAIT FOR BREAKOUT",
+      "score": 6
      },
      {
       "id": 46,
@@ -31759,20 +31760,20 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "46.1/100",
+      "value": "47.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 4.6
+      "score": 4.8
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 3294.9,
-      "hi": 4405.8,
+      "lo": 3110.0,
+      "hi": 3294.9,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 3408.6,
+      "lo": 3391.7,
       "hi": 3609.0,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -31781,22 +31782,22 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      4405.8,
       3294.9,
-      3110.0
+      3110.0,
+      3006.6
      ],
      "resistance": [
-      3408.6,
+      3391.7,
       3609.0,
       3778.3
      ],
      "hi_52w": 7705.0,
      "lo_52w": 2995.0,
-     "near_support": 4405.8,
-     "near_resistance": 3408.6,
-     "support_dist_pct": 32.7,
-     "resistance_dist_pct": 2.7,
-     "breaking_out": true,
+     "near_support": 3294.9,
+     "near_resistance": 3391.7,
+     "support_dist_pct": -0.7,
+     "resistance_dist_pct": 2.2,
+     "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
       3609.0,
@@ -31917,7 +31918,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 48.4,
+    "overall_score": 48.8,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -32265,17 +32266,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "6.6%",
+      "value": "-2.3%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 6
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+2.9%",
+      "value": "+2.0%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -32345,7 +32346,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.44",
+      "value": "0.87",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -32415,21 +32416,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "48.4/100",
+      "value": "48.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 4.8
+      "score": 4.9
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 1272.3,
-      "hi": 1388.7,
+      "lo": 1230.5,
+      "hi": 1272.3,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 1340.5,
-      "hi": 1439.1,
+      "lo": 1329.4,
+      "hi": 1348.9,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1302.8,
@@ -32437,21 +32438,21 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      1388.7,
       1272.3,
-      1230.5
+      1230.5,
+      1165.3
      ],
      "resistance": [
-      1340.5,
-      1439.1,
-      1494.6
+      1329.4,
+      1348.9,
+      1388.7
      ],
      "hi_52w": 1844.0,
      "lo_52w": 1086.0,
-     "near_support": 1388.7,
-     "near_resistance": 1340.5,
-     "support_dist_pct": 6.6,
-     "resistance_dist_pct": 2.9,
+     "near_support": 1272.3,
+     "near_resistance": 1329.4,
+     "support_dist_pct": -2.3,
+     "resistance_dist_pct": 2.0,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -32573,7 +32574,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 48.6,
+    "overall_score": 49.8,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -32921,17 +32922,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "29.1%",
+      "value": "-3.0%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+2.9%",
+      "value": "+3.4%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "NEAR RESISTANCE",
       "score": 2
@@ -33001,10 +33002,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.1",
+      "value": "1.13",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
-      "score": 2
+      "score": 4
      },
      {
       "id": 44,
@@ -33071,20 +33072,20 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "48.6/100",
+      "value": "49.8/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 4.9
+      "score": 5.0
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 481.2,
-      "hi": 640.0,
+      "lo": 466.0,
+      "hi": 481.2,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 510.4,
+      "lo": 512.9,
       "hi": 527.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
@@ -33093,21 +33094,20 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      640.0,
       481.2,
       466.0
      ],
      "resistance": [
-      510.4,
+      512.9,
       527.5,
       551.0
      ],
      "hi_52w": 937.8,
      "lo_52w": 466.0,
-     "near_support": 640.0,
-     "near_resistance": 510.4,
-     "support_dist_pct": 29.1,
-     "resistance_dist_pct": 2.9,
+     "near_support": 481.2,
+     "near_resistance": 512.9,
+     "support_dist_pct": -3.0,
+     "resistance_dist_pct": 3.4,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -33229,7 +33229,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 45.7,
+    "overall_score": 47.6,
     "overall_verdict": "NEUTRAL ⚪",
     "equations": [
      {
@@ -33577,10 +33577,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "11.5%",
+      "value": "-2.4%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "MODERATE",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
@@ -33657,10 +33657,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.43",
+      "value": "2.04",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "GOOD",
+      "score": 7
      },
      {
       "id": 44,
@@ -33727,21 +33727,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "45.7/100",
+      "value": "47.6/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "NEUTRAL ⚪",
-      "score": 4.6
+      "score": 4.8
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 1378.5,
-      "hi": 1574.8,
+      "lo": 1187.0,
+      "hi": 1378.5,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 1481.0,
-      "hi": 1539.0,
+      "hi": 1519.1,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 1411.8,
@@ -33749,20 +33749,19 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      1574.8,
       1378.5,
       1187.0
      ],
      "resistance": [
       1481.0,
-      1539.0,
-      1574.5
+      1519.1,
+      1564.3
      ],
      "hi_52w": 1970.7,
      "lo_52w": 1187.0,
-     "near_support": 1574.8,
+     "near_support": 1378.5,
      "near_resistance": 1481.0,
-     "support_dist_pct": 11.5,
+     "support_dist_pct": -2.4,
      "resistance_dist_pct": 4.9,
      "breaking_out": false,
      "breaking_down": false,
@@ -33885,7 +33884,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 42.2,
+    "overall_score": 43.7,
     "overall_verdict": "AVOID 🔴",
     "equations": [
      {
@@ -34233,17 +34232,17 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "29.4%",
+      "value": "-4.3%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
       "group": "Momentum",
       "name": "Resistance Distance",
       "formula": "(Near Resistance − Current Price) ÷ Current Price × 100",
-      "value": "+8.6%",
+      "value": "+8.8%",
       "benchmark": "How much upside before hitting selling pressure",
       "verdict": "MODERATE ROOM",
       "score": 5
@@ -34313,10 +34312,10 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.29",
+      "value": "2.05",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
-      "verdict": "POOR",
-      "score": 2
+      "verdict": "GOOD",
+      "score": 7
      },
      {
       "id": 44,
@@ -34343,10 +34342,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Zone Classification",
       "formula": "Current price vs support and resistance bands",
-      "value": "BUY ZONE",
+      "value": "HOLD ZONE",
       "benchmark": "Near support = accumulate | Near resistance = take profit",
       "verdict": "ACCUMULATE HERE",
-      "score": 9
+      "score": 7
      },
      {
       "id": 47,
@@ -34383,42 +34382,41 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "42.2/100",
+      "value": "43.7/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "AVOID 🔴",
-      "score": 4.2
+      "score": 4.4
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 221.6,
-      "hi": 299.5,
+      "lo": 215.0,
+      "hi": 221.6,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
-      "lo": 251.4,
-      "hi": 310.3,
+      "lo": 251.9,
+      "hi": 299.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 231.5,
-     "zone": "BUY ZONE"
+     "zone": "HOLD ZONE"
     },
     "support_resistance": {
      "support": [
-      299.5,
       221.6
      ],
      "resistance": [
-      251.4,
-      310.3,
-      315.8
+      251.9,
+      299.5,
+      310.3
      ],
      "hi_52w": 399.4,
      "lo_52w": 221.6,
-     "near_support": 299.5,
-     "near_resistance": 251.4,
-     "support_dist_pct": 29.4,
-     "resistance_dist_pct": 8.6,
+     "near_support": 221.6,
+     "near_resistance": 251.9,
+     "support_dist_pct": -4.3,
+     "resistance_dist_pct": 8.8,
      "breaking_out": false,
      "breaking_down": false,
      "vol_nodes": [
@@ -34540,7 +34538,7 @@ window.STOCK_DATA = {
    },
    "math_detail": {
     "as_of": "2026-07-13",
-    "overall_score": 41.6,
+    "overall_score": 43.3,
     "overall_verdict": "AVOID 🔴",
     "equations": [
      {
@@ -34888,10 +34886,10 @@ window.STOCK_DATA = {
       "group": "Momentum",
       "name": "Support Distance",
       "formula": "(Near Support − Current Price) ÷ Current Price × 100",
-      "value": "24.2%",
+      "value": "-1.7%",
       "benchmark": "How far price must fall to hit nearest support",
-      "verdict": "FAR FROM SUPPORT",
-      "score": 4
+      "verdict": "TIGHT SUPPORT",
+      "score": 8
      },
      {
       "id": 36,
@@ -34968,7 +34966,7 @@ window.STOCK_DATA = {
       "group": "Safety",
       "name": "Risk/Reward Ratio (S/R based)",
       "formula": "Upside to Resistance ÷ Downside to Support",
-      "value": "0.05",
+      "value": "0.76",
       "benchmark": ">2:1 = good trade setup | >3:1 = excellent",
       "verdict": "POOR",
       "score": 2
@@ -34988,10 +34986,10 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "Breakout / Breakdown Status",
       "formula": "Is price breaking key S/R levels in last 5 sessions?",
-      "value": "BREAKING DOWN ↓",
+      "value": "RANGE-BOUND",
       "benchmark": "Breakout above resistance = fresh buy | Breakdown below support = exit",
-      "verdict": "EXIT SIGNAL",
-      "score": 2
+      "verdict": "WAIT FOR BREAKOUT",
+      "score": 6
      },
      {
       "id": 46,
@@ -35038,21 +35036,21 @@ window.STOCK_DATA = {
       "group": "Confidence",
       "name": "FINAL VERDICT — Overall Score",
       "formula": "All 49 equations → weighted composite signal",
-      "value": "41.6/100",
+      "value": "43.3/100",
       "benchmark": "≥75 = Strong Buy | 60-74 = Buy | 45-59 = Neutral | <45 = Avoid",
       "verdict": "AVOID 🔴",
-      "score": 4.2
+      "score": 4.3
      }
     ],
     "price_zones": {
      "buy_zone": {
-      "lo": 413.3,
-      "hi": 522.0,
+      "lo": 382.4,
+      "hi": 413.3,
       "note": "Accumulation zone — where buying support is expected"
      },
      "sell_zone": {
       "lo": 425.9,
-      "hi": 447.7,
+      "hi": 447.5,
       "note": "Distribution zone — where selling pressure is expected"
      },
      "current_price": 420.4,
@@ -35060,23 +35058,22 @@ window.STOCK_DATA = {
     },
     "support_resistance": {
      "support": [
-      522.0,
       413.3,
       382.4
      ],
      "resistance": [
       425.9,
-      447.7,
+      447.5,
       462.5
      ],
      "hi_52w": 726.5,
      "lo_52w": 378.9,
-     "near_support": 522.0,
+     "near_support": 413.3,
      "near_resistance": 425.9,
-     "support_dist_pct": 24.2,
+     "support_dist_pct": -1.7,
      "resistance_dist_pct": 1.3,
      "breaking_out": false,
-     "breaking_down": true,
+     "breaking_down": false,
      "vol_nodes": [
       410.4,
       443.6,

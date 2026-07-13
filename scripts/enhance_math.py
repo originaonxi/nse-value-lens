@@ -118,20 +118,21 @@ def volume_profile_levels(ohlcv, n_bins=20):
 def compute_sr(ohlcv, price, dma50, dma200):
     """Compute support and resistance levels from 1-year data."""
     if not ohlcv:
-        # Fallback: derive from existing fields
-        levels = {
-            "support": [],
-            "resistance": [],
-            "method": "derived_from_dma"
+        # Fallback: classify each DMA strictly by side of current price
+        sup_list, res_list = [], []
+        for lv in [dma200, dma50]:
+            if lv is None: continue
+            if lv < price:   sup_list.append(round(lv, 1))
+            elif lv > price: res_list.append(round(lv, 1))
+        near_sup_fb = sorted(sup_list, reverse=True)[0] if sup_list else round(price * 0.93, 1)
+        near_res_fb = sorted(res_list)[0]               if res_list else round(price * 1.10, 1)
+        return {
+            "support": sup_list, "resistance": res_list, "method": "derived_from_dma",
+            "near_support": near_sup_fb, "near_resistance": near_res_fb,
+            "support_dist_pct": round((near_sup_fb / price - 1) * 100, 1) if price else 0,
+            "resistance_dist_pct": round((near_res_fb / price - 1) * 100, 1) if price else 0,
+            "breaking_out": False, "breaking_down": False,
         }
-        if dma200:
-            levels["support"].append(round(dma200, 1))
-        if dma50:
-            if dma50 < price:
-                levels["support"].append(round(dma50, 1))
-            else:
-                levels["resistance"].append(round(dma50, 1))
-        return levels
 
     swing_h, swing_l = swing_highs_lows(ohlcv)
     vol_nodes = volume_profile_levels(ohlcv)
@@ -140,40 +141,40 @@ def compute_sr(ohlcv, price, dma50, dma200):
     all_res = [h for h in swing_h if h > price * 1.005] + [v for v in vol_nodes if v > price * 1.005]
     # All candidate support = swing lows + vol nodes + DMAs below price
     all_sup = [l for l in swing_l if l < price * 0.995] + [v for v in vol_nodes if v < price * 0.995]
-    if dma200:
+    if dma200 and dma200 < price:
         all_sup.append(dma200)
+    elif dma200 and dma200 > price:
+        all_res.append(dma200)
     if dma50 and dma50 < price:
         all_sup.append(dma50)
+    elif dma50 and dma50 > price:
+        all_res.append(dma50)
 
     res_clustered = cluster_levels(all_res)
     sup_clustered = cluster_levels(all_sup)
 
-    # Take 3 nearest levels on each side
-    sup_levels = sorted(sup_clustered, reverse=True)[:3]  # nearest first
-    res_levels = sorted(res_clustered)[:3]                 # nearest first
+    # Final safety clamp — guarantee support < price, resistance > price
+    sup_levels = sorted([v for v in sup_clustered if v < price], reverse=True)[:3]
+    res_levels = sorted([v for v in res_clustered if v > price])[:3]
 
     # 52-week high / low
     hi52 = max(r["high"] for r in ohlcv)
     lo52 = min(r["low"] for r in ohlcv)
 
-    # Breakout / breakdown detection
-    # Breakout: price closed above a resistance in last 5 days
-    recent_closes = [r["close"] for r in ohlcv[-5:]]
-    prev_closes = [r["close"] for r in ohlcv[-10:-5]]
-    breaking_out = any(
-        rc > r and all(pc <= r for pc in prev_closes)
-        for rc in recent_closes
-        for r in res_clustered[:2]
-    ) if res_clustered else False
-    breaking_down = any(
-        rc < s and all(pc >= s for pc in prev_closes)
-        for rc in recent_closes
-        for s in sup_clustered[:2]
-    ) if sup_clustered else False
+    # Breakout/breakdown — latest close only vs nearest level; mutually exclusive
+    last_close = ohlcv[-1]["close"]
+    prev_close = ohlcv[-2]["close"] if len(ohlcv) >= 2 else last_close
+    breaking_out  = bool(res_levels and last_close > res_levels[0] and prev_close <= res_levels[0])
+    breaking_down = bool(sup_levels and last_close < sup_levels[0] and prev_close >= sup_levels[0])
+    if breaking_out and breaking_down:   # can't be both — keep whichever is larger move
+        if abs(last_close - res_levels[0]) >= abs(last_close - sup_levels[0]):
+            breaking_down = False
+        else:
+            breaking_out  = False
 
-    # Distance to nearest levels
-    near_sup = sup_levels[0] if sup_levels else dma200 or price * 0.93
-    near_res = res_levels[0] if res_levels else price * 1.1
+    # Distance to nearest — fallback always strictly on the correct side
+    near_sup = sup_levels[0] if sup_levels else (dma200 if dma200 and dma200 < price else price * 0.93)
+    near_res = res_levels[0] if res_levels else (dma200 if dma200 and dma200 > price else price * 1.10)
     sup_dist_pct = round((near_sup / price - 1) * 100, 1)
     res_dist_pct = round((near_res / price - 1) * 100, 1)
 
@@ -284,9 +285,16 @@ def build_math_detail(s, sr):
     peg = round(pe / growth, 2) if pe and growth and growth > 0 else None
     div_support = round(price * div / 100 / 0.035, 1) if div and div > 0 else None  # 3.5% yield floor
 
-    # ── S/R distances ──
-    near_sup = sr.get("near_support", dma200 or price * 0.92)
-    near_res = sr.get("near_resistance", price * 1.1)
+    # ── S/R distances — safe side-aware fallback + hard clamp ──
+    _sup_fb = (dma200 if dma200 and dma200 < price else
+               dma50  if dma50  and dma50  < price else price * 0.92)
+    _res_fb = (dma200 if dma200 and dma200 > price else
+               dma50  if dma50  and dma50  > price else price * 1.10)
+    near_sup = sr.get("near_support", _sup_fb)
+    near_res = sr.get("near_resistance", _res_fb)
+    # Hard clamp — never let support be at or above price (or resistance at or below)
+    if near_sup >= price: near_sup = price * 0.92
+    if near_res <= price: near_res = price * 1.10
     sup_pct  = round((near_sup / price - 1) * 100, 1) if price else 0
     res_pct  = round((near_res / price - 1) * 100, 1) if price else 0
     risk_reward_sr = round(abs(res_pct / sup_pct), 2) if sup_pct != 0 else None
