@@ -113,6 +113,135 @@
     </section>
 
     <section class="panel" style="margin-top:16px;">
+      <details id="nifty50-details" open>
+        <summary style="cursor:pointer;font-weight:700;font-size:15px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;">
+          <span>📊</span><span>Nifty 50 — All 50 Stocks · Click to Analyze</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px;">(source: NSE official ind_nifty50list.csv · validated against Nifty 200)</span>
+        </summary>
+        <p style="color:var(--muted);font-size:12px;margin:8px 0 12px;line-height:1.4;">
+          All 50 symbols cross-checked against the local <code>nifty200.csv</code> — every stock here is analyzable. Click any to run the full valuation report instantly.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:#7cb8ff;display:block;margin-bottom:4px;">🏦 Financial Services — CSV: Financial Services (11)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="HDFCBANK">HDFC Bank</button>
+              <button class="pill-btn" data-sym="ICICIBANK">ICICI Bank</button>
+              <button class="pill-btn" data-sym="KOTAKBANK">Kotak Bank</button>
+              <button class="pill-btn" data-sym="SBIN">SBI</button>
+              <button class="pill-btn" data-sym="AXISBANK">Axis Bank</button>
+              <button class="pill-btn" data-sym="BAJFINANCE">Bajaj Finance</button>
+              <button class="pill-btn" data-sym="BAJAJFINSV">Bajaj Finserv</button>
+              <button class="pill-btn" data-sym="HDFCLIFE">HDFC Life</button>
+              <button class="pill-btn" data-sym="SBILIFE">SBI Life</button>
+              <button class="pill-btn" data-sym="SHRIRAMFIN">Shriram Finance</button>
+              <button class="pill-btn" data-sym="JIOFIN">Jio Financial</button>
+            </div>
+          </div>
+
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px;">💻 Information Technology (5)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="TCS">TCS</button>
+              <button class="pill-btn" data-sym="INFY">Infosys</button>
+              <button class="pill-btn" data-sym="HCLTECH">HCL Tech</button>
+              <button class="pill-btn" data-sym="WIPRO">Wipro</button>
+              <button class="pill-btn" data-sym="TECHM">Tech Mahindra</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px;">🚗 Automobile and Auto Components — CSV: Automobile and Auto Components (5)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="BAJAJ-AUTO">Bajaj Auto</button>
+              <button class="pill-btn" data-sym="MARUTI">Maruti Suzuki</button>
+              <button class="pill-btn" data-sym="M&amp;M">M&amp;M</button>
+              <button class="pill-btn" data-sym="EICHERMOT">Eicher Motors</button>
+              <button class="pill-btn" data-sym="TMPV">Tata Motors (PV)</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--warn);display:block;margin-bottom:4px;">🛢️ Oil, Gas &amp; Power (5)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="RELIANCE">Reliance</button>
+              <button class="pill-btn" data-sym="ONGC">ONGC</button>
+              <button class="pill-btn" data-sym="COALINDIA">Coal India</button>
+              <button class="pill-btn" data-sym="NTPC">NTPC</button>
+              <button class="pill-btn" data-sym="POWERGRID">Power Grid</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--warn);display:block;margin-bottom:4px;">🧴 FMCG (4)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="HINDUNILVR">HUL</button>
+              <button class="pill-btn" data-sym="ITC">ITC</button>
+              <button class="pill-btn" data-sym="NESTLEIND">Nestle</button>
+              <button class="pill-btn" data-sym="TATACONSUM">Tata Consumer</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px;">🏗️ Capital Goods, Construction &amp; Materials — CSV: Capital Goods / Construction / Construction Materials (4)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="LT">L&amp;T (Construction)</button>
+              <button class="pill-btn" data-sym="BEL">BEL (Capital Goods)</button>
+              <button class="pill-btn" data-sym="GRASIM">Grasim (Construction Materials)</button>
+              <button class="pill-btn" data-sym="ULTRACEMCO">UltraTech Cement (Construction Materials)</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;">⛏️ Metals &amp; Mining (4)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="TATASTEEL">Tata Steel</button>
+              <button class="pill-btn" data-sym="JSWSTEEL">JSW Steel</button>
+              <button class="pill-btn" data-sym="HINDALCO">Hindalco</button>
+              <button class="pill-btn" data-sym="ADANIENT">Adani Enterprises</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px;">💊 Healthcare &amp; Pharma (5)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="SUNPHARMA">Sun Pharma</button>
+              <button class="pill-btn" data-sym="DRREDDY">Dr Reddy's</button>
+              <button class="pill-btn" data-sym="CIPLA">Cipla</button>
+              <button class="pill-btn" data-sym="APOLLOHOSP">Apollo Hospitals</button>
+              <button class="pill-btn" data-sym="MAXHEALTH">Max Healthcare</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:#7cb8ff;display:block;margin-bottom:4px;">📡 Telecommunication &amp; Services — CSV: Telecommunication / Services (3)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="BHARTIARTL">Bharti Airtel (Telecommunication)</button>
+              <button class="pill-btn" data-sym="ADANIPORTS">Adani Ports (Services)</button>
+              <button class="pill-btn" data-sym="INDIGO">IndiGo (Services)</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size:11px;font-weight:700;color:var(--warn);display:block;margin-bottom:4px;">🛍️ Consumer Durables &amp; Services — CSV: Consumer Durables / Consumer Services (4)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="pill-btn" data-sym="TITAN">Titan (Consumer Durables)</button>
+              <button class="pill-btn" data-sym="ASIANPAINT">Asian Paints (Consumer Durables)</button>
+              <button class="pill-btn" data-sym="TRENT">Trent (Consumer Services)</button>
+              <button class="pill-btn" data-sym="ETERNAL">Eternal/Zomato (Consumer Services)</button>
+            </div>
+          </div>
+
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.4;">
+          ⚠️ <strong>ETERNAL</strong> = formerly Zomato (renamed) · <strong>TMPV</strong> = Tata Motors Passenger Vehicles (post-demerger symbol) · <strong>M&amp;M</strong> and <strong>BAJAJ-AUTO</strong> use exact NSE special-character symbols.
+        </p>
+      </details>
+    </section>
+
+    <section class="panel" style="margin-top:16px;">
       <details id="themes-details">
         <summary style="cursor:pointer;font-weight:700;font-size:15px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;">
           <span>📋</span><span>Budget 2022–2026 Theme Reference</span>
@@ -129,7 +258,7 @@
     </section>
 
     <section class="panel" style="margin-top:16px;">
-      <details id="shortlist-details">
+      <details id="shortlist-details" open>
         <summary style="cursor:pointer;font-weight:700;font-size:15px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;">
           <span>🏆</span><span>Budget 2026 Strongest Shortlist — Top 10 Beneficiaries</span>
           <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px;">(click to expand)</span>
@@ -234,6 +363,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('symbol').value = 'BANKBARODA';
   $('manual').value = '{\n  "gnpa": 1.89,\n  "nnpa": 0.45,\n  "pcr": 93.94,\n  "car": 14.7,\n  "nim": 2.89,\n  "loanGrowth": 13.9,\n  "patCr": 20021\n}';
   analyze();
+  loadShortlist();
 });
 
 async function loadShortlist() {
