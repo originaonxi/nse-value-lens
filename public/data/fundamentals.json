@@ -1,0 +1,2704 @@
+{
+  "as_of": "2026-07-05",
+  "note": "Fundamentals hand-verified from screener.in on 2026-07-05. Edit this file to update fundamentals (screener.in requires login for CSV export). Technicals are auto-computed by scripts/refresh.py via Yahoo Finance. The 'math' block per stock drives the Jul-Dec 2026 upside model: basis 'pe' means Price = EPS x P/E, basis 'pb' means Price = Book Value x P/B. anchor = today's EPS or book value per share; growth_pct = assumed earnings/book growth over the next ~2 quarters (deliberately BELOW recent actuals); target_multiple = the fair P/E or P/B if the market just returns to normal for this stock; div_6m_pct = roughly half the annual dividend yield.",
+  "stocks": [
+    {
+      "symbol": "PETRONET",
+      "name": "Petronet LNG",
+      "sector": "Gas / LNG",
+      "market_cap_cr": 41392,
+      "pe": 10.6,
+      "pb": null,
+      "roce": 22.7,
+      "roe": 18.6,
+      "de": 0.11,
+      "div_yield": 3.62,
+      "promoter_holding": 50.0,
+      "pledged": 0,
+      "profit_growth": 25.6,
+      "sales_growth": -10,
+      "target_upside": 31,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 26.0,
+        "growth_pct": 10,
+        "target_multiple": 12.5,
+        "multiple_note": "traded 12-14x historically; 12.5x is below its own average",
+        "growth_note": "Q4 profit already +25.6% YoY; we assume only +10%",
+        "div_6m_pct": 1.8
+      },
+      "thesis": "PE 10.6 with ROCE 22.7% and near-zero debt, still 14% below its 52-week high. Handles ~75% of India's LNG imports; the post-ceasefire collapse in crude/LNG prices directly lifts regas volumes and spreads. Street targets: Motilal Oswal Rs 361, Investec Rs 400 (+31-45%). Cleanest fundamentals-plus-catalyst combination on the list.",
+      "risks": "3-yr sales CAGR is negative (LNG price passthrough optics); Dahej tariff renegotiation risk; volumes hostage to spot LNG prices.",
+      "sources": [
+        "https://www.screener.in/company/PETRONET/consolidated/",
+        "https://tradebrains.in/can-petronet-lng-cross-400-in-2026-check-the-details/"
+      ],
+      "confidence": {
+        "prob_pct": 55,
+        "band": "HIGH",
+        "why": "Hardest catalyst on the list - spot LNG collapsed post-ceasefire; brokers already at 361-400",
+        "trigger": "Q2 regas volume print (Oct-Nov)"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "May-Jun 2026",
+        "note": "New Rs 1,200 cr long-term regas deal with Deepak Fertilisers arm at Dahej (starts May-Jul 2026); Q4 PAT beat estimates; MOFSL Buy TP Rs 361. Volume visibility improving - thesis strengthening.",
+        "url": "https://scanx.trade/stock-news/petronet-lng-ltd"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "JV: GAIL + Indian Oil + BPCL + ONGC (12.5% each) = 50.00%",
+        "fii": 27.13,
+        "dii": 12.94,
+        "trend": "FIIs bought back in Mar qtr (26.3% → 27.1%); DIIs buying overall (10.9% → 12.9%)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/PETRONET/consolidated/",
+        "flow": 6
+      },
+      "theme": "energy",
+      "policy": 5,
+      "side": "long"
+    },
+    {
+      "symbol": "COALINDIA",
+      "name": "Coal India",
+      "sector": "Mining",
+      "market_cap_cr": 270359,
+      "pe": 8.69,
+      "pb": 2.27,
+      "roce": 35.3,
+      "roe": 28.5,
+      "de": 0.12,
+      "div_yield": 6.04,
+      "promoter_holding": 63.13,
+      "pledged": 0,
+      "profit_growth": 13.7,
+      "sales_growth": null,
+      "target_upside": 20,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 50.5,
+        "growth_pct": 8,
+        "target_multiple": 10,
+        "multiple_note": "has traded 7-11x; 10x is the top of normal, not a stretch",
+        "growth_note": "Q4 profit +13.7% YoY; we assume only +8%",
+        "div_6m_pct": 3.0
+      },
+      "thesis": "PE 8.7, ROCE 35%, 6% dividend yield, D/E 0.12 - a cash machine that outperformed the falling market (+11.4% in H1 2026 vs NIFTY -7.1%) with price above a rising 200-DMA. Power demand plus 13.9% YoY GST growth says domestic volume is intact.",
+      "risks": "Energy-transition derating cap on the multiple; government (63%) can demand special dividends or price restraint; e-auction premiums cyclical.",
+      "sources": [
+        "https://www.screener.in/company/COALINDIA/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 55,
+        "band": "HIGH",
+        "why": "Smallest re-rating ask (8.7 to 10x), 6% cash-yield floor, trend already up while market fell",
+        "trigger": "Q2 volumes (Nov) + any FPI return to cheap large-caps"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jul 2, 2026",
+        "note": "Won Rs 2,831 cr solar LoA (Jalaun) + UP renewables JV; UBS Buy initiation. Watch: Q1 FY27 own output fell 7.5% even as June power-plant supplies rose 5.9%.",
+        "url": "https://hdfcsky.com/news/stocks-to-watch-today-july-2-2026-coal-india-bharti-airtel-nmdc-south-indian-bank-hero-motocorp"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Government of India (Ministry of Coal) 63.13%",
+        "fii": 8.38,
+        "dii": 22.76,
+        "trend": "Flat-to-mild buying on both sides",
+        "named": [
+          "LIC ~6.7% (approx, investor-profile source — not exchange-verified)"
+        ],
+        "src": "https://www.screener.in/company/COALINDIA/consolidated/",
+        "flow": 6
+      },
+      "theme": "energy",
+      "policy": 5,
+      "side": "long"
+    },
+    {
+      "symbol": "NMDC",
+      "name": "NMDC",
+      "sector": "Mining",
+      "market_cap_cr": 75082,
+      "pe": 10.1,
+      "pb": 2.2,
+      "roce": 27.6,
+      "roe": 23.4,
+      "de": 0.19,
+      "div_yield": 3.86,
+      "promoter_holding": 60.79,
+      "pledged": 0,
+      "profit_growth": 37.2,
+      "sales_growth": 34,
+      "target_upside": 22,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 8.46,
+        "growth_pct": 15,
+        "target_multiple": 11,
+        "multiple_note": "mid-cycle for NMDC is 10-12x; 11x = middle of the range",
+        "growth_note": "Q4 profit +37%, sales +34%; we assume less than half of that (+15%)",
+        "div_6m_pct": 1.9
+      },
+      "thesis": "PE 10 with Q4 profit +37% YoY and sales +34%; 12-month return +30% with price 6% above the 200-DMA and 50>200 alignment - value with confirmed momentum. India's largest iron-ore producer riding domestic steel capex.",
+      "risks": "Iron-ore price cyclicality; June metal-sector selloff (-6.5%) can extend; government divestment overhang.",
+      "sources": [
+        "https://www.screener.in/company/NMDC/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 55,
+        "band": "HIGH",
+        "why": "Profit +37% with trend confirmed on all counts; iron-ore price is the swing factor",
+        "trigger": "Nov Q2 results, steel-capex announcements"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jul 1, 2026",
+        "note": "June production +44% YoY (5.15 MT); Q1 FY27 output +25.9% YoY. Volume momentum accelerating into FY27 - thesis strengthening.",
+        "url": "https://hdfcsky.com/news/stocks-to-watch-today-july-2-2026-coal-india-bharti-airtel-nmdc-south-indian-bank-hero-motocorp"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "President of India (Ministry of Steel) 60.79%",
+        "fii": 13.6,
+        "dii": 13.76,
+        "trend": "FIIs buying 4 straight qtrs (12.2% → 13.6%); DIIs trimming",
+        "named": [
+          "LIC 5.53% — largest public shareholder (long-term seller from 11.7% in 2023)"
+        ],
+        "src": "https://www.screener.in/company/NMDC/consolidated/",
+        "flow": 7
+      },
+      "theme": "critical_minerals",
+      "policy": 7,
+      "side": "long"
+    },
+    {
+      "symbol": "KARURVYSYA",
+      "name": "Karur Vysya Bank",
+      "sector": "Private Bank",
+      "market_cap_cr": 28203,
+      "pe": 11.2,
+      "pb": 2.0,
+      "roce": null,
+      "roe": 19.3,
+      "de": null,
+      "div_yield": 0.89,
+      "promoter_holding": 2.07,
+      "pledged": 0,
+      "profit_growth": 41,
+      "sales_growth": null,
+      "target_upside": 20,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 26.1,
+        "growth_pct": 18,
+        "target_multiple": 12,
+        "multiple_note": "quality private banks trade 12-16x; 12x is the cheap end",
+        "growth_note": "Q4 profit +41% YoY with best-in-class NPAs; we assume +18%",
+        "div_6m_pct": 0.4
+      },
+      "thesis": "Best asset quality in the screen (GNPA 0.75%, NNPA 0.19%) with Q4 profit +41% YoY at just 11x earnings. ROE 19.3%. Strongest technicals of all candidates: +7% above 200-DMA, 50>200, +30% over 12 months - and private banks led June's rally (+6.4%).",
+      "risks": "No promoter (2.07%) - old-gen private bank governance discount; NIM compression if RBI resumes cutting; small-bank liquidity in a selloff.",
+      "sources": [
+        "https://www.screener.in/company/KARURVYSYA/"
+      ],
+      "confidence": {
+        "prob_pct": 55,
+        "band": "HIGH",
+        "why": "Banks already leading (+6.4% June), cleanest loan book in the screen, modest 12x ask",
+        "trigger": "Oct Q2 bank earnings season"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jul 2026",
+        "note": "Q1 FY27 business update: total business +15.9% YoY, advances +17.1%, deposits +14.9%; MD & CEO re-appointed 2 years. Clean hold; dividend record date Jul 24.",
+        "url": "https://www.sahi.com/news/karur-vysya-bank-q1-business-hits-2-27-l-crore-as-advances-climb-17-12-yoy-1071-PE1_COR"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Legacy founding families only 2.07% — institution-owned bank",
+        "fii": 19.25,
+        "dii": 39.26,
+        "trend": "FIIs buying strongly (+2.4pp in Mar qtr alone, 15.4% → 19.3% over 3 qtrs)",
+        "named": [
+          "Rekha Jhunjhunwala 4.16% — held steady all 4 quarters (the only marquee individual in this entire screen)",
+          "ICICI Pru AMC cleared by RBI to go up to 9.95% (Feb 2026)"
+        ],
+        "src": "https://trendlyne.com/equity/holding-lookup/721/53781/karur-vysya-bank-ltd/rakesh-jhunjhunwala-and-associates-portfolio/",
+        "flow": 9
+      },
+      "theme": "financials",
+      "policy": 3,
+      "side": "long"
+    },
+    {
+      "symbol": "LICI",
+      "name": "Life Insurance Corp",
+      "sector": "Insurance",
+      "market_cap_cr": 544266,
+      "pe": 9.47,
+      "pb": 3.07,
+      "roce": 35.1,
+      "roe": 37.8,
+      "de": 0.0,
+      "div_yield": 2.32,
+      "promoter_holding": 96.5,
+      "pledged": 0,
+      "profit_growth": 20,
+      "sales_growth": null,
+      "target_upside": 18,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 45.4,
+        "growth_pct": 12,
+        "target_multiple": 10.5,
+        "multiple_note": "listed-life-insurer floor; private peers trade 2-6x higher",
+        "growth_note": "TTM profit ~+20%; we assume +12%",
+        "div_6m_pct": 1.2
+      },
+      "thesis": "India's largest insurer at PE 9.5 with TTM profit up ~20%. The record Rs 32,000 cr/month SIP flow and DII dominance IS its business tailwind. Price 4% above the 200-DMA, mid-range in its 52-week band - unchased.",
+      "risks": "Screener quarterly series is uneven (verify latest quarter before adding); market-share loss to private insurers; embedded-value opacity; government stake overhang.",
+      "sources": [
+        "https://www.screener.in/company/LICI/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "MEDIUM",
+        "why": "SIP tailwind real, but the Rs 10,000 cr government stake-sale overhang + CFO exit likely cap the price near-term",
+        "trigger": "Monthly SIP prints, Q2 embedded-value note"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jun 24, 2026",
+        "note": "CFO Sunil Agrawal resigned effective Jul 14. Government (96.5%) preparing a fresh ~Rs 10,000 cr stake sale 'very soon' - OFS supply overhang likely caps the price inside the 6-month window. Confidence cut 45 to 40.",
+        "url": "https://www.tickertape.in/stocks/life-insurance-corporation-of-india-LIC"
+      },
+      "holders": {
+        "as_of": "Jun 2026",
+        "promoter": "President of India / Govt of India 96.50% (free float only ~3.5%)",
+        "fii": 0.33,
+        "dii": 1.09,
+        "trend": "FIIs slowly buying the tiny float; DIIs selling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/LICI/consolidated/",
+        "flow": 4
+      },
+      "theme": "financials",
+      "policy": 2,
+      "side": "long"
+    },
+    {
+      "symbol": "CHAMBLFERT",
+      "name": "Chambal Fertilisers",
+      "sector": "Fertilisers",
+      "market_cap_cr": 19293,
+      "pe": 9.88,
+      "pb": 1.85,
+      "roce": 25.5,
+      "roe": 20.4,
+      "de": 0.1,
+      "div_yield": 2.08,
+      "promoter_holding": 61.25,
+      "pledged": 0,
+      "profit_growth": 64,
+      "sales_growth": null,
+      "target_upside": 20,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 48.8,
+        "growth_pct": 12,
+        "target_multiple": 11,
+        "multiple_note": "agri-input peers sit 11-14x; 11x is the bottom of that band",
+        "growth_note": "Q4 profit +64% YoY; we assume just +12%",
+        "div_6m_pct": 1.0
+      },
+      "thesis": "PE under 10 with ROCE 25.5%, near-zero debt, promoter 61%, and latest-quarter profit +64%. Price above a rising 200-DMA with 50>200. Agri-input demand is policy-protected; urea subsidy flow supports working capital.",
+      "risks": "Subsidy-receivable timing swings quarters; gas price input risk; single-commodity (urea) concentration.",
+      "sources": [
+        "https://www.screener.in/company/CHAMBLFERT/consolidated/",
+        "https://www.screener.in/screens/147173/low-pe-and-high-roe-shares/"
+      ],
+      "confidence": {
+        "prob_pct": 50,
+        "band": "MEDIUM",
+        "why": "Policy-backed demand and clean books, but no dated catalyst - relies on gradual re-rate",
+        "trigger": "Good monsoon follow-through + Q2 margins"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jun 10, 2026",
+        "note": "Fertiliser stocks rallied up to 5% on sector tailwinds; Q3 revenue +20% YoY, virtually debt-free. No adverse news found.",
+        "url": "https://www.business-standard.com/markets/news/fertiliser-stocks-in-demand-chambal-fact-aries-rise-up-to-5-here-s-why-126061000394_1.html"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Adventz Group / KK Birla group (Saroj Poddar) 61.25% — and CREEPING UP (60.5% → 61.25%)",
+        "fii": 15.1,
+        "dii": 5.4,
+        "trend": "Promoters buying their own stock; FIIs trimming from Sep peak; DIIs buying Mar qtr",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/CHAMBLFERT/consolidated/",
+        "flow": 6
+      },
+      "theme": "other",
+      "policy": 5,
+      "side": "long"
+    },
+    {
+      "symbol": "INFY",
+      "name": "Infosys",
+      "sector": "IT Services",
+      "market_cap_cr": 424910,
+      "pe": 14.1,
+      "pb": null,
+      "roce": 40.0,
+      "roe": 31.9,
+      "de": 0.07,
+      "div_yield": 4.58,
+      "promoter_holding": 14.38,
+      "pledged": 0,
+      "profit_growth": 23,
+      "sales_growth": 8,
+      "target_upside": 25,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 74.3,
+        "growth_pct": 8,
+        "target_multiple": 17,
+        "multiple_note": "10-yr range 22-25x; 17x assumes it NEVER fully recovers",
+        "growth_note": "Q4 profit +23% YoY; we assume +8% (guidance-cut buffer)",
+        "div_6m_pct": 2.3
+      },
+      "thesis": "CONTRARIAN ENTRY - the deepest dislocation in NIFTY 500: -34% in H1 2026 on AI-disruption panic while earnings still grew (Q4 PAT +23% YoY). PE 14 vs 22-25 historical, ROCE 40%, dividend 4.6%. Kotak Buy FV Rs 1,220, PL Buy TP Rs 1,570 (+17% to +50%). Stagger the entry - it is 23% BELOW its 200-DMA (fails the trend gate).",
+      "risks": "Falling knife until trend repairs; FY27 guidance cut risk flagged by Motilal Oswal; AI really is compressing legacy-services pricing; promoter holding low (founder-professional structure - normal for Infosys).",
+      "sources": [
+        "https://www.screener.in/company/INFY/consolidated/",
+        "https://www.businesstoday.in/markets/stocks/story/infosys-tcs-wipro-hcltech-shares-hit-52-week-lows-as-nifty-it-slides-over-2-540306-2026-07-01"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "MEDIUM",
+        "why": "Biggest math upside but trend is broken - needs one non-disaster quarter to flip sentiment",
+        "trigger": "Oct Q2 + FY27 guidance NOT being cut"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jul 1-4, 2026",
+        "note": "Motilal Oswal: Infosys may CUT FY27 guidance this earnings season; ICICI Sec cut IT targets up to 33% ahead of Q1 (Jul 2). The July results are the event - this is exactly why the plan is 3 tranches, not a lump sum.",
+        "url": "https://www.businesstoday.in/markets/stocks/story/it-stocks-in-focus-motilal-oswal-sees-weak-it-demand-infosys-hcl-tech-may-cut-fy27-guidance-540244-2026-07-01"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Founders & families (Murthy, Nilekani, Gopalakrishnan, Shibulal et al.) 14.38%",
+        "fii": 28.45,
+        "dii": 43.19,
+        "trend": "Classic rotation: FIIs selling steadily (31.9% → 28.5%), DIIs absorbing (39.4% → 43.2%)",
+        "named": [
+          "LIC 11.54% — largest non-promoter holder",
+          "ICICI Prudential MF 4.74%",
+          "SBI MF 4.66%",
+          "NPS Trust 2.99%",
+          "Nippon Life 2.24%",
+          "HDFC MF 2.04%"
+        ],
+        "src": "https://trendlyne.com/equity/share-holding/630/INFY/latest/infosys-ltd/",
+        "flow": 4
+      },
+      "theme": "it_services",
+      "policy": 1,
+      "side": "long"
+    },
+    {
+      "symbol": "HINDPETRO",
+      "name": "Hindustan Petroleum",
+      "sector": "Oil Marketing",
+      "market_cap_cr": 84953,
+      "pe": 4.71,
+      "pb": 1.3,
+      "roce": 22.2,
+      "roe": 30.9,
+      "de": 0.85,
+      "div_yield": 6.07,
+      "promoter_holding": 54.9,
+      "pledged": 0,
+      "profit_growth": 123.9,
+      "sales_growth": null,
+      "target_upside": 27,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 84.7,
+        "growth_pct": 0,
+        "target_multiple": 6,
+        "multiple_note": "OMCs trade 6-8x mid-cycle; 6x is the floor of the band",
+        "growth_note": "Q4 profit +124% YoY; we assume ZERO growth (windfall normalizes)",
+        "div_6m_pct": 3.0
+      },
+      "thesis": "CONTRARIAN ENTRY - PE 4.7 with Q4 profit +124% YoY and 6.1% dividend yield, 20% below its 52-week high after the H1 oil shock crushed OMCs. Brent collapsing post-ceasefire is a direct marketing-margin explosion. Just 5% below the 200-DMA - closest contrarian to trend repair.",
+      "risks": "Government fuel-price interference in either direction; refining GRM cyclicality; D/E 0.85 is the highest among picks; crude re-spike if ceasefire breaks.",
+      "sources": [
+        "https://www.screener.in/company/HINDPETRO/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 50,
+        "band": "MEDIUM",
+        "why": "Crude collapse is physics for pump margins, but government pricing can take the windfall",
+        "trigger": "Monthly marketing-margin data, Q2 results"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Apr-Jul 2026",
+        "note": "Emkay Buy (12-29% OMC upside), MOFSL preferred OMC pick; Rs 7,920 cr LPG compensation flowing monthly through 2026. GRM + compensation tailwind intact.",
+        "url": "https://www.businesstoday.in/markets/stocks/story/target-prices-for-hpcl-bpcl-ioc-petronet-lng-amid-jump-in-crude-oil-prices-stock-picks-more-528159-2026-04-30"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "ONGC 54.90% (promoter since 2018 acquisition)",
+        "fii": 17.26,
+        "dii": 19.58,
+        "trend": "FIIs buying 3 straight qtrs (13.6% Jun → 17.3% Mar, +2.8pp); DIIs selling",
+        "named": [
+          "HDFC Mid-Cap Fund 4.76%",
+          "Kotak Midcap Fund 2.11%",
+          "Insurance cos collectively 3.67%"
+        ],
+        "src": "https://trendlyne.com/equity/share-holding/556/HINDPETRO/latest/hindustan-petroleum-corporation-ltd/",
+        "flow": 7
+      },
+      "theme": "energy",
+      "policy": 4,
+      "side": "long"
+    },
+    {
+      "symbol": "BANKBARODA",
+      "name": "Bank of Baroda",
+      "sector": "PSU Bank",
+      "market_cap_cr": 130422,
+      "pe": 6.58,
+      "pb": 0.79,
+      "roce": null,
+      "roe": 12.7,
+      "de": null,
+      "div_yield": 3.37,
+      "promoter_holding": 63.97,
+      "pledged": 0,
+      "profit_growth": -4,
+      "sales_growth": null,
+      "target_upside": 25,
+      "top_pick": false,
+      "math": {
+        "basis": "pb",
+        "anchor": 321,
+        "growth_pct": 6,
+        "target_multiple": 0.9,
+        "multiple_note": "banks are 'worth' ~1x book; BOB sells at 0.79x. 0.9x is still a discount",
+        "growth_note": "ROE 12.7% adds ~6% to book value in 6 months",
+        "div_6m_pct": 1.7
+      },
+      "thesis": "WATCHLIST - P/B 0.79 near its 52-week low while the Bank index rallied +6.4% in June; the un-chased laggard in the winning sector. 25-30% upside to mid-cycle P/B ~1.0. Enters the buy list when price reclaims the 200-DMA (currently 7% below).",
+      "risks": "NMC Health settlement ~$600M dents Q1/Q2 FY27 earnings (Jul 2026); PSU credit-cost cycle; trend gate failed. Underlying growth strong (Q1 advances +17.4%).",
+      "sources": [
+        "https://www.screener.in/company/BANKBARODA/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "LOW",
+        "why": "0.79x book is cheap but momentum still negative - entry gate is the 200-DMA reclaim",
+        "trigger": "Price crossing the 200-DMA (~272)"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jul 3, 2026",
+        "note": "Definitive ~$600M (Rs 5,700-6,000 cr) NMC Health settlement - largest cross-border payout by an Indian PSB; shares slid ~7% in 2 days (this IS the capitulation volume on the chart). Underlying Q1 growth strong: advances +17.4%, deposits +13.8%. Verify the P&L hit in Q1 results before entering.",
+        "url": "https://apacnewsnetwork.com/2026/07/bank-of-baroda-shares-nmc-settlement/"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Government of India 63.97%",
+        "fii": 9.69,
+        "dii": 18.92,
+        "trend": "FIIs buying over FY26 (8.1% → 9.7%); DIIs flat",
+        "named": [
+          "LIC 7.05% (raised through the 5% disclosure threshold)"
+        ],
+        "src": "https://www.screener.in/company/BANKBARODA/consolidated/",
+        "flow": 6
+      },
+      "theme": "financials",
+      "policy": 3,
+      "side": "long"
+    },
+    {
+      "symbol": "ONGC",
+      "name": "ONGC",
+      "sector": "Oil E&P",
+      "market_cap_cr": 299209,
+      "pe": 7.18,
+      "pb": 0.8,
+      "roce": 14.2,
+      "roe": 11.7,
+      "de": 0.47,
+      "div_yield": 5.15,
+      "promoter_holding": 58.89,
+      "pledged": 0,
+      "profit_growth": -22.4,
+      "sales_growth": null,
+      "target_upside": 20,
+      "top_pick": false,
+      "math": {
+        "basis": "pb",
+        "anchor": 296,
+        "growth_pct": 3,
+        "target_multiple": 0.95,
+        "multiple_note": "sells below liquidation value (0.80x book); 0.95x is still sub-book",
+        "growth_note": "retained profit adds ~3% to book in 6 months even in a weak year",
+        "div_6m_pct": 2.6
+      },
+      "thesis": "WATCHLIST - P/B 0.80 near the 52-week low with a 5.15% dividend. Emkay 'Add' with 12-29% upside. Natural hedge against HINDPETRO (falling crude hurts ONGC, helps OMCs) if you hold both.",
+      "risks": "Latest quarter profit -22% YoY (falling crude realization); ROCE 14.2% just under the 15% quality bar; windfall-tax regime risk.",
+      "sources": [
+        "https://www.screener.in/company/ONGC/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 35,
+        "band": "LOW",
+        "why": "Falling crude is a headwind for the seller of crude; 0.8x book + 5% div cap the downside more than they add upside",
+        "trigger": "Crude stabilizing above 70 dollars"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "2026",
+        "note": "Emkay Add. KG-98/2 crude underdelivering (~28k bpd vs 45k target); peak gas expected mid-2026 with BP as technical expert; Rs 4,606 cr for 10 new KG wells. Execution drag priced in.",
+        "url": "https://www.business-standard.com/companies/news/ongc-kg-basin-crude-output-decline-peak-gas-mid-2026-125111301990_1.html"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "President of India 58.89% (+ ~10.3% other govt-company cross-holdings)",
+        "fii": 7.97,
+        "dii": 19.3,
+        "trend": "FIIs mild buying; DIIs mild selling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/ONGC/consolidated/",
+        "flow": 5
+      },
+      "theme": "energy",
+      "policy": 6,
+      "side": "long"
+    },
+    {
+      "symbol": "HCLTECH",
+      "name": "HCL Technologies",
+      "sector": "IT Services",
+      "market_cap_cr": 309000,
+      "pe": 17.8,
+      "pb": null,
+      "roce": 30.6,
+      "roe": null,
+      "de": 0.07,
+      "div_yield": 4.74,
+      "promoter_holding": 60.81,
+      "pledged": 0,
+      "profit_growth": 4.2,
+      "sales_growth": null,
+      "target_upside": 15,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 64.0,
+        "growth_pct": 4,
+        "target_multiple": 19,
+        "multiple_note": "10-yr range 22-26x; 19x = partial recovery only",
+        "growth_note": "Q4 profit +4.2% YoY - slowest of all picks; we assume +4%",
+        "div_6m_pct": 2.4
+      },
+      "thesis": "WATCHLIST - second IT contrarian: div 4.7%, near-debt-free, -28% in H1. INFY is the cleaner bet (cheaper PE, faster growth); hold this only if you want a second IT name. Market cap approximate. The math honestly shows ~15%, not 20%+ - that is why it is watchlist.",
+      "risks": "JPMorgan underweight; PL Reduce TP Rs 1,300; 19% below 200-DMA; slowest profit growth among picks.",
+      "sources": [
+        "https://www.screener.in/company/HCLTECH/consolidated/",
+        "https://www.forbes.com/sites/investor-hub/article/best-stocks-to-buy-now-june-2026/"
+      ],
+      "confidence": {
+        "prob_pct": 25,
+        "band": "LOW",
+        "why": "The honest math reaches only about +13% - tracked for information, not conviction",
+        "trigger": "Sector-wide IT re-rating only"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jul 1-2, 2026",
+        "note": "Same sector event as Infosys: possible FY27 guidance cut flagged by Motilal Oswal; ICICI Sec target cuts across IT. July results are the risk gate.",
+        "url": "https://www.businesstoday.in/markets/stocks/story/it-stocks-in-focus-motilal-oswal-sees-weak-it-demand-infosys-hcl-tech-may-cut-fy27-guidance-540244-2026-07-01"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Shiv Nadar family 60.86% (Vama Sundari Investments 44.21%; control gifted to Roshni Nadar Malhotra 2025)",
+        "fii": 15.51,
+        "dii": 18.95,
+        "trend": "FIIs selling 3 straight qtrs (18.6% → 15.5%); DIIs buying",
+        "named": [
+          "LIC 7.01% (raised stake in 2026)"
+        ],
+        "src": "https://www.screener.in/company/HCLTECH/consolidated/",
+        "flow": 3
+      },
+      "theme": "it_services",
+      "policy": 1,
+      "side": "long"
+    },
+    {
+      "symbol": "PFC",
+      "name": "Power Finance Corp",
+      "sector": "Power Financier",
+      "market_cap_cr": 140518,
+      "pe": 5.42,
+      "pb": 1.06,
+      "roce": null,
+      "roe": 20.7,
+      "de": null,
+      "div_yield": 4.36,
+      "promoter_holding": 55.99,
+      "pledged": 0,
+      "profit_growth": 13,
+      "sales_growth": null,
+      "target_upside": 24,
+      "top_pick": true,
+      "math": {
+        "basis": "pb",
+        "anchor": 403,
+        "growth_pct": 9,
+        "target_multiple": 1.2,
+        "multiple_note": "lenders re-rate on book value; PFC has ranged 0.8-1.3x - 1.2x is inside its own band",
+        "growth_note": "ROE 20.7% compounds book ~9% in six months even with dividends out",
+        "div_6m_pct": 2.2
+      },
+      "thesis": "India's biggest power-sector lender at 5.4x earnings and 1.06x book with a 4.4% dividend. Net NPA just 0.13% - the cleanest loan book of any PSU-linked lender. Every renewable-energy and grid-capex announcement flows through PFC/REC loan growth. Found by the full 500-stock systematic screen, then hand-verified.",
+      "risks": "Wholesale power exposure concentration; state discom repayment cycles; rate-sensitive borrowing costs; government majority owner.",
+      "sources": [
+        "https://www.screener.in/company/PFC/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 55,
+        "band": "HIGH",
+        "why": "Cleanest NPAs in PSU-lender space, trend up, and the REC merger (approved Jul 1) is a re-rating catalyst - with integration volatility",
+        "trigger": "Merger integration steps + Q2 NPA print; dividend record date Jul 31"
+      },
+      "news": {
+        "verdict": "WARN+",
+        "date": "Jul 1, 2026",
+        "note": "REC merger into PFC approved by both boards (88 PFC shares per 100 REC) with presidential assent - creates a Rs 11 lakh cr power-financing giant. Re-rating catalyst, but expect swap-arbitrage volatility and integration noise. Rs 3.95 final dividend, record date Jul 31.",
+        "url": "https://solarquarter.com/2026/07/01/pfc-and-rec-approve-merger-to-create-%e2%82%b911-lakh-crore-power-financing-giant/"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "President of India 55.99%",
+        "fii": 19.64,
+        "dii": 15.05,
+        "trend": "FIIs buying (18.3% → 19.6% Dec→Mar); DIIs selling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/PFC/consolidated/",
+        "flow": 6
+      },
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long"
+    },
+    {
+      "symbol": "NATIONALUM",
+      "name": "National Aluminium (NALCO)",
+      "sector": "Metals - Aluminium",
+      "market_cap_cr": 63841,
+      "pe": 11.0,
+      "pb": 2.95,
+      "roce": 39.6,
+      "roe": 29.4,
+      "de": 0.01,
+      "div_yield": 3.02,
+      "promoter_holding": 51.28,
+      "pledged": 0,
+      "profit_growth": 64.2,
+      "sales_growth": null,
+      "target_upside": 25,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 31.6,
+        "growth_pct": 5,
+        "target_multiple": 12.5,
+        "multiple_note": "metal producers run 10-14x mid-cycle; 12.5x is the middle",
+        "growth_note": "Q4 +64% but company guides alumina SOFT at $300-310/t (Jun 2026) - we cut growth to +5%",
+        "div_6m_pct": 1.5
+      },
+      "thesis": "World's lowest-cost bauxite/alumina producer at 11x earnings with ROCE 39.6%, essentially ZERO debt (borrowings Rs 182 cr vs Rs 63,841 cr market cap) and Q4 profit +64%. Price 22% below its 52-week high after the June metals selloff, yet still above a rising 200-DMA. Found by the systematic screen.",
+      "risks": "Aluminium is a global cyclical - LME price and China supply decide the multiple; June metal weakness can extend; PSU divestment overhang.",
+      "sources": [
+        "https://www.screener.in/company/NATIONALUM/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 50,
+        "band": "MEDIUM",
+        "why": "Spectacular quality-plus-cheapness combo, but the commodity price is outside anyone's control",
+        "trigger": "LME aluminium holding firm + Nov Q2 results"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jul 2, 2026",
+        "note": "UBS initiated Buy on NALCO; CPSE metals rallied up to 7%. New 1-MTPA alumina refinery ~85% complete, commissioning from June. Caution: company itself guides alumina soft at $300-310/t on oversupply - growth assumption cut to +5% accordingly.",
+        "url": "https://www.business-standard.com/markets/news/cpse-stocks-in-demand-bhel-cil-nalco-nmdc-surge-up-to-7-here-s-why-126010200472_1.html"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "President of India (Ministry of Mines) 51.28%",
+        "fii": 22.27,
+        "dii": 10.75,
+        "trend": "FIIs buying HARD 2 straight qtrs (16.2% Sep → 22.3% Mar, +6pp); DIIs trimming",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/NATIONALUM/consolidated/",
+        "flow": 9
+      },
+      "theme": "critical_minerals",
+      "policy": 8,
+      "side": "long"
+    },
+    {
+      "symbol": "GESHIP",
+      "name": "Great Eastern Shipping",
+      "sector": "Shipping",
+      "market_cap_cr": 20564,
+      "pe": 6.99,
+      "pb": 1.21,
+      "roce": 18.4,
+      "roe": 18.8,
+      "de": 0.07,
+      "div_yield": 2.44,
+      "promoter_holding": 30.08,
+      "pledged": 0,
+      "profit_growth": 25.5,
+      "sales_growth": null,
+      "target_upside": 22,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 206,
+        "growth_pct": 0,
+        "target_multiple": 8.5,
+        "multiple_note": "shipping mid-cycle runs 8-10x; 8.5x assumed with ZERO earnings growth",
+        "growth_note": "Q4 profit +25.5% YoY but freight rates are volatile - we assume flat",
+        "div_6m_pct": 1.2
+      },
+      "thesis": "WATCHLIST - India's largest shipper at 7x earnings, near-zero debt (D/E 0.065), Q4 profit +25%. Already +31% in 6 months with strong momentum. The catch: tanker/dry-bulk rates ARE the business, and nobody controls those.",
+      "risks": "Pure freight-rate cyclical; promoter holding only 30%; already ran hard - 20% below 52-week high but well off lows; rate reversal erases the story fast.",
+      "sources": [
+        "https://www.screener.in/company/GESHIP/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 45,
+        "band": "MEDIUM",
+        "why": "Great math and momentum but the earnings driver (freight rates) is uncontrollable and mean-reverting",
+        "trigger": "Tanker day-rates + quarterly NAV disclosure"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jun 2026",
+        "note": "Buying a secondhand LR2 tanker; crude-tanker rates firm on OPEC+ unwind; analyst TP ~Rs 1,700. Cyclical rate reversal remains the core risk.",
+        "url": "https://finance.yahoo.com/quote/GESHIP.NS/"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Sheth family ~22.1% + Bhiwandiwalla family = 30.08%",
+        "fii": 28.44,
+        "dii": 15.25,
+        "trend": "FIIs buying aggressively 3 qtrs (24.6% → 28.4%, +3.8pp); public shrinking",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/GESHIP/consolidated/",
+        "flow": 8
+      },
+      "theme": "shipbuilding_ports",
+      "policy": 6,
+      "side": "long"
+    },
+    {
+      "symbol": "TANLA",
+      "name": "Tanla Platforms",
+      "sector": "Tech Platform (CPaaS)",
+      "market_cap_cr": 7149,
+      "pe": 14.0,
+      "pb": 2.9,
+      "roce": 26.3,
+      "roe": 21.4,
+      "de": 0.02,
+      "div_yield": 2.23,
+      "promoter_holding": 46.17,
+      "pledged": 0,
+      "profit_growth": 14.5,
+      "sales_growth": null,
+      "target_upside": 26,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 38.5,
+        "growth_pct": 5,
+        "target_multiple": 16,
+        "multiple_note": "traded 20x+ in its growth years; 16x assumes only a partial rehab",
+        "growth_note": "FY26 full-year PAT nearly flat (+0.4%) despite Q4 growth - we assume only +5%",
+        "div_6m_pct": 1.1
+      },
+      "thesis": "The only stock in the hidden-gems sweep that passed EVERY filter with zero screener flags: PE 14, ROCE 26.3%, essentially no debt, dividend-paying, promoter steady at 46%, sales rising every quarter of FY26 - yet 30% below its high purely because the tech rout tarred it. India's dominant CPaaS/messaging platform.",
+      "risks": "CPaaS price commoditisation; tech-sector sentiment still broken after H1; mid-cap liquidity in a selloff.",
+      "sources": [
+        "https://www.screener.in/company/TANLA/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "MEDIUM",
+        "why": "Cleanest quality-per-rupee in the sweep, but FY26 PAT was flat - needs margin repair, not just sentiment",
+        "trigger": "Q2 continuing the FY26 sales streak (Oct-Nov)"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jun 2026",
+        "note": "FY26 full-year: revenue +9.7% but PAT nearly FLAT (+0.4%) - margin compression despite the good Q4. Rs 175 cr buyback at Rs 875 completed (support done). Growth assumption cut to +5%; dead-money risk more than blow-up risk.",
+        "url": "https://www.whalesbook.com/corporate-news/English/technology/Tanla-Platforms-FY26-Revenue-Jumps-97percent-to-indian-rupee4418-Cr-PAT-Grows-04percent/6a4018167465030c38bb37d3"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Founder D. Uday Kumar Reddy 21.72% + group = 46.17%",
+        "fii": 7.6,
+        "dii": 0.28,
+        "trend": "FIIs and DIIs both nearly absent/selling — retail holds 45%; institutions have not discovered/returned yet",
+        "named": [
+          "No marquee holders — no verified superinvestor positions"
+        ],
+        "src": "https://www.screener.in/company/TANLA/consolidated/",
+        "flow": 3
+      },
+      "theme": "it_services",
+      "policy": 2,
+      "side": "long"
+    },
+    {
+      "symbol": "GPPL",
+      "name": "Gujarat Pipavav Port",
+      "sector": "Ports",
+      "market_cap_cr": 7478,
+      "pe": 14.9,
+      "pb": 3.1,
+      "roce": 28.0,
+      "roe": 21.2,
+      "de": 0.02,
+      "div_yield": 5.3,
+      "promoter_holding": 44.01,
+      "pledged": 0,
+      "profit_growth": 27,
+      "sales_growth": null,
+      "target_upside": 26,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 10.4,
+        "growth_pct": 10,
+        "target_multiple": 17,
+        "multiple_note": "port/infra peers run 17-22x; GPPL itself has averaged ~18x",
+        "growth_note": "Q4 profit +27% YoY; we assume +10%",
+        "div_6m_pct": 2.7
+      },
+      "thesis": "WATCHLIST (demoted Jul 5 on concession-risk news) - a debt-free port with ROCE 28%, profit +27%, an 83% payout funding a 5.3% dividend yield, APM Terminals (Maersk) as promoter - sitting near its 52-week LOW. The most unchased cash machine in the NIFTY 500. The dividend pays you to wait for the re-rate.",
+      "risks": "MATERIAL (Jul 2026): concession expires Sep 2028, extension not secured, GMB MoU non-binding; CCO resigned Jun 30; single-port concentration; below 200-DMA.",
+      "sources": [
+        "https://www.screener.in/company/GPPL/"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "MEDIUM",
+        "why": "5.3% yield floor intact, but the 2028 concession extension is unresolved and binary - wait for clarity",
+        "trigger": "200-DMA reclaim + Q2 container volumes"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jun 30, 2026",
+        "note": "MATERIAL: port concession expires Sep 29, 2028 and extension NOT yet secured (Rs 17,000 cr GMB MoU is explicitly non-binding); CCO resigned effective Jun 30. Binary concession news could land inside the window - demoted from pick to WATCH until extension clarity.",
+        "url": "https://indiashippingnews.com/gujarat-pipavav-port-says-%E2%82%B917000-cr-mou-with-gmb-non-binding-major-spend-to-follow-concession-extension/"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "APM Terminals (A.P. Moller-Maersk) 44.01% — operating rights until Sep 2028",
+        "fii": 22.14,
+        "dii": 14.96,
+        "trend": "FIIs buying 3 straight qtrs (19.5% → 22.1%); DIIs selling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/GPPL/consolidated/",
+        "flow": 6
+      },
+      "theme": "shipbuilding_ports",
+      "policy": 6,
+      "side": "long"
+    },
+    {
+      "symbol": "CHENNPETRO",
+      "name": "Chennai Petroleum (CPCL)",
+      "sector": "Refining",
+      "market_cap_cr": 16764,
+      "pe": 5.4,
+      "pb": 1.51,
+      "roce": 35.1,
+      "roe": 32.1,
+      "de": 0.18,
+      "div_yield": 0.71,
+      "promoter_holding": 67.29,
+      "pledged": 0,
+      "profit_growth": 565,
+      "sales_growth": null,
+      "target_upside": 10,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 208,
+        "growth_pct": -15,
+        "target_multiple": 7,
+        "multiple_note": "refiners get 6-8x mid-cycle; 7x on NORMALIZED (lower) earnings",
+        "growth_note": "Q4 profit +565% YoY is peak-cycle refining margin - we assume earnings FALL 15%",
+        "div_6m_pct": 0.4
+      },
+      "thesis": "WATCHLIST - statistically the cheapest stock in the sweep (PE 5.4, ROCE 35%, profit up 6x YoY, IOC owns 67%). Kept off the buy list because the honest math says the PE is optically flattered: normalize the peak refining margins down 15% and the upside shrinks to ~10%. A trade on GRMs staying high, not an investment.",
+      "risks": "Pure refining-margin cyclical - the E in the PE is peak-cycle; GRM reversal crushes it; thin dividend.",
+      "sources": [
+        "https://www.screener.in/company/500110/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 30,
+        "band": "LOW",
+        "why": "Cheap on peak earnings is not cheap - the math needs margins to STAY at cycle highs",
+        "trigger": "Singapore GRM prints staying elevated through H2"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jun 19, 2026",
+        "note": "Granted NAVRATNA status - greater capex/JV autonomy. Q1 results Jul 24. GRM volatility remains the story.",
+        "url": "https://www.screener.in/company/CHENNPETRO/consolidated/"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Indian Oil Corp 51.89% + Naftiran Intertrade (NIOC affiliate, Iran) 15.40% = 67.29%",
+        "fii": 12.59,
+        "dii": 2.11,
+        "trend": "FIIs bought big Dec qtr (8.8% → 12.9%) and held; DIIs small buy",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "src": "https://www.screener.in/company/CHENNPETRO/consolidated/",
+        "flow": 6
+      },
+      "theme": "energy",
+      "policy": 4,
+      "side": "long"
+    },
+    {
+      "symbol": "LICHSGFIN",
+      "name": "LIC Housing Finance",
+      "sector": "Housing Finance",
+      "market_cap_cr": 30457,
+      "pe": 5.4,
+      "pb": 0.74,
+      "roce": null,
+      "roe": 14.4,
+      "de": null,
+      "div_yield": 1.81,
+      "promoter_holding": 45.24,
+      "pledged": 0,
+      "profit_growth": 8.7,
+      "sales_growth": null,
+      "target_upside": 23,
+      "top_pick": false,
+      "math": {
+        "basis": "pb",
+        "anchor": 753,
+        "growth_pct": 6,
+        "target_multiple": 0.85,
+        "multiple_note": "has ranged 0.9-1.4x book across cycles; 0.85x is still below the range",
+        "growth_note": "ROE 14.4% compounds book ~6% in six months",
+        "div_6m_pct": 0.9
+      },
+      "thesis": "WATCHLIST - the deepest sane value among financials: 0.74x book and 5.4x earnings for an LIC-parented mortgage book still growing (+8.7%). Just misses the buy list because ROE 14.4% sits under the 15% quality bar and rate cuts squeeze NIMs before they help volumes.",
+      "risks": "NIM compression in the rate-cut cycle; asset-quality in developer book; ROE below the quality bar.",
+      "sources": [
+        "https://www.screener.in/company/LICHSGFIN/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 40,
+        "band": "MEDIUM",
+        "why": "0.74x book with LIC parentage caps downside, but the ROE does not force a re-rate quickly",
+        "trigger": "Q2 NIM holding + disbursement growth"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "Jul 2026",
+        "note": "Q4 PAT Rs 1,497 cr (+9% PBT), Rs 10/share dividend; next results Jul 30. Steady and cheap, no red flags.",
+        "url": "https://www.business-standard.com/markets/lic-housing-finance-ltd-share-price-4248.html"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Life Insurance Corporation of India 45.24%",
+        "fii": 21.39,
+        "dii": 20.89,
+        "trend": "FIIs buying Mar qtr; DIIs selling",
+        "named": [
+          "LIC is the promoter itself"
+        ],
+        "src": "https://www.screener.in/company/LICHSGFIN/consolidated/",
+        "flow": 5
+      },
+      "theme": "financials",
+      "policy": 4,
+      "side": "long"
+    },
+    {
+      "symbol": "HEROMOTOCO",
+      "name": "Hero MotoCorp",
+      "sector": "Auto (2-Wheelers)",
+      "market_cap_cr": 97097,
+      "pe": 16.6,
+      "pb": null,
+      "roce": 35.8,
+      "roe": 28.5,
+      "de": 0.01,
+      "div_yield": 3.81,
+      "promoter_holding": 34.75,
+      "pledged": 0,
+      "profit_growth": 26,
+      "sales_growth": null,
+      "target_upside": 26,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 292.3,
+        "growth_pct": 10,
+        "target_multiple": 19,
+        "multiple_note": "traded 17-22x across cycles; 19x is mid-range for a franchise this profitable",
+        "growth_note": "Q4 +26%, TTM +37% - we assume just +10%",
+        "div_6m_pct": 1.9
+      },
+      "thesis": "The GARP find: world's largest two-wheeler maker at PE 16.6 with ROCE 35.8%, near-zero debt, a 3.8% dividend (71.5% payout) and TTM profit +37% - priced like a PSU while being a consumer franchise. 24% below its 52-week high. Adds the consumer-demand engine this PSU/commodity-heavy portfolio lacked.",
+      "risks": "Two-wheeler volume cycle (5-yr sales CAGR only 8.9%); EV transition execution vs Ola/TVS; rural demand dependence.",
+      "sources": [
+        "https://www.screener.in/company/HEROMOTOCO/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 50,
+        "band": "MEDIUM",
+        "why": "Franchise quality at value price with a dividend floor, but volume growth is cyclical and EV share shift is real",
+        "trigger": "Monthly volume prints + festive season demand (Oct-Nov)"
+      },
+      "news": {
+        "verdict": "WARN",
+        "date": "Jul 1, 2026",
+        "note": "June domestic dispatches -4.2% YoY (commuter fatigue) BUT exports +32.8%, VIDA EV registrations +185% YoY (11% EV share, brand refreshed), Rs 3,200 cr Andhra investment. Festive season (Oct-Nov) is the demand test.",
+        "url": "https://www.sahi.com/news/hero-motocorp-june-sales-fall-2-3-yoy-to-541-159-units-amid-slowdown-128-PE1_CORP"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Munjal family 34.73% (Bahadur Chand Investments 20.01% + family)",
+        "fii": 31.15,
+        "dii": 24.69,
+        "trend": "FIIs buying strongly (27.1% Jun → 31.2% Mar, +4.1pp); DIIs selling",
+        "named": [
+          "LIC 5.40% → cut to 5.14% by May 2026 (selling)",
+          "Kotak Flexicap 4.18%",
+          "Norway Govt Pension Fund Global 2.37%",
+          "ICICI Pru Large Cap 2.33%"
+        ],
+        "src": "https://trendlyne.com/equity/share-holding/540/HEROMOTOCO/latest/hero-motocorp-ltd/",
+        "flow": 7
+      },
+      "theme": "consumer",
+      "policy": 3,
+      "side": "long"
+    },
+    {
+      "symbol": "ECLERX",
+      "name": "eClerx Services",
+      "sector": "IT Services (KPO)",
+      "market_cap_cr": 14002,
+      "pe": 19.8,
+      "pb": null,
+      "roce": 34.8,
+      "roe": 29.0,
+      "de": 0.16,
+      "div_yield": 0.03,
+      "promoter_holding": 54.53,
+      "pledged": 0,
+      "profit_growth": 33.8,
+      "sales_growth": null,
+      "target_upside": 22,
+      "top_pick": true,
+      "math": {
+        "basis": "pe",
+        "anchor": 75.2,
+        "growth_pct": 15,
+        "target_multiple": 21,
+        "multiple_note": "quality midcap IT/KPO runs 20-25x; 21x is the low end",
+        "growth_note": "Q4 +33.8%, TTM +36% - we assume +15%",
+        "div_6m_pct": 0.0
+      },
+      "thesis": "Niche high-margin KPO compounder (ROCE 34.8%, profit +34% YoY) derated 40% alongside large-cap IT despite growing twice as fast. Promoter 54.5%, returns cash via buybacks. Diversifies the IT exposure beyond INFY/HCLTECH into a segment AI augments rather than replaces (so far).",
+      "risks": "Rides the same IT-services sentiment as INFY in the short run; client concentration typical of KPO; buybacks not dividends (no yield floor).",
+      "sources": [
+        "https://www.screener.in/company/ECLERX/consolidated/"
+      ],
+      "confidence": {
+        "prob_pct": 45,
+        "band": "MEDIUM",
+        "why": "Growth is verified and the derating is sentiment-driven, but the sector tape must stop falling first",
+        "trigger": "Q2 results + IT sector sentiment turning after July guidance season"
+      },
+      "news": {
+        "verdict": "CLEAR",
+        "date": "May 13, 2026",
+        "note": "FY26 profit +30.5% on revenue +22.3%; Rs 300 cr buyback completed Jan 2026 (2.1x oversubscribed); 1:1 bonus issued Mar 2026; promoters formally declared ZERO share encumbrance for FY26.",
+        "url": "https://scanx.trade/stock-market-news/companies/eclerx-services-reports-robust-fy26-financial-results-consolidated-revenue-surges-to-rs-41-170-26-million/40244776"
+      },
+      "holders": {
+        "as_of": "Mar 2026",
+        "promoter": "Co-founders PD Mundhra + Anjan Malik ≈ 54.53% (rising via buybacks)",
+        "fii": 11.82,
+        "dii": 23.95,
+        "trend": "FIIs buying 4 straight qtrs (10.2% → 11.8%)",
+        "named": [
+          "HDFC MF ~9.79% (HDFC Large & Mid Cap Fund 9.73% — largest public holder)",
+          "MFs total ~23%"
+        ],
+        "src": "https://www.screener.in/company/ECLERX/consolidated/",
+        "flow": 7
+      },
+      "theme": "it_services",
+      "policy": 2,
+      "side": "long"
+    },
+    {
+      "symbol": "LT",
+      "name": "Larsen & Toubro",
+      "sector": "Construction/Capital Goods",
+      "theme": "roads_construction",
+      "policy": 10,
+      "side": "long",
+      "market_cap_cr": 540352,
+      "pe": 32.9,
+      "pb": 4.94,
+      "roce": 14.6,
+      "roe": 15.9,
+      "de": null,
+      "div_yield": 0.97,
+      "promoter_holding": 0,
+      "pledged": 0,
+      "profit_growth": 37.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 119.39,
+        "growth_pct": 15,
+        "target_multiple": 31,
+        "multiple_note": "fair ~31x vs current 32.9x",
+        "growth_note": "assumed +15% (vs latest-Q 37.0% YoY)",
+        "div_6m_pct": 0.5
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "No promoter — widely held (professionally managed)",
+        "fii": 18.78,
+        "dii": 43.32,
+        "trend": "FII trimming (19.8→18.8), DII buying (42.7→43.3)",
+        "named": [
+          "LIC & domestic MFs (largest DII bloc)"
+        ],
+        "flow": 5
+      },
+      "thesis": "The single broadest expression of India's capex cycle — defence, metros, rail, power, water, hydrocarbons, semiconductors, heavy engineering. Order book crossed ₹5.7 lakh cr with 15-20% inflow guidance. Q4 profit +37%. Not cheap at 33x but the most diversified capex proxy on the exchange.",
+      "risks": "Execution/working-capital on a giant order book; L&T Finance drag; 5-yr CAGR optically low (COVID base).",
+      "sources": [
+        "https://www.screener.in/company/LT/consolidated/"
+      ]
+    },
+    {
+      "symbol": "POWERGRID",
+      "name": "Power Grid Corporation",
+      "sector": "Power Transmission",
+      "theme": "power_transmission",
+      "policy": 10,
+      "side": "long",
+      "market_cap_cr": 265903,
+      "pe": 16.7,
+      "pb": 2.65,
+      "roce": 9.74,
+      "roe": 16.5,
+      "de": null,
+      "div_yield": 3.15,
+      "promoter_holding": 51.34,
+      "pledged": 0,
+      "profit_growth": 15.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 17.13,
+        "growth_pct": 8,
+        "target_multiple": 18,
+        "multiple_note": "fair ~18x vs current 16.7x",
+        "growth_note": "assumed +8% (vs latest-Q 15.0% YoY)",
+        "div_6m_pct": 1.6
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 51.34%",
+        "fii": 25.02,
+        "dii": 20.05,
+        "trend": "FII selling (28→25), DII buying hard (17→20)",
+        "named": [
+          "LIC (large DII holder)"
+        ],
+        "flow": 5
+      },
+      "thesis": "The cheapest way to own the grid supercycle: 16.7x PE, 3.15% dividend, ROE 16.5%, Q4 profit +15%. NEP targets ₹7.9 lakh cr transmission capex to evacuate 500GW renewables by 2030, plus AI data-centre load rising to 8-10GW. The transmission backbone every other government ambition runs through.",
+      "risks": "Regulated returns cap upside; TBCB competition; high (but normal-for-utility) leverage.",
+      "sources": [
+        "https://www.screener.in/company/POWERGRID/consolidated/"
+      ]
+    },
+    {
+      "symbol": "CGPOWER",
+      "name": "CG Power & Industrial",
+      "sector": "Power Transmission",
+      "theme": "power_transmission",
+      "policy": 9,
+      "side": "long",
+      "market_cap_cr": 142614,
+      "pe": 118,
+      "pb": 17.9,
+      "roce": 26.7,
+      "roe": 20.5,
+      "de": 0.0,
+      "div_yield": 0.14,
+      "promoter_holding": 56.36,
+      "pledged": 0,
+      "profit_growth": 32.5,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 7.68,
+        "growth_pct": 25,
+        "target_multiple": 55,
+        "multiple_note": "fair ~55x vs current 118x",
+        "growth_note": "assumed +25% (vs latest-Q 32.5% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Tube Investments / Murugappa 56.36%",
+        "fii": 12.03,
+        "dii": 18.01,
+        "trend": "FII selling, DII buying",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "Elite operator (ROCE 26.7%, near debt-free, Q4 +32.5%) in grid/motors/rail/semiconductor packaging — but priced at an extraordinary 118x PE, 17.9x book. Wonderful business, treacherous price.",
+      "risks": "118x PE / 17.9x book leave zero margin of safety; rising working-capital days flagged.",
+      "sources": [
+        "https://www.screener.in/company/CGPOWER/consolidated/"
+      ]
+    },
+    {
+      "symbol": "POLYCAB",
+      "name": "Polycab India",
+      "sector": "Power Transmission (Cables)",
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 140220,
+      "pe": 55.7,
+      "pb": 11.7,
+      "roce": 33.2,
+      "roe": 23.0,
+      "de": null,
+      "div_yield": 0.51,
+      "promoter_holding": 61.5,
+      "pledged": 0,
+      "profit_growth": 7.1,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 167.07,
+        "growth_pct": 15,
+        "target_multiple": 40,
+        "multiple_note": "fair ~40x vs current 55.7x",
+        "growth_note": "assumed +15% (vs latest-Q 7.1% YoY)",
+        "div_6m_pct": 0.3
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 61.5%",
+        "fii": 18.21,
+        "dii": 7.95,
+        "trend": "FII buying (noisy), DII selling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "Cable & wire leader riding electrification — best ROCE in the group (33.2%). But 55.7x PE / 11.7x book with only ~7% latest-quarter profit growth is a demanding price.",
+      "risks": "Multiple far ahead of current growth; copper-price and competition risk.",
+      "sources": [
+        "https://www.screener.in/company/POLYCAB/consolidated/"
+      ]
+    },
+    {
+      "symbol": "SIEMENS",
+      "name": "Siemens Ltd",
+      "sector": "Industrial Automation",
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 123616,
+      "pe": 52.1,
+      "pb": 8.95,
+      "roce": 21.2,
+      "roe": 16.3,
+      "de": 0.0,
+      "div_yield": 0.0,
+      "promoter_holding": 75.0,
+      "pledged": 0,
+      "profit_growth": -36.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 66.76,
+        "growth_pct": 10,
+        "target_multiple": 40,
+        "multiple_note": "fair ~40x vs current 52.1x",
+        "growth_note": "assumed +10% (vs latest-Q -36.0% YoY)",
+        "div_6m_pct": 0.0
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Siemens AG 75%",
+        "fii": 6.8,
+        "dii": 8.59,
+        "trend": "FII selling, DII buying",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "Automation/rail/electrification blue-chip. Note: the -36% latest-quarter print is distorted by the Siemens Energy India demerger, not a real collapse. Quality is high; valuation at 52x is full.",
+      "risks": "Demerger distorts comparability; 52x PE with no dividend post-reset.",
+      "sources": [
+        "https://www.screener.in/company/SIEMENS/consolidated/"
+      ]
+    },
+    {
+      "symbol": "KEI",
+      "name": "KEI Industries",
+      "sector": "Power Transmission (Cables)",
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 48923,
+      "pe": 53.3,
+      "pb": 7.33,
+      "roce": 20.1,
+      "roe": 14.8,
+      "de": null,
+      "div_yield": 0.09,
+      "promoter_holding": 35.0,
+      "pledged": 0,
+      "profit_growth": null,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 95.91,
+        "growth_pct": 18,
+        "target_multiple": 40,
+        "multiple_note": "fair ~40x vs current 53.3x",
+        "growth_note": "assumed +18% (vs latest-Q None% YoY)",
+        "div_6m_pct": 0.2
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 35%",
+        "fii": 27.27,
+        "dii": 25.83,
+        "trend": "FII AND DII both buying (rare double accumulation)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 8
+      },
+      "thesis": "Cables/electrification with the strongest institutional flow in the group — both FII (25.5→27.3) and DII (23.5→25.8) accumulating. ROCE 20%, low debt. The catch is a 53x multiple.",
+      "risks": "53x PE demands sustained 20%+ growth; commodity input swings.",
+      "sources": [
+        "https://www.screener.in/company/KEI/consolidated/"
+      ]
+    },
+    {
+      "symbol": "KPIL",
+      "name": "Kalpataru Projects Intl",
+      "sector": "Power T&D EPC",
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 22924,
+      "pe": 23.4,
+      "pb": 2.95,
+      "roce": 18.3,
+      "roe": 13.7,
+      "de": 0.46,
+      "div_yield": 0.82,
+      "promoter_holding": 33.58,
+      "pledged": 0,
+      "profit_growth": 83.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 57.35,
+        "growth_pct": 20,
+        "target_multiple": 22,
+        "multiple_note": "fair ~22x vs current 23.4x",
+        "growth_note": "assumed +20% (vs latest-Q 83.0% YoY)",
+        "div_6m_pct": 0.4
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 33.58%",
+        "fii": 10.92,
+        "dii": 45.12,
+        "trend": "DII buying strongly (43.9→45.1)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 6
+      },
+      "thesis": "T&D + infrastructure EPC at a reasonable 23x with Q4 profit ~+83% and heavy DII accumulation (45% DII owned). One of the few electrification plays still at a sane multiple.",
+      "risks": "EPC working-capital cycles; moderate leverage; order-timing lumpiness.",
+      "sources": [
+        "https://www.screener.in/company/KPIL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "KEC",
+      "name": "KEC International",
+      "sector": "Power T&D EPC",
+      "theme": "power_transmission",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 13197,
+      "pe": 20.3,
+      "pb": 2.15,
+      "roce": 14.5,
+      "roe": 11.3,
+      "de": null,
+      "div_yield": 1.11,
+      "promoter_holding": 50.1,
+      "pledged": 0,
+      "profit_growth": null,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 24.43,
+        "growth_pct": 25,
+        "target_multiple": 22,
+        "multiple_note": "fair ~22x vs current 20.3x",
+        "growth_note": "assumed +25% (vs latest-Q None% YoY)",
+        "div_6m_pct": 0.6
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "RPG Group 50.1%",
+        "fii": 9.84,
+        "dii": 26.86,
+        "trend": "FII selling hard (16→9.8), DII buying (22.5→26.9)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "The cheapest electrification EPC (20x, near 52-week low, 1.1% dividend) with a large T&D/rail/civil order book and a recovery in margins. DII stepping in as FII exits. Value entry in a high-policy theme.",
+      "risks": "High working-capital debt; lowest ROE in the T&D cohort (11.3%); FII outflow.",
+      "sources": [
+        "https://www.screener.in/company/KEC/consolidated/"
+      ]
+    },
+    {
+      "symbol": "BEL",
+      "name": "Bharat Electronics",
+      "sector": "Defence Electronics",
+      "theme": "defence",
+      "policy": 10,
+      "side": "long",
+      "market_cap_cr": 300250,
+      "pe": 49.5,
+      "pb": 12.5,
+      "roce": 36.5,
+      "roe": 27.6,
+      "de": 0.0,
+      "div_yield": 0.58,
+      "promoter_holding": 51.14,
+      "pledged": 0,
+      "profit_growth": 41.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 8.3,
+        "growth_pct": 20,
+        "target_multiple": 42,
+        "multiple_note": "fair ~42x vs current 49.5x",
+        "growth_note": "assumed +20% (vs latest-Q 41.0% YoY)",
+        "div_6m_pct": 0.3
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 51.14%",
+        "fii": 19.51,
+        "dii": 20.0,
+        "trend": "FII buying (17.5→19.5), DII trimming",
+        "named": [
+          "LIC"
+        ],
+        "flow": 6
+      },
+      "thesis": "Best growth-adjusted defence name: ROCE 36.5%, Q4 profit +41%, near debt-free, and FIIs accumulating. Record ₹7.85 lakh cr defence budget (+15%) with 75% ring-fenced for domestic buy flows straight to its order book. 49x is rich but the least stretched pure-defence play on quality.",
+      "risks": "49x PE / 12.5x book; working-capital wrinkle (debtor days ~170) worth watching.",
+      "sources": [
+        "https://www.screener.in/company/BEL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "HAL",
+      "name": "Hindustan Aeronautics",
+      "sector": "Defence Aerospace",
+      "theme": "defence",
+      "policy": 10,
+      "side": "long",
+      "market_cap_cr": 301721,
+      "pe": 33.1,
+      "pb": 7.3,
+      "roce": 32.0,
+      "roe": 24.0,
+      "de": 0.0,
+      "div_yield": 0.89,
+      "promoter_holding": 71.64,
+      "pledged": 0,
+      "profit_growth": 5.5,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 136.28,
+        "growth_pct": 12,
+        "target_multiple": 34,
+        "multiple_note": "fair ~34x vs current 33.1x",
+        "growth_note": "assumed +12% (vs latest-Q 5.5% YoY)",
+        "div_6m_pct": 0.45
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 71.64%",
+        "fii": 9.34,
+        "dii": 11.9,
+        "trend": "FII selling (12→9.3), DII absorbing",
+        "named": [
+          "LIC"
+        ],
+        "flow": 4
+      },
+      "thesis": "Cheapest defence PSU (33x) with the highest dividend and enormous order visibility (~₹1.9 lakh cr book). Post-Sindoor emergency procurement adds fuel. The value entry point in defence.",
+      "risks": "Latest-quarter growth only +5.5% (execution pace); FII exiting; delivery timelines.",
+      "sources": [
+        "https://www.screener.in/company/HAL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "GRSE",
+      "name": "Garden Reach Shipbuilders",
+      "sector": "Defence Shipbuilding",
+      "theme": "shipbuilding_ports",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 30249,
+      "pe": 40.4,
+      "pb": 11.5,
+      "roce": 43.0,
+      "roe": 31.8,
+      "de": 0.0,
+      "div_yield": 0.52,
+      "promoter_holding": 74.5,
+      "pledged": 0,
+      "profit_growth": 41.8,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 65.37,
+        "growth_pct": 25,
+        "target_multiple": 38,
+        "multiple_note": "fair ~38x vs current 40.4x",
+        "growth_note": "assumed +25% (vs latest-Q 41.8% YoY)",
+        "div_6m_pct": 0.3
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 74.50%",
+        "fii": 3.51,
+        "dii": 1.69,
+        "trend": "FII trimming",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "Strongest fundamentals in shipbuilding: ROCE 43% (highest), ROE 31.8%, Q4 profit +42%, 36% 5-yr CAGR, near debt-free. Navy adds a warship every ~40 days from 2026. Premium price but earned.",
+      "risks": "40x PE; order-book lumpiness; low institutional float.",
+      "sources": [
+        "https://www.screener.in/company/GRSE/consolidated/"
+      ]
+    },
+    {
+      "symbol": "DATAPATTNS",
+      "name": "Data Patterns",
+      "sector": "Defence Electronics",
+      "theme": "defence",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 23913,
+      "pe": 96.8,
+      "pb": 13.8,
+      "roce": 21.9,
+      "roe": 15.2,
+      "de": 0.0,
+      "div_yield": 0.23,
+      "promoter_holding": 42.41,
+      "pledged": 0,
+      "profit_growth": 22.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 44.11,
+        "growth_pct": 30,
+        "target_multiple": 50,
+        "multiple_note": "fair ~50x vs current 96.8x",
+        "growth_note": "assumed +30% (vs latest-Q 22.0% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 42.41%",
+        "fii": 12.47,
+        "dii": 11.68,
+        "trend": "FII trimming, DII adding",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "High-quality private defence-electronics with 35% 5-yr CAGR and a clean balance sheet — but ~97x PE prices in flawless execution for years.",
+      "risks": "97x PE leaves no room for a single miss; customer concentration.",
+      "sources": [
+        "https://www.screener.in/company/DATAPATTNS/consolidated/"
+      ]
+    },
+    {
+      "symbol": "SOLARINDS",
+      "name": "Solar Industries",
+      "sector": "Defence/Explosives",
+      "theme": "defence",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 164287,
+      "pe": 97.9,
+      "pb": 26.2,
+      "roce": 36.8,
+      "roe": 31.5,
+      "de": null,
+      "div_yield": 0.06,
+      "promoter_holding": 73.15,
+      "pledged": 0,
+      "profit_growth": 17.3,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 185.45,
+        "growth_pct": 30,
+        "target_multiple": 55,
+        "multiple_note": "fair ~55x vs current 97.9x",
+        "growth_note": "assumed +30% (vs latest-Q 17.3% YoY)",
+        "div_6m_pct": 0.05
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Nawn family 73.15%",
+        "fii": 6.59,
+        "dii": 12.89,
+        "trend": "Both FII+DII marginally trimming",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "Genuine compounder — highest 5-yr CAGR in defence (43%), ROCE 37% — expanding from explosives into ammunition/defence. But 98x PE and 26x book are the richest multiples in the set.",
+      "risks": "26x book / 98x PE = near-zero margin of safety; any growth stumble hurts hard.",
+      "sources": [
+        "https://www.screener.in/company/SOLARINDS/consolidated/"
+      ]
+    },
+    {
+      "symbol": "KAYNES",
+      "name": "Kaynes Technology",
+      "sector": "Electronics/Semi",
+      "theme": "electronics_semi",
+      "policy": 9,
+      "side": "long",
+      "market_cap_cr": 22267,
+      "pe": 60.9,
+      "pb": 4.69,
+      "roce": 13.2,
+      "roe": 9.64,
+      "de": null,
+      "div_yield": 0.0,
+      "promoter_holding": 53.46,
+      "pledged": 0,
+      "profit_growth": 21.3,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 54.52,
+        "growth_pct": 30,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 60.9x",
+        "growth_note": "assumed +30% (vs latest-Q 21.3% YoY)",
+        "div_6m_pct": 0.0
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 53.46%",
+        "fii": 7.28,
+        "dii": 15.13,
+        "trend": "FII AND DII dumping hard (heavy institutional exit)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 2
+      },
+      "thesis": "Deeper-in-the-chain electronics/OSAT play on India Semiconductor Mission 2.0, now 57% off its high. But single-digit ROE (9.6%) at 61x PE, and institutions are exiting aggressively — the flow is a red flag.",
+      "risks": "Heavy FII+DII selling; 61x PE on 9.6% ROE; semiconductor theme carries an active China rare-earth headwind.",
+      "sources": [
+        "https://www.screener.in/company/KAYNES/consolidated/"
+      ]
+    },
+    {
+      "symbol": "DIXON",
+      "name": "Dixon Technologies",
+      "sector": "Electronics Mfg",
+      "theme": "electronics_semi",
+      "policy": 7,
+      "side": "long",
+      "market_cap_cr": 82483,
+      "pe": 57.3,
+      "pb": 17.5,
+      "roce": 42.0,
+      "roe": 37.4,
+      "de": null,
+      "div_yield": 0.06,
+      "promoter_holding": 28.69,
+      "pledged": 0,
+      "profit_growth": -36.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 235.43,
+        "growth_pct": 15,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 57.3x",
+        "growth_note": "assumed +15% (vs latest-Q -36.0% YoY)",
+        "div_6m_pct": 0.05
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 28.69%",
+        "fii": 18.3,
+        "dii": 28.14,
+        "trend": "FII trimming, DII adding",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "The quality leader in electronics contract-manufacturing (ROCE 42%, ROE 37%) — the only name where returns nearly justify the multiple. But Q4 profit fell ~36% and 57x PE assumes the growth stall is temporary.",
+      "risks": "Latest-quarter profit -36% (growth stalling); 57x PE; low promoter holding.",
+      "sources": [
+        "https://www.screener.in/company/DIXON/consolidated/"
+      ]
+    },
+    {
+      "symbol": "CYIENTDLM",
+      "name": "Cyient DLM",
+      "sector": "Electronics Mfg",
+      "theme": "electronics_semi",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 4180,
+      "pe": 56.9,
+      "pb": 4.1,
+      "roce": 9.9,
+      "roe": 7.49,
+      "de": null,
+      "div_yield": 0.0,
+      "promoter_holding": 52.12,
+      "pledged": 0,
+      "profit_growth": -29.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 9.24,
+        "growth_pct": 20,
+        "target_multiple": 40,
+        "multiple_note": "fair ~40x vs current 56.9x",
+        "growth_note": "assumed +20% (vs latest-Q -29.0% YoY)",
+        "div_6m_pct": 0.0
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Cyient 52.12%",
+        "fii": 0.79,
+        "dii": 26.67,
+        "trend": "Negligible FII, DII falling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "Electronics manufacturing for aerospace/defence/medical on the reshoring theme — but 57x PE against 7.5% ROE and a -29% latest quarter is a poor quality/price match.",
+      "risks": "57x PE on single-digit ROE; falling profits; near-zero FII interest.",
+      "sources": [
+        "https://www.screener.in/company/CYIENTDLM/consolidated/"
+      ]
+    },
+    {
+      "symbol": "TARIL",
+      "name": "Transformers & Rectifiers",
+      "sector": "Power Transmission (Transformers)",
+      "theme": "power_transmission",
+      "policy": 9,
+      "side": "long",
+      "market_cap_cr": 10431,
+      "pe": 39.4,
+      "pb": 6.9,
+      "roce": 23.3,
+      "roe": 19.1,
+      "de": null,
+      "div_yield": 0.06,
+      "promoter_holding": 64.36,
+      "pledged": 0,
+      "profit_growth": -3.2,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 8.81,
+        "growth_pct": 25,
+        "target_multiple": 35,
+        "multiple_note": "fair ~35x vs current 39.4x",
+        "growth_note": "assumed +25% (vs latest-Q -3.2% YoY)",
+        "div_6m_pct": 0.05
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 64.36%",
+        "fii": 8.33,
+        "dii": 1.77,
+        "trend": "DII exiting (4.2→1.8)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "The best value/quality in transformers (39x — cheapest, ROCE 23%, ROE 19%) — a direct grid-capex beneficiary as transformer demand surges. Cheapest of the equipment names, though DII is trimming and the latest quarter was flat.",
+      "risks": "Still 39x PE; DII selling; order execution and copper/CRGO input costs.",
+      "sources": [
+        "https://www.screener.in/company/TARIL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "THERMAX",
+      "name": "Thermax",
+      "sector": "Capital Goods/Energy",
+      "theme": "nuclear",
+      "policy": 7,
+      "side": "long",
+      "market_cap_cr": 55612,
+      "pe": 101,
+      "pb": 10.0,
+      "roce": 13.9,
+      "roe": 10.6,
+      "de": null,
+      "div_yield": 0.3,
+      "promoter_holding": 61.99,
+      "pledged": 0,
+      "profit_growth": 18.4,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 46.18,
+        "growth_pct": 18,
+        "target_multiple": 55,
+        "multiple_note": "fair ~55x vs current 101x",
+        "growth_note": "assumed +18% (vs latest-Q 18.4% YoY)",
+        "div_6m_pct": 0.15
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 61.99%",
+        "fii": 11.25,
+        "dii": 15.49,
+        "trend": "FII out, DII in",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "Energy/environment capital goods with a nuclear/clean-energy optionality — Q4 +18%. But 101x PE against a 10.6% ROE is one of the most stretched valuations in the whole universe.",
+      "risks": "101x PE on 10.6% ROE; order-cycle dependent; FII exiting.",
+      "sources": [
+        "https://www.screener.in/company/THERMAX/consolidated/"
+      ]
+    },
+    {
+      "symbol": "WABAG",
+      "name": "VA Tech Wabag",
+      "sector": "Water",
+      "theme": "water",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 13757,
+      "pe": 36.8,
+      "pb": 5.4,
+      "roce": 21.3,
+      "roe": 15.9,
+      "de": null,
+      "div_yield": 0.23,
+      "promoter_holding": 19.09,
+      "pledged": 0,
+      "profit_growth": 28.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 59.95,
+        "growth_pct": 20,
+        "target_multiple": 30,
+        "multiple_note": "fair ~30x vs current 36.8x",
+        "growth_note": "assumed +20% (vs latest-Q 28.0% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 19.09% (low)",
+        "fii": 16.6,
+        "dii": 5.77,
+        "trend": "FII falling, DII rising",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "Pure-play water treatment on the Jal Jeevan (extended to 2028) + ₹1 lakh cr Urban Challenge Fund theme. ROCE 21%, near-zero debt, Q4 +28%. Municipal water is a decades-long annuity. Trading near its 52-week high though.",
+      "risks": "36.8x near the highs; low promoter holding (19%); project-execution and receivables.",
+      "sources": [
+        "https://www.screener.in/company/WABAG/consolidated/"
+      ]
+    },
+    {
+      "symbol": "HINDCOPPER",
+      "name": "Hindustan Copper",
+      "sector": "Critical Minerals",
+      "theme": "critical_minerals",
+      "policy": 8,
+      "side": "long",
+      "market_cap_cr": 48143,
+      "pe": 48.7,
+      "pb": 14.4,
+      "roce": 42.5,
+      "roe": 32.9,
+      "de": null,
+      "div_yield": 0.29,
+      "promoter_holding": 66.14,
+      "pledged": 0,
+      "profit_growth": 0.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 10.23,
+        "growth_pct": 10,
+        "target_multiple": 28,
+        "multiple_note": "fair ~28x vs current 48.7x",
+        "growth_note": "assumed +10% (vs latest-Q 0.0% YoY)",
+        "div_6m_pct": 0.15
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 66.14%",
+        "fii": 5.96,
+        "dii": 4.84,
+        "trend": "Both FII+DII falling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "India's only integrated copper miner — leveraged to the critical-minerals push and copper demand from electrification/EVs. ROCE 42%. But 48.7x PE and 14.4x book are extreme for a commodity producer, and the latest quarter was flat.",
+      "risks": "14.4x book / 48.7x PE on a cyclical commodity; flat earnings vs history; both FII+DII selling.",
+      "sources": [
+        "https://www.screener.in/company/HINDCOPPER/consolidated/"
+      ]
+    },
+    {
+      "symbol": "BIOCON",
+      "name": "Biocon",
+      "sector": "Biopharma",
+      "theme": "biopharma",
+      "policy": 6,
+      "side": "long",
+      "market_cap_cr": 66980,
+      "pe": 172,
+      "pb": 2.0,
+      "roce": 3.75,
+      "roe": 1.4,
+      "de": null,
+      "div_yield": 0.12,
+      "promoter_holding": 44.68,
+      "pledged": 0,
+      "profit_growth": -57.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 2.39,
+        "growth_pct": 5,
+        "target_multiple": 90,
+        "multiple_note": "fair ~90x vs current 172x",
+        "growth_note": "assumed +5% (vs latest-Q -57.0% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 44.68% (fell from 60.6% in 2024)",
+        "fii": 8.16,
+        "dii": 23.31,
+        "trend": "FII AND DII both rising (accumulating despite weak fundamentals)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 6
+      },
+      "thesis": "Biosimilars leader positioned for the BIOSECURE China-decoupling wave (₹10,000 cr Biopharma SHAKTI). Institutions are accumulating on the forward story — but trailing fundamentals are poor: 172x PE, 1.4% ROE, negative 5-yr CAGR, high debt, and a promoter holding that has fallen 16 points since 2024.",
+      "risks": "172x PE on depressed/negative earnings; ₹15,400 cr debt; promoter selling; turnaround is a bet, not a fact.",
+      "sources": [
+        "https://www.screener.in/company/BIOCON/consolidated/"
+      ]
+    },
+    {
+      "symbol": "SYNGENE",
+      "name": "Syngene International",
+      "sector": "Biopharma/CRO",
+      "theme": "biopharma",
+      "policy": 7,
+      "side": "long",
+      "market_cap_cr": 16968,
+      "pe": 45.6,
+      "pb": 3.5,
+      "roce": 9.99,
+      "roe": 7.78,
+      "de": null,
+      "div_yield": 0.3,
+      "promoter_holding": 52.68,
+      "pledged": 0,
+      "profit_growth": -32.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 9.21,
+        "growth_pct": 10,
+        "target_multiple": 40,
+        "multiple_note": "fair ~40x vs current 45.6x",
+        "growth_note": "assumed +10% (vs latest-Q -32.0% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Biocon 52.68%",
+        "fii": 13.91,
+        "dii": 26.44,
+        "trend": "FII falling, DII rising",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 5
+      },
+      "thesis": "Leading CRO/CDMO — the cleanest BIOSECURE 'China+1' beneficiary as US pharma decouples from WuXi. Near its 52-week low. But 45.6x PE with a -32% latest quarter and flat 5-yr earnings needs the reshoring order flow to actually convert.",
+      "risks": "45.6x on declining profit; poor recent sales growth; BIOSECURE order flow is multi-year, not imminent.",
+      "sources": [
+        "https://www.screener.in/company/SYNGENE/consolidated/"
+      ]
+    },
+    {
+      "symbol": "BHEL",
+      "name": "Bharat Heavy Electricals",
+      "sector": "Power Equipment/Nuclear",
+      "theme": "nuclear",
+      "policy": 6,
+      "side": "long",
+      "market_cap_cr": 142433,
+      "pe": 89.9,
+      "pb": 5.45,
+      "roce": 9.14,
+      "roe": 6.23,
+      "de": null,
+      "div_yield": 0.34,
+      "promoter_holding": 58.17,
+      "pledged": 0,
+      "profit_growth": 156.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 4.55,
+        "growth_pct": 40,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 89.9x",
+        "growth_note": "assumed +40% (vs latest-Q 156.0% YoY)",
+        "div_6m_pct": 0.15
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 58.17%",
+        "fii": 7.23,
+        "dii": 23.93,
+        "trend": "FII AND DII both rising (accumulating the turnaround)",
+        "named": [
+          "LIC"
+        ],
+        "flow": 7
+      },
+      "thesis": "The classic turnaround: Q4 profit +156% as thermal + nuclear (SHANTI Act, ₹24,000 cr Titagarh trainset-adjacent orders, SMR mission) orders inflect. Both FII and DII buying. Trailing 90x PE looks absurd but forward earnings on a recovering base tell a different story.",
+      "risks": "90x trailing PE only works if the turnaround holds; historically poor ROCE (9%); execution risk.",
+      "sources": [
+        "https://www.screener.in/company/BHEL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "NCC",
+      "name": "NCC Ltd",
+      "sector": "Construction",
+      "theme": "roads_construction",
+      "policy": 7,
+      "side": "long",
+      "market_cap_cr": 9042,
+      "pe": 12.9,
+      "pb": 1.15,
+      "roce": 16.8,
+      "roe": 9.2,
+      "de": null,
+      "div_yield": 1.52,
+      "promoter_holding": 22.81,
+      "pledged": 0,
+      "profit_growth": -8.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 11.16,
+        "growth_pct": 12,
+        "target_multiple": 15,
+        "multiple_note": "fair ~15x vs current 12.9x",
+        "growth_note": "assumed +12% (vs latest-Q -8.0% YoY)",
+        "div_6m_pct": 0.8
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 22.81% (low)",
+        "fii": 12.11,
+        "dii": 16.4,
+        "trend": "FII+DII flat-to-falling",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "The cheapest construction play — 12.9x PE, 1.15x book, 1.52% dividend, near its 52-week low — leveraged to the ₹12.2 lakh cr FY27 capex budget and Jal Jeevan. Deep value in a high-policy theme; the market simply hasn't noticed yet.",
+      "risks": "Latest quarter -8%; low promoter holding (22.8%); contractor receivables/leverage; NHAI awarding has been muted.",
+      "sources": [
+        "https://www.screener.in/company/NCC/consolidated/"
+      ]
+    },
+    {
+      "symbol": "MTARTECH",
+      "name": "MTAR Technologies",
+      "sector": "Defence/Nuclear Precision",
+      "theme": "nuclear",
+      "policy": 8,
+      "side": "short",
+      "market_cap_cr": 20741,
+      "pe": 214,
+      "pb": 25.0,
+      "roce": 15.1,
+      "roe": 12.5,
+      "de": null,
+      "div_yield": 0.0,
+      "promoter_holding": 30.44,
+      "pledged": 0,
+      "profit_growth": -17.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 31.52,
+        "growth_pct": 30,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 214x",
+        "growth_note": "assumed +30% (vs latest-Q -17.0% YoY)",
+        "div_6m_pct": 0.0
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 30.44%",
+        "fii": 17.31,
+        "dii": 27.66,
+        "trend": "FII up, DII down",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "SHORT / AVOID on price, not theme. A real nuclear/defence precision-engineering beneficiary — but 214x PE against a 12.5% ROE and 16% CAGR is the most extreme valuation in the entire universe. The theme is a decade long; the price already assumes it all went perfectly.",
+      "risks": "214x PE; latest quarter profit down; any de-rating toward even 45x implies ~70% downside.",
+      "sources": [
+        "https://www.screener.in/company/MTARTECH/consolidated/"
+      ]
+    },
+    {
+      "symbol": "RVNL",
+      "name": "Rail Vikas Nigam",
+      "sector": "Railways EPC",
+      "theme": "railways",
+      "policy": 6,
+      "side": "short",
+      "market_cap_cr": 48250,
+      "pe": 55.2,
+      "pb": 4.92,
+      "roce": 10.8,
+      "roe": 9.02,
+      "de": null,
+      "div_yield": 0.74,
+      "promoter_holding": 72.84,
+      "pledged": 0,
+      "profit_growth": -32.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 4.2,
+        "growth_pct": -10,
+        "target_multiple": 25,
+        "multiple_note": "fair ~25x vs current 55.2x",
+        "growth_note": "assumed +-10% (vs latest-Q -32.0% YoY)",
+        "div_6m_pct": 0.4
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 72.84% (cut 5.4% over 3yr)",
+        "fii": 4.86,
+        "dii": 6.42,
+        "trend": "Low institutional; govt trimming",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "TACTICAL SHORT. 55x PE on a railway EPC with NEGATIVE 5-yr profit CAGR, a -32% latest quarter, and screener-flagged working-capital deterioration (debtor days 47→96). Earnings padded by ₹869 cr other income; promoter (govt) trimming. Flat FY27 railway capex removes the catalyst.",
+      "risks": "Over-owned policy-froth theme rolling over; a squeeze is possible in a broad rally.",
+      "sources": [
+        "https://www.screener.in/company/RVNL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "BDL",
+      "name": "Bharat Dynamics",
+      "sector": "Defence Missiles",
+      "theme": "defence",
+      "policy": 9,
+      "side": "short",
+      "market_cap_cr": 47743,
+      "pe": 114,
+      "pb": 11.2,
+      "roce": 13.8,
+      "roe": 10.2,
+      "de": 0.0,
+      "div_yield": 0.36,
+      "promoter_holding": 74.93,
+      "pledged": 0,
+      "profit_growth": 0.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 11.43,
+        "growth_pct": 15,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 114x",
+        "growth_note": "assumed +15% (vs latest-Q 0.0% YoY)",
+        "div_6m_pct": 0.05
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 74.93%",
+        "fii": 1.69,
+        "dii": 11.53,
+        "trend": "FII selling steadily (2.4→1.7)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "SHORT / AVOID on price. Missile-maker with real strategic importance — but the weakest quality in defence (10% ROE, 10% 5-yr CAGR) at the highest multiple (114x PE). Priced on order-book hope, not delivery.",
+      "risks": "114x PE on 10% CAGR; FII exiting; a genuine theme wrapped around an un-investable valuation.",
+      "sources": [
+        "https://www.screener.in/company/BDL/consolidated/"
+      ]
+    },
+    {
+      "symbol": "MAZDOCK",
+      "name": "Mazagon Dock Shipbuilders",
+      "sector": "Defence Shipbuilding",
+      "theme": "shipbuilding_ports",
+      "policy": 9,
+      "side": "short",
+      "market_cap_cr": 96916,
+      "pe": 48.0,
+      "pb": 9.9,
+      "roce": 36.0,
+      "roe": 29.2,
+      "de": null,
+      "div_yield": 0.72,
+      "promoter_holding": 84.83,
+      "pledged": 0,
+      "profit_growth": -20.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 50.06,
+        "growth_pct": 0,
+        "target_multiple": 32,
+        "multiple_note": "fair ~32x vs current 48.0x",
+        "growth_note": "assumed +0% (vs latest-Q -20.0% YoY)",
+        "div_6m_pct": 0.35
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 84.83%",
+        "fii": 1.73,
+        "dii": 5.09,
+        "trend": "FII out, DII in",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 4
+      },
+      "thesis": "TACTICAL SHORT (Kotak: Sell, TP ₹1,950). Warship-builder whose latest quarter profit fell ~20% YoY on revenue -18% — a real earnings decline, not optics. Down ~27% from its high, below trend. Kotak models margins normalizing 17.4%→14.6%. Defence-yard froth deflating on actual numbers.",
+      "risks": "Excellent ROCE (36%) and order book make it a business worth owning eventually — just not at 48x with margins normalizing.",
+      "sources": [
+        "https://www.screener.in/company/MAZDOCK/consolidated/"
+      ]
+    },
+    {
+      "symbol": "TITAGARH",
+      "name": "Titagarh Rail Systems",
+      "sector": "Railways",
+      "theme": "railways",
+      "policy": 8,
+      "side": "short",
+      "market_cap_cr": 11440,
+      "pe": 71.6,
+      "pb": 4.7,
+      "roce": 10.6,
+      "roe": 6.47,
+      "de": null,
+      "div_yield": 0.12,
+      "promoter_holding": 40.46,
+      "pledged": 0,
+      "profit_growth": -30.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 11.86,
+        "growth_pct": 0,
+        "target_multiple": 30,
+        "multiple_note": "fair ~30x vs current 71.6x",
+        "growth_note": "assumed +0% (vs latest-Q -30.0% YoY)",
+        "div_6m_pct": 0.1
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 40.46%",
+        "fii": 10.87,
+        "dii": 15.38,
+        "trend": "FII exiting (16.9→10.9)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "SHORT / AVOID. Rolling-stock maker with a big order book (>₹28,000 cr incl. the ₹24,000 cr BHEL trainset deal) — but 72x PE against a 6.5% ROE and a shrinking latest quarter, with FIIs steadily exiting. Flat FY27 railway capex removes the growth surprise.",
+      "risks": "72x PE on 6.5% ROE; profit shrinking; a squeeze risk if railways re-rate as a group.",
+      "sources": [
+        "https://www.screener.in/company/TITAGARH/consolidated/"
+      ]
+    },
+    {
+      "symbol": "COCHINSHIP",
+      "name": "Cochin Shipyard",
+      "sector": "Defence Shipbuilding",
+      "theme": "shipbuilding_ports",
+      "policy": 8,
+      "side": "short",
+      "market_cap_cr": 37142,
+      "pe": 51.8,
+      "pb": 6.3,
+      "roce": 16.0,
+      "roe": 12.5,
+      "de": null,
+      "div_yield": 0.69,
+      "promoter_holding": 67.91,
+      "pledged": 0,
+      "profit_growth": -13.3,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 27.26,
+        "growth_pct": 0,
+        "target_multiple": 35,
+        "multiple_note": "fair ~35x vs current 51.8x",
+        "growth_note": "assumed +0% (vs latest-Q -13.3% YoY)",
+        "div_6m_pct": 0.35
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Government of India 67.91%",
+        "fii": 3.1,
+        "dii": 6.05,
+        "trend": "FII out over multi-year; promoter cut ~5% over 3yr",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "AVOID / UNDERPERFORM. 52x PE against just 4% 5-yr CAGR, a -13% latest quarter, the weakest returns and highest debt in the shipbuilding trio, plus promoter selling. Same defence-yard de-rating vector as Mazagon with less order visibility.",
+      "risks": "Poor fundamentals-to-multiple; ₹211bn order book is the offsetting bull case.",
+      "sources": [
+        "https://www.screener.in/company/COCHINSHIP/consolidated/"
+      ]
+    },
+    {
+      "symbol": "TRENT",
+      "name": "Trent Ltd",
+      "sector": "Retail (Consumer Disc.)",
+      "theme": "consumer",
+      "policy": 3,
+      "side": "short",
+      "market_cap_cr": 154645,
+      "pe": 90.0,
+      "pb": 22.1,
+      "roce": 28.0,
+      "roe": 27.7,
+      "de": null,
+      "div_yield": 0.1,
+      "promoter_holding": 37.0,
+      "pledged": 0,
+      "profit_growth": 8.7,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 32.22,
+        "growth_pct": 15,
+        "target_multiple": 55,
+        "multiple_note": "fair ~55x vs current 90.0x",
+        "growth_note": "assumed +15% (vs latest-Q 8.7% YoY)",
+        "div_6m_pct": 0.05
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Tata Group 37%",
+        "fii": 15.6,
+        "dii": null,
+        "trend": "FII cut stake hard (30→15.6)",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "TACTICAL SHORT / UNDERPERFORM (best retail short). A genuinely great business (Zudio/Westside, ROCE 28%) — but growth decelerated to +8.7% from the 40-50% that earned its 90x multiple, it is below its 200-DMA, ~23% off its high, and FIIs have halved their stake. Momentum + deceleration + rich multiple is the classic underperform setup. NOT a budget-priority sector.",
+      "risks": "Quality is real, so size as underperform not a blow-up; consumption could re-accelerate.",
+      "sources": [
+        "https://www.screener.in/company/TRENT/consolidated/"
+      ]
+    },
+    {
+      "symbol": "NYKAA",
+      "name": "FSN E-Commerce (Nykaa)",
+      "sector": "E-commerce (Consumer Disc.)",
+      "theme": "consumer",
+      "policy": 2,
+      "side": "short",
+      "market_cap_cr": 94076,
+      "pe": 476,
+      "pb": 66.3,
+      "roce": null,
+      "roe": 7.75,
+      "de": null,
+      "div_yield": 0.0,
+      "promoter_holding": 52.0,
+      "pledged": 0,
+      "profit_growth": 316.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 0.69,
+        "growth_pct": 40,
+        "target_multiple": 120,
+        "multiple_note": "fair ~120x vs current 476x",
+        "growth_note": "assumed +40% (vs latest-Q 316.0% YoY)",
+        "div_6m_pct": 0.0
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter 52%",
+        "fii": null,
+        "dii": null,
+        "trend": "FIIs reducing; multiple Sell ratings",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "AVOID (hard to short outright). 476x PE and 66x book on a structurally thin ~8% ROE — a caricature of a rich multiple, with Sell ratings from Macquarie/Citi/HDFC. The danger: the +316% latest-quarter profit is inflecting off a tiny base, so a naked short can get squeezed. Rich-multiple avoid, not a clean tactical short.",
+      "risks": "Earnings inflecting off a small base makes shorting dangerous; borrow/squeeze risk.",
+      "sources": [
+        "https://www.screener.in/company/NYKAA/consolidated/"
+      ]
+    },
+    {
+      "symbol": "ASIANPAINT",
+      "name": "Asian Paints",
+      "sector": "Consumer/Paints",
+      "theme": "consumer",
+      "policy": 2,
+      "side": "short",
+      "market_cap_cr": 254000,
+      "pe": 58.9,
+      "pb": 11.9,
+      "roce": 26.0,
+      "roe": null,
+      "de": null,
+      "div_yield": 1.0,
+      "promoter_holding": 52.6,
+      "pledged": 0,
+      "profit_growth": 2.0,
+      "sales_growth": null,
+      "top_pick": false,
+      "math": {
+        "basis": "pe",
+        "anchor": 45.03,
+        "growth_pct": 10,
+        "target_multiple": 45,
+        "multiple_note": "fair ~45x vs current 58.9x",
+        "growth_note": "assumed +10% (vs latest-Q 2.0% YoY)",
+        "div_6m_pct": 0.5
+      },
+      "holders": {
+        "as_of": "Mar-Jun 2026",
+        "promoter": "Promoter ~52.6%",
+        "fii": null,
+        "dii": null,
+        "trend": "CLSA Underperform TP ₹1,927",
+        "named": [
+          "No marquee individuals disclosed"
+        ],
+        "flow": 3
+      },
+      "thesis": "AVOID / UNDERPERFORM. Elite franchise (ROCE 26%) but a structural stall — ~1% 3-yr sales growth, ~2% profit — as Birla Opus takes share. 59x PE for near-zero growth. CLSA Underperform. A de-rating story, not an earnings collapse.",
+      "risks": "Fortress balance sheet and brand mean it won't crater — just likely lag; input-cost/competition swing factors.",
+      "sources": [
+        "https://www.screener.in/company/ASIANPAINT/consolidated/"
+      ]
+    }
+  ],
+  "geopolitics": {
+    "defence": 9,
+    "power_transmission": 8,
+    "electronics_semi": 6,
+    "critical_minerals": 8,
+    "railways": 6,
+    "shipbuilding_ports": 7,
+    "nuclear": 9,
+    "biopharma": 8,
+    "roads_construction": 7,
+    "water": 7,
+    "energy": 6,
+    "financials": 5,
+    "it_services": 3,
+    "consumer": 4,
+    "other": 5
+  }
+}
