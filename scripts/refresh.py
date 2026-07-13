@@ -23,8 +23,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FUND = ROOT / "data" / "fundamentals.json"
-OUT = ROOT / "data" / "stocks.js"
+FUND = ROOT / "public" / "data" / "fundamentals.json"
+OUT = ROOT / "public" / "data" / "stocks.js"
 NIFTY = "^NSEI"
 
 

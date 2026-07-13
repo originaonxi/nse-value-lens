@@ -262,6 +262,47 @@
     color:#39415a;z-index:5;pointer-events:none}
   #loaderr{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
     z-index:50;background:var(--bg);color:var(--red);font-size:14px;text-align:center;line-height:1.8}
+  /* ── S/R Zone Alerts overlay ── */
+  #sroverlay,#eqoverlay{position:fixed;inset:0;z-index:46;background:rgba(4,6,11,.98);display:none;overflow-y:auto;padding:40px 4vw 60px}
+  #sroverlay.open,#eqoverlay.open{display:block}
+  .sr-group{margin:22px 0}
+  .sr-group h3{font-size:14px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .sr-buy h3{color:var(--green)} .sr-sell h3{color:var(--red)} .sr-break h3{color:var(--gold)}
+  .sr-row{display:grid;grid-template-columns:80px 1fr 80px 80px 80px 80px 100px;gap:8px;align-items:center;
+    background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:9px 13px;margin-bottom:7px;font-size:12px;cursor:pointer;transition:border-color .15s}
+  .sr-row:hover{border-color:var(--accent)}
+  .sr-row .sym2{font-weight:700;font-size:13.5px}
+  .sr-row .dist{font-family:var(--mono);font-weight:700}
+  .sr-row .dist.ds{color:var(--green)} .sr-row .dist.dr{color:var(--red)}
+  .sr-row .eqbtn{background:#141a2a;color:var(--accent);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:10.5px;cursor:pointer;white-space:nowrap}
+  .sr-row .eqbtn:hover{border-color:var(--accent)}
+  @media(max-width:900px){.sr-row{grid-template-columns:70px 1fr 70px 70px 100px}}
+  /* ── 50-Equation overlay ── */
+  #eq-groups{max-width:1100px}
+  .eq-group{margin:18px 0}
+  .eq-group-hdr{font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;padding:6px 10px;background:rgba(77,163,255,.07);border-radius:8px}
+  .eq-row{display:grid;grid-template-columns:28px 200px 1fr 100px 60px;gap:10px;align-items:start;
+    padding:8px 10px;border-bottom:1px solid #0d1221;font-size:11px}
+  .eq-row:hover{background:rgba(255,255,255,.02)}
+  .eq-num{font-family:var(--mono);color:var(--dim);font-size:9.5px;padding-top:2px}
+  .eq-name{font-weight:700;color:var(--text);margin-bottom:2px;font-size:11.5px}
+  .eq-formula{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.4}
+  .eq-val{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:12px}
+  .eq-verdict-txt{font-size:10px;color:#9fb0c9;line-height:1.4;margin-top:2px}
+  .eq-sbar{height:3px;background:#141a2a;border-radius:2px;margin-top:5px;overflow:hidden;width:50px}
+  .eq-sfill{height:100%;border-radius:2px}
+  /* ── Zone badge ── */
+  .zbadge{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.8px;margin:5px 0}
+  .zBUY{background:rgba(77,208,122,.18);color:var(--green);border:1px solid rgba(77,208,122,.4)}
+  .zSELL{background:rgba(255,93,115,.18);color:var(--red);border:1px solid rgba(255,93,115,.4)}
+  .zHOLD{background:rgba(255,201,77,.12);color:var(--gold);border:1px solid rgba(255,201,77,.3)}
+  /* ── S/R levels in detail panel ── */
+  #d-sr{margin:8px 0;font-size:11px}
+  .srlv{display:flex;justify-content:space-between;padding:3px 8px;border-radius:5px;margin:2px 0;font-family:var(--mono)}
+  .srlv.sup{background:rgba(77,208,122,.07);border-left:2px solid var(--green);color:#9fd4b0}
+  .srlv.res{background:rgba(255,93,115,.07);border-left:2px solid var(--red);color:#d4a0a8}
+  #d-eqbtn{width:100%;margin:8px 0;background:rgba(77,163,255,.08);color:var(--accent);border:1px solid rgba(77,163,255,.3);border-radius:9px;padding:7px 0;font-size:12px;font-weight:700;cursor:pointer}
+  #d-eqbtn:hover{background:rgba(77,163,255,.18)}
 </style>
 </head>
 <body>
@@ -296,6 +337,9 @@
   <div id="d-tech"></div>
   <div id="d-week"></div>
   <div id="d-hold"></div>
+  <div id="d-zone"></div>
+  <div id="d-sr"></div>
+  <button id="d-eqbtn" onclick="openEquations(currentStock)">📊 50-Equation Full Math</button>
   <div class="grid2" id="d-metrics"></div>
   <div class="thesis" id="d-thesis"></div>
   <div class="risks" id="d-risks"></div>
@@ -323,6 +367,7 @@
     <button id="calcbtn" style="color:#53e0d0;border-color:rgba(83,224,208,.4)">💰 Calculator</button>
     <button id="lsbtn" style="color:#4dd07a;border-color:rgba(77,208,122,.5);font-weight:700">⚖️ Long / Short Board</button>
     <button id="budgetbtn" style="color:#ff9d5c;border-color:rgba(255,157,92,.4)">🇮🇳 Budget Thesis</button>
+    <button id="srbtn" style="color:#4da3ff;border-color:rgba(77,163,255,.5);font-weight:700">📍 S/R Zones</button>
   </div>
   <span id="hint">drag = orbit · scroll = zoom · hover = info · click = details</span>
 </div>
@@ -473,6 +518,22 @@
   <div id="rep-body"></div>
 </div>
 
+<div id="sroverlay">
+  <span class="close2" id="srclose">✕ close</span>
+  <h2>📍 S/R Zone Alerts — stocks near support or resistance <span id="sr-asof" style="font-size:14px;color:var(--dim)"></span></h2>
+  <p style="color:var(--dim);font-size:12px;max-width:900px;margin-bottom:6px">Within 5% of a 1-year swing high/low or volume-profile level. Click any row to open detail. Click <b style="color:var(--accent)">📊 Math</b> for all 50 equations.</p>
+  <p style="color:var(--dim);font-size:11px;margin-bottom:20px">Refreshed daily at 06:30 IST via server cron (yfinance → swing analysis → volume profile).</p>
+  <div id="sr-body"></div>
+</div>
+
+<div id="eqoverlay">
+  <span class="close2" id="eqclose">✕ close</span>
+  <h2 id="eq-title" style="margin-bottom:4px"></h2>
+  <div id="eq-zone-banner"></div>
+  <div id="eq-sr-summary" style="font-size:11.5px;font-family:var(--mono);color:var(--dim);margin:8px 0 18px;line-height:1.8"></div>
+  <div id="eq-groups"></div>
+</div>
+
 <div id="disclaimer">Educational screener — not SEBI-registered investment advice. Markets can fall 20% as easily as rise 20%. Verify before acting.</div>
 <div id="loaderr"></div>
 
@@ -600,8 +661,10 @@ function fmt(v,suf){ suf=suf||'';
   if(v===null||v===undefined||Number.isNaN(v)) return '—';
   return (typeof v==='number'? v.toLocaleString('en-IN',{maximumFractionDigits:1}):v)+suf; }
 function rup(v){ return v==null?'—':'₹'+v.toLocaleString('en-IN',{maximumFractionDigits:0}); }
-
+let currentStock = null;
 function openDetail(s){
+  currentStock = s;
+  document.getElementById('d-eqbtn').onclick = function(){ openEquations(s); };
   const d=document.getElementById('detail'); d.classList.add('open');
   document.getElementById('d-name').textContent=s.symbol+' — '+s.name;
   document.getElementById('d-sector').textContent=s.sector;
@@ -635,6 +698,7 @@ function openDetail(s){
   renderTech(s);
   renderWeek(s);
   renderHolders(s);
+  renderSRPanel(s);
   const mets=[['P/E',fmt(s.pe)],['ROCE / ROE',fmt(s.roce||s.roe,'%')],['Div yield',fmt(s.div_yield,'%')],
     ['Debt/Eq',fmt(s.de)],['Profit gr YoY',fmt(s.profit_growth,'%')],['vs 200 DMA',fmt(s.above_200dma,'%')],
     ['Off 52w high',fmt(s.pct_off_52w_high,'%')],['12m return',fmt(s.ret_12m,'%')],
@@ -1116,6 +1180,156 @@ function loop(){
   renderer.render(scene,camera);
 }
 addEventListener('resize',function(){camera.aspect=W()/H();camera.updateProjectionMatrix();renderer.setSize(W(),H());});
+/* ── S/R Panel in detail ── */
+function renderSRPanel(s){
+  const zEl=document.getElementById('d-zone');
+  const srEl=document.getElementById('d-sr');
+  const md=s.math_detail;
+  if(!md){zEl.innerHTML='';srEl.innerHTML='';return;}
+  const pz=md.price_zones; const sr=md.support_resistance;
+  const zone=pz?pz.zone:'HOLD ZONE';
+  const zkey=zone.replace(' ZONE','');
+  zEl.innerHTML='<span class="zbadge z'+zkey+'">'+(sr&&sr.breaking_out?'🚀 BREAKING OUT':sr&&sr.breaking_down?'⚠ BREAKING DOWN':zone)+'</span>'+
+    (md.overall_score!=null?' <span style="font-size:10.5px;color:var(--dim)">50-eq score: <b style="color:var(--gold)">'+md.overall_score+'/100</b> '+md.overall_verdict+'</span>':'');
+  if(!sr){srEl.innerHTML='';return;}
+  let html='<div style="font-size:10px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.8px">Support levels (buy zone)</div>';
+  (sr.support||[]).forEach(function(lv,i){
+    const dist=pz?((lv/pz.current_price-1)*100).toFixed(1):null;
+    html+='<div class="srlv sup"><span>S'+(i+1)+' ₹'+lv+'</span><span style="color:var(--green)">'+(dist?dist+'%':'')+'</span></div>';
+  });
+  html+='<div style="font-size:10px;color:var(--dim);margin:5px 0 3px;text-transform:uppercase;letter-spacing:.8px">Resistance levels (sell zone)</div>';
+  (sr.resistance||[]).forEach(function(lv,i){
+    const dist=pz?((lv/pz.current_price-1)*100).toFixed(1):null;
+    html+='<div class="srlv res"><span>R'+(i+1)+' ₹'+lv+'</span><span style="color:var(--red)">+'+(dist?dist+'%':'')+'</span></div>';
+  });
+  srEl.innerHTML=html;
+}
+
+/* ── 50-Equation overlay ── */
+const EQ_GROUP_COLORS={Valuation:'#ff5d73',Quality:'#4dd07a',Momentum:'#4da3ff',Safety:'#b28bff',Confidence:'#ffc94d'};
+function scoreColor(sc){
+  if(sc==null)return'#4a5468';
+  if(sc>=8)return'var(--green)';if(sc>=6)return'var(--gold)';if(sc>=4)return'var(--accent)';return'var(--red)';
+}
+function openEquations(s){
+  if(!s||!s.math_detail)return;
+  const md=s.math_detail; const sr=md.support_resistance; const pz=md.price_zones;
+  document.getElementById('eq-title').innerHTML=
+    '📊 '+s.symbol+' — '+s.name+' <span style="font-size:13px;color:var(--dim)">50-Equation Full Math · '+md.as_of+'</span>';
+  const zone=pz?pz.zone:'';
+  const zkey=zone.replace(' ZONE','');
+  document.getElementById('eq-zone-banner').innerHTML=
+    '<span class="zbadge z'+zkey+'">'+zone+'</span> '+
+    '<b style="color:var(--gold)">Overall: '+md.overall_score+'/100</b> '+md.overall_verdict+
+    (sr&&sr.breaking_out?'  <span style="color:var(--green);font-weight:700">🚀 BREAKING OUT</span>':'')+
+    (sr&&sr.breaking_down?'  <span style="color:var(--red);font-weight:700">⚠ BREAKING DOWN</span>':'');
+  let srHtml='';
+  if(sr){
+    srHtml='Current ₹'+s.price+' &nbsp;|&nbsp; ';
+    if(sr.support&&sr.support.length)srHtml+='Support: <span style="color:var(--green)">'+sr.support.map(function(l){return'₹'+l;}).join(' / ')+'</span> &nbsp;|&nbsp; ';
+    if(sr.resistance&&sr.resistance.length)srHtml+='Resistance: <span style="color:var(--red)">'+sr.resistance.map(function(l){return'₹'+l;}).join(' / ')+'</span>';
+    srHtml+='<br>Buy zone: <span style="color:var(--green)">₹'+pz.buy_zone.lo+' – ₹'+pz.buy_zone.hi+'</span> &nbsp;|&nbsp; Sell zone: <span style="color:var(--red)">₹'+pz.sell_zone.lo+' – ₹'+pz.sell_zone.hi+'</span>';
+    srHtml+='<br>'+sr.method+' · 1-year OHLCV from Yahoo Finance · as of '+md.as_of;
+  }
+  document.getElementById('eq-sr-summary').innerHTML=srHtml;
+  const eqs=md.equations||[];
+  const groups={};
+  eqs.forEach(function(e){if(!groups[e.group])groups[e.group]=[];groups[e.group].push(e);});
+  let html='<div id="eq-groups">';
+  Object.keys(groups).forEach(function(grp){
+    const col=EQ_GROUP_COLORS[grp]||'var(--accent)';
+    html+='<div class="eq-group"><div class="eq-group-hdr" style="color:'+col+'">'+grp+' ('+groups[grp].length+' equations)</div>';
+    groups[grp].forEach(function(e){
+      const sc=e.score; const scPct=sc!=null?Math.min(100,sc*10):0;
+      html+='<div class="eq-row">'+
+        '<div class="eq-num">#'+e.id+'</div>'+
+        '<div><div class="eq-name">'+e.name+'</div><div class="eq-formula">'+e.formula+'</div></div>'+
+        '<div><div class="eq-val">'+(e.value||'—')+'</div><div class="eq-verdict-txt">'+(e.benchmark||'')+'</div></div>'+
+        '<div><div class="eq-verdict-txt" style="color:'+(sc!=null&&sc>=7?'var(--green)':sc!=null&&sc>=5?'var(--gold)':'var(--red)')+'">'+e.verdict+'</div></div>'+
+        '<div style="text-align:right"><span style="font-family:var(--mono);font-size:10px;color:'+scoreColor(sc)+'">'+(sc!=null?sc+'/10':'—')+'</span>'+
+        '<div class="eq-sbar"><div class="eq-sfill" style="width:'+scPct+'%;background:'+scoreColor(sc)+'"></div></div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  document.getElementById('eq-groups').outerHTML=html;
+  document.getElementById('eqoverlay').classList.add('open');
+}
+document.getElementById('eqclose').addEventListener('click',function(){document.getElementById('eqoverlay').classList.remove('open');});
+
+/* ── S/R Zones overlay ── */
+function openSRAlerts(){
+  const THRESH=5;
+  const stocks_data=window.STOCK_DATA.stocks;
+  const asOf=window.STOCK_DATA.as_of;
+  document.getElementById('sr-asof').textContent='· '+asOf;
+  const nearSup=[],nearRes=[],breaking=[];
+  stocks_data.forEach(function(s){
+    const md=s.math_detail; if(!md)return;
+    const sr=md.support_resistance; if(!sr)return;
+    const sup=sr.support_dist_pct; const res=sr.resistance_dist_pct;
+    if(sr.breaking_out||sr.breaking_down){breaking.push({s:s,sup:sup,res:res});}
+    else if(sup!=null&&sup>=-THRESH&&sup<=0){nearSup.push({s:s,sup:sup,res:res});}
+    else if(res!=null&&res>=0&&res<=THRESH){nearRes.push({s:s,sup:sup,res:res});}
+  });
+  nearSup.sort(function(a,b){return Math.abs(a.sup)-Math.abs(b.sup);});
+  nearRes.sort(function(a,b){return Math.abs(a.res)-Math.abs(b.res);});
+  function rowHTML(item,type){
+    const s=item.s; const sr2=s.math_detail.support_resistance;
+    const nearLv=type==='sup'?sr2.near_support:sr2.near_resistance;
+    const dist=type==='sup'?item.sup:item.res;
+    const distCls=type==='sup'?'ds':'dr';
+    const distStr=(dist>0?'+':'')+fmt(dist)+'%';
+    const verdict=s.math_detail.overall_verdict||'';
+    const score=s.math_detail.overall_score||'';
+    return '<div class="sr-row" onclick="openDetail(window.STOCK_DATA.stocks.find(function(x){return x.symbol===\''+s.symbol+'\';}))">'+
+      '<div><div class="sym2">'+s.symbol+'</div><div style="font-size:10px;color:var(--dim)">'+s.scores.composite+'/100</div></div>'+
+      '<div><div>'+s.name+'</div><div style="font-size:10px;color:var(--dim)">'+s.sector+'</div></div>'+
+      '<div style="font-family:var(--mono)">₹'+fmt(s.price)+'</div>'+
+      '<div style="font-family:var(--mono);color:'+(type==='sup'?'var(--green)':'var(--red)')+'">₹'+fmt(nearLv)+'</div>'+
+      '<div class="dist '+distCls+'">'+distStr+'</div>'+
+      '<div style="font-size:10px">'+score+'/100<br><span style="color:var(--dim)">'+verdict.replace(/[🟢🟡⚪🔴]/g,'').trim()+'</span></div>'+
+      '<button class="eqbtn" onclick="event.stopPropagation();openEquations(window.STOCK_DATA.stocks.find(function(x){return x.symbol===\''+s.symbol+'\';}))">📊 Math</button>'+
+    '</div>';
+  }
+  let html='';
+  if(breaking.length){
+    html+='<div class="sr-group sr-break"><h3>🚀 Breaking Out / ⚠ Breaking Down ('+breaking.length+')</h3>';
+    breaking.forEach(function(item){
+      const s=item.s; const sr2=s.math_detail.support_resistance;
+      const tag=sr2.breaking_out?'<span style="color:var(--green)">↑ BREAKING OUT</span>':'<span style="color:var(--red)">↓ BREAKING DOWN</span>';
+      html+='<div class="sr-row" onclick="openDetail(window.STOCK_DATA.stocks.find(function(x){return x.symbol===\''+s.symbol+'\';}))">'+
+        '<div><div class="sym2">'+s.symbol+'</div></div>'+
+        '<div>'+s.name+'</div>'+
+        '<div style="font-family:var(--mono)">₹'+fmt(s.price)+'</div>'+
+        '<div>'+tag+'</div>'+
+        '<div class="dist">—</div>'+
+        '<div style="font-size:10px">'+(s.math_detail.overall_score||'')+'/100</div>'+
+        '<button class="eqbtn" onclick="event.stopPropagation();openEquations(window.STOCK_DATA.stocks.find(function(x){return x.symbol===\''+s.symbol+'\';}))">📊 Math</button>'+
+      '</div>';
+    });
+    html+='</div>';
+  }
+  if(nearSup.length){
+    html+='<div class="sr-group sr-buy"><h3>🟢 Near Support — BUY ZONE (within 5%) · '+nearSup.length+' stocks</h3>';
+    nearSup.forEach(function(item){html+=rowHTML(item,'sup');});
+    html+='</div>';
+  }
+  if(nearRes.length){
+    html+='<div class="sr-group sr-sell"><h3>🔴 Near Resistance — SELL ZONE (within 5%) · '+nearRes.length+' stocks</h3>';
+    nearRes.forEach(function(item){html+=rowHTML(item,'res');});
+    html+='</div>';
+  }
+  if(!breaking.length&&!nearSup.length&&!nearRes.length){
+    html='<p style="color:var(--dim);font-size:13px;margin-top:30px">No stocks within 5% of a key S/R level right now. Try widening to 8%.</p>';
+  }
+  document.getElementById('sr-body').innerHTML=html;
+  document.getElementById('sroverlay').classList.add('open');
+}
+document.getElementById('srclose').addEventListener('click',function(){document.getElementById('sroverlay').classList.remove('open');});
+document.getElementById('srbtn').addEventListener('click',openSRAlerts);
+
 applyFilters(); applyCam(); loop();
 </script>
 </body>
