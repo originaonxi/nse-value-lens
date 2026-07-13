@@ -19,6 +19,15 @@ try {
   preBakedReports = require(path.join(__dirname, '..', 'data', 'pre_baked_reports.json'));
 } catch (_e) {}
 
+let openfundDb = {};
+let openfundAsOf = '2026-07-06';
+try {
+  const _opf = require(path.join(__dirname, '..', 'data', 'openfund_picks.json'));
+  openfundAsOf = _opf.as_of || openfundAsOf;
+  for (const s of (_opf.stocks || [])) openfundDb[String(s.symbol).toUpperCase()] = s;
+} catch (_e) {}
+
+
 // ── Budget 2022–2026 Theme Data ──────────────────────────────────────────────
 // `nifty200` = Nifty 200 confirmed symbols only (analyzable in this app).
 // `themeOnly` = reference names NOT in Nifty 200 — display only, never added as buttons.
@@ -633,6 +642,48 @@ function buildPrompt({ constituent, quote, screener, attainix, framework, metric
   return `You are an Indian equity research analyst. Produce a concise speculative research note for ${constituent.symbol} (${constituent.companyName}), a Nifty 200 stock.\n\nUse this framework: ${framework === 'industrial' ? 'industrial metrics (PE/PB/EV-EBITDA/ROE/ROCE/FCF/net-debt)' : 'lender metrics (P/B vs ROE, GNPA, NNPA, PCR, CAR, NIM, slippage, loan growth; do NOT use industrial D/E or EV/EBITDA)'}\n\nData:\n- CMP: ${fmtMoney(metrics.cmp)}\n- 52W range: ${fmtMoney(quote.fiftyTwoWeekLow)} - ${fmtMoney(quote.fiftyTwoWeekHigh)}\n- PE: ${metrics.pe}\n- PB: ${metrics.pb}\n- ROE: ${metrics.roe}%\n- ROCE: ${metrics.roce}%\n- Dividend yield: ${metrics.dividendYield}%\n- Attainix MV/IV: ${attainix?.mvToIv ?? 'n/a'}\n- Discount type: ${discount.label}\n\nRequired output sections:\n1. Metric table with values and sources\n2. Why it looks cheap\n3. Honest reason for the discount\n4. Why this may NOT be a value trap\n5. Re-rating math using Gordon PB model for lenders or PE expansion for industrials\n6. Value-trap condition\n7. Thesis invalidation level\n8. Not financial advice disclaimer`; 
 }
 
+function getOpenfundPick(symbol) {
+  return openfundDb[String(symbol).toUpperCase()] || null;
+}
+
+function buildIvqmSection(pick) {
+  if (!pick) return '';
+  const { composite, value, quality, momentum, safety } = pick;
+  const band = pick.confidence_band || '—';
+  const upside = pick.math_upside != null
+    ? `+${Number(pick.math_upside).toFixed(1)}%`
+    : pick.target_upside != null ? `+${pick.target_upside}%` : 'n/a';
+  const total  = pick.math_total   != null ? `+${Number(pick.math_total).toFixed(1)}%`   : 'n/a';
+  const rr     = pick.risk_reward  != null ? `${Number(pick.risk_reward).toFixed(1)}×`   : 'n/a';
+  const dn     = pick.downside_pct != null
+    ? `−${Number(pick.downside_pct).toFixed(1)}% vs ${pick.downside_ref || '200-DMA'}`
+    : 'n/a';
+  const newsBadge = pick.news_verdict === 'CLEAR' ? '✅ CLEAR'
+    : pick.news_verdict ? `⚠️ ${pick.news_verdict}` : '—';
+  const confBadge = band === 'HIGH' ? '🟢 HIGH' : band === 'MEDIUM' ? '🟡 MEDIUM'
+    : band === 'LOW' ? '🔴 LOW' : band;
+  const divStr = pick.div_yield != null ? `${Number(pick.div_yield).toFixed(1)}% div` : 'div n/a';
+  const confPct = pick.confidence_pct != null ? `${pick.confidence_pct}%` : 'n/a';
+  const lines = [
+    '',
+    `## OpenFund IVQM Score (samcolibri/openfund · ${openfundAsOf})`,
+    `_NIFTY 500 value screen — IVQM composite: Value 30 · Quality 30 · Momentum 25 · Safety 15_`,
+    '',
+    '| Component | Score | Max |',
+    '|---|---|---|',
+    `| Value | ${value} | 30 |`,
+    `| Quality | ${quality} | 30 |`,
+    `| Momentum | ${momentum} | 25 |`,
+    `| Safety | ${safety} | 15 |`,
+    `| **Composite** | **${composite}** | **100** |`,
+    '',
+    `**Math upside:** ${upside} price + ${divStr} = **${total} total** · **Risk/reward:** ${rr} · **Downside:** ${dn}  `,
+    `**Confidence:** ${confBadge} (${confPct}) · **Trigger:** ${pick.confidence_trigger || '—'}  `,
+    `**News (${openfundAsOf}):** ${newsBadge}`,
+  ];
+  return lines.join('\n');
+}
+
 function buildReport({ constituent, quote, screener, attainix, manual = {} }) {
   const framework = classifyFramework(constituent);
   const metrics = makeMetrics(constituent, quote, screener, manual);
@@ -734,9 +785,12 @@ function buildReport({ constituent, quote, screener, attainix, manual = {} }) {
     ddmSection = `\n\n## Dividend Discount Model (DDM)\nD₀ = CMP × div yield = ${fmtMoney(ddm.d0)} | D₁ = ${fmtMoney(ddm.d1)} | cost of equity ~11% | terminal growth ~3%  \nFair value = D₁ ÷ (r − g) ≈ **${fmtMoney(ddm.fairValue)}**  \nImplied upside from DDM: **${pct(ddm.impliedUpside, 0)}**  \n_DDM suits PSU dividend plays with policy-backed payouts. Breaks down if payout ratio changes or ROE falls._`;
   }
 
+  // OpenFund IVQM — only shown when symbol is in the pre-computed dataset; never fabricated
+  const ivqmSection = buildIvqmSection(getOpenfundPick(constituent.symbol));
+
   const markdown = `# ${constituent.symbol} · ${constituent.companyName}\n\n**Sector:** ${constituent.industry} · **Nifty 200:** ✅ verified via official NSE Indices CSV  \n**Discount type:** ${discount.label}  \n**Metrics framework:** ${framework === 'industrial' ? 'Industrial metrics apply — PE/PB/ROE/ROCE/FCF/net-debt.' : 'LENDER metrics apply — D/E and EV/EBITDA are not primary valuation tools.'}${budgetThemeSection}\n\n${table([metricTitle, 'Value', 'Source'], rows)}\n\n## Technical setup\n${technical}\n\n## Why it looks cheap / or does not\n${cheapnessText} ${attainixText}\n\n## Honest reason for the discount\n${discount.reason}\n\n## Why this may NOT be a pure value trap\n${valuationText}\n\n## Re-rating / double scenario\n${doubleScenario}${ddmSection}\n\n## Value-trap condition\n${discount.trap}\n\n## Thesis invalidation level\n${invalidationText}\n\n## Source caveats\n${sourceNotes.map((s) => `- ${s}`).join('\n')}\n\n> ⚠️ This is a speculative research report generated from free public sources. It is NOT financial advice, NOT a buy/sell recommendation, and not a substitute for a SEBI-registered investment advisor. Free-source scraping can fail or go stale; verify critical figures from exchange filings before investing.`;
   return {
-    markdown,
+    markdown: markdown + ivqmSection,
     data: { constituent, quote, screener, attainix, framework, metrics, discount },
     prompt: buildPrompt({ constituent, quote, screener, attainix, framework, metrics, discount }),
   };
@@ -801,4 +855,5 @@ module.exports = {
   pegRatio,
   capitalQuality,
   dividendDDM,
+  getOpenfundPick,
 };

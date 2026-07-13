@@ -242,6 +242,24 @@
     </section>
 
     <section class="panel" style="margin-top:16px;">
+      <details id="openfund-details" open>
+        <summary style="cursor:pointer;font-weight:700;font-size:15px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;">
+          <span>🔭</span><span>OpenFund Value Screen — NIFTY 500 IVQM Top Picks</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px;">(samcolibri/openfund · 2026-07-06 · Value 30 · Quality 30 · Momentum 25 · Safety 15)</span>
+        </summary>
+        <p style="color:var(--muted);font-size:12px;margin:8px 0 12px;line-height:1.4;">
+          IVQM composite scores hand-verified from screener.in + Yahoo Finance technicals.
+          <strong style="color:var(--accent);">N200</strong> stocks show a Full Analysis button.
+          <strong style="color:var(--muted);">N500</strong> stocks are NIFTY 500 only — use screener.in for those.
+          Not SEBI-registered investment advice.
+        </p>
+        <div id="openfund-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">
+          <div style="color:var(--muted);font-size:13px;padding:8px;">Loading OpenFund screen…</div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" style="margin-top:16px;">
       <details id="themes-details">
         <summary style="cursor:pointer;font-weight:700;font-size:15px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;">
           <span>📋</span><span>Budget 2022–2026 Theme Reference</span>
@@ -364,7 +382,63 @@ window.addEventListener('DOMContentLoaded', () => {
   $('manual').value = '{\n  "gnpa": 1.89,\n  "nnpa": 0.45,\n  "pcr": 93.94,\n  "car": 14.7,\n  "nim": 2.89,\n  "loanGrowth": 13.9,\n  "patCr": 20021\n}';
   analyze();
   loadShortlist();
+  loadOpenfund();
 });
+
+async function loadOpenfund() {
+  try {
+    const res = await fetch('/api/openfund');
+    const data = await res.json();
+    if (!data.ok) throw new Error('bad response');
+    const grid = $('openfund-grid');
+    grid.innerHTML = data.stocks.map((s, i) => {
+      const compColor = s.composite >= 80 ? '#72e6ac' : s.composite >= 65 ? '#ffd166' : '#ff6b7a';
+      const bandColor = s.confidence_band === 'HIGH' ? '#72e6ac' : s.confidence_band === 'MEDIUM' ? '#ffd166' : '#ff6b7a';
+      const newsOk = s.news_verdict === 'CLEAR';
+      const upside = s.math_upside != null ? '+' + s.math_upside.toFixed(1) + '%'
+                   : s.target_upside  != null ? '+' + s.target_upside + '%' : '—';
+      const rr = s.risk_reward != null ? s.risk_reward.toFixed(1) + '×' : '—';
+      const profLabel = s.roce != null ? 'ROCE' : 'ROE';
+      const profVal   = s.roce != null ? s.roce : s.roe;
+      const sym = s.symbol.replace(/&/g, '&amp;');
+      const analyzeBtn = s.in_nifty200
+        ? `<button class="pill-btn" data-sym="${sym}" style="font-size:11px;padding:4px 10px;margin-top:6px;">Full Analysis →</button>`
+        : `<span style="display:inline-block;margin-top:6px;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 7px;">N500 only — screener.in for analysis</span>`;
+      return `<div style="background:#0b1224;border:1px solid ${s.top_pick ? compColor : 'var(--line)'};border-radius:12px;padding:13px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px;">
+          <span style="background:#172240;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${i + 1}</span>
+          <span style="font-weight:700;font-size:13px;">${s.symbol}</span>
+          <span style="font-size:10px;color:var(--muted);">${s.name}</span>
+          <span style="font-size:9px;background:#172240;border:1px solid ${s.in_nifty200 ? 'var(--accent)' : 'var(--line)'};color:${s.in_nifty200 ? 'var(--accent)' : 'var(--muted)'};border-radius:4px;padding:1px 4px;">${s.in_nifty200 ? 'N200' : 'N500'}</span>
+          ${s.news_verdict ? `<span style="font-size:10px;font-weight:600;color:${newsOk ? '#72e6ac' : '#ffd166'};">${newsOk ? '✅' : '⚠️'} ${s.news_verdict}</span>` : ''}
+        </div>
+        <div style="margin-bottom:7px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+            <span style="color:var(--muted);">IVQM Composite</span>
+            <span style="font-weight:700;color:${compColor};">${s.composite}/100</span>
+          </div>
+          <div style="background:#172240;border-radius:4px;height:7px;overflow:hidden;margin-bottom:3px;">
+            <div style="width:${s.composite}%;height:100%;background:${compColor};border-radius:4px;"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);">V ${s.value}/30 · Q ${s.quality}/30 · M ${s.momentum}/25 · S ${s.safety}/15</div>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr auto 1fr;gap:2px 10px;font-size:11px;margin-bottom:7px;">
+          <span style="color:var(--muted);">PE</span><span>${s.pe != null ? s.pe + '×' : '—'}</span>
+          <span style="color:var(--muted);">${profLabel}</span><span>${profVal != null ? profVal + '%' : '—'}</span>
+          <span style="color:var(--muted);">Upside</span><span style="color:#72e6ac;font-weight:600;">${upside}</span>
+          <span style="color:var(--muted);">R/R</span><span>${rr}</span>
+        </div>
+        <div style="font-size:10px;margin-bottom:5px;">
+          <span style="color:${bandColor};font-weight:600;">${s.confidence_band}</span>
+          <span style="color:var(--muted);"> · ${s.sector}</span>
+        </div>
+        ${analyzeBtn}
+      </div>`;
+    }).join('');
+  } catch (_e) {
+    $('openfund-grid').innerHTML = '<div style="color:var(--muted);font-size:13px;">Could not load OpenFund screen. Refresh to retry.</div>';
+  }
+}
 
 async function loadShortlist() {
   try {

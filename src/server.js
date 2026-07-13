@@ -6,6 +6,7 @@ const { marked } = require('marked');
 const sanitizeHtml = require('sanitize-html');
 const { analyzeSymbol, BUDGET_THEMES, getShortlist } = require('./analyzer');
 const { getNifty200Constituents } = require('./adapters');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -61,6 +62,16 @@ app.get('/api/themes', (_req, res) => {
 
 app.get('/api/shortlist', (_req, res) => {
   res.json({ ok: true, shortlist: getShortlist() });
+});
+
+app.get('/api/openfund', (_req, res) => {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'data', 'openfund_picks.json'), 'utf8');
+    const payload = JSON.parse(raw);
+    res.json({ ok: true, as_of: payload.as_of, method: payload.method, stocks: payload.stocks });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
 app.post('/api/analyze', rateLimit, async (req, res) => {
