@@ -674,9 +674,17 @@ document.getElementById('ranksub').textContent = D.method || '';
 
 /* ---------- three.js scene ---------- */
 const W=()=>innerWidth, H=()=>innerHeight;
-const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setSize(W(),H()); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-document.getElementById('scene').appendChild(renderer.domElement);
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setSize(W(),H()); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  document.getElementById('scene').appendChild(renderer.domElement);
+} catch(e) {
+  const err = document.getElementById('loaderr');
+  err.style.display = 'flex';
+  err.innerHTML = 'WebGL is disabled on this browser/device.<br>Enable WebGL or try Chrome/Safari.';
+  throw new Error('WebGL unavailable');
+}
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x07090f, 0.0035);
 const camera = new THREE.PerspectiveCamera(55, W()/H(), 0.1, 2000);
