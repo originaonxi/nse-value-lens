@@ -108,48 +108,83 @@ async function analyzeSelected(){
   renderSide();
   setStatus(`Loaded ${selectedSymbol}.`);
 }
+async function analyzeSelected(){
+  if(!selectedSymbol){ setStatus('Choose a stock from the left.'); return; }
+  setStatus(`Loading analysis for ${selectedSymbol}...`);
+  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
+  resultTitle.textContent = `Analysis — ${selectedSymbol}`;
+  resultBody.innerHTML = `<div class=\"report\">${data.html}</div><div class=\"section\"><div class=\"subnote\">Prompt</div><div class=\"prompt mono\">${esc(data.prompt||'')}</div></div>`;
+  renderSide();
+  setStatus(`Loaded ${selectedSymbol}.`);
+}
 
 function showMath(){
   if(!selectedSymbol){ setStatus('Choose a stock from the left first.'); return; }
   const s = mathIndex.get(selectedSymbol);
+  resultTitle.textContent = `Math — ${selectedSymbol}`;
   if(!s || !s.math_detail){
-    resultTitle.textContent = `Math — ${selectedSymbol}`;
-    resultBody.innerHTML = `<div class="empty">No local math_detail is available for this stock in data/stocks.js yet.</div>`;
+    resultBody.innerHTML = `<div class=\"empty\">No local math_detail is available for this stock in data/stocks.js yet.</div>`;
     return;
   }
   const md = s.math_detail;
   const sr = md.support_resistance || {};
   const pz = md.price_zones || {};
   const eqs = md.equations || [];
-  resultTitle.textContent = `Math — ${selectedSymbol}`;
+  const pegBase = (s.profit_growth && s.pe) ? (s.pe / Math.max(s.profit_growth, 0.01)) : null;
   resultBody.innerHTML = `
-    <div class="chips">
-      <span class="chip">Overall score: ${esc(md.overall_score)}</span>
-      <span class="chip">Verdict: ${esc(md.overall_verdict)}</span>
-      <span class="chip">Zone: ${esc(pz.zone || '—')}</span>
+    <div class=\"chips\">
+      <span class=\"chip\">Overall score: ${esc(md.overall_score)}</span>
+      <span class=\"chip\">Verdict: ${esc(md.overall_verdict)}</span>
+      <span class=\"chip\">Zone: ${esc(pz.zone || '—')}</span>
+      <span class=\"chip\">PEG: ${pegBase != null ? pegBase.toFixed(2) : '—'}</span>
     </div>
-    <div class="section">
+    <div class=\"section\">
+      <h3>PEG ratio — what it means</h3>
+      <div class=\"subnote\">PEG = P/E ÷ earnings growth. It can help, but it is <b>not</b> a magic ratio and it does <b>not</b> work for everyone. Big funds usually use it as one check inside a bigger framework: value, quality/profitability, momentum, balance-sheet safety, and business durability.</div>
+      <table class=\"simple\">
+        <tr><th>Current PE</th><th>Profit growth</th><th>PEG</th><th>Reading</th></tr>
+        <tr>
+          <td class=\"mono\">${fmt(s.pe)}</td>
+          <td class=\"mono\">${fmt(s.profit_growth)}%</td>
+          <td class=\"mono\">${pegBase != null ? pegBase.toFixed(2) : '—'}</td>
+          <td>${pegBase == null ? 'Need PE and growth' : pegBase < 0.75 ? 'Cheap vs growth' : pegBase < 1.25 ? 'Fair' : 'Rich / growth already priced in'}</td>
+        </tr>
+      </table>
+      <div class=\"subnote\">PEG breaks when growth is cyclical, low-quality, one-off, or temporarily inflated. Good investors cross-check PEG with ROCE, ROE, debt, cash flow, revisions, and trend.</div>
+    </div>
+    <div class=\"section\">
+      <h3>Ratios / factors with strongest evidence</h3>
+      <table class=\"simple\">
+        <tr><th>Factor</th><th>How pros think</th><th>Strength</th><th>Weakness</th></tr>
+        <tr><td><b>Value</b> (PE, PB, EV/EBIT)</td><td>Cheap vs normalized earnings and book</td><td>Works long-run</td><td>Value traps</td></tr>
+        <tr><td><b>Quality</b> (ROCE, ROE, margins)</td><td>High returns on capital, durable economics</td><td>Filters junk</td><td>Can be overpaid</td></tr>
+        <tr><td><b>Momentum</b> (6m/12m trend)</td><td>Price and revisions moving together</td><td>Repeatedly strong</td><td>Sharp reversals</td></tr>
+        <tr><td><b>Safety</b> (D/E, pledge)</td><td>Strong balance sheet, low distress</td><td>Survives bad cycles</td><td>Misses turnarounds</td></tr>
+      </table>
+      <div class=\"subnote\">No single ratio is proven to work for everyone. The robust stack is value + quality + momentum + safety.</div>
+    </div>
+    <div class=\"section\">
       <h3>Support / Resistance</h3>
-      <table class="simple">
+      <table class=\"simple\">
         <tr><th>Current</th><th>Support</th><th>Resistance</th><th>Buy zone</th><th>Sell zone</th></tr>
         <tr>
-          <td class="mono">${fmt(pz.current_price)}</td>
-          <td class="mono">${(sr.support||[]).join(', ') || '—'}</td>
-          <td class="mono">${(sr.resistance||[]).join(', ') || '—'}</td>
-          <td class="mono">${pz.buy_zone ? `${pz.buy_zone.lo} – ${pz.buy_zone.hi}` : '—'}</td>
-          <td class="mono">${pz.sell_zone ? `${pz.sell_zone.lo} – ${pz.sell_zone.hi}` : '—'}</td>
+          <td class=\"mono\">${fmt(pz.current_price)}</td>
+          <td class=\"mono\">${(sr.support||[]).join(', ') || '—'}</td>
+          <td class=\"mono\">${(sr.resistance||[]).join(', ') || '—'}</td>
+          <td class=\"mono\">${pz.buy_zone ? `${pz.buy_zone.lo} – ${pz.buy_zone.hi}` : '—'}</td>
+          <td class=\"mono\">${pz.sell_zone ? `${pz.sell_zone.lo} – ${pz.sell_zone.hi}` : '—'}</td>
         </tr>
       </table>
     </div>
-    <div class="section">
+    <div class=\"section\">
       <h3>Confidence / Trigger</h3>
-      <div class="subnote">Breaking out: ${fmt(sr.breaking_out)} · Breaking down: ${fmt(sr.breaking_down)}</div>
+      <div class=\"subnote\">Breaking out: ${fmt(sr.breaking_out)} · Breaking down: ${fmt(sr.breaking_down)}</div>
     </div>
-    <div class="section">
+    <div class=\"section\">
       <h3>Equation rows</h3>
-      <table class="simple">
+      <table class=\"simple\">
         <tr><th>#</th><th>Name</th><th>Value</th><th>Verdict</th></tr>
-        ${eqs.map(e => `<tr><td class="mono">${fmt(e.id)}</td><td><b>${esc(e.name||'')}</b><div class="subnote mono">${esc(e.formula||'')}</div></td><td class="mono">${esc(String(fmt(e.value)))}</td><td>${esc(e.verdict||'')}</td></tr>`).join('')}
+        ${eqs.map(e => `<tr><td class=\"mono\">${fmt(e.id)}</td><td><b>${esc(e.name||'')}</b><div class=\"subnote mono\">${esc(e.formula||'')}</div></td><td class=\"mono\">${esc(String(fmt(e.value)))}</td><td>${esc(e.verdict||'')}</td></tr>`).join('')}
       </table>
     </div>`;
 }
