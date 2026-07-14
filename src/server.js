@@ -269,6 +269,20 @@ function runInstitutionalRefresh(cb) {
     (err, stdout, stderr) => cb(err, (stdout + '\n' + stderr).trim().split('\n').slice(-3).join('\n')));
 }
 
+function runRankingRefresh(cb) {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return cb(new Error('AIRTABLE_API_KEY missing; ranking cron skipped'));
+  }
+  const py = process.platform === 'win32' ? 'python' : 'python3';
+  const script = path.join(__dirname, '..', 'scripts', 'rank_fo_daily.py');
+  execFile(py, [script], {
+      cwd: path.join(__dirname, '..'),
+      timeout: 1800000,
+      env: process.env,
+    },
+    (err, stdout, stderr) => cb(err, (stdout + '\n' + stderr).trim().split('\n').slice(-5).join('\n')));
+}
+
 /* ── Daily cron 06:30 IST = 01:00 UTC ── */
 cron.schedule('0 1 * * *', () => {
   console.log('[cron] daily S/R refresh starting…');
@@ -284,6 +298,15 @@ cron.schedule('30 2 * * *', () => {
   runInstitutionalRefresh((err, out) => {
     if (err) console.error('[cron] F&O institutional failed:', err.message);
     else console.log('[cron] F&O institutional done:', out);
+  });
+});
+
+/* ── Daily ranking refresh 08:45 IST = 03:15 UTC ── */
+cron.schedule('15 3 * * *', () => {
+  console.log('[cron] daily F&O ranking refresh starting…');
+  runRankingRefresh((err, out) => {
+    if (err) console.error('[cron] F&O ranking failed:', err.message);
+    else console.log('[cron] F&O ranking done:', out);
   });
 });
 
