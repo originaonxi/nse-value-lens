@@ -650,14 +650,14 @@
 
 <script src="data/stocks.js"></script>
 <script src="data/history.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="vendor/three.min.js"></script>
 <script>
 if (typeof THREE === 'undefined' || typeof window.STOCK_DATA === 'undefined') {
   const e = document.getElementById('loaderr');
   e.style.display = 'flex';
   e.innerHTML = (typeof window.STOCK_DATA === 'undefined')
     ? 'data/stocks.js missing — run scripts/refresh.py to generate it.'
-    : 'Three.js CDN failed to load — check your internet connection and reload.<br>(The 3D engine loads from cdnjs.cloudflare.com)';
+    : '3D engine failed to load — try a modern browser (Chrome/Safari).';
   throw new Error('deps missing');
 }
 
