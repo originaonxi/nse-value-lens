@@ -43,14 +43,25 @@ function renderSafeMarkdown(markdown) {
 
 
 app.use(express.json({ limit: '256kb' }));
-app.use(express.static(path.join(__dirname, '..', 'public'), {
+
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+const INDEX_HTML = path.join(PUBLIC_DIR, 'index.html');
+function setNoCacheHtml(res) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Surrogate-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+}
+
+// Explicit dynamic HTML routes so Railway edge always serves the latest command-center UI
+app.get(['/', '/index.html'], (_req, res) => {
+  setNoCacheHtml(res);
+  res.type('html').send(fs.readFileSync(INDEX_HTML, 'utf8'));
+});
+
+app.use(express.static(PUBLIC_DIR, {
   setHeaders(res, filePath) {
-    if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-      res.setHeader('Surrogate-Control', 'no-store');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-    }
+    if (filePath.endsWith('.html')) setNoCacheHtml(res);
   }
 }));
 
