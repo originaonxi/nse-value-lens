@@ -5,270 +5,139 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NSE</title>
 <style>
-  :root{--bg:#f3f3f3;--panel:#fff;--line:#d8d8d8;--text:#111;--muted:#666;--blue:#1a0dab;--green:#0b8043;--red:#c5221f;--amber:#a06500}
-  *{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,Helvetica,sans-serif}
-  a{color:var(--blue);text-decoration:underline;cursor:pointer}
-  .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
-  .left{background:#fff;border-right:1px solid var(--line);padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
-  .right{padding:16px;overflow:auto}
-  .logo{font-size:28px;font-weight:700;letter-spacing:-.8px;margin:2px 0 8px}
-  .small{font-size:12px;color:var(--muted)}
-  .searchBox input{width:100%;height:40px;border:1px solid #bbb;border-radius:4px;padding:0 12px;font-size:15px}
-  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}.chip{font-size:11px;border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
-  .stocklist{border-top:1px solid var(--line)}
-  .stockitem{padding:8px 6px;border-bottom:1px solid #eee;cursor:pointer}.stockitem:hover,.stockitem.active{background:#f8f8f8}
-  .stockitem .sym{font-weight:700}.stockitem .name{font-size:12px;color:var(--muted)}
-  .header{margin-bottom:10px}.title{font-size:24px;font-weight:700}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}
-  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}.buttons button{border:1px solid #b3b3b3;background:#fff;padding:8px 10px;border-radius:4px;cursor:pointer;font-size:13px}.buttons button:hover{background:#f0f0f0}
-  .status{font-size:12px;color:var(--muted);min-height:18px;margin-bottom:10px}
-  .grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:16px}
-  .box{background:var(--panel);border:1px solid var(--line);padding:14px}.box h2{margin:0 0 10px;font-size:17px}.box h3{margin:14px 0 8px;font-size:14px}
-  .empty{font-size:13px;color:var(--muted)} .subnote{font-size:11px;color:var(--muted)} .mono{font-family:Consolas,'Courier New',monospace}
-  .simple{width:100%;border-collapse:collapse;font-size:13px}.simple th,.simple td{border-bottom:1px solid #eee;padding:7px 4px;text-align:left;vertical-align:top}.simple th{font-size:12px;color:var(--muted)}
-  .click{cursor:pointer}.click:hover{background:#fafafa}.good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}.warn{color:var(--amber);font-weight:700}
-  .report{line-height:1.6}.report table{width:100%;border-collapse:collapse;display:block;overflow:auto}.report th,.report td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}.report blockquote{margin:12px 0;padding:10px 12px;border-left:3px solid #ccc;background:#fafafa}
-  .prompt{white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px;margin-top:10px}
-  .section{margin-top:14px}
-  @media (max-width:980px){.app{grid-template-columns:1fr}.left{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.grid{grid-template-columns:1fr}}
+:root{--bg:#f3f3f3;--panel:#fff;--line:#d8d8d8;--text:#111;--muted:#666;--blue:#1a0dab;--green:#0b8043;--red:#c5221f;--amber:#a06500}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,Helvetica,sans-serif}
+a{color:var(--blue);text-decoration:underline;cursor:pointer}
+.app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+.left{background:#fff;border-right:1px solid var(--line);padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
+.right{padding:16px;overflow:auto}
+.logo{font-size:28px;font-weight:700;letter-spacing:-.8px;margin:2px 0 8px}.small{font-size:12px;color:var(--muted)}
+.searchBox input{width:100%;height:40px;border:1px solid #bbb;border-radius:4px;padding:0 12px;font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}.chip{font-size:11px;border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
+.stocklist{border-top:1px solid var(--line)} .stockitem{padding:8px 6px;border-bottom:1px solid #eee;cursor:pointer}.stockitem:hover,.stockitem.active{background:#f8f8f8}.stockitem .sym{font-weight:700}.stockitem .name{font-size:12px;color:var(--muted)}
+.header{margin-bottom:10px}.title{font-size:24px;font-weight:700}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+.status{font-size:12px;color:var(--muted);min-height:18px;margin-bottom:10px}
+.summary{background:#fff;border:1px solid var(--line);padding:14px;margin-bottom:14px}.summary h2{margin:0 0 6px;font-size:22px}.summary .sub{color:var(--muted);font-size:12px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:12px}.metric{border:1px solid #eee;padding:8px}.metric .k{font-size:11px;color:var(--muted);text-transform:uppercase}.metric .v{font-size:16px;font-weight:700;margin-top:2px}
+.verdict{font-size:15px;font-weight:700}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}.tabs button{border:1px solid #b3b3b3;background:#fff;padding:7px 10px;border-radius:4px;cursor:pointer;font-size:13px}.tabs button.active{background:#111;color:#fff;border-color:#111}.tabs button:hover{background:#f0f0f0}.tabs button.active:hover{background:#111}
+.box{background:var(--panel);border:1px solid var(--line);padding:14px}.box h3{margin:0 0 10px;font-size:16px}.subnote{font-size:11px;color:var(--muted)}.empty{font-size:13px;color:var(--muted)} .mono{font-family:Consolas,'Courier New',monospace}
+.simple{width:100%;border-collapse:collapse;font-size:13px}.simple th,.simple td{border-bottom:1px solid #eee;padding:7px 4px;text-align:left;vertical-align:top}.simple th{font-size:12px;color:var(--muted)}
+.report{line-height:1.6}.report table{width:100%;border-collapse:collapse;display:block;overflow:auto}.report th,.report td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}.report blockquote{margin:12px 0;padding:10px 12px;border-left:3px solid #ccc;background:#fafafa}
+.prompt{white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px;margin-top:10px}
+.row{cursor:pointer}.row:hover{background:#fafafa}
+@media (max-width:1100px){.summary-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}
+@media (max-width:980px){.app{grid-template-columns:1fr}.left{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}}
+@media (max-width:620px){.summary-grid{grid-template-columns:1fr}.tabs{gap:4px}.tabs button{font-size:12px;padding:6px 8px}}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="left">
     <div class="logo">NSE</div>
-    <div class="small">Left panel: search bar + all stocks. Click any stock to open analysis on the right.</div>
-    <div class="searchBox section"><input id="stockSearch" type="text" placeholder="Search stock by symbol or name"></div>
-    <div class="chips">
-      <span class="chip" id="chipStocks">Loading stocks...</span>
-      <span class="chip" id="chipSR">Loading S/R...</span>
-      <span class="chip" id="chipSellers">Loading sellers...</span>
-    </div>
+    <div class="small">Left panel: search bar + all stocks. Right panel: one stock and everything about it.</div>
+    <div class="searchBox"><input id="stockSearch" type="text" placeholder="Search stock by symbol or name"></div>
+    <div class="chips"><span class="chip" id="chipStocks">Loading stocks...</span><span class="chip" id="chipSR">Loading S/R...</span><span class="chip" id="chipSellers">Loading sellers...</span></div>
     <div class="stocklist" id="stockList"></div>
   </aside>
-
   <main class="right">
-    <div class="header">
-      <div class="title">NSE Research Terminal</div>
-      <div class="subtitle">Simple two-pane layout: all stocks on the left, full analysis and math on the right. No 3D.</div>
-    </div>
-
-    <div class="buttons">
-      <button id="btnAnalyze">Analyze</button>
-      <button id="btnMath">Math</button>
-      <button id="btnCopyPrompt">Copy prompt</button>
-      <button id="btnOpenfund">OpenFund picks</button>
-      <button id="btnSR">S/R alerts</button>
-      <button id="btnShortlist">Shortlist</button>
-      <button id="btnThemes">Themes</button>
-      <button id="btnConstituents">Constituents</button>
-      <button id="btnSellers">Net sellers</button>
-    </div>
-
+    <div class="header"><div class="title">NSE Stock Command Center</div><div class="subtitle">Simple Google-like UI. One stock, all tabs, all context.</div></div>
     <div class="status" id="status">Loading...</div>
-
-    <div class="grid">
-      <section class="box">
-        <h2 id="resultTitle">Analysis</h2>
-        <div id="resultBody" class="empty">Pick a stock on the left.</div>
-      </section>
-      <section class="box">
-        <h2>Quick panels</h2>
-        <div id="sideBody" class="empty">Loading quick panels...</div>
-      </section>
+    <section class="summary" id="summaryBox"><div class="empty">Choose a stock from the left panel.</div></section>
+    <div class="tabs" id="tabs">
+      <button data-tab="overview" class="active">Overview</button>
+      <button data-tab="math">Math</button>
+      <button data-tab="technical">Technical</button>
+      <button data-tab="signals">Signals</button>
+      <button data-tab="sr">Support/Resistance</button>
+      <button data-tab="report">Full Report</button>
+      <button data-tab="ranks">Rank Table</button>
+      <button data-tab="banker">Banker Checklist</button>
+      <button data-tab="calculator">Calculator</button>
+      <button data-tab="longshort">Long/Short</button>
+      <button data-tab="budget">Budget Thesis</button>
+      <button data-tab="sralerts">S/R Alerts</button>
+      <button data-tab="sellers">Net Sellers</button>
+      <button id="copyPromptBtn" style="margin-left:auto">Copy prompt</button>
     </div>
+    <section class="box" id="contentBox"><div class="empty">Loading data...</div></section>
   </main>
 </div>
-
 <script src="data/stocks.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const statusEl = $('status'), resultTitle = $('resultTitle'), resultBody = $('resultBody'), sideBody = $('sideBody'), stockList = $('stockList');
-let selectedSymbol = '';
+const statusEl = $('status'), stockList = $('stockList'), summaryBox = $('summaryBox'), contentBox = $('contentBox');
+let selectedSymbol = '', activeTab = 'overview';
 let constituents = [], openfund = null, srAlerts = null, shortlist = null, themes = null, netSellers = null;
-const mathIndex = new Map();
-(window.STOCK_DATA?.stocks || []).forEach(s => mathIndex.set(s.symbol, s));
-
-function setStatus(msg){ statusEl.textContent = msg; }
+const analyzeCache = new Map();
+const mathIndex = new Map((window.STOCK_DATA?.stocks || []).map(s => [s.symbol, s]));
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmt(v){ return (v === null || v === undefined || v === '') ? '—' : v; }
+function setStatus(msg){ statusEl.textContent = msg; }
 async function getJSON(url, opts={}){ const r = await fetch(url, opts); if(!r.ok) throw new Error(`${r.status} ${r.statusText}`); return r.json(); }
-
+function cls(sig){ return sig === 'SELLING' ? 'bad' : sig === 'BUYING' ? 'good' : sig === 'WATCH' ? 'warn' : ''; }
 function filterStocks(q){ q=(q||'').trim().toLowerCase(); if(!q) return constituents; return constituents.filter(s => (s.symbol||'').toLowerCase().includes(q) || (s.name||'').toLowerCase().includes(q)); }
-function renderList(items){
-  stockList.innerHTML = items.map(it => `<div class="stockitem ${selectedSymbol===it.symbol?'active':''}" data-symbol="${esc(it.symbol)}"><div class="sym">${esc(it.symbol)}</div><div class="name">${esc(it.name||'')}</div></div>`).join('') || `<div class="empty" style="padding:10px 6px">No stocks found.</div>`;
-  stockList.querySelectorAll('[data-symbol]').forEach(el => el.addEventListener('click', () => { selectedSymbol = el.dataset.symbol; renderList(filterStocks($('stockSearch').value)); analyzeSelected(); }));
-}
-
-async function analyzeSelected(){
-  if(!selectedSymbol){ setStatus('Choose a stock from the left.'); return; }
-  setStatus(`Loading analysis for ${selectedSymbol}...`);
-  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
-  resultTitle.textContent = `Analysis — ${selectedSymbol}`;
-  resultBody.innerHTML = `<div class="report">${data.html}</div><div class="section"><div class="subnote">Prompt</div><div class="prompt mono">${esc(data.prompt||'')}</div></div>`;
-  renderSide();
-  setStatus(`Loaded ${selectedSymbol}.`);
-}
-async function analyzeSelected(){
-  if(!selectedSymbol){ setStatus('Choose a stock from the left.'); return; }
-  setStatus(`Loading analysis for ${selectedSymbol}...`);
-  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
-  resultTitle.textContent = `Analysis — ${selectedSymbol}`;
-  resultBody.innerHTML = `<div class=\"report\">${data.html}</div><div class=\"section\"><div class=\"subnote\">Prompt</div><div class=\"prompt mono\">${esc(data.prompt||'')}</div></div>`;
-  renderSide();
-  setStatus(`Loaded ${selectedSymbol}.`);
-}
-
-function showMath(){
-  if(!selectedSymbol){ setStatus('Choose a stock from the left first.'); return; }
-  const s = mathIndex.get(selectedSymbol);
-  resultTitle.textContent = `Math — ${selectedSymbol}`;
-  if(!s || !s.math_detail){
-    resultBody.innerHTML = `<div class=\"empty\">No local math_detail is available for this stock in data/stocks.js yet.</div>`;
-    return;
-  }
-  const md = s.math_detail;
-  const sr = md.support_resistance || {};
-  const pz = md.price_zones || {};
-  const eqs = md.equations || [];
-  const pegBase = (s.profit_growth && s.pe) ? (s.pe / Math.max(s.profit_growth, 0.01)) : null;
-  resultBody.innerHTML = `
-    <div class=\"chips\">
-      <span class=\"chip\">Overall score: ${esc(md.overall_score)}</span>
-      <span class=\"chip\">Verdict: ${esc(md.overall_verdict)}</span>
-      <span class=\"chip\">Zone: ${esc(pz.zone || '—')}</span>
-      <span class=\"chip\">PEG: ${pegBase != null ? pegBase.toFixed(2) : '—'}</span>
-    </div>
-    <div class=\"section\">
-      <h3>PEG ratio — what it means</h3>
-      <div class=\"subnote\">PEG = P/E ÷ earnings growth. It can help, but it is <b>not</b> a magic ratio and it does <b>not</b> work for everyone. Big funds usually use it as one check inside a bigger framework: value, quality/profitability, momentum, balance-sheet safety, and business durability.</div>
-      <table class=\"simple\">
-        <tr><th>Current PE</th><th>Profit growth</th><th>PEG</th><th>Reading</th></tr>
-        <tr>
-          <td class=\"mono\">${fmt(s.pe)}</td>
-          <td class=\"mono\">${fmt(s.profit_growth)}%</td>
-          <td class=\"mono\">${pegBase != null ? pegBase.toFixed(2) : '—'}</td>
-          <td>${pegBase == null ? 'Need PE and growth' : pegBase < 0.75 ? 'Cheap vs growth' : pegBase < 1.25 ? 'Fair' : 'Rich / growth already priced in'}</td>
-        </tr>
-      </table>
-      <div class=\"subnote\">PEG breaks when growth is cyclical, low-quality, one-off, or temporarily inflated. Good investors cross-check PEG with ROCE, ROE, debt, cash flow, revisions, and trend.</div>
-    </div>
-    <div class=\"section\">
-      <h3>Ratios / factors with strongest evidence</h3>
-      <table class=\"simple\">
-        <tr><th>Factor</th><th>How pros think</th><th>Strength</th><th>Weakness</th></tr>
-        <tr><td><b>Value</b> (PE, PB, EV/EBIT)</td><td>Cheap vs normalized earnings and book</td><td>Works long-run</td><td>Value traps</td></tr>
-        <tr><td><b>Quality</b> (ROCE, ROE, margins)</td><td>High returns on capital, durable economics</td><td>Filters junk</td><td>Can be overpaid</td></tr>
-        <tr><td><b>Momentum</b> (6m/12m trend)</td><td>Price and revisions moving together</td><td>Repeatedly strong</td><td>Sharp reversals</td></tr>
-        <tr><td><b>Safety</b> (D/E, pledge)</td><td>Strong balance sheet, low distress</td><td>Survives bad cycles</td><td>Misses turnarounds</td></tr>
-      </table>
-      <div class=\"subnote\">No single ratio is proven to work for everyone. The robust stack is value + quality + momentum + safety.</div>
-    </div>
-    <div class=\"section\">
-      <h3>Support / Resistance</h3>
-      <table class=\"simple\">
-        <tr><th>Current</th><th>Support</th><th>Resistance</th><th>Buy zone</th><th>Sell zone</th></tr>
-        <tr>
-          <td class=\"mono\">${fmt(pz.current_price)}</td>
-          <td class=\"mono\">${(sr.support||[]).join(', ') || '—'}</td>
-          <td class=\"mono\">${(sr.resistance||[]).join(', ') || '—'}</td>
-          <td class=\"mono\">${pz.buy_zone ? `${pz.buy_zone.lo} – ${pz.buy_zone.hi}` : '—'}</td>
-          <td class=\"mono\">${pz.sell_zone ? `${pz.sell_zone.lo} – ${pz.sell_zone.hi}` : '—'}</td>
-        </tr>
-      </table>
-    </div>
-    <div class=\"section\">
-      <h3>Confidence / Trigger</h3>
-      <div class=\"subnote\">Breaking out: ${fmt(sr.breaking_out)} · Breaking down: ${fmt(sr.breaking_down)}</div>
-    </div>
-    <div class=\"section\">
-      <h3>Equation rows</h3>
-      <table class=\"simple\">
-        <tr><th>#</th><th>Name</th><th>Value</th><th>Verdict</th></tr>
-        ${eqs.map(e => `<tr><td class=\"mono\">${fmt(e.id)}</td><td><b>${esc(e.name||'')}</b><div class=\"subnote mono\">${esc(e.formula||'')}</div></td><td class=\"mono\">${esc(String(fmt(e.value)))}</td><td>${esc(e.verdict||'')}</td></tr>`).join('')}
-      </table>
+function currentMath(){ return selectedSymbol ? mathIndex.get(selectedSymbol) : null; }
+function currentSeller(){ return (netSellers?.sellers || []).find(s => s.symbol === selectedSymbol) || null; }
+async function ensureReport(){ if(!selectedSymbol) return null; if(analyzeCache.has(selectedSymbol)) return analyzeCache.get(selectedSymbol); const d = await getJSON('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symbol:selectedSymbol})}); analyzeCache.set(selectedSymbol,d); return d; }
+function renderList(items){ stockList.innerHTML = items.map(it => `<div class="stockitem ${selectedSymbol===it.symbol?'active':''}" data-symbol="${esc(it.symbol)}"><div class="sym">${esc(it.symbol)}</div><div class="name">${esc(it.name||'')}</div></div>`).join('') || `<div class="empty" style="padding:10px 6px">No stocks found.</div>`; stockList.querySelectorAll('[data-symbol]').forEach(el => el.addEventListener('click', () => { selectedSymbol = el.dataset.symbol; renderList(filterStocks($('stockSearch').value)); renderSummary(); renderActiveTab(); })); }
+function renderSummary(){
+  const s = currentMath(), seller = currentSeller();
+  if(!selectedSymbol){ summaryBox.innerHTML = `<div class="empty">Choose a stock from the left panel.</div>`; return; }
+  const name = constituents.find(c => c.symbol === selectedSymbol)?.name || s?.name || '';
+  const verdict = s?.math_detail?.overall_verdict || 'API-backed / no local model verdict';
+  const zone = s?.math_detail?.price_zones?.zone || '—';
+  const updated = s?.math_detail?.as_of || window.STOCK_DATA?.as_of || '—';
+  const peg = (s?.pe && s?.profit_growth && s.profit_growth > 0) ? (s.pe / s.profit_growth).toFixed(2) : '—';
+  summaryBox.innerHTML = `
+    <h2>${esc(selectedSymbol)}${name ? ' — ' + esc(name) : ''}</h2>
+    <div class="sub">Last update: ${esc(updated)} · Verdict: <span class="verdict ${verdict.includes('BUY')||verdict.includes('STRONG')?'good':verdict.includes('AVOID')||verdict.includes('SELL')?'bad':'warn'}">${esc(verdict)}</span> · Zone: ${esc(zone)}</div>
+    <div class="summary-grid">
+      <div class="metric"><div class="k">Price</div><div class="v mono">${fmt(s?.price ?? seller?.price)}</div></div>
+      <div class="metric"><div class="k">PEG</div><div class="v mono">${peg}</div></div>
+      <div class="metric"><div class="k">PE / PB</div><div class="v mono">${fmt(s?.pe)} / ${fmt(s?.pb)}</div></div>
+      <div class="metric"><div class="k">ROCE / ROE</div><div class="v mono">${fmt(s?.roce)} / ${fmt(s?.roe)}</div></div>
+      <div class="metric"><div class="k">Support</div><div class="v mono">${(s?.math_detail?.support_resistance?.support || []).slice(0,2).join(', ') || '—'}</div></div>
+      <div class="metric"><div class="k">Resistance</div><div class="v mono">${(s?.math_detail?.support_resistance?.resistance || []).slice(0,2).join(', ') || '—'}</div></div>
+      <div class="metric"><div class="k">Seller status</div><div class="v ${seller ? 'bad' : ''}">${seller ? 'NET SELLER' : '—'}</div></div>
+      <div class="metric"><div class="k">Composite</div><div class="v mono">${fmt(s?.scores?.composite)}</div></div>
     </div>`;
 }
 
-async function copyPrompt(){
-  if(!selectedSymbol){ setStatus('Choose a stock first.'); return; }
-  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
-  await navigator.clipboard.writeText(data.prompt || '');
-  setStatus(`Prompt copied for ${selectedSymbol}.`);
+function renderOverview(){
+  const s=currentMath(), seller=currentSeller();
+  if(!s){ contentBox.innerHTML=`<div class="empty">Choose a stock from the left to see overview.</div>`; return; }
+  contentBox.innerHTML = `<h3>Overview</h3><div class="subnote">One stock and everything around it.</div><div class="section"><b>Thesis</b><div>${esc(s.thesis||'—')}</div></div><div class="section"><b>Risks</b><div>${esc(s.risks||'—')}</div></div><div class="section"><b>Seller status</b><div>${seller ? `<span class="bad">NET SELLER</span> · FII Δ ${fmt(seller.fii_change_q)} · DII Δ ${fmt(seller.dii_change_q)}` : 'No current seller flag for this stock.'}</div></div>`;
 }
-
-function bindRows(){ document.querySelectorAll('[data-symbol]').forEach(el => { const sym = el.dataset.symbol; if(!sym) return; el.addEventListener('click', () => { selectedSymbol = sym; renderList(filterStocks($('stockSearch').value)); analyzeSelected(); }); }); }
-
-function showOpenfund(){ resultTitle.textContent='OpenFund picks'; const rows=(openfund?.stocks||[]).slice(0,25); resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>Stock</th><th>Score</th><th>Upside</th><th>Sector</th></tr>${rows.map(s=>`<tr class="click" data-symbol="${esc(s.symbol)}"><td><a>${esc(s.symbol)}</a></td><td>${fmt(s.composite)}</td><td>${fmt(s.math_total || s.target_upside)}%</td><td>${esc(s.sector||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No OpenFund data.</div>`; bindRows(); }
-function showSR(){ resultTitle.textContent='Support / Resistance alerts'; const rows=srAlerts?.alerts||[]; resultBody.innerHTML = rows.length ? `<div class="subnote">Computed from backend S/R engine.</div><table class="simple"><tr><th>Stock</th><th>Status</th><th>S Dist</th><th>R Dist</th><th>Score</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="${r.breaking_out?'good':r.breaking_down?'bad':r.near_support?'good':'warn'}">${r.breaking_out?'BREAKOUT':r.breaking_down?'BREAKDOWN':r.near_support?'NEAR SUPPORT':'NEAR RESISTANCE'}</td><td class="mono">${fmt(r.support_dist_pct)}%</td><td class="mono">${fmt(r.resistance_dist_pct)}%</td><td>${fmt(r.overall_score)}</td></tr>`).join('')}</table>` : `<div class="empty">No S/R alerts.</div>`; bindRows(); }
-function showShortlist(){ resultTitle.textContent='Budget shortlist'; const rows=shortlist?.shortlist||[]; resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>#</th><th>Stock</th><th>Theme</th></tr>${rows.map((r,i)=>`<tr class="click" data-symbol="${esc(r.symbol||r.stock||'')}"><td>${i+1}</td><td><a>${esc(r.symbol||r.stock||'')}</a></td><td>${esc(r.theme||r.reason||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No shortlist data.</div>`; bindRows(); }
-function showThemes(){ resultTitle.textContent='Themes'; const entries=Object.entries(themes?.themes||{}); resultBody.innerHTML = entries.length ? `<table class="simple"><tr><th>Theme</th><th>Stocks</th><th>Why</th></tr>${entries.map(([k,v])=>`<tr><td><b>${esc(v.label||k)}</b></td><td class="mono">${esc((v.nifty200||[]).join(', '))}</td><td>${esc(v.tagline||'')}<div class="subnote">${esc(v.budgetCatalyst||'')}</div></td></tr>`).join('')}</table>` : `<div class="empty">No theme data.</div>`; }
-function showConstituents(){ resultTitle.textContent='Constituents'; const rows=constituents; resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>Symbol</th><th>Name</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td>${esc(r.name||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No constituents.</div>`; bindRows(); }
-function showNetSellers(){ resultTitle.textContent='Net sellers (FII / DII QoQ)'; const rows=netSellers?.sellers||[]; resultBody.innerHTML = rows.length ? `<div class="subnote">This is the seller tracker you asked for. Honest label: quarterly FII/DII selling from Airtable tracker. Named block/bulk-deal source is not wired yet.</div><table class="simple"><tr><th>Stock</th><th>FII Δ</th><th>DII Δ</th><th>Promoter Δ</th><th>Price</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="mono ${r.fii_change_q<0?'bad':''}">${fmt(r.fii_change_q)}</td><td class="mono ${r.dii_change_q<0?'bad':''}">${fmt(r.dii_change_q)}</td><td class="mono">${fmt(r.promoter_change_q)}</td><td class="mono">${fmt(r.price)}</td></tr>`).join('')}</table>` : `<div class="empty">No seller data.</div>`; bindRows(); }
-
-function renderSide(){
-  const s = selectedSymbol ? mathIndex.get(selectedSymbol) : null;
-  sideBody.innerHTML = `
-    <div class="chips">
-      <span class="chip">Stocks: ${constituents.length}</span>
-      <span class="chip">OpenFund: ${(openfund?.stocks||[]).length}</span>
-      <span class="chip">S/R: ${(srAlerts?.alerts||[]).length}</span>
-      <span class="chip">Sellers: ${(netSellers?.sellers||[]).length}</span>
-    </div>
-    <h3>Selected stock</h3>
-    <div class="empty">${selectedSymbol ? `<b>${esc(selectedSymbol)}</b>` : 'None selected.'}</div>
-    <h3>Math quick view</h3>
-    ${s && s.math_detail ? `
-      <table class="simple">
-        <tr><th>Overall</th><td>${fmt(s.math_detail.overall_score)} / ${esc(s.math_detail.overall_verdict||'')}</td></tr>
-        <tr><th>Zone</th><td>${esc(s.math_detail.price_zones?.zone || '—')}</td></tr>
-        <tr><th>Support</th><td class="mono">${(s.math_detail.support_resistance?.support || []).join(', ') || '—'}</td></tr>
-        <tr><th>Resistance</th><td class="mono">${(s.math_detail.support_resistance?.resistance || []).join(', ') || '—'}</td></tr>
-      </table>` : `<div class="empty">Choose a stock with math data, then press <b>Math</b>.</div>`}
-    <h3>Current product shape</h3>
-    <ul>
-      <li>Left: search bar + all stocks</li>
-      <li>Right: analysis + math + panels</li>
-      <li>All major buttons preserved</li>
-      <li>New extra button: <b>Net sellers</b></li>
-    </ul>`;
-}
-
-$('stockSearch').addEventListener('input', e => renderList(filterStocks(e.target.value)));
-$('btnAnalyze').onclick = analyzeSelected;
-$('btnMath').onclick = showMath;
-$('btnCopyPrompt').onclick = copyPrompt;
-$('btnOpenfund').onclick = showOpenfund;
-$('btnSR').onclick = showSR;
-$('btnShortlist').onclick = showShortlist;
-$('btnThemes').onclick = showThemes;
-$('btnConstituents').onclick = showConstituents;
-$('btnSellers').onclick = showNetSellers;
-
-(async function init(){
-  try {
-    setStatus('Loading data...');
-    const [constD, openfundD, srD, shortD, themeD, sellerD] = await Promise.all([
-      getJSON('/api/constituents'),
-      getJSON('/api/openfund'),
-      getJSON('/api/sr-alerts'),
-      getJSON('/api/shortlist'),
-      getJSON('/api/themes'),
-      getJSON('/api/net-sellers').catch(() => ({ ok:false, sellers:[] })),
-    ]);
-    constituents = (constD.rows || []).map(r => ({ symbol: r.symbol || r.Symbol || '', name: r.name || r.Company || '' })).filter(r => r.symbol);
-    openfund = openfundD; srAlerts = srD; shortlist = shortD; themes = themeD; netSellers = sellerD;
-    $('chipStocks').textContent = `${constituents.length} stocks`;
-    $('chipSR').textContent = `${(srAlerts.alerts || []).length} S/R alerts`;
-    $('chipSellers').textContent = `${(netSellers.sellers || []).length} sellers`;
-    renderList(constituents);
-    renderSide();
-    showOpenfund();
-    setStatus('Ready. Pick a stock on the left or use the buttons.');
-  } catch(err) {
-    setStatus(`Load error: ${err.message}`);
-    resultBody.innerHTML = `<div class="bad">${esc(err.message)}</div>`;
+async function renderMath(){
+  if(!selectedSymbol){ contentBox.innerHTML=`<div class="empty">Choose a stock first.</div>`; return; }
+  const s=currentMath();
+  if(s && s.math_detail){
+    const md=s.math_detail, sr=md.support_resistance||{}, pz=md.price_zones||{}, eqs=md.equations||[];
+    const peg=(s.pe && s.profit_growth && s.profit_growth>0)?(s.pe/s.profit_growth):null;
+    contentBox.innerHTML=`<h3>Math</h3><div class="chips"><span class="chip">Overall ${esc(md.overall_score)}</span><span class="chip">${esc(md.overall_verdict)}</span><span class="chip">Zone ${esc(pz.zone||'—')}</span><span class="chip">PEG ${peg!=null?peg.toFixed(2):'—'}</span></div><div class="section"><b>PEG ratio</b><div class="subnote">PEG = P/E ÷ earnings growth. Good only when growth is real and durable. Funds do not use PEG alone.</div></div><div class="section"><table class="simple"><tr><th>PE</th><th>Profit growth</th><th>PEG</th><th>Reading</th></tr><tr><td class="mono">${fmt(s.pe)}</td><td class="mono">${fmt(s.profit_growth)}%</td><td class="mono">${peg!=null?peg.toFixed(2):'—'}</td><td>${peg==null?'Need PE and growth':peg<0.75?'Cheap vs growth':peg<1.25?'Fair':'Rich / priced in'}</td></tr></table></div><div class="section"><b>Proven factors</b><table class="simple"><tr><th>Factor</th><th>Meaning</th><th>Why used</th></tr><tr><td>Value</td><td>PE / PB / EV-EBIT</td><td>Cheap vs normalized earnings</td></tr><tr><td>Quality</td><td>ROCE / ROE / margins</td><td>Filters junk</td></tr><tr><td>Momentum</td><td>6m / 12m trend</td><td>Repeatedly strong</td></tr><tr><td>Safety</td><td>D/E / pledge</td><td>Survives bad cycles</td></tr></table></div><div class="section"><b>Support / Resistance</b><table class="simple"><tr><th>Current</th><th>Support</th><th>Resistance</th><th>Buy zone</th><th>Sell zone</th></tr><tr><td class="mono">${fmt(pz.current_price)}</td><td class="mono">${(sr.support||[]).join(', ')||'—'}</td><td class="mono">${(sr.resistance||[]).join(', ')||'—'}</td><td class="mono">${pz.buy_zone?`${pz.buy_zone.lo} – ${pz.buy_zone.hi}`:'—'}</td><td class="mono">${pz.sell_zone?`${pz.sell_zone.lo} – ${pz.sell_zone.hi}`:'—'}</td></tr></table></div><div class="section"><b>Confidence / Trigger</b><div class="subnote">Breaking out: ${fmt(sr.breaking_out)} · Breaking down: ${fmt(sr.breaking_down)}</div></div><div class="section"><b>Equation rows</b><table class="simple"><tr><th>#</th><th>Name</th><th>Value</th><th>Verdict</th></tr>${eqs.map(e=>`<tr><td class="mono">${fmt(e.id)}</td><td><b>${esc(e.name||'')}</b><div class="subnote mono">${esc(e.formula||'')}</div></td><td class="mono">${esc(String(fmt(e.value)))}</td><td>${esc(e.verdict||'')}</td></tr>`).join('')}</table></div>`;
+    return;
   }
-})();
+  const rep=await ensureReport(); const d=rep?.data||{}, q=d.quote||{}, m=d.metrics||{}, att=d.attainix||{}, disc=d.discount||{}; const pe=m.pe, pb=m.pb, eg=m.earningsGrowth, peg=(pe&&eg&&eg>0)?(pe/eg):null;
+  contentBox.innerHTML=`<h3>Math</h3><div class="chips"><span class="chip">Framework ${esc(d.framework||'—')}</span><span class="chip">MV/IV ${fmt(att.mvToIv)}</span><span class="chip">PEG ${peg!=null?peg.toFixed(2):'—'}</span></div><div class="section"><b>Derived from live analysis API</b><div class="subnote">This stock is outside the local OpenFund math universe, so this math view is assembled from /api/analyze output.</div></div><table class="simple"><tr><th>Price</th><th>52W High</th><th>52W Low</th><th>50 DMA</th><th>200 DMA</th><th>RSI14</th></tr><tr><td class="mono">${fmt(q.cmp)}</td><td class="mono">${fmt(q.fiftyTwoWeekHigh)}</td><td class="mono">${fmt(q.fiftyTwoWeekLow)}</td><td class="mono">${fmt(q.dma50)}</td><td class="mono">${fmt(q.dma200)}</td><td class="mono">${fmt(q.rsi14)}</td></tr></table><div class="section"><b>Core ratios</b><table class="simple"><tr><th>PE</th><th>PB</th><th>ROE</th><th>ROCE</th><th>Yield</th><th>PEG</th></tr><tr><td class="mono">${fmt(pe)}</td><td class="mono">${fmt(pb)}</td><td class="mono">${fmt(m.roe)}</td><td class="mono">${fmt(m.roce)}</td><td class="mono">${fmt(m.dividendYield)}</td><td class="mono">${peg!=null?peg.toFixed(2):'—'}</td></tr></table></div><div class="section"><b>Valuation signal</b><div>${esc(disc.label||'—')}</div><div class="subnote">${esc(disc.reason||'')} ${esc(disc.trap||'')}</div></div><div class="section"><b>What big funds usually care about</b><table class="simple"><tr><th>Factor</th><th>Interpretation</th></tr><tr><td>Value</td><td>Cheap vs normalized earnings / intrinsic value</td></tr><tr><td>Quality</td><td>ROE, ROCE, margins, capital discipline</td></tr><tr><td>Momentum</td><td>Trend and revisions</td></tr><tr><td>Safety</td><td>Leverage and lender health where relevant</td></tr></table></div>`;
+}
+function renderTechnical(){ const s=currentMath(); if(!s){ contentBox.innerHTML=`<div class="empty">Choose a stock first.</div>`; return;} contentBox.innerHTML=`<h3>Technical</h3><table class="simple"><tr><th>6M</th><th>12M</th><th>RSI14</th><th>MACD Hist</th><th>50 DMA</th><th>200 DMA</th><th>Above 200 DMA</th></tr><tr><td class="mono">${fmt(s.ret_6m)}%</td><td class="mono">${fmt(s.ret_12m)}%</td><td class="mono">${fmt(s.rsi14)}</td><td class="mono">${fmt(s.macd_hist)}</td><td class="mono">${fmt(s.dma50)}</td><td class="mono">${fmt(s.dma200)}</td><td class="mono">${fmt(s.above_200dma)}%</td></tr></table>`; }
+function renderSignals(){ const s=currentMath(); if(!s){ contentBox.innerHTML=`<div class="empty">Choose a stock first.</div>`; return;} contentBox.innerHTML=`<h3>Signals</h3><table class="simple"><tr><th>Composite</th><th>Value</th><th>Quality</th><th>Momentum</th><th>Safety</th><th>Long score</th><th>Short score</th></tr><tr><td class="mono">${fmt(s.scores?.composite)}</td><td class="mono">${fmt(s.scores?.value)}</td><td class="mono">${fmt(s.scores?.quality)}</td><td class="mono">${fmt(s.scores?.momentum)}</td><td class="mono">${fmt(s.scores?.safety)}</td><td class="mono">${fmt(s.long_score)}</td><td class="mono">${fmt(s.short_score)}</td></tr></table>`; }
+function renderSR(){ const rows=srAlerts?.alerts||[]; contentBox.innerHTML = rows.length?`<h3>Support / Resistance</h3><div class="subnote">Latest S/R alerts from backend calculation.</div><table class="simple"><tr><th>Stock</th><th>Status</th><th>S Dist</th><th>R Dist</th><th>Score</th></tr>${rows.map(r=>`<tr class="row" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="${r.breaking_out?'good':r.breaking_down?'bad':r.near_support?'good':'warn'}">${r.breaking_out?'BREAKOUT':r.breaking_down?'BREAKDOWN':r.near_support?'NEAR SUPPORT':'NEAR RESISTANCE'}</td><td class="mono">${fmt(r.support_dist_pct)}%</td><td class="mono">${fmt(r.resistance_dist_pct)}%</td><td>${fmt(r.overall_score)}</td></tr>`).join('')}</table>`:`<div class="empty">No S/R alerts.</div>`; bindRows(); }
+async function renderReport(){ if(!selectedSymbol){ contentBox.innerHTML=`<div class="empty">Choose a stock first.</div>`; return;} const d=await ensureReport(); contentBox.innerHTML=`<h3>Full Report</h3><div class="report">${d.html}</div><div class="section"><div class="subnote">Prompt</div><div class="prompt mono">${esc(d.prompt||'')}</div></div>`; }
+function renderRanks(){ const rows=(openfund?.stocks||[]).slice(0,40); contentBox.innerHTML = rows.length?`<h3>Rank Table</h3><table class="simple"><tr><th>Stock</th><th>Score</th><th>Upside</th><th>Sector</th></tr>${rows.map(s=>`<tr class="row" data-symbol="${esc(s.symbol)}"><td><a>${esc(s.symbol)}</a></td><td>${fmt(s.composite)}</td><td>${fmt(s.math_total||s.target_upside)}%</td><td>${esc(s.sector||'')}</td></tr>`).join('')}</table>`:`<div class="empty">No rank data.</div>`; bindRows(); }
+function renderBanker(){ const s=currentMath(); if(!s){ contentBox.innerHTML=`<div class="empty">Choose a stock first.</div>`; return;} contentBox.innerHTML=`<h3>Banker Checklist</h3><table class="simple"><tr><th>Check</th><th>Value</th><th>Status</th></tr><tr><td>Debt / Equity</td><td class="mono">${fmt(s.de)}</td><td class="${s.de!=null&&s.de<1?'good':'warn'}">${s.de!=null&&s.de<1?'PASS':'WATCH'}</td></tr><tr><td>Promoter pledge</td><td class="mono">${fmt(s.pledged)}%</td><td class="${s.pledged===0?'good':'bad'}">${s.pledged===0?'CLEAN':'RISK'}</td></tr><tr><td>ROCE</td><td class="mono">${fmt(s.roce)}%</td><td class="${s.roce>=15?'good':'warn'}">${s.roce>=15?'GOOD':'LOW'}</td></tr><tr><td>Profit growth</td><td class="mono">${fmt(s.profit_growth)}%</td><td class="${s.profit_growth>0?'good':'bad'}">${s.profit_growth>0?'POSITIVE':'NEGATIVE'}</td></tr></table>`; }
+function renderCalculator(){ const s=currentMath(); if(!s||!s.math_detail){ contentBox.innerHTML=`<div class="empty">Choose a stock with math data first.</div>`; return;} const pz=s.math_detail.price_zones||{}; contentBox.innerHTML=`<h3>Calculator</h3><div class="subnote">Simple risk/reward view from local buy/sell zones.</div><table class="simple"><tr><th>Current</th><th>Buy zone</th><th>Sell zone</th><th>R/R</th></tr><tr><td class="mono">${fmt(pz.current_price)}</td><td class="mono">${pz.buy_zone?`${pz.buy_zone.lo} – ${pz.buy_zone.hi}`:'—'}</td><td class="mono">${pz.sell_zone?`${pz.sell_zone.lo} – ${pz.sell_zone.hi}`:'—'}</td><td class="mono">${fmt(s.math?.risk_reward)}</td></tr></table>`; }
+function renderLongShort(){ const D=window.STOCK_DATA||{}; contentBox.innerHTML=`<h3>Long / Short</h3><table class="simple"><tr><th>Long board</th><th>Short board</th><th>Avoid</th></tr><tr><td class="mono">${(D.long_board||[]).join(', ')||'—'}</td><td class="mono">${(D.short_board||[]).join(', ')||'—'}</td><td class="mono">${(D.avoid_board||[]).join(', ')||'—'}</td></tr></table>`; }
+function renderBudget(){ const entries=Object.entries(themes?.themes||{}); contentBox.innerHTML=entries.length?`<h3>Budget Thesis</h3><table class="simple"><tr><th>Theme</th><th>Stocks</th><th>Why</th></tr>${entries.map(([k,v])=>`<tr><td><b>${esc(v.label||k)}</b></td><td class="mono">${esc((v.nifty200||[]).join(', '))}</td><td>${esc(v.tagline||'')}<div class="subnote">${esc(v.budgetCatalyst||'')}</div></td></tr>`).join('')}</table>`:`<div class="empty">No themes.</div>`; }
+function renderSRAlerts(){ return renderSR(); }
+function renderSellers(){ const rows=netSellers?.sellers||[]; contentBox.innerHTML=rows.length?`<h3>Net Sellers</h3><div class="subnote">This is the seller tracker you asked for. Honest label: quarterly FII/DII seller data from Airtable. Named block/bulk seller feed is not wired yet.</div><table class="simple"><tr><th>Stock</th><th>FII Δ</th><th>DII Δ</th><th>Promoter Δ</th><th>Price</th></tr>${rows.map(r=>`<tr class="row" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="mono ${r.fii_change_q<0?'bad':''}">${fmt(r.fii_change_q)}</td><td class="mono ${r.dii_change_q<0?'bad':''}">${fmt(r.dii_change_q)}</td><td class="mono">${fmt(r.promoter_change_q)}</td><td class="mono">${fmt(r.price)}</td></tr>`).join('')}</table>`:`<div class="empty">No sellers.</div>`; bindRows(); }
+function bindRows(){ document.querySelectorAll('[data-symbol]').forEach(el=>{ const sym=el.dataset.symbol; if(!sym) return; el.addEventListener('click',()=>{ selectedSymbol=sym; renderList(filterStocks($('stockSearch').value)); renderSummary(); renderActiveTab(); }); }); }
+async function renderActiveTab(){ try { if(activeTab==='overview') return renderOverview(); if(activeTab==='math') return await renderMath(); if(activeTab==='technical') return renderTechnical(); if(activeTab==='signals') return renderSignals(); if(activeTab==='sr') return renderSR(); if(activeTab==='report') return await renderReport(); if(activeTab==='ranks') return renderRanks(); if(activeTab==='banker') return renderBanker(); if(activeTab==='calculator') return renderCalculator(); if(activeTab==='longshort') return renderLongShort(); if(activeTab==='budget') return renderBudget(); if(activeTab==='sralerts') return renderSRAlerts(); if(activeTab==='sellers') return renderSellers(); } catch(err){ contentBox.innerHTML=`<div class="bad">${esc(err.message)}</div>`; } }
+$('stockSearch').addEventListener('input', e => renderList(filterStocks(e.target.value)));
+document.querySelectorAll('#tabs button[data-tab]').forEach(btn => btn.addEventListener('click',()=>{ document.querySelectorAll('#tabs button[data-tab]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); activeTab=btn.dataset.tab; renderActiveTab(); setStatus(`${selectedSymbol||'Dashboard'} · ${activeTab}`); }));
+$('copyPromptBtn').addEventListener('click', async ()=>{ if(!selectedSymbol){ setStatus('Choose a stock first.'); return; } const d=await ensureReport(); await navigator.clipboard.writeText(d.prompt||''); setStatus(`Prompt copied for ${selectedSymbol}.`); });
+(async function init(){ try { setStatus('Loading data...'); const [constD, openfundD, srD, shortD, themeD, sellerD] = await Promise.all([getJSON('/api/constituents'), getJSON('/api/openfund'), getJSON('/api/sr-alerts'), getJSON('/api/shortlist'), getJSON('/api/themes'), getJSON('/api/net-sellers').catch(()=>({ok:false,sellers:[]}))]); constituents=(constD.rows||[]).map(r=>({symbol:r.symbol||r.Symbol||'',name:r.name||r.Company||''})).filter(r=>r.symbol); openfund=openfundD; srAlerts=srD; shortlist=shortD; themes=themeD; netSellers=sellerD; $('chipStocks').textContent=`${constituents.length} stocks`; $('chipSR').textContent=`${(srAlerts.alerts||[]).length} S/R alerts`; $('chipSellers').textContent=`${(netSellers.sellers||[]).length} sellers`; renderList(constituents); renderSummary(); await renderActiveTab(); setStatus('Ready. Pick a stock on the left or switch tabs.'); } catch(err){ setStatus(`Load error: ${err.message}`); contentBox.innerHTML=`<div class="bad">${esc(err.message)}</div>`; }})();
 </script>
 </body>
 </html>
