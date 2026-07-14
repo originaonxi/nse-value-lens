@@ -6,7 +6,7 @@ Sources:
   2. Screener.in quarterly FII/DII/Promoter holding changes (public)
 Sends email alert when a stock shows net institutional selling > 1%
 
-Run: AIRTABLE_API_KEY=xxx GMAIL_FROM=xxx GMAIL_APP_PWD=xxx ALERT_TO=xxx python refresh_fo_institutional.py
+Run: with secrets set in env (AIRTABLE_API_KEY, GMAIL_FROM, GMAIL_APP_PWD, ALERT_TO) then execute `python refresh_fo_institutional.py`
 """
 import os, sys, json, zipfile, io, re, time, smtplib
 from datetime import datetime, timedelta
