@@ -156,7 +156,7 @@ app.post('/api/refresh', (req, res) => {
   });
 });
 
-/* ── Shared refresh runner ── */
+/* ── Shared refresh runners ── */
 function runRefresh(cb) {
   const py = process.platform === 'win32' ? 'python' : 'python3';
   const script = path.join(__dirname, '..', 'scripts', 'enhance_math.py');
@@ -164,12 +164,35 @@ function runRefresh(cb) {
     (err, stdout, stderr) => cb(err, (stdout + stderr).trim().split('\n').pop()));
 }
 
+function runInstitutionalRefresh(cb) {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return cb(new Error('AIRTABLE_API_KEY missing; institutional cron skipped'));
+  }
+  const py = process.platform === 'win32' ? 'python' : 'python3';
+  const script = path.join(__dirname, '..', 'scripts', 'refresh_fo_institutional.py');
+  execFile(py, [script], {
+      cwd: path.join(__dirname, '..'),
+      timeout: 1200000,
+      env: process.env,
+    },
+    (err, stdout, stderr) => cb(err, (stdout + '\n' + stderr).trim().split('\n').slice(-3).join('\n')));
+}
+
 /* ── Daily cron 06:30 IST = 01:00 UTC ── */
 cron.schedule('0 1 * * *', () => {
   console.log('[cron] daily S/R refresh starting…');
   runRefresh((err, out) => {
-    if (err) console.error('[cron] failed:', err.message);
-    else console.log('[cron] done:', out);
+    if (err) console.error('[cron] S/R failed:', err.message);
+    else console.log('[cron] S/R done:', out);
+  });
+});
+
+/* ── Daily institutional refresh 08:00 IST = 02:30 UTC ── */
+cron.schedule('30 2 * * *', () => {
+  console.log('[cron] daily F&O institutional refresh starting…');
+  runInstitutionalRefresh((err, out) => {
+    if (err) console.error('[cron] F&O institutional failed:', err.message);
+    else console.log('[cron] F&O institutional done:', out);
   });
 });
 
