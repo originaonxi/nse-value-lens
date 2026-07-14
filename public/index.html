@@ -5,336 +5,233 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NSE</title>
 <style>
-  :root{
-    --blue:#1a0dab;
-    --blue2:#2b7de9;
-    --text:#111;
-    --muted:#666;
-    --line:#d9d9d9;
-    --bg:#fff;
-    --panel:#f7f7f7;
-    --good:#0f9d58;
-    --bad:#d93025;
-    --warn:#b26a00;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial, Helvetica, sans-serif}
+  :root{--bg:#f3f3f3;--panel:#fff;--line:#d8d8d8;--text:#111;--muted:#666;--blue:#1a0dab;--green:#0b8043;--red:#c5221f;--amber:#a06500}
+  *{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,Helvetica,sans-serif}
   a{color:var(--blue);text-decoration:underline;cursor:pointer}
-  .page{max-width:960px;margin:0 auto;padding:18px 16px 48px}
-  .topline{font-size:12px;color:var(--muted);margin-bottom:14px}
-  .brand{font-size:40px;font-weight:700;letter-spacing:-1px;margin:32px 0 8px;text-align:center}
-  .tag{font-size:14px;color:var(--muted);text-align:center;margin-bottom:20px}
-  .search-wrap{display:flex;justify-content:center;margin-bottom:12px}
-  .search{width:min(680px,100%);display:flex;gap:8px;align-items:center}
-  .search input{flex:1;height:42px;padding:0 14px;border:1px solid #bbb;border-radius:21px;font-size:16px}
-  .search button{height:40px;padding:0 16px;border:1px solid #999;background:#f8f8f8;border-radius:6px;font-size:14px;cursor:pointer}
-  .search button:hover{border-color:#666;background:#efefef}
-  .mini-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
-  .mini-actions button{border:1px solid #aaa;background:#f8f8f8;padding:7px 10px;border-radius:4px;cursor:pointer;font-size:13px}
-  .mini-actions button:hover{background:#efefef}
-  .status{font-size:12px;color:var(--muted);text-align:center;min-height:18px;margin-bottom:14px}
-  .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:start}
-  .box{border:1px solid var(--line);background:#fff;padding:14px}
-  .box h2{margin:0 0 10px;font-size:18px}
-  .box h3{margin:14px 0 8px;font-size:15px}
-  .sub{font-size:12px;color:var(--muted)}
-  .result{white-space:normal}
-  .report{font-size:14px;line-height:1.6}
-  .report h1,.report h2,.report h3{font-family:Arial, Helvetica, sans-serif}
-  .report table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;display:block;overflow:auto}
-  .report th,.report td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;text-align:left}
-  .list{margin:0;padding-left:18px}
-  .pill{display:inline-block;padding:2px 7px;border:1px solid var(--line);border-radius:20px;font-size:11px;color:var(--muted);margin-right:6px}
-  .signal-good{color:var(--good);font-weight:700}
-  .signal-bad{color:var(--bad);font-weight:700}
-  .signal-warn{color:var(--warn);font-weight:700}
-  .simple-table{width:100%;border-collapse:collapse;font-size:13px}
-  .simple-table th,.simple-table td{border-bottom:1px solid var(--line);padding:7px 4px;text-align:left;vertical-align:top}
-  .simple-table th{font-size:12px;color:var(--muted);font-weight:700}
-  .row-link{cursor:pointer}
-  .row-link:hover{background:#fafafa}
-  .empty{font-size:13px;color:var(--muted)}
-  .mono{font-family:Consolas, 'Courier New', monospace}
-  .footer{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
-  .footer a{color:var(--blue)}
-  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .old-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:13px;margin-bottom:18px}
-  .alert-up{color:var(--good);font-weight:700}
-  .alert-down{color:var(--bad);font-weight:700}
-  .tiny{font-size:11px;color:var(--muted)}
-  .section-gap{margin-top:16px}
-  @media (max-width: 820px){
-    .grid{grid-template-columns:1fr}
-    .two-col{grid-template-columns:1fr}
-    .brand{font-size:34px;margin-top:18px}
-    .search{flex-direction:column;align-items:stretch}
-    .search button{width:100%}
-  }
+  .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+  .left{background:#fff;border-right:1px solid var(--line);padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
+  .right{padding:16px;overflow:auto}
+  .logo{font-size:28px;font-weight:700;letter-spacing:-.8px;margin:2px 0 8px}
+  .small{font-size:12px;color:var(--muted)}
+  .searchBox input{width:100%;height:40px;border:1px solid #bbb;border-radius:4px;padding:0 12px;font-size:15px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}.chip{font-size:11px;border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
+  .stocklist{border-top:1px solid var(--line)}
+  .stockitem{padding:8px 6px;border-bottom:1px solid #eee;cursor:pointer}.stockitem:hover,.stockitem.active{background:#f8f8f8}
+  .stockitem .sym{font-weight:700}.stockitem .name{font-size:12px;color:var(--muted)}
+  .header{margin-bottom:10px}.title{font-size:24px;font-weight:700}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}.buttons button{border:1px solid #b3b3b3;background:#fff;padding:8px 10px;border-radius:4px;cursor:pointer;font-size:13px}.buttons button:hover{background:#f0f0f0}
+  .status{font-size:12px;color:var(--muted);min-height:18px;margin-bottom:10px}
+  .grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:16px}
+  .box{background:var(--panel);border:1px solid var(--line);padding:14px}.box h2{margin:0 0 10px;font-size:17px}.box h3{margin:14px 0 8px;font-size:14px}
+  .empty{font-size:13px;color:var(--muted)} .subnote{font-size:11px;color:var(--muted)} .mono{font-family:Consolas,'Courier New',monospace}
+  .simple{width:100%;border-collapse:collapse;font-size:13px}.simple th,.simple td{border-bottom:1px solid #eee;padding:7px 4px;text-align:left;vertical-align:top}.simple th{font-size:12px;color:var(--muted)}
+  .click{cursor:pointer}.click:hover{background:#fafafa}.good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}.warn{color:var(--amber);font-weight:700}
+  .report{line-height:1.6}.report table{width:100%;border-collapse:collapse;display:block;overflow:auto}.report th,.report td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}.report blockquote{margin:12px 0;padding:10px 12px;border-left:3px solid #ccc;background:#fafafa}
+  .prompt{white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px;margin-top:10px}
+  .section{margin-top:14px}
+  @media (max-width:980px){.app{grid-template-columns:1fr}.left{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-  <div class="page">
-    <div class="topline">nifty.up.railway.app · old-school mode · fast HTML UI</div>
+<div class="app">
+  <aside class="left">
+    <div class="logo">NSE</div>
+    <div class="small">Left panel: search bar + all stocks. Click any stock to open analysis on the right.</div>
+    <div class="searchBox section"><input id="stockSearch" type="text" placeholder="Search stock by symbol or name"></div>
+    <div class="chips">
+      <span class="chip" id="chipStocks">Loading stocks...</span>
+      <span class="chip" id="chipSR">Loading S/R...</span>
+      <span class="chip" id="chipSellers">Loading sellers...</span>
+    </div>
+    <div class="stocklist" id="stockList"></div>
+  </aside>
 
-    <div class="brand">NSE</div>
-    <div class="tag">Simple stock search, support/resistance alerts, OpenFund picks, and budget themes.</div>
-
-    <div class="old-links">
-      <a id="lnkOpenfund">OpenFund top picks</a>
-      <a id="lnkSR">S/R alerts</a>
-      <a id="lnkShortlist">Shortlist</a>
-      <a id="lnkThemes">Themes</a>
-      <a id="lnkConst">Constituents</a>
+  <main class="right">
+    <div class="header">
+      <div class="title">NSE Research Terminal</div>
+      <div class="subtitle">Simple two-pane layout: all stocks on the left, full analysis and math on the right. No 3D.</div>
     </div>
 
-    <div class="search-wrap">
-      <form class="search" id="searchForm">
-        <input id="symbolInput" type="text" placeholder="Enter NSE symbol: IRFC, COCHINSHIP, BANKBARODA, POLYCAB" autocomplete="off" />
-        <button type="submit">Search</button>
-        <button type="button" id="copyPromptBtn">Copy prompt</button>
-      </form>
-    </div>
-
-    <div class="mini-actions">
+    <div class="buttons">
+      <button id="btnAnalyze">Analyze</button>
+      <button id="btnMath">Math</button>
+      <button id="btnCopyPrompt">Copy prompt</button>
       <button id="btnOpenfund">OpenFund picks</button>
-      <button id="btnSR">S/R zones</button>
-      <button id="btnShortlist">Budget shortlist</button>
+      <button id="btnSR">S/R alerts</button>
+      <button id="btnShortlist">Shortlist</button>
       <button id="btnThemes">Themes</button>
-      <button id="btnConst">All constituents</button>
+      <button id="btnConstituents">Constituents</button>
+      <button id="btnSellers">Net sellers</button>
     </div>
 
-    <div class="status" id="status">Ready.</div>
+    <div class="status" id="status">Loading...</div>
 
     <div class="grid">
-      <div class="box result">
-        <h2>Result</h2>
-        <div id="resultBody" class="empty">Search a symbol to see the report.</div>
-      </div>
-
-      <div class="box">
+      <section class="box">
+        <h2 id="resultTitle">Analysis</h2>
+        <div id="resultBody" class="empty">Pick a stock on the left.</div>
+      </section>
+      <section class="box">
         <h2>Quick panels</h2>
-        <div class="two-col">
-          <div>
-            <h3>Today</h3>
-            <div id="todayPanel" class="empty">Loading...</div>
-          </div>
-          <div>
-            <h3>OpenFund</h3>
-            <div id="openfundPanel" class="empty">Loading...</div>
-          </div>
-        </div>
-
-        <div class="section-gap">
-          <h3>Support / Resistance alerts</h3>
-          <div id="srPanel" class="empty">Loading...</div>
-        </div>
-
-        <div class="section-gap">
-          <h3>Budget shortlist</h3>
-          <div id="shortlistPanel" class="empty">Loading...</div>
-        </div>
-      </div>
+        <div id="sideBody" class="empty">Loading quick panels...</div>
+      </section>
     </div>
+  </main>
+</div>
 
-    <div class="box section-gap">
-      <h2>Simple tables</h2>
-      <div class="two-col">
-        <div>
-          <h3>Theme picks</h3>
-          <div id="themesPanel" class="empty">Click Themes.</div>
-        </div>
-        <div>
-          <h3>Constituents</h3>
-          <div id="constPanel" class="empty">Click Constituents.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      Data: Railway API + OpenFund + S/R alerts. No 3D. No solar system. Just plain web.
-    </div>
-  </div>
-
+<script src="data/stocks.js"></script>
 <script>
-const $ = (id) => document.getElementById(id);
-const statusEl = $('status');
-const resultBody = $('resultBody');
-const openfundPanel = $('openfundPanel');
-const srPanel = $('srPanel');
-const shortlistPanel = $('shortlistPanel');
-const themesPanel = $('themesPanel');
-const constPanel = $('constPanel');
-const todayPanel = $('todayPanel');
+const $ = id => document.getElementById(id);
+const statusEl = $('status'), resultTitle = $('resultTitle'), resultBody = $('resultBody'), sideBody = $('sideBody'), stockList = $('stockList');
+let selectedSymbol = '';
+let constituents = [], openfund = null, srAlerts = null, shortlist = null, themes = null, netSellers = null;
+const mathIndex = new Map();
+(window.STOCK_DATA?.stocks || []).forEach(s => mathIndex.set(s.symbol, s));
 
 function setStatus(msg){ statusEl.textContent = msg; }
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmt(v){ return (v === null || v === undefined || v === '') ? '—' : v; }
-function signalClass(sig){
-  if(sig === 'SELLING') return 'signal-bad';
-  if(sig === 'BUYING') return 'signal-good';
-  if(sig === 'WATCH') return 'signal-warn';
-  return '';
+async function getJSON(url, opts={}){ const r = await fetch(url, opts); if(!r.ok) throw new Error(`${r.status} ${r.statusText}`); return r.json(); }
+
+function filterStocks(q){ q=(q||'').trim().toLowerCase(); if(!q) return constituents; return constituents.filter(s => (s.symbol||'').toLowerCase().includes(q) || (s.name||'').toLowerCase().includes(q)); }
+function renderList(items){
+  stockList.innerHTML = items.map(it => `<div class="stockitem ${selectedSymbol===it.symbol?'active':''}" data-symbol="${esc(it.symbol)}"><div class="sym">${esc(it.symbol)}</div><div class="name">${esc(it.name||'')}</div></div>`).join('') || `<div class="empty" style="padding:10px 6px">No stocks found.</div>`;
+  stockList.querySelectorAll('[data-symbol]').forEach(el => el.addEventListener('click', () => { selectedSymbol = el.dataset.symbol; renderList(filterStocks($('stockSearch').value)); analyzeSelected(); }));
 }
 
-async function getJSON(url, opts={}){
-  const r = await fetch(url, opts);
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+async function analyzeSelected(){
+  if(!selectedSymbol){ setStatus('Choose a stock from the left.'); return; }
+  setStatus(`Loading analysis for ${selectedSymbol}...`);
+  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
+  resultTitle.textContent = `Analysis — ${selectedSymbol}`;
+  resultBody.innerHTML = `<div class="report">${data.html}</div><div class="section"><div class="subnote">Prompt</div><div class="prompt mono">${esc(data.prompt||'')}</div></div>`;
+  renderSide();
+  setStatus(`Loaded ${selectedSymbol}.`);
 }
 
-function renderReport(symbol, html, prompt){
+function showMath(){
+  if(!selectedSymbol){ setStatus('Choose a stock from the left first.'); return; }
+  const s = mathIndex.get(selectedSymbol);
+  if(!s || !s.math_detail){
+    resultTitle.textContent = `Math — ${selectedSymbol}`;
+    resultBody.innerHTML = `<div class="empty">No local math_detail is available for this stock in data/stocks.js yet.</div>`;
+    return;
+  }
+  const md = s.math_detail;
+  const sr = md.support_resistance || {};
+  const pz = md.price_zones || {};
+  const eqs = md.equations || [];
+  resultTitle.textContent = `Math — ${selectedSymbol}`;
   resultBody.innerHTML = `
-    <div class="sub">Report for <b>${esc(symbol)}</b></div>
-    <div class="report">${html}</div>
-    <div class="section-gap tiny">Prompt</div>
-    <pre class="mono" style="white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px">${esc(prompt || '')}</pre>
-  `;
-}
-
-async function analyze(symbol){
-  setStatus(`Loading report for ${symbol}...`);
-  const data = await getJSON('/api/analyze', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ symbol })
-  });
-  renderReport(symbol, data.html, data.prompt);
-  setStatus(`Loaded ${symbol}.`);
-}
-
-async function loadOpenfund(){
-  const d = await getJSON('/api/openfund');
-  const top = (d.stocks || []).slice(0, 10);
-  openfundPanel.innerHTML = `
-    <div class="tiny">As of ${esc(d.as_of)} · ${esc(d.method)}</div>
-    <table class="simple-table">
-      <tr><th>Stock</th><th>Score</th><th>Upside</th></tr>
-      ${top.map(s => `
-        <tr class="row-link" data-symbol="${esc(s.symbol)}">
-          <td><a>${esc(s.symbol)}</a></td>
-          <td>${fmt(s.composite)}</td>
-          <td>${fmt(s.math_total || s.target_upside)}%</td>
-        </tr>`).join('')}
-    </table>
-  `;
-  openfundPanel.querySelectorAll('[data-symbol]').forEach(el => {
-    el.addEventListener('click', () => analyze(el.dataset.symbol));
-  });
-}
-
-async function loadSR(){
-  const d = await getJSON('/api/sr-alerts');
-  const rows = d.alerts || [];
-  todayPanel.innerHTML = `<span class="pill">${rows.length} alerts</span><span class="pill">${esc(d.as_of)}</span>`;
-  srPanel.innerHTML = rows.length ? `
-    <table class="simple-table">
-      <tr><th>Stock</th><th>Signal</th><th>S/R</th></tr>
-      ${rows.slice(0, 30).map(r => `
-        <tr class="row-link" data-symbol="${esc(r.symbol)}">
-          <td><a>${esc(r.symbol)}</a></td>
-          <td class="${r.breaking_out ? 'alert-up' : r.breaking_down ? 'alert-down' : r.near_support ? 'signal-good' : 'signal-bad'}">
-            ${r.breaking_out ? 'BREAKOUT' : r.breaking_down ? 'BREAKDOWN' : r.near_support ? 'NEAR SUPPORT' : 'NEAR RESISTANCE'}
-          </td>
-          <td class="tiny mono">S ${fmt(r.support_dist_pct)}% · R ${fmt(r.resistance_dist_pct)}%</td>
-        </tr>`).join('')}
-    </table>
-  ` : `<div class="empty">No alerts.</div>`;
-  srPanel.querySelectorAll('[data-symbol]').forEach(el => {
-    el.addEventListener('click', () => analyze(el.dataset.symbol));
-  });
-}
-
-async function loadShortlist(){
-  const d = await getJSON('/api/shortlist');
-  const rows = d.shortlist || [];
-  shortlistPanel.innerHTML = rows.length ? `
-    <table class="simple-table">
-      <tr><th>Rank</th><th>Stock</th><th>Theme</th></tr>
-      ${rows.slice(0, 15).map((r, i) => `
-        <tr class="row-link" data-symbol="${esc(r.symbol || r.stock || '')}">
-          <td>${i+1}</td>
-          <td><a>${esc(r.symbol || r.stock || '')}</a></td>
-          <td>${esc(r.theme || r.reason || '')}</td>
-        </tr>`).join('')}
-    </table>` : `<div class="empty">No shortlist.</div>`;
-  shortlistPanel.querySelectorAll('[data-symbol]').forEach(el => {
-    if (el.dataset.symbol) el.addEventListener('click', () => analyze(el.dataset.symbol));
-  });
-}
-
-async function loadThemes(){
-  setStatus('Loading themes...');
-  const d = await getJSON('/api/themes');
-  const entries = Object.entries(d.themes || {});
-  themesPanel.innerHTML = entries.length ? `
-    <table class="simple-table">
-      <tr><th>Theme</th><th>Why</th></tr>
-      ${entries.map(([k,v]) => `
+    <div class="chips">
+      <span class="chip">Overall score: ${esc(md.overall_score)}</span>
+      <span class="chip">Verdict: ${esc(md.overall_verdict)}</span>
+      <span class="chip">Zone: ${esc(pz.zone || '—')}</span>
+    </div>
+    <div class="section">
+      <h3>Support / Resistance</h3>
+      <table class="simple">
+        <tr><th>Current</th><th>Support</th><th>Resistance</th><th>Buy zone</th><th>Sell zone</th></tr>
         <tr>
-          <td><b>${esc(v.label || k)}</b><div class="tiny mono">${esc((v.nifty200 || []).join(', '))}</div></td>
-          <td>${esc(v.tagline || '')}<div class="tiny">${esc(v.budgetCatalyst || '')}</div></td>
-        </tr>`).join('')}
-    </table>` : `<div class="empty">No themes.</div>`;
-  setStatus('Themes loaded.');
+          <td class="mono">${fmt(pz.current_price)}</td>
+          <td class="mono">${(sr.support||[]).join(', ') || '—'}</td>
+          <td class="mono">${(sr.resistance||[]).join(', ') || '—'}</td>
+          <td class="mono">${pz.buy_zone ? `${pz.buy_zone.lo} – ${pz.buy_zone.hi}` : '—'}</td>
+          <td class="mono">${pz.sell_zone ? `${pz.sell_zone.lo} – ${pz.sell_zone.hi}` : '—'}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="section">
+      <h3>Confidence / Trigger</h3>
+      <div class="subnote">Breaking out: ${fmt(sr.breaking_out)} · Breaking down: ${fmt(sr.breaking_down)}</div>
+    </div>
+    <div class="section">
+      <h3>Equation rows</h3>
+      <table class="simple">
+        <tr><th>#</th><th>Name</th><th>Value</th><th>Verdict</th></tr>
+        ${eqs.map(e => `<tr><td class="mono">${fmt(e.id)}</td><td><b>${esc(e.name||'')}</b><div class="subnote mono">${esc(e.formula||'')}</div></td><td class="mono">${esc(String(fmt(e.value)))}</td><td>${esc(e.verdict||'')}</td></tr>`).join('')}
+      </table>
+    </div>`;
 }
 
-async function loadConstituents(){
-  setStatus('Loading constituents...');
-  const d = await getJSON('/api/constituents');
-  const rows = d.rows || [];
-  constPanel.innerHTML = rows.length ? `
-    <div class="tiny">${rows.length} constituents</div>
-    <table class="simple-table">
-      <tr><th>Symbol</th><th>Name</th></tr>
-      ${rows.slice(0, 80).map(r => `
-        <tr class="row-link" data-symbol="${esc(r.symbol || r.Symbol || '')}">
-          <td><a>${esc(r.symbol || r.Symbol || '')}</a></td>
-          <td>${esc(r.name || r.Company || '')}</td>
-        </tr>`).join('')}
-    </table>` : `<div class="empty">No constituents.</div>`;
-  constPanel.querySelectorAll('[data-symbol]').forEach(el => {
-    if (el.dataset.symbol) el.addEventListener('click', () => analyze(el.dataset.symbol));
-  });
-  setStatus('Constituents loaded.');
+async function copyPrompt(){
+  if(!selectedSymbol){ setStatus('Choose a stock first.'); return; }
+  const data = await getJSON('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: selectedSymbol }) });
+  await navigator.clipboard.writeText(data.prompt || '');
+  setStatus(`Prompt copied for ${selectedSymbol}.`);
 }
 
-$('searchForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const sym = $('symbolInput').value.trim().toUpperCase();
-  if(!sym){ setStatus('Enter a symbol.'); return; }
-  try { await analyze(sym); }
-  catch(err){ resultBody.innerHTML = `<div class="signal-bad">${esc(err.message)}</div>`; setStatus('Search failed.'); }
-});
+function bindRows(){ document.querySelectorAll('[data-symbol]').forEach(el => { const sym = el.dataset.symbol; if(!sym) return; el.addEventListener('click', () => { selectedSymbol = sym; renderList(filterStocks($('stockSearch').value)); analyzeSelected(); }); }); }
 
-$('copyPromptBtn').addEventListener('click', async () => {
-  const sym = $('symbolInput').value.trim().toUpperCase();
-  if(!sym){ setStatus('Enter a symbol first.'); return; }
-  try {
-    const data = await getJSON('/api/analyze', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symbol: sym })
-    });
-    await navigator.clipboard.writeText(data.prompt || '');
-    setStatus(`Prompt copied for ${sym}.`);
-  } catch(err){ setStatus('Could not copy prompt.'); }
-});
+function showOpenfund(){ resultTitle.textContent='OpenFund picks'; const rows=(openfund?.stocks||[]).slice(0,25); resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>Stock</th><th>Score</th><th>Upside</th><th>Sector</th></tr>${rows.map(s=>`<tr class="click" data-symbol="${esc(s.symbol)}"><td><a>${esc(s.symbol)}</a></td><td>${fmt(s.composite)}</td><td>${fmt(s.math_total || s.target_upside)}%</td><td>${esc(s.sector||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No OpenFund data.</div>`; bindRows(); }
+function showSR(){ resultTitle.textContent='Support / Resistance alerts'; const rows=srAlerts?.alerts||[]; resultBody.innerHTML = rows.length ? `<div class="subnote">Computed from backend S/R engine.</div><table class="simple"><tr><th>Stock</th><th>Status</th><th>S Dist</th><th>R Dist</th><th>Score</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="${r.breaking_out?'good':r.breaking_down?'bad':r.near_support?'good':'warn'}">${r.breaking_out?'BREAKOUT':r.breaking_down?'BREAKDOWN':r.near_support?'NEAR SUPPORT':'NEAR RESISTANCE'}</td><td class="mono">${fmt(r.support_dist_pct)}%</td><td class="mono">${fmt(r.resistance_dist_pct)}%</td><td>${fmt(r.overall_score)}</td></tr>`).join('')}</table>` : `<div class="empty">No S/R alerts.</div>`; bindRows(); }
+function showShortlist(){ resultTitle.textContent='Budget shortlist'; const rows=shortlist?.shortlist||[]; resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>#</th><th>Stock</th><th>Theme</th></tr>${rows.map((r,i)=>`<tr class="click" data-symbol="${esc(r.symbol||r.stock||'')}"><td>${i+1}</td><td><a>${esc(r.symbol||r.stock||'')}</a></td><td>${esc(r.theme||r.reason||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No shortlist data.</div>`; bindRows(); }
+function showThemes(){ resultTitle.textContent='Themes'; const entries=Object.entries(themes?.themes||{}); resultBody.innerHTML = entries.length ? `<table class="simple"><tr><th>Theme</th><th>Stocks</th><th>Why</th></tr>${entries.map(([k,v])=>`<tr><td><b>${esc(v.label||k)}</b></td><td class="mono">${esc((v.nifty200||[]).join(', '))}</td><td>${esc(v.tagline||'')}<div class="subnote">${esc(v.budgetCatalyst||'')}</div></td></tr>`).join('')}</table>` : `<div class="empty">No theme data.</div>`; }
+function showConstituents(){ resultTitle.textContent='Constituents'; const rows=constituents; resultBody.innerHTML = rows.length ? `<table class="simple"><tr><th>Symbol</th><th>Name</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td>${esc(r.name||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No constituents.</div>`; bindRows(); }
+function showNetSellers(){ resultTitle.textContent='Net sellers (FII / DII QoQ)'; const rows=netSellers?.sellers||[]; resultBody.innerHTML = rows.length ? `<div class="subnote">This is the seller tracker you asked for. Honest label: quarterly FII/DII selling from Airtable tracker. Named block/bulk-deal source is not wired yet.</div><table class="simple"><tr><th>Stock</th><th>FII Δ</th><th>DII Δ</th><th>Promoter Δ</th><th>Price</th></tr>${rows.map(r=>`<tr class="click" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="mono ${r.fii_change_q<0?'bad':''}">${fmt(r.fii_change_q)}</td><td class="mono ${r.dii_change_q<0?'bad':''}">${fmt(r.dii_change_q)}</td><td class="mono">${fmt(r.promoter_change_q)}</td><td class="mono">${fmt(r.price)}</td></tr>`).join('')}</table>` : `<div class="empty">No seller data.</div>`; bindRows(); }
 
-$('btnOpenfund').onclick = loadOpenfund;
-$('btnSR').onclick = loadSR;
-$('btnShortlist').onclick = loadShortlist;
-$('btnThemes').onclick = loadThemes;
-$('btnConst').onclick = loadConstituents;
-$('lnkOpenfund').onclick = loadOpenfund;
-$('lnkSR').onclick = loadSR;
-$('lnkShortlist').onclick = loadShortlist;
-$('lnkThemes').onclick = loadThemes;
-$('lnkConst').onclick = loadConstituents;
+function renderSide(){
+  const s = selectedSymbol ? mathIndex.get(selectedSymbol) : null;
+  sideBody.innerHTML = `
+    <div class="chips">
+      <span class="chip">Stocks: ${constituents.length}</span>
+      <span class="chip">OpenFund: ${(openfund?.stocks||[]).length}</span>
+      <span class="chip">S/R: ${(srAlerts?.alerts||[]).length}</span>
+      <span class="chip">Sellers: ${(netSellers?.sellers||[]).length}</span>
+    </div>
+    <h3>Selected stock</h3>
+    <div class="empty">${selectedSymbol ? `<b>${esc(selectedSymbol)}</b>` : 'None selected.'}</div>
+    <h3>Math quick view</h3>
+    ${s && s.math_detail ? `
+      <table class="simple">
+        <tr><th>Overall</th><td>${fmt(s.math_detail.overall_score)} / ${esc(s.math_detail.overall_verdict||'')}</td></tr>
+        <tr><th>Zone</th><td>${esc(s.math_detail.price_zones?.zone || '—')}</td></tr>
+        <tr><th>Support</th><td class="mono">${(s.math_detail.support_resistance?.support || []).join(', ') || '—'}</td></tr>
+        <tr><th>Resistance</th><td class="mono">${(s.math_detail.support_resistance?.resistance || []).join(', ') || '—'}</td></tr>
+      </table>` : `<div class="empty">Choose a stock with math data, then press <b>Math</b>.</div>`}
+    <h3>Current product shape</h3>
+    <ul>
+      <li>Left: search bar + all stocks</li>
+      <li>Right: analysis + math + panels</li>
+      <li>All major buttons preserved</li>
+      <li>New extra button: <b>Net sellers</b></li>
+    </ul>`;
+}
+
+$('stockSearch').addEventListener('input', e => renderList(filterStocks(e.target.value)));
+$('btnAnalyze').onclick = analyzeSelected;
+$('btnMath').onclick = showMath;
+$('btnCopyPrompt').onclick = copyPrompt;
+$('btnOpenfund').onclick = showOpenfund;
+$('btnSR').onclick = showSR;
+$('btnShortlist').onclick = showShortlist;
+$('btnThemes').onclick = showThemes;
+$('btnConstituents').onclick = showConstituents;
+$('btnSellers').onclick = showNetSellers;
 
 (async function init(){
   try {
-    await Promise.all([loadOpenfund(), loadSR(), loadShortlist()]);
-    setStatus('Loaded quick panels.');
+    setStatus('Loading data...');
+    const [constD, openfundD, srD, shortD, themeD, sellerD] = await Promise.all([
+      getJSON('/api/constituents'),
+      getJSON('/api/openfund'),
+      getJSON('/api/sr-alerts'),
+      getJSON('/api/shortlist'),
+      getJSON('/api/themes'),
+      getJSON('/api/net-sellers').catch(() => ({ ok:false, sellers:[] })),
+    ]);
+    constituents = (constD.rows || []).map(r => ({ symbol: r.symbol || r.Symbol || '', name: r.name || r.Company || '' })).filter(r => r.symbol);
+    openfund = openfundD; srAlerts = srD; shortlist = shortD; themes = themeD; netSellers = sellerD;
+    $('chipStocks').textContent = `${constituents.length} stocks`;
+    $('chipSR').textContent = `${(srAlerts.alerts || []).length} S/R alerts`;
+    $('chipSellers').textContent = `${(netSellers.sellers || []).length} sellers`;
+    renderList(constituents);
+    renderSide();
+    showOpenfund();
+    setStatus('Ready. Pick a stock on the left or use the buttons.');
   } catch(err) {
-    setStatus('Some panels failed to load.');
+    setStatus(`Load error: ${err.message}`);
+    resultBody.innerHTML = `<div class="bad">${esc(err.message)}</div>`;
   }
 })();
 </script>

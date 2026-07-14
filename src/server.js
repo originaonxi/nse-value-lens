@@ -143,6 +143,46 @@ app.get('/api/sr-alerts', (_req, res) => {
     .filter(Boolean);
   res.json({ ok: true, as_of: data.as_of, count: alerts.length, alerts });
 });
+/* ── Net sellers endpoint (Airtable-backed) ── */
+app.get('/api/net-sellers', async (_req, res) => {
+  const AKEY = process.env.AIRTABLE_API_KEY;
+  const BASE_ID = process.env.AIRTABLE_BASE_ID || 'appQsIke1wuAVOkpF';
+  if (!AKEY) return res.json({ ok: false, error: 'AIRTABLE_API_KEY missing', sellers: [] });
+  try {
+    const sellers = [];
+    let offset = '';
+    while (true) {
+      const u = new URL(`https://api.airtable.com/v0/${BASE_ID}/fo_tracker`);
+      if (offset) u.searchParams.set('offset', offset);
+      const r = await fetch(u.toString(), { headers: { Authorization: `Bearer ${AKEY}` } });
+      if (!r.ok) throw new Error(`Airtable ${r.status}`);
+      const d = await r.json();
+      for (const rec of d.records || []) {
+        const f = rec.fields || {};
+        if (f.Signal === 'SELLING') {
+          sellers.push({
+            symbol: f.Symbol,
+            fii_change_q: f.FII_Change_Q ?? null,
+            dii_change_q: f.DII_Change_Q ?? null,
+            promoter_change_q: f.Promoter_Change_Q ?? null,
+            price: f.Price ?? null,
+            updated: f.Last_Updated ?? null,
+          });
+        }
+      }
+      offset = d.offset || '';
+      if (!offset) break;
+    }
+    sellers.sort((a, b) => {
+      const aa = Math.min(a.fii_change_q ?? 0, a.dii_change_q ?? 0);
+      const bb = Math.min(b.fii_change_q ?? 0, b.dii_change_q ?? 0);
+      return aa - bb;
+    });
+    res.json({ ok: true, count: sellers.length, sellers });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message, sellers: [] });
+  }
+});
 
 /* ── Token-gated manual refresh ── */
 app.post('/api/refresh', (req, res) => {
