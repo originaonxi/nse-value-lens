@@ -6,39 +6,24 @@
 <title>NSE</title>
 <style>
 :root{--bg:#f3f3f3;--panel:#fff;--line:#d8d8d8;--text:#111;--muted:#666;--blue:#1a0dab;--green:#0b8043;--red:#c5221f;--amber:#a06500}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,Helvetica,sans-serif}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,Helvetica,sans-serif}
 a{color:var(--blue);text-decoration:underline;cursor:pointer}
 .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
 .left{background:#fff;border-right:1px solid var(--line);padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
 .right{padding:16px;overflow:auto}
-.logo{font-size:28px;font-weight:700;letter-spacing:-.8px;margin:2px 0 8px}
-.small{font-size:12px;color:var(--muted)}
+.logo{font-size:28px;font-weight:700;letter-spacing:-.8px;margin:2px 0 8px}.small{font-size:12px;color:var(--muted)}
 .searchBox input{width:100%;height:40px;border:1px solid #bbb;border-radius:4px;padding:0 12px;font-size:15px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}.chip{font-size:11px;border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
-.stocklist{border-top:1px solid var(--line)}
-.stockitem{padding:8px 6px;border-bottom:1px solid #eee;cursor:pointer}
-.stockitem:hover,.stockitem.active{background:#f8f8f8}
-.stockitem .sym{font-weight:700}.stockitem .name{font-size:12px;color:var(--muted)}
-.header{margin-bottom:10px}.title{font-size:24px;font-weight:700}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}
-.status{font-size:12px;color:var(--muted);min-height:18px;margin-bottom:10px}
-.summary{background:#fff;border:1px solid var(--line);padding:14px;margin-bottom:14px}
-.summary h2{margin:0 0 6px;font-size:22px}.summary .sub{color:var(--muted);font-size:12px}
-.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:12px}
-.metric{border:1px solid #eee;padding:8px}.metric .k{font-size:11px;color:var(--muted);text-transform:uppercase}.metric .v{font-size:16px;font-weight:700;margin-top:2px}
+.stocklist{border-top:1px solid var(--line)} .stockitem{padding:8px 6px;border-bottom:1px solid #eee;cursor:pointer}.stockitem:hover,.stockitem.active{background:#f8f8f8}.stockitem .sym{font-weight:700}.stockitem .name{font-size:12px;color:var(--muted)}
+.header{margin-bottom:10px}.title{font-size:24px;font-weight:700}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}.status{font-size:12px;color:var(--muted);min-height:18px;margin-bottom:10px}
+.summary{background:#fff;border:1px solid var(--line);padding:14px;margin-bottom:14px}.summary h2{margin:0 0 6px;font-size:22px}.summary .sub{color:var(--muted);font-size:12px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:12px}.metric{border:1px solid #eee;padding:8px}.metric .k{font-size:11px;color:var(--muted);text-transform:uppercase}.metric .v{font-size:16px;font-weight:700;margin-top:2px}
 .good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}.warn{color:var(--amber);font-weight:700}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
-.tabs button{border:1px solid #b3b3b3;background:#fff;padding:7px 10px;border-radius:4px;cursor:pointer;font-size:13px}
-.tabs button.active{background:#111;color:#fff;border-color:#111}
-.tabs button:hover{background:#f0f0f0}.tabs button.active:hover{background:#111}
-.box{background:var(--panel);border:1px solid var(--line);padding:14px}
-.box h3{margin:0 0 10px;font-size:16px}.subnote{font-size:11px;color:var(--muted)}.empty{font-size:13px;color:var(--muted)}
-.mono{font-family:Consolas,'Courier New',monospace}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}.tabs button{border:1px solid #b3b3b3;background:#fff;padding:7px 10px;border-radius:4px;cursor:pointer;font-size:13px}.tabs button.active{background:#111;color:#fff;border-color:#111}.tabs button:hover{background:#f0f0f0}.tabs button.active:hover{background:#111}
+.box{background:var(--panel);border:1px solid var(--line);padding:14px}.box h3{margin:0 0 10px;font-size:16px}.subnote{font-size:11px;color:var(--muted)}.empty{font-size:13px;color:var(--muted)} .mono{font-family:Consolas,'Courier New',monospace}
 .simple{width:100%;border-collapse:collapse;font-size:13px}.simple th,.simple td{border-bottom:1px solid #eee;padding:7px 4px;text-align:left;vertical-align:top}.simple th{font-size:12px;color:var(--muted)}
 .report{line-height:1.6}.report table{width:100%;border-collapse:collapse;display:block;overflow:auto}.report th,.report td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}.report blockquote{margin:12px 0;padding:10px 12px;border-left:3px solid #ccc;background:#fafafa}
-.prompt{white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px;margin-top:10px}
-.row{cursor:pointer}.row:hover{background:#fafafa}
-.section{margin-top:14px}
+.prompt{white-space:pre-wrap;background:#fafafa;border:1px solid #e5e5e5;padding:10px;margin-top:10px}.row{cursor:pointer}.row:hover{background:#fafafa}.section{margin-top:14px}
 @media (max-width:1100px){.summary-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}
 @media (max-width:980px){.app{grid-template-columns:1fr}.left{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}}
 @media (max-width:620px){.summary-grid{grid-template-columns:1fr}.tabs{gap:4px}.tabs button{font-size:12px;padding:6px 8px}}
@@ -50,7 +35,7 @@ a{color:var(--blue);text-decoration:underline;cursor:pointer}
     <div class="logo">NSE</div>
     <div class="small">Left panel: search bar + all stocks. Right panel: one stock and everything about it.</div>
     <div class="searchBox"><input id="stockSearch" type="text" placeholder="Search stock by symbol or name"></div>
-    <div class="chips"><span class="chip" id="chipStocks">Loading stocks...</span><span class="chip" id="chipSR">Loading S/R...</span><span class="chip" id="chipSellers">Loading sellers...</span></div>
+    <div class="chips"><span class="chip" id="chipStocks">Loading stocks...</span><span class="chip" id="chipSR">Loading S/R...</span><span class="chip" id="chipSellers">Loading sellers...</span><span class="chip" id="chipRanks">Loading ranks...</span></div>
     <div class="stocklist" id="stockList"></div>
   </aside>
   <main class="right">
@@ -81,7 +66,7 @@ a{color:var(--blue);text-decoration:underline;cursor:pointer}
 const $ = id => document.getElementById(id);
 const statusEl = $('status'), stockList = $('stockList'), summaryBox = $('summaryBox'), contentBox = $('contentBox');
 let selectedSymbol = '', activeTab = 'overview';
-let constituents = [], openfund = null, srAlerts = null, shortlist = null, themes = null, netSellers = null;
+let constituents = [], openfund = null, srAlerts = null, shortlist = null, themes = null, netSellers = null, rankings = null;
 const analyzeCache = new Map();
 const mathIndex = new Map((window.STOCK_DATA?.stocks || []).map(s => [s.symbol, s]));
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -91,33 +76,34 @@ async function getJSON(url, opts={}){ const r = await fetch(url, opts); if(!r.ok
 function filterStocks(q){ q=(q||'').trim().toLowerCase(); if(!q) return constituents; return constituents.filter(s => (s.symbol||'').toLowerCase().includes(q) || (s.name||'').toLowerCase().includes(q)); }
 function currentMath(){ return selectedSymbol ? mathIndex.get(selectedSymbol) : null; }
 function currentSeller(){ return (netSellers?.sellers || []).find(s => s.symbol === selectedSymbol) || null; }
+function currentRank(){ return (rankings?.rankings || []).find(r => r.symbol === selectedSymbol) || null; }
 async function ensureReport(){ if(!selectedSymbol) return null; if(analyzeCache.has(selectedSymbol)) return analyzeCache.get(selectedSymbol); const d = await getJSON('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symbol:selectedSymbol})}); analyzeCache.set(selectedSymbol,d); return d; }
 function renderList(items){ stockList.innerHTML = items.map(it => `<div class="stockitem ${selectedSymbol===it.symbol?'active':''}" data-symbol="${esc(it.symbol)}"><div class="sym">${esc(it.symbol)}</div><div class="name">${esc(it.name||'')}</div></div>`).join('') || `<div class="empty" style="padding:10px 6px">No stocks found.</div>`; }
 function renderSummary(){
-  const s = currentMath(), seller = currentSeller();
   if(!selectedSymbol){ summaryBox.innerHTML = `<div class="empty">Choose a stock from the left panel.</div>`; return; }
+  const s=currentMath(), seller=currentSeller(), rank=currentRank();
   const name = constituents.find(c => c.symbol === selectedSymbol)?.name || s?.name || '';
-  const verdict = s?.math_detail?.overall_verdict || 'API-backed / no local model verdict';
-  const zone = s?.math_detail?.price_zones?.zone || '—';
-  const updated = s?.math_detail?.as_of || window.STOCK_DATA?.as_of || '—';
-  const peg = (s?.pe && s?.profit_growth && s.profit_growth > 0) ? (s.pe / s.profit_growth).toFixed(2) : '—';
+  const verdict = s?.math_detail?.overall_verdict || rank?.signal || 'API-backed / no local model verdict';
+  const zone = s?.math_detail?.price_zones?.zone || rank?.trend || '—';
+  const updated = s?.math_detail?.as_of || rank?.updated || window.STOCK_DATA?.as_of || '—';
+  const peg = (s?.pe && s?.profit_growth && s.profit_growth > 0) ? (s.pe / s.profit_growth).toFixed(2) : fmt(rank?.peg);
   summaryBox.innerHTML = `
     <h2>${esc(selectedSymbol)}${name ? ' — ' + esc(name) : ''}</h2>
-    <div class="sub">Last update: ${esc(updated)} · Verdict: <span class="${verdict.includes('BUY')||verdict.includes('STRONG')?'good':verdict.includes('AVOID')||verdict.includes('SELL')?'bad':'warn'}">${esc(verdict)}</span> · Zone: ${esc(zone)}</div>
+    <div class="sub">Last update: ${esc(updated)} · Verdict: <span class="${String(verdict).includes('BUY')||String(verdict).includes('STRONG')?'good':String(verdict).includes('AVOID')||String(verdict).includes('SELL')?'bad':'warn'}">${esc(verdict)}</span> · Zone/Trend: ${esc(zone)}</div>
     <div class="summary-grid">
-      <div class="metric"><div class="k">Price</div><div class="v mono">${fmt(s?.price ?? seller?.price)}</div></div>
+      <div class="metric"><div class="k">Price</div><div class="v mono">${fmt(s?.price ?? seller?.price ?? rank?.price)}</div></div>
       <div class="metric"><div class="k">PEG</div><div class="v mono">${peg}</div></div>
-      <div class="metric"><div class="k">PE / PB</div><div class="v mono">${fmt(s?.pe)} / ${fmt(s?.pb)}</div></div>
-      <div class="metric"><div class="k">ROCE / ROE</div><div class="v mono">${fmt(s?.roce)} / ${fmt(s?.roe)}</div></div>
+      <div class="metric"><div class="k">PE / PB</div><div class="v mono">${fmt(s?.pe ?? rank?.pe)} / ${fmt(s?.pb ?? rank?.pb)}</div></div>
+      <div class="metric"><div class="k">ROCE / ROE</div><div class="v mono">${fmt(s?.roce ?? rank?.roce)} / ${fmt(s?.roe ?? rank?.roe)}</div></div>
       <div class="metric"><div class="k">Support</div><div class="v mono">${(s?.math_detail?.support_resistance?.support || []).slice(0,2).join(', ') || '—'}</div></div>
       <div class="metric"><div class="k">Resistance</div><div class="v mono">${(s?.math_detail?.support_resistance?.resistance || []).slice(0,2).join(', ') || '—'}</div></div>
       <div class="metric"><div class="k">Seller status</div><div class="v ${seller ? 'bad' : ''}">${seller ? 'NET SELLER' : '—'}</div></div>
-      <div class="metric"><div class="k">Composite</div><div class="v mono">${fmt(s?.scores?.composite)}</div></div>
+      <div class="metric"><div class="k">Rank / Score</div><div class="v mono">${fmt(rank?.rank)} / ${fmt(rank?.score)}</div></div>
     </div>`;
 }
 async function renderOverview(){
   if(!selectedSymbol){ contentBox.innerHTML = `<div class="empty">Choose a stock from the left to see overview.</div>`; return; }
-  const s=currentMath(), seller=currentSeller();
+  const s=currentMath(), seller=currentSeller(), rank=currentRank();
   if(s){
     contentBox.innerHTML = `<h3>Overview</h3><div class="subnote">One stock and everything around it.</div><div class="section"><b>Thesis</b><div>${esc(s.thesis||'—')}</div></div><div class="section"><b>Risks</b><div>${esc(s.risks||'—')}</div></div><div class="section"><b>Seller status</b><div>${seller ? `<span class="bad">NET SELLER</span> · FII Δ ${fmt(seller.fii_change_q)} · DII Δ ${fmt(seller.dii_change_q)}` : 'No current seller flag for this stock.'}</div></div>`;
     return;
@@ -141,7 +127,7 @@ function renderTechnical(){ const s=currentMath(); if(!s){ contentBox.innerHTML 
 function renderSignals(){ const s=currentMath(); if(!s){ contentBox.innerHTML = `<div class="empty">Choose a stock first.</div>`; return; } contentBox.innerHTML = `<h3>Signals</h3><table class="simple"><tr><th>Composite</th><th>Value</th><th>Quality</th><th>Momentum</th><th>Safety</th><th>Long score</th><th>Short score</th></tr><tr><td class="mono">${fmt(s.scores?.composite)}</td><td class="mono">${fmt(s.scores?.value)}</td><td class="mono">${fmt(s.scores?.quality)}</td><td class="mono">${fmt(s.scores?.momentum)}</td><td class="mono">${fmt(s.scores?.safety)}</td><td class="mono">${fmt(s.long_score)}</td><td class="mono">${fmt(s.short_score)}</td></tr></table>`; }
 function renderSR(){ const rows=srAlerts?.alerts||[]; contentBox.innerHTML = rows.length ? `<h3>Support / Resistance</h3><div class="subnote">Latest S/R alerts from backend calculation.</div><table class="simple"><tr><th>Stock</th><th>Status</th><th>S Dist</th><th>R Dist</th><th>Score</th></tr>${rows.map(r=>`<tr class="row" data-symbol="${esc(r.symbol)}"><td><a>${esc(r.symbol)}</a></td><td class="${r.breaking_out?'good':r.breaking_down?'bad':r.near_support?'good':'warn'}">${r.breaking_out?'BREAKOUT':r.breaking_down?'BREAKDOWN':r.near_support?'NEAR SUPPORT':'NEAR RESISTANCE'}</td><td class="mono">${fmt(r.support_dist_pct)}%</td><td class="mono">${fmt(r.resistance_dist_pct)}%</td><td>${fmt(r.overall_score)}</td></tr>`).join('')}</table>` : `<div class="empty">No S/R alerts.</div>`; }
 async function renderReport(){ if(!selectedSymbol){ contentBox.innerHTML = `<div class="empty">Choose a stock first.</div>`; return; } const d=await ensureReport(); contentBox.innerHTML = `<h3>Full Report</h3><div class="report">${d.html}</div><div class="section"><div class="subnote">Prompt</div><div class="prompt mono">${esc(d.prompt||'')}</div></div>`; }
-function renderRanks(){ const rows=(openfund?.stocks||[]).slice(0,40); contentBox.innerHTML = rows.length ? `<h3>Rank Table</h3><table class="simple"><tr><th>Stock</th><th>Score</th><th>Upside</th><th>Sector</th></tr>${rows.map(s=>`<tr class="row" data-symbol="${esc(s.symbol)}"><td><a>${esc(s.symbol)}</a></td><td>${fmt(s.composite)}</td><td>${fmt(s.math_total||s.target_upside)}%</td><td>${esc(s.sector||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No rank data.</div>`; }
+function renderRanks(){ const rows=(rankings?.rankings||[]).slice(0,80); contentBox.innerHTML = rows.length ? `<h3>Rank Table</h3><div class="subnote">Daily all-stock F&O ranking.</div><table class="simple"><tr><th>Rank</th><th>Stock</th><th>Score</th><th>6M %</th><th>RSI</th><th>Signal</th></tr>${rows.map(r=>`<tr class="row" data-symbol="${esc(r.symbol)}"><td class="mono">${fmt(r.rank)}</td><td><a>${esc(r.symbol)}</a></td><td class="mono">${fmt(r.score)}</td><td class="mono">${fmt(r.ret_6m)}</td><td class="mono">${fmt(r.rsi14)}</td><td class="${(r.signal==='SELLING'?'bad':r.signal==='BUYING'?'good':'warn')}">${esc(r.signal||'')}</td></tr>`).join('')}</table>` : `<div class="empty">No ranking data.</div>`; }
 function renderBanker(){ const s=currentMath(); if(!s){ contentBox.innerHTML = `<div class="empty">Choose a stock first.</div>`; return; } contentBox.innerHTML = `<h3>Banker Checklist</h3><table class="simple"><tr><th>Check</th><th>Value</th><th>Status</th></tr><tr><td>Debt / Equity</td><td class="mono">${fmt(s.de)}</td><td class="${s.de!=null&&s.de<1?'good':'warn'}">${s.de!=null&&s.de<1?'PASS':'WATCH'}</td></tr><tr><td>Promoter pledge</td><td class="mono">${fmt(s.pledged)}%</td><td class="${s.pledged===0?'good':'bad'}">${s.pledged===0?'CLEAN':'RISK'}</td></tr><tr><td>ROCE</td><td class="mono">${fmt(s.roce)}%</td><td class="${s.roce>=15?'good':'warn'}">${s.roce>=15?'GOOD':'LOW'}</td></tr><tr><td>Profit growth</td><td class="mono">${fmt(s.profit_growth)}%</td><td class="${s.profit_growth>0?'good':'bad'}">${s.profit_growth>0?'POSITIVE':'NEGATIVE'}</td></tr></table>`; }
 function renderCalculator(){ const s=currentMath(); if(!s||!s.math_detail){ contentBox.innerHTML = `<div class="empty">Choose a stock with math data first.</div>`; return; } const pz=s.math_detail.price_zones||{}; contentBox.innerHTML = `<h3>Calculator</h3><div class="subnote">Simple risk/reward view from local buy/sell zones.</div><table class="simple"><tr><th>Current</th><th>Buy zone</th><th>Sell zone</th><th>R/R</th></tr><tr><td class="mono">${fmt(pz.current_price)}</td><td class="mono">${pz.buy_zone?`${pz.buy_zone.lo} – ${pz.buy_zone.hi}`:'—'}</td><td class="mono">${pz.sell_zone?`${pz.sell_zone.lo} – ${pz.sell_zone.hi}`:'—'}</td><td class="mono">${fmt(s.math?.risk_reward)}</td></tr></table>`; }
 function renderLongShort(){ const D=window.STOCK_DATA||{}; contentBox.innerHTML = `<h3>Long / Short</h3><table class="simple"><tr><th>Long board</th><th>Short board</th><th>Avoid</th></tr><tr><td class="mono">${(D.long_board||[]).join(', ')||'—'}</td><td class="mono">${(D.short_board||[]).join(', ')||'—'}</td><td class="mono">${(D.avoid_board||[]).join(', ')||'—'}</td></tr></table>`; }
@@ -154,7 +140,7 @@ document.addEventListener('click', (e)=>{ const row=e.target.closest('#contentBo
 $('stockSearch').addEventListener('input', e => renderList(filterStocks(e.target.value)));
 document.querySelectorAll('#tabs button[data-tab]').forEach(btn => btn.addEventListener('click',()=>{ document.querySelectorAll('#tabs button[data-tab]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); activeTab=btn.dataset.tab; renderActiveTab(); setStatus(`${selectedSymbol||'Dashboard'} · ${activeTab}`); }));
 $('copyPromptBtn').addEventListener('click', async ()=>{ if(!selectedSymbol){ setStatus('Choose a stock first.'); return; } const d=await ensureReport(); await navigator.clipboard.writeText(d.prompt||''); setStatus(`Prompt copied for ${selectedSymbol}.`); });
-(async function init(){ try { setStatus('Loading data...'); const [constD, openfundD, srD, shortD, themeD, sellerD] = await Promise.all([getJSON('/api/constituents'), getJSON('/api/openfund'), getJSON('/api/sr-alerts'), getJSON('/api/shortlist'), getJSON('/api/themes'), getJSON('/api/net-sellers').catch(()=>({ok:false,sellers:[]}))]); constituents=(constD.rows||[]).map(r=>({symbol:r.symbol||r.Symbol||'',name:r.name||r.Company||''})).filter(r=>r.symbol); openfund=openfundD; srAlerts=srD; shortlist=shortD; themes=themeD; netSellers=sellerD; $('chipStocks').textContent=`${constituents.length} stocks`; $('chipSR').textContent=`${(srAlerts.alerts||[]).length} S/R alerts`; $('chipSellers').textContent=`${(netSellers.sellers||[]).length} sellers`; if(constituents.length){ selectedSymbol=constituents[0].symbol; } renderList(constituents); renderSummary(); await renderActiveTab(); setStatus('Ready. Pick a stock on the left or switch tabs.'); } catch(err){ setStatus(`Load error: ${err.message}`); contentBox.innerHTML = `<div class="bad">${esc(err.message)}</div>`; }})();
+(async function init(){ try { setStatus('Loading data...'); const [constD, openfundD, srD, shortD, themeD, sellerD, rankD] = await Promise.all([getJSON('/api/constituents'), getJSON('/api/openfund'), getJSON('/api/sr-alerts'), getJSON('/api/shortlist'), getJSON('/api/themes'), getJSON('/api/net-sellers').catch(()=>({ok:false,sellers:[]})), getJSON('/api/rankings').catch(()=>({ok:false,rankings:[]}))]); constituents=(constD.rows||[]).map(r=>({symbol:r.symbol||r.Symbol||'',name:r.name||r.Company||''})).filter(r=>r.symbol); openfund=openfundD; srAlerts=srD; shortlist=shortD; themes=themeD; netSellers=sellerD; rankings=rankD; $('chipStocks').textContent=`${constituents.length} stocks`; $('chipSR').textContent=`${(srAlerts.alerts||[]).length} S/R alerts`; $('chipSellers').textContent=`${(netSellers.sellers||[]).length} sellers`; $('chipRanks').textContent=`${(rankings.rankings||[]).length} ranks`; if(constituents.length){ selectedSymbol=constituents[0].symbol; } renderList(constituents); renderSummary(); await renderActiveTab(); setStatus('Ready. Pick a stock on the left or switch tabs.'); } catch(err){ setStatus(`Load error: ${err.message}`); contentBox.innerHTML = `<div class="bad">${esc(err.message)}</div>`; } })();
 </script>
 </body>
 </html>

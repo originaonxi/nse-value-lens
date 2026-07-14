@@ -195,6 +195,46 @@ app.get('/api/net-sellers', async (_req, res) => {
   }
 });
 
+/* ── Rankings endpoint (Airtable-backed) ── */
+app.get('/api/rankings', async (_req, res) => {
+  const AKEY = process.env.AIRTABLE_API_KEY;
+  const BASE_ID = process.env.AIRTABLE_BASE_ID || 'appQsIke1wuAVOkpF';
+  if (!AKEY) return res.json({ ok: false, error: 'AIRTABLE_API_KEY missing', rankings: [] });
+  try {
+    const rows = [];
+    let offset = '';
+    while (true) {
+      const u = new URL(`https://api.airtable.com/v0/${BASE_ID}/fo_tracker`);
+      if (offset) u.searchParams.set('offset', offset);
+      const r = await fetch(u.toString(), { headers: { Authorization: `Bearer ${AKEY}` } });
+      if (!r.ok) throw new Error(`Airtable ${r.status}`);
+      const d = await r.json();
+      for (const rec of d.records || []) {
+        const f = rec.fields || {};
+        rows.push({
+          symbol: f.Symbol,
+          rank: f.Rank ?? null,
+          score: f.Rank_Score ?? null,
+          rank_change: f.Rank_Change ?? null,
+          ret_6m: f.Ret_6M ?? null,
+          ret_12m: f.Ret_12M ?? null,
+          rsi14: f.RSI14 ?? null,
+          trend: f.Trend_Signal ?? null,
+          signal: f.Signal ?? null,
+          price: f.Price ?? null,
+          updated: f.Ranking_Updated ?? f.Last_Updated ?? null,
+        });
+      }
+      offset = d.offset || '';
+      if (!offset) break;
+    }
+    rows.sort((a, b) => (a.rank ?? 9999) - (b.rank ?? 9999));
+    res.json({ ok: true, count: rows.length, rankings: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message, rankings: [] });
+  }
+});
+
 /* ── Token-gated manual refresh ── */
 app.post('/api/refresh', (req, res) => {
   const secret = process.env.REFRESH_SECRET;
