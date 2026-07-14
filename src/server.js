@@ -43,7 +43,15 @@ function renderSafeMarkdown(markdown) {
 
 
 app.use(express.json({ limit: '256kb' }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, name: 'nse-value-lens' });
