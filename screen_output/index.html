@@ -62,6 +62,7 @@ tr:hover td{background:#1c2128}
 
 <div class="tabs">
   <button class="tab-btn active" onclick="showTab('combined')">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
+  <button class="tab-btn" onclick="showTab('sr')">&#128200; S&amp;R Daily<span class="badge">live</span></button>
   <button class="tab-btn" onclick="showTab('vdn')">Value-Down</button>
   <button class="tab-btn" onclick="showTab('m5')">Momentum-5</button>
   <button class="tab-btn" onclick="showTab('fund')">Fund 15-stock</button>
@@ -70,6 +71,35 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('ensemble')">Ensemble<span class="badge">new</span></button>
   <button class="tab-btn" onclick="showTab('formulas')">Methodology</button>
   <button class="tab-btn" onclick="showTab('universe')">Universe</button>
+</div>
+
+<!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
+<div id="sr" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">5-method Support &amp; Resistance screen — run daily after close.</strong><br>
+    M1 Swing H/L (fractal N=5) &nbsp;|&nbsp; M2 Pivot Points (PP/R1/R2/S1/S2) &nbsp;|&nbsp;
+    M3 52w High/Low &nbsp;|&nbsp; M4 K-means 90-session cluster &nbsp;|&nbsp;
+    M5 Volume-at-Price POC + 70% Value Area &nbsp;|&nbsp;
+    Breakout trigger: Donchian 20d + vol &gt;1.5× avg.<br>
+    Proximity: <code>AT</code> = within 0.5 ATR &nbsp; <code>NEAR</code> = within 1.5 ATR.
+    Re-run <code>python daily_sr.py</code> each evening.
+  </p>
+  <div id="srStats" class="stat-strip"></div>
+  <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap" id="srFilters">
+    <button onclick="srFilter('ALL')"    class="tab-btn active"  id="sf-ALL">All</button>
+    <button onclick="srFilter('BREAKOUT_UP')"  class="tab-btn" id="sf-BREAKOUT_UP"  style="color:#3fb950">&#9650; Breakout</button>
+    <button onclick="srFilter('BREAKOUT_DN')"  class="tab-btn" id="sf-BREAKOUT_DN"  style="color:#f778ba">&#9660; Breakdown</button>
+    <button onclick="srFilter('AT_RESISTANCE')" class="tab-btn" id="sf-AT_RESISTANCE" style="color:#d29922">At Resistance</button>
+    <button onclick="srFilter('AT_SUPPORT')"    class="tab-btn" id="sf-AT_SUPPORT"    style="color:#3fb950">At Support</button>
+    <button onclick="srFilter('NEAR')"   class="tab-btn" id="sf-NEAR">Near Level</button>
+  </div>
+  <div class="scroll" style="max-height:580px"><table><thead><tr>
+    <th>Signal</th><th>Symbol</th><th>Company</th><th>Close &#8377;</th>
+    <th>Vol&#215;</th><th>Nearest R &#8377;</th><th>Dist R (ATR)</th>
+    <th>Nearest S &#8377;</th><th>Dist S (ATR)</th>
+    <th>POC &#8377;</th><th>Pivot PP</th><th>BO Str</th>
+  </tr></thead><tbody id="srRows"></tbody></table></div>
+  <div class="disc" id="srFoot">Loading&hellip;</div>
 </div>
 
 <!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
@@ -427,4 +457,62 @@ fetch('combined_portfolio.json').then(r=>r.json()).then(p=>{
     }
   });
 }).catch(e=>{document.getElementById('combFoot').textContent='Could not load combined_portfolio.json — run build_combined.py first.';});
+
+// ═══ S&R Daily tab ═══════════════════════════════════════════════════════
+const SIG_ICON={BREAKOUT_UP:'🟢',BREAKOUT_DN:'🔴',AT_RESISTANCE:'🟡',AT_SUPPORT:'🟢',NEAR_RESISTANCE:'🟠',NEAR_SUPPORT:'🔵',NEUTRAL:'⚪'};
+const SIG_COL ={BREAKOUT_UP:'#3fb950',BREAKOUT_DN:'#f778ba',AT_RESISTANCE:'#d29922',AT_SUPPORT:'#3fb950',NEAR_RESISTANCE:'#d29922',NEAR_SUPPORT:'#58a6ff',NEUTRAL:'#8b949e'};
+let _srAll=[], _srFilter='ALL';
+function srFilter(f){
+  _srFilter=f;
+  document.querySelectorAll('#srFilters .tab-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('sf-'+f)||document.getElementById('sf-ALL');
+  if(btn) btn.classList.add('active');
+  renderSR();
+}
+function renderSR(){
+  const rows=_srFilter==='ALL'?_srAll:
+    _srFilter==='NEAR'?_srAll.filter(r=>r.signal.startsWith('NEAR')):
+    _srAll.filter(r=>r.signal===_srFilter);
+  document.getElementById('srRows').innerHTML=rows.map(r=>{
+    const col=SIG_COL[r.signal]||'#8b949e';
+    const icon=SIG_ICON[r.signal]||'⚪';
+    const nr=r.nearest_resistance!=null?fmtInr(r.nearest_resistance):'—';
+    const ns=r.nearest_support   !=null?fmtInr(r.nearest_support)   :'—';
+    const dr=r.dist_resistance_atr!=null?r.dist_resistance_atr.toFixed(2)+'×':'—';
+    const ds=r.dist_support_atr   !=null?r.dist_support_atr.toFixed(2)  +'×':'—';
+    const poc=r.poc!=null?fmtInr(r.poc):'—';
+    const pp=r.pivot?fmtInr(r.pivot.PP):'—';
+    const bo=r.bo_strength_atr?r.bo_strength_atr.toFixed(2)+'atr':'—';
+    const vr=r.vol_ratio!=null?r.vol_ratio.toFixed(1)+'×':'—';
+    return `<tr>
+      <td><span style="color:${col};font-weight:700">${icon} ${r.signal.replace('_',' ')}</span></td>
+      <td class="sym">${r.symbol}</td>
+      <td class="co" title="${r.name||''}">${r.name||r.symbol}</td>
+      <td>${fmtInr(r.close)}</td>
+      <td style="color:${(r.vol_ratio||0)>1.5?'#3fb950':'#c9d1d9'}">${vr}</td>
+      <td style="color:#f778ba">${nr}</td>
+      <td style="color:${r.dist_resistance_atr!=null&&r.dist_resistance_atr<0.5?'#f778ba':'#c9d1d9'}">${dr}</td>
+      <td style="color:#3fb950">${ns}</td>
+      <td style="color:${r.dist_support_atr!=null&&r.dist_support_atr<0.5?'#3fb950':'#c9d1d9'}">${ds}</td>
+      <td style="color:#a371f7">${poc}</td>
+      <td style="color:#8b949e">${pp}</td>
+      <td style="color:${(r.bo_strength_atr||0)>0?'#3fb950':(r.bo_strength_atr||0)<0?'#f778ba':'#8b949e'}">${bo}</td>
+    </tr>`;
+  }).join('');
+}
+fetch('sr_levels.json').then(r=>r.json()).then(d=>{
+  _srAll=d.stocks||[];
+  const signals=Object.fromEntries(['BREAKOUT_UP','BREAKOUT_DN','AT_RESISTANCE','AT_SUPPORT','NEAR_RESISTANCE','NEAR_SUPPORT','NEUTRAL'].map(s=>[s,0]));
+  _srAll.forEach(r=>{ if(signals[r.signal]!==undefined) signals[r.signal]++; });
+  document.getElementById('srStats').innerHTML=[
+    ['As of', d.as_of],
+    ['Breakout ▲', signals.BREAKOUT_UP],
+    ['Breakdown ▼', signals.BREAKOUT_DN],
+    ['At Resistance', signals.AT_RESISTANCE],
+    ['At Support', signals.AT_SUPPORT],
+    ['Near Level', (signals.NEAR_RESISTANCE+signals.NEAR_SUPPORT)],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('srFoot').innerHTML=`<strong>Methods (5):</strong> ${d.methods.join(' &middot; ')}<br><strong>Breakout rule:</strong> ${d.breakout_trigger} &middot; <strong>Proximity:</strong> ${d.proximity_rule}<br>Run <code>python daily_sr.py</code> each evening to refresh. Data as of ${d.as_of}.`;
+  renderSR();
+}).catch(e=>{document.getElementById('srFoot').textContent='Run: python daily_sr.py to generate sr_levels.json';});
 </script></body></html>
