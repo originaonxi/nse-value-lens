@@ -353,12 +353,13 @@ function showModal(sym){
         </tbody></table>
       </div>
       <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
-        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Balance Sheet (yfinance)</div>
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Balance Sheet (yfinance)</div>
+        ${(p.sector||'').includes('Financial')?'<div style="font-size:.7rem;color:#58a6ff;margin-bottom:6px;padding:3px 6px;background:#0d1a2e;border-radius:4px">&#8505; Financial sector: debt/cash &amp; FCF reflect business model (deposits/loans), not financial risk</div>':''}
         <table style="width:100%;font-size:.82rem"><tbody>
           <tr><td style="color:#8b949e">Cash (BS)</td><td style="text-align:right;color:#3fb950">${fmtInr(p.total_cash)}</td></tr>
-          <tr><td style="color:#8b949e">Debt (BS)</td><td style="text-align:right;color:#d29922">${fmtInr(p.total_debt)}</td></tr>
-          <tr><td style="color:#8b949e">Debt/Cash</td><td style="text-align:right;color:${(p.debt_to_cash||0)>10?'#f778ba':'#c9d1d9'}">${fmtNum(p.debt_to_cash,1)}×</td></tr>
-          <tr><td style="color:#8b949e">FCF</td><td style="text-align:right;color:${(p.fcf||1)>0?'#3fb950':'#f778ba'}">${fmtInr(p.fcf)}</td></tr>
+          <tr><td style="color:#8b949e">Debt (BS)</td><td style="text-align:right;color:#8b949e">${fmtInr(p.total_debt)}</td></tr>
+          <tr><td style="color:#8b949e">Debt/Cash</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.debt_to_cash||0)>10?'#f778ba':'#c9d1d9'}">${fmtNum(p.debt_to_cash,1)}×${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
+          <tr><td style="color:#8b949e">FCF</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.fcf||1)>0?'#3fb950':'#f778ba'}">${fmtInr(p.fcf)}${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
           <tr><td style="color:#8b949e">Revenue</td><td style="text-align:right">${fmtInr(p.revenue)}</td></tr>
           <tr><td style="color:#8b949e">EBITDA</td><td style="text-align:right">${fmtInr(p.ebitda)}</td></tr>
         </tbody></table>
