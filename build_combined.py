@@ -117,21 +117,32 @@ def fetch_deep(symbol):
         return symbol, {'_error': str(e)}
 
 
-def red_flags(sym, d):
-    """Return list of warning strings for a stock's deep data."""
+FIN_KW = {'bank','financial','finance','nbfc','insur','housing','investment',
+           'investcorp','muthoot','bajajfin','holding','finserv'}
+
+def is_fin_sym(name_or_sym):
+    return any(k in name_or_sym.lower() for k in FIN_KW)
+
+
+def red_flags(sym, d, fin=False):
+    """Sector-aware warnings.
+    fin=True (bank/NBFC): debt/cash and FCF are structurally high — not flagged as risks.
+    Only flag universal problems: loss-making, very low ROE (non-fin only).
+    """
     flags = []
-    dc = d.get('debt_to_cash')
-    if dc and dc > 3:
-        flags.append(f"HIGH DEBT: debt is {dc:.1f}× cash")
-    fcf = d.get('fcf')
-    if fcf is not None and fcf < 0:
-        flags.append(f"NEGATIVE FCF: {inr(fcf)}")
-    roe = d.get('roe')
-    if roe is not None and roe < 0.08:
-        flags.append(f"LOW ROE: {roe*100:.1f}%")
     nm = d.get('net_margin')
     if nm is not None and nm < 0:
         flags.append(f"LOSS-MAKING: net margin {nm*100:.1f}%")
+    if not fin:
+        dc = d.get('debt_to_cash')
+        if dc and dc > 3:
+            flags.append(f"HIGH DEBT: debt is {dc:.1f}× cash")
+        fcf = d.get('fcf')
+        if fcf is not None and fcf < 0:
+            flags.append(f"NEGATIVE FCF: {inr(fcf)}")
+    roe = d.get('roe')
+    if roe is not None and roe < 0.08:
+        flags.append(f"LOW ROE: {roe*100:.1f}%")
     return flags
 
 
@@ -191,11 +202,10 @@ def build():
     # NON-FIN stocks:
     #   HARD FAIL = (debt/cash > 20 AND fcf < 0) OR net_margin < 0
     #   These are replaced by the next-best in the same sleeve
-    FIN_KW = {'bank','financial','finance','nbfc','insur','housing','investment',
-              'muthoot','bajajfin','holding','finserv'}
-    def is_fin_sym(sym):
+    # is_fin_sym and FIN_KW are at module level — use name lookup via val_picks for accuracy
+    def is_fin_sym_named(sym):
         name = next((dat.get('name','') for s,dat in val_picks if s==sym), sym)
-        return any(k in name.lower() for k in FIN_KW)
+        return is_fin_sym(name)
 
     def hard_fail(sym, d):
         """True = stock must be replaced."""
@@ -272,7 +282,7 @@ def build():
                 final_a.append((sym, mdat))
                 used.add(sym)
         else:
-            soft = [f for f in red_flags(sym, d)]
+            soft = red_flags(sym, d, fin=is_fin_sym_named(sym))
             tag  = ' ⚠ '+', '.join(soft) if soft else ' ✓'
             print(f"  ✓ {sym:<12} ROE={roe_s}  debt/cash={dc_s}  FCF={fcf_s}{tag}")
             final_a.append((sym, mdat))
@@ -312,7 +322,7 @@ def build():
                 print(f"  ⚠ {sym:<12} FLAGGED — keeping with warning")
                 final_b.append((sym, vdat)); used_b.add(sym)
         else:
-            soft = [f for f in red_flags(sym, d) if 'FCF' not in f or not is_fin_sym(sym)]
+            soft = red_flags(sym, d, fin=is_fin_sym_named(sym))
             tag  = ' ⚠ '+', '.join(soft) if soft else ' ✓'
             print(f"  ✓ {sym:<12} ROE={roe_s}  52wDD={dd_s}{tag}")
             final_b.append((sym, vdat)); used_b.add(sym)
@@ -321,7 +331,7 @@ def build():
     # ── 5. Build holdings ─────────────────────────────────────────────────
     def make_holding(sym, sleeve, label, rank_in_sleeve):
         d     = deep.get(sym, {})
-        flags = red_flags(sym, d)
+        flags = red_flags(sym, d, fin=is_fin_sym_named(sym))
         # Price from momentum data if available, else yfinance
         price = dict(all_mom).get(sym, {}).get('price') or d.get('pe') and None
         # Robust price lookup
@@ -385,7 +395,7 @@ def build():
         shares = int(ALLOC_PER // price)
         value  = shares * price
         deployed += value
-        flags  = red_flags(sym, d)
+        flags  = red_flags(sym, d, fin=is_fin_sym_named(sym))
         roe_s  = f"{d['roe']*100:.1f}%" if d.get('roe') else 'N/A'
         flag_s = ' ⚠ '+', '.join(flags) if flags else ' ✓'
         print(f"  A{i} {sym:<12} m5={mdat['m5_score']:.3f}  12m={mdat['mom12']:.1f}%"
@@ -412,7 +422,7 @@ def build():
             'dd_52wh_pct': price_dd.get(sym, {}).get('dd_52wh_pct'),
             'drop_1m_pct': price_dd.get(sym, {}).get('drop_1m_pct'),
             'drop_5d_pct': price_dd.get(sym, {}).get('drop_5d_pct'),
-            'red_flags': red_flags(sym, d),
+            'red_flags': red_flags(sym, d, fin=is_fin_sym_named(sym)),
         })
 
     print("\n── Sleeve B: Value-Down ─────────────────────────────────────────")
@@ -424,7 +434,7 @@ def build():
         shares = int(ALLOC_PER // price) if price else 0
         value  = shares * price if price else 0
         deployed += value
-        flags  = red_flags(sym, d)
+        flags  = red_flags(sym, d, fin=is_fin_sym_named(sym))
         mom_s  = f"z_ram={dict(all_mom).get(sym,{}).get('z_ram','N/A')}"
         flag_s = ' ⚠ '+', '.join(flags) if flags else ' ✓'
         roe_s  = f"{vdat.get('roe_pct','?')}%"
@@ -456,7 +466,7 @@ def build():
             'dd_52wh_pct': vdat.get('dd_52wh_pct'),
             'drop_1m_pct': vdat.get('drop_1m_pct'), 'drop_5d_pct': vdat.get('drop_5d_pct'),
             'val_score': vdat.get('_score'),
-            'red_flags': red_flags(sym, d),
+            'red_flags': red_flags(sym, d, fin=is_fin_sym_named(sym)),
         })
 
     cash_left = round(SEED - deployed, 2)
@@ -512,7 +522,7 @@ def build():
             'dd_52wh_pct': price_dd.get(sym, {}).get('dd_52wh_pct') or vh.get('dd_52wh_pct'),
             'drop_1m_pct': price_dd.get(sym, {}).get('drop_1m_pct') or vh.get('drop_1m_pct'),
             'drop_5d_pct': price_dd.get(sym, {}).get('drop_5d_pct') or vh.get('drop_5d_pct'),
-            'red_flags': red_flags(sym, d),
+            'red_flags': red_flags(sym, d, fin=is_fin_sym_named(sym)),
         }
     # Patch sleeve/label/scores into profiles from final holdings so modal has complete data
     for h in holdings:
