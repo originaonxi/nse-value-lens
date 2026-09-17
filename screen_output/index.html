@@ -61,7 +61,8 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('m5')">Momentum-5 &#8377;10L<span class="badge">pure math</span></button>
+  <button class="tab-btn active" onclick="showTab('vdn')">Value-Down &#8377;10L<span class="badge">funda+price</span></button>
+  <button class="tab-btn" onclick="showTab('m5')">Momentum-5</button>
   <button class="tab-btn" onclick="showTab('fund')">Fund 15-stock</button>
   <button class="tab-btn" onclick="showTab('baseline')">Baseline 12-1 Raw</button>
   <button class="tab-btn" onclick="showTab('sharpe')">Sharpe-RAM<span class="badge">new</span></button>
@@ -70,7 +71,22 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('universe')">Universe</button>
 </div>
 
-<div id="m5" class="tab-panel active">
+<div id="vdn" class="tab-panel active">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Fundamentally good, price beaten down.</strong>
+    Sector-aware: industrials scored on PE+PB+cash-yield (40%) / ROE+margin+low-debt (35%) / price-damage (25%); banks on PE+PB (50%) / ROE (30%) / price-damage (20%).<br>
+    Price-damage = 50% drawdown from 52w high + 30% 1-month return + 20% 5-day return &mdash; catches yesterday's selloff, not just 6m losers.<br>
+    Hard rule: PE, PB, ROE must all be present &mdash; no data gaps &rarr; not scored as "good funda". Top 10 &rarr; &#8377;1L each.
+  </p>
+  <div id="vdnStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:300px"><canvas id="chVdn"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Sector</th><th>Score</th><th>PE</th><th>PB</th><th>ROE%</th><th>CashYld%</th><th>52w DD%</th><th>Shares</th><th>Value &#8377;</th></tr></thead><tbody id="vdnRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="vdnFoot">Loading&hellip;</div>
+</div>
+
+<div id="m5" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
     <strong style="color:#e6edf3">Pure mathematics. No gates. No human filters.</strong>
     Every one of the 194 Nifty 200 stocks competes on the same formula:<br>
@@ -195,6 +211,25 @@ fetch('fund_portfolio.json').then(r=>r.json()).then(p=>{
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12}}}}
   });
 }).catch(e=>{document.getElementById('fundFoot').textContent='Could not load fund_portfolio.json — run build_fund.py first.';});
+
+// ---- Value-Down tab: render from value_dn.json ----
+fetch('value_dn.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2'];
+  document.getElementById('vdnStats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],['Holdings',p.holdings_count],
+    ['Universe',p.universe_size+' ('+p.fin_count+' fin)']
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('vdnRows').innerHTML=H.map((h,i)=>`<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td>${h.type}</td><td class="hi">${(+h._score).toFixed(3)}</td><td>${h.pe?h.pe.toFixed(1):'N/A'}</td><td>${h.pb?h.pb.toFixed(2):'N/A'}</td><td class="mid">${h.roe?(h.roe*100).toFixed(1)+'%':'N/A'}</td><td>${h.cash&&h.mc?((h.cash/h.mc)*100).toFixed(1)+'%':'N/A'}</td><td class="lo">${h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A'}</td><td>${h.shares.toLocaleString('en-IN')}</td><td class="hi">${inr(h.value_rs)}</td></tr>`).join('');
+  document.getElementById('vdnFoot').innerHTML=`<strong>Method:</strong> ${p.score_note}<br><strong>Hard rule:</strong> PE+PB+ROE must all be present (avg missing fields in final picks: 0.0). <strong>As of</strong> ${p.as_of} · rebalance ${p.rebalance}. Downloads: <a href="value_dn.csv" style="color:#58a6ff">value_dn.csv</a>. VEDL excluded only due to missing ROE data. <strong>Data caveat:</strong> fundamentals are yfinance <code>.info</code> first-pass &mdash; known gaps/implausibilities exist (e.g. INFY cash understated vs annual report); validate against exchange-filings before real money. Not investment advice.`;
+  new Chart(document.getElementById('chVdn').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:11},boxWidth:12}}}}
+  });
+}).catch(e=>{document.getElementById('vdnFoot').textContent='Could not load value_dn.json — run build_value_dn.py first.';});
 
 // ---- Momentum-5 tab: render from m5_portfolio.json ----
 fetch('m5_portfolio.json').then(r=>r.json()).then(p=>{
