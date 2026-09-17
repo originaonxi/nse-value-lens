@@ -61,7 +61,8 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('vdn')">Value-Down &#8377;10L<span class="badge">funda+price</span></button>
+  <button class="tab-btn active" onclick="showTab('combined')">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
+  <button class="tab-btn" onclick="showTab('vdn')">Value-Down</button>
   <button class="tab-btn" onclick="showTab('m5')">Momentum-5</button>
   <button class="tab-btn" onclick="showTab('fund')">Fund 15-stock</button>
   <button class="tab-btn" onclick="showTab('baseline')">Baseline 12-1 Raw</button>
@@ -71,7 +72,37 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('universe')">Universe</button>
 </div>
 
-<div id="vdn" class="tab-panel active">
+<!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:#161b22;border:1px solid #30363d;border-radius:10px;max-width:680px;margin:40px auto;padding:24px;position:relative">
+  <button onclick="document.getElementById('modal').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:1.3rem;cursor:pointer">✕</button>
+  <div id="modalBody"></div>
+</div></div>
+
+<!-- ═══ COMBINED FUND TAB ════════════════════════════════════════════════ -->
+<div id="combined" class="tab-panel active">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">&#8377;10L across two orthogonal strategies — insurance by design.</strong><br>
+    <span style="color:#3fb950">&#9650; Sleeve A &#8377;5L</span>: top-5 by M5 momentum score
+    <code>(z(mom6/vol)+z(mom12/vol))/2</code> — stocks already going up.<br>
+    <span style="color:#58a6ff">&#9660; Sleeve B &#8377;5L</span>: top-5 by fundamental value score
+    (PE+PB+ROE proven, sector-aware, price beaten down from 52w high).<br>
+    Gate: non-fin stocks replaced if debt/cash&gt;20× AND FCF&lt;0.
+    <strong>Click any row for deep analysis.</strong>
+  </p>
+  <div id="combStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:320px"><canvas id="chComb"></canvas></div>
+    <div class="scroll"><table><thead><tr>
+      <th>#</th><th>Sleeve</th><th>Symbol</th><th>Company</th>
+      <th>Score</th><th>12m%</th><th>PE</th><th>ROE%</th>
+      <th>52w DD%</th><th>5d%</th><th>Value &#8377;</th><th>Flags</th>
+    </tr></thead><tbody id="combRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="combFoot">Loading&hellip;</div>
+</div>
+
+<div id="vdn" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
     <strong style="color:#e6edf3">Fundamentally good, price beaten down.</strong>
     Sector-aware: industrials scored on PE+PB+cash-yield (40%) / ROE+margin+low-debt (35%) / price-damage (25%); banks on PE+PB (50%) / ROE (30%) / price-damage (20%).<br>
@@ -265,4 +296,134 @@ fetch('m5_portfolio.json').then(r=>r.json()).then(p=>{
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:12},boxWidth:14}}}}
   });
 }).catch(e=>{document.getElementById('m5Foot').textContent='Could not load m5_portfolio.json — run build_m5.py first.';});
+
+// ═══ Combined Fund tab ═══════════════════════════════════════════════════
+function fmtInr(n){return n!=null?'\u20B9'+Math.round(n).toLocaleString('en-IN'):'N/A';}
+function fmtPct(n,dec=1){return n!=null?n.toFixed(dec)+'%':'N/A';}
+function fmtNum(n,dec=2){return n!=null?n.toFixed(dec):'N/A';}
+
+function showModal(sym){
+  const h=_holdings.find(x=>x.symbol===sym)||{};
+  const base=_profiles[sym]||{};
+  const p=Object.assign({},base,h);   // holding data wins — has sleeve/scores/roe_pct
+  if(!p.symbol) return;
+  const inr=fmtInr, pct=fmtPct, num=fmtNum;
+  const flags=(p.red_flags||[]);
+  const flagHtml=flags.length?'<div style="background:#2d1b00;border:1px solid #d29922;border-radius:6px;padding:8px 12px;margin-bottom:12px;color:#d29922;font-size:.8rem">&#9888; '+flags.join(' &nbsp;|&nbsp; ')+'</div>':'';
+  const sleeve=p.sleeve||'';
+  const sleeveCol=sleeve==='A'?'#3fb950':'#58a6ff';
+  const scoreLabel=sleeve==='A'?'M5 score':'Val score';
+  const scoreVal=sleeve==='A'?(p.m5_score!=null?p.m5_score.toFixed(3):'N/A'):(p.val_score!=null?p.val_score.toFixed(3):'N/A');
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:1.4rem;font-weight:700;color:#e6edf3">${sym}</span>
+      <span style="background:${sleeveCol};color:#000;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700">Sleeve ${sleeve||'—'}</span>
+      <span style="color:#8b949e;font-size:.85rem">${p.name||''}</span>
+    </div>
+    ${flagHtml}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Momentum</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">M5 score</td><td style="text-align:right;color:#3fb950;font-weight:700">${fmtNum(p.m5_score,3)}</td></tr>
+          <tr><td style="color:#8b949e">12-month return</td><td style="text-align:right;color:#3fb950">${fmtPct(p.mom12_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">6-month return</td><td style="text-align:right">${fmtPct(p.mom6_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Annualised vol</td><td style="text-align:right">${fmtPct(p.vol_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Above 200-DMA</td><td style="text-align:right">${p.above_dma?'<span style="color:#3fb950">Yes</span>':'<span style="color:#f778ba">No</span>'}</td></tr>
+          <tr><td style="color:#8b949e">F&amp;O eligible</td><td style="text-align:right">${p.in_fno?'<span style="color:#3fb950">Yes</span>':'No'}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Price Damage</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">From 52w high</td><td style="text-align:right;color:#f778ba;font-weight:700">${fmtPct(p.dd_52wh_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 1 month</td><td style="text-align:right;color:#d29922">${fmtPct(p.drop_1m_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 5 days</td><td style="text-align:right">${fmtPct(p.drop_5d_pct,1)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Valuation</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">PE</td><td style="text-align:right">${fmtNum(p.pe,1)}</td></tr>
+          <tr><td style="color:#8b949e">PB</td><td style="text-align:right">${fmtNum(p.pb,2)}</td></tr>
+          <tr><td style="color:#8b949e">ROE</td><td style="text-align:right;color:#3fb950">${fmtPct(p.roe_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Net Margin</td><td style="text-align:right">${fmtPct(p.net_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Gross Margin</td><td style="text-align:right">${fmtPct(p.gross_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">EPS</td><td style="text-align:right">${fmtNum(p.eps,2)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Balance Sheet (yfinance)</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">Cash (BS)</td><td style="text-align:right;color:#3fb950">${fmtInr(p.total_cash)}</td></tr>
+          <tr><td style="color:#8b949e">Debt (BS)</td><td style="text-align:right;color:#d29922">${fmtInr(p.total_debt)}</td></tr>
+          <tr><td style="color:#8b949e">Debt/Cash</td><td style="text-align:right;color:${(p.debt_to_cash||0)>10?'#f778ba':'#c9d1d9'}">${fmtNum(p.debt_to_cash,1)}×</td></tr>
+          <tr><td style="color:#8b949e">FCF</td><td style="text-align:right;color:${(p.fcf||1)>0?'#3fb950':'#f778ba'}">${fmtInr(p.fcf)}</td></tr>
+          <tr><td style="color:#8b949e">Revenue</td><td style="text-align:right">${fmtInr(p.revenue)}</td></tr>
+          <tr><td style="color:#8b949e">EBITDA</td><td style="text-align:right">${fmtInr(p.ebitda)}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div style="font-size:.73rem;color:#8b949e;padding:8px 10px;background:#0d1117;border-radius:6px;border:1px solid #30363d">
+      Sector: ${p.sector||'N/A'} | Industry: ${p.industry||'N/A'} | Beta: ${fmtNum(p.beta,2)} | Div Yield: ${fmtPct(p.div_yield_pct,2)}<br>
+      <strong style="color:#d29922">Data caveat:</strong> fundamentals from yfinance .info + balance_sheet — first-pass only. Validate cash/debt/ROE against NSE exchange filings.
+    </div>`;
+  document.getElementById('modal').style.display='block';
+}
+
+let _profiles={};
+let _holdings=[];
+fetch('stock_profiles.json').then(r=>r.json()).then(sp=>{ _profiles=sp; });
+
+fetch('combined_portfolio.json').then(r=>r.json()).then(p=>{
+  const H=p.holdings; _holdings=H;  // expose to showModal before any click
+  const palA='#3fb950', palB='#58a6ff';
+  document.getElementById('combStats').innerHTML=[
+    ['Seed',fmtInr(p.seed_rs)],['Deployed',fmtInr(p.deployed_rs)],
+    ['Cash',fmtInr(p.cash_rs)+' ('+p.cash_pct+'%)'],
+    ['Sleeve A \u25b2',fmtInr(p.sleeve_a_rs)+' Momentum'],
+    ['Sleeve B \u25bc',fmtInr(p.sleeve_b_rs)+' Value-Down'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+
+  document.getElementById('combRows').innerHTML=H.map((h,i)=>{
+    const isA=h.sleeve==='A';
+    const sc=isA?(h.m5_score!=null?h.m5_score.toFixed(3):'—'):(h.val_score!=null?h.val_score.toFixed(3):'—');
+    const col=isA?palA:palB;
+    const dd=h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A';
+    const d5=h.drop_5d_pct!=null?h.drop_5d_pct.toFixed(1)+'%':'N/A';
+    const flags=(h.red_flags||[]).length;
+    const flagBadge=flags?`<span style="background:#2d1b00;color:#d29922;padding:1px 6px;border-radius:8px;font-size:.68rem">⚠ ${flags}</span>`:'<span style="color:#3fb950;font-size:.75rem">✓</span>';
+    return `<tr onclick="showModal('${h.symbol}')" style="cursor:pointer">
+      <td>${i+1}</td>
+      <td><span style="background:${col};color:#000;padding:1px 7px;border-radius:9px;font-size:.68rem;font-weight:700">${h.sleeve}</span></td>
+      <td class="sym">${h.symbol}</td>
+      <td class="co" title="${h.name}">${h.name}</td>
+      <td class="${isA?'hi':'lo'}">${sc}</td>
+      <td class="${(h.mom12_pct||0)>30?'hi':'mid'}">${h.mom12_pct!=null?h.mom12_pct.toFixed(1)+'%':'N/A'}</td>
+      <td>${h.pe!=null?h.pe.toFixed(1):'N/A'}</td>
+      <td class="${(h.roe_pct||0)>15?'hi':'mid'}">${h.roe_pct!=null?h.roe_pct+'%':'N/A'}</td>
+      <td style="color:#f778ba">${dd}</td>
+      <td style="color:${(h.drop_5d_pct||0)<-3?'#f778ba':'#c9d1d9'}">${d5}</td>
+      <td class="hi">${fmtInr(h.value_rs)}</td>
+      <td>${flagBadge}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('combFoot').innerHTML=`<strong>Method:</strong> ${p.method}<br><strong>Caveat:</strong> ${p.data_caveat} Downloads: <a href="combined_portfolio.json" style="color:#58a6ff">combined_portfolio.json</a>.`;
+
+  const labels=H.map(h=>h.symbol);
+  const vals=H.map(h=>h.value_rs);
+  const colors=H.map(h=>h.sleeve==='A'?palA:palB);
+  new Chart(document.getElementById('chComb').getContext('2d'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+      plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12,
+        generateLabels:function(chart){return chart.data.labels.map((l,i)=>({
+          text:l,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:'#0d1117',lineWidth:2,hidden:false,index:i
+        }))}
+      }}}
+    }
+  });
+}).catch(e=>{document.getElementById('combFoot').textContent='Could not load combined_portfolio.json — run build_combined.py first.';});
 </script></body></html>
