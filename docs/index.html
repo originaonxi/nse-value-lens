@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NSE Momentum — Baseline &amp; Quant Upgrade</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#c9d1d9;--acc:#58a6ff;--warn:#d29922;--good:#3fb950}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;padding:20px}
+h1{color:#e6edf3;font-size:1.32rem;margin-bottom:2px}
+.sub{color:#8b949e;font-size:.8rem;margin-bottom:14px}
+.sub a{color:var(--acc)}
+.warn-banner{background:#2d2000;border:1px solid var(--warn);border-radius:8px;padding:11px 14px;margin-bottom:16px;color:var(--warn);font-size:.8rem;line-height:1.65}
+.warn-banner strong{color:#f0c040}
+.warn-banner code{background:#1a1400;padding:1px 5px;border-radius:3px;color:#ffd54f}
+.note{background:#0d1117;border:1px solid #58a6ff;border-radius:8px;padding:11px 14px;margin-bottom:16px;color:#79a8ff;font-size:.8rem;line-height:1.7}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab-btn{background:var(--card);border:1px solid var(--bd);border-bottom:none;padding:8px 18px;cursor:pointer;color:#8b949e;font-size:.85rem;border-radius:6px 6px 0 0;font-weight:600}
+.tab-btn.active{background:#1c2128;color:#e6edf3;border-color:var(--acc)}
+.tab-panel{display:none;background:#161b22;border:1px solid var(--acc);border-radius:0 8px 8px 8px;padding:18px;margin-bottom:16px}
+.tab-panel.active{display:block}
+.badge{display:inline-block;background:var(--acc);color:#000;padding:1px 7px;border-radius:9px;font-size:.68rem;font-weight:700;margin-left:6px;vertical-align:middle}
+table{width:100%;border-collapse:collapse}
+th{background:#0d1117;color:#8b949e;font-weight:600;text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;z-index:1}
+td{padding:5px 8px;border-bottom:1px solid #21262d;vertical-align:middle}
+tr:hover td{background:#1c2128}
+.sym{font-weight:700;color:var(--acc)}
+.co{color:#8b949e;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi{color:var(--good);font-weight:700}.mid{color:var(--warn);font-weight:600}.lo{color:var(--acc)}
+.chart-box{height:380px;position:relative;margin-bottom:16px}
+.scroll{max-height:520px;overflow-y:auto}
+.diff{font-size:.76rem;color:#8b949e;margin-top:12px;padding:10px;background:#161b22;border-radius:6px;border:1px solid var(--bd);line-height:1.7}
+.diff strong{color:#e6edf3}
+.disc{font-size:.73rem;color:#8b949e;margin-top:14px;padding:10px 14px;border:1px solid var(--bd);border-radius:6px;background:var(--card);line-height:1.7}
+.disc strong{color:#e6edf3}
+.formula-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.formula{font-family:monospace;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px 14px;font-size:.8rem;color:#ffd54f;line-height:1.9}
+.stat-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;min-width:110px}
+.stat .v{font-size:1.4rem;font-weight:700;color:var(--acc)}
+.stat .l{font-size:.72rem;color:#8b949e;margin-top:2px}
+</style></head><body>
+
+<h1>NSE Nifty 200 — Momentum Screener</h1>
+<div class="sub">2026-09-17 &nbsp;·&nbsp; 194/200 eligible &nbsp;·&nbsp; jugaad-data (NSE direct) primary &nbsp;|&nbsp; <a href="quant_upgrade_master.csv">quant_upgrade_master.csv (full ranked dump)</a></div>
+
+<div class="stat-strip">
+  <div class="stat"><div class="v">194</div><div class="l">Stocks fetched</div></div>
+  <div class="stat"><div class="v">180</div><div class="l">F&amp;O eligible</div></div>
+  <div class="stat"><div class="v">47</div><div class="l">Strict gate pass</div></div>
+  <div class="stat"><div class="v">30</div><div class="l">Top picks per tab</div></div>
+  <div class="stat"><div class="v">6</div><div class="l">Recent IPOs excluded</div></div>
+</div>
+
+<div class="warn-banner">
+  <strong>Quant upgrade — F&amp;O + DMA gate + volatility-adjusted ranking</strong><br>
+  NIFTY200 &rarr; F&amp;O-eligible (180) &rarr; close &gt; rising-200-DMA (47 pass) &rarr; top 30 by <code>z(RAM = mom12 / annualised_vol)</code>.<br>
+  Adds: F&amp;O-only eligibility, volatility-normalised momentum, residual momentum vs NIFTY 50, trend quality (OLS t-stat), DMA-slope gate.
+  <strong>Not the official Nifty200 Momentum 30</strong> — labelled <em>possible approximation</em>; exact NSE z-score/skip/combination math still unconfirmed (methodology PDF auth-gated).<br>
+  Prices are raw NSE closes (not split/dividend adjusted). Benchmark: NIFTY 50; beta clamp [0.2, 3.0].
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('combined')">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
+  <button class="tab-btn" onclick="showTab('vdn')">Value-Down</button>
+  <button class="tab-btn" onclick="showTab('m5')">Momentum-5</button>
+  <button class="tab-btn" onclick="showTab('fund')">Fund 15-stock</button>
+  <button class="tab-btn" onclick="showTab('baseline')">Baseline 12-1 Raw</button>
+  <button class="tab-btn" onclick="showTab('sharpe')">Sharpe-RAM<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('ensemble')">Ensemble<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('formulas')">Methodology</button>
+  <button class="tab-btn" onclick="showTab('universe')">Universe</button>
+</div>
+
+<!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:#161b22;border:1px solid #30363d;border-radius:10px;max-width:680px;margin:40px auto;padding:24px;position:relative">
+  <button onclick="document.getElementById('modal').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:1.3rem;cursor:pointer">✕</button>
+  <div id="modalBody"></div>
+</div></div>
+
+<!-- ═══ COMBINED FUND TAB ════════════════════════════════════════════════ -->
+<div id="combined" class="tab-panel active">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">&#8377;10L across two orthogonal strategies — insurance by design.</strong><br>
+    <span style="color:#3fb950">&#9650; Sleeve A &#8377;5L</span>: top-5 by M5 momentum score
+    <code>(z(mom6/vol)+z(mom12/vol))/2</code> — stocks already going up.<br>
+    <span style="color:#58a6ff">&#9660; Sleeve B &#8377;5L</span>: top-5 by fundamental value score
+    (PE+PB+ROE proven, sector-aware, price beaten down from 52w high).<br>
+    Gate: non-fin stocks replaced if debt/cash&gt;20× AND FCF&lt;0.
+    <strong>Click any row for deep analysis.</strong>
+  </p>
+  <div id="combStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:320px"><canvas id="chComb"></canvas></div>
+    <div class="scroll"><table><thead><tr>
+      <th>#</th><th>Sleeve</th><th>Symbol</th><th>Company</th>
+      <th>Score</th><th>12m%</th><th>PE</th><th>ROE%</th>
+      <th>52w DD%</th><th>5d%</th><th>Value &#8377;</th><th>Flags</th>
+    </tr></thead><tbody id="combRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="combFoot">Loading&hellip;</div>
+</div>
+
+<div id="vdn" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Fundamentally good, price beaten down.</strong>
+    Sector-aware: industrials scored on PE+PB+cash-yield (40%) / ROE+margin+low-debt (35%) / price-damage (25%); banks on PE+PB (50%) / ROE (30%) / price-damage (20%).<br>
+    Price-damage = 50% drawdown from 52w high + 30% 1-month return + 20% 5-day return &mdash; catches yesterday's selloff, not just 6m losers.<br>
+    Hard rule: PE, PB, ROE must all be present &mdash; no data gaps &rarr; not scored as "good funda". Top 10 &rarr; &#8377;1L each.
+  </p>
+  <div id="vdnStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:300px"><canvas id="chVdn"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Sector</th><th>Score</th><th>PE</th><th>PB</th><th>ROE%</th><th>CashYld%</th><th>52w DD%</th><th>Shares</th><th>Value &#8377;</th></tr></thead><tbody id="vdnRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="vdnFoot">Loading&hellip;</div>
+</div>
+
+<div id="m5" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Pure mathematics. No gates. No human filters.</strong>
+    Every one of the 194 Nifty 200 stocks competes on the same formula:<br>
+    <code>ram6 = mom6% / vol%</code> &nbsp;&nbsp; <code>ram12 = mom12% / vol%</code> &nbsp;&nbsp;
+    <code>score = ( z(ram6) + z(ram12) ) / 2</code><br>
+    Vol-adjust first, z-score the risk-adjusted ratios cross-sectionally, average the two horizons. Top 5 → &#8377;2L each.
+  </p>
+  <div id="m5Stats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:300px"><canvas id="chM5"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>Score</th><th>z(ram12)</th><th>z(ram6)</th><th>12m%</th><th>6m%</th><th>Vol%</th><th>Shares</th><th>Price &#8377;</th><th>Value &#8377;</th></tr></thead><tbody id="m5Rows"></tbody></table></div>
+  </div>
+  <div class="disc" id="m5Foot">Loading&hellip;</div>
+</div>
+
+<div id="fund" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Investable <strong style="color:#e6edf3">&#8377;10,00,000</strong> portfolio built from the strict-gate winners: <code>in F&amp;O &amp; above rising 200-DMA</code> &rarr; ranked by z(RAM) &rarr; top 15, score-weighted, 12% single-name cap. Integer shares at last close; residual held as cash. Rebalanced monthly.</p>
+  <div id="fundStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start">
+    <div class="chart-box" style="height:340px"><canvas id="chFund"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>Shares</th><th>Price</th><th>Value &#8377;</th><th>Weight%</th><th>z(RAM)</th><th>12-1%</th></tr></thead><tbody id="fundRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="fundFoot">Loading portfolio&hellip;</div>
+</div>
+
+<div id="baseline" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Original screen: raw 12-1 return, 200-DMA filter, top 30. No F&amp;O filter, no vol adjustment, no residual, no trend-quality. Kept for comparison. All columns shown for reference; ranking is by raw 12-1 %.</p>
+  <div class="chart-box"><canvas id="chB"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ADANIGREEN</td><td class="co" title="Adani Green Energy Ltd.">Adani Green Energy Ltd.</td><td class="lo">32.4%</td><td class="hi">50.6%</td><td>42.9%</td><td>0.756</td><td class="lo">0.654</td><td>1.094</td><td>15.7</td><td>Rs.1,274.20</td><td>Rs.1,186.62</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">SAIL</td><td class="co" title="Steel Authority of India Ltd.">Steel Authority of India</td><td class="lo">31.2%</td><td class="lo">13.5%</td><td>34.6%</td><td>0.902</td><td class="mid">0.817</td><td>0.484</td><td>4.1</td><td>Rs.175.01</td><td>Rs.165.68</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">ADANIENT</td><td class="co" title="Adani Enterprises Ltd.">Adani Enterprises Ltd.</td><td class="lo">26.0%</td><td class="hi">52.0%</td><td>37.7%</td><td>0.688</td><td class="lo">0.579</td><td>1.148</td><td>21.9</td><td>Rs.2,923.20</td><td>Rs.2,536.47</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">SIEMENS</td><td class="co" title="Siemens Ltd.">Siemens Ltd.</td><td class="lo">25.9%</td><td class="mid">23.4%</td><td>30.2%</td><td>0.857</td><td class="lo">0.767</td><td>0.680</td><td>11.7</td><td>Rs.3,763.50</td><td>Rs.3,476.58</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">OFSS</td><td class="co" title="Oracle Financial Services Software Ltd.">Oracle Financial Service</td><td class="lo">25.5%</td><td class="hi">78.1%</td><td>33.0%</td><td>0.770</td><td class="lo">0.670</td><td>1.699</td><td>33.5</td><td>Rs.11,620.00</td><td>Rs.9,090.38</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">APLAPOLLO</td><td class="co" title="APL Apollo Tubes Ltd.">APL Apollo Tubes Ltd.</td><td class="lo">24.7%</td><td class="lo">9.4%</td><td>26.1%</td><td>0.946</td><td class="mid">0.867</td><td>0.160</td><td>-9.1</td><td>Rs.2,148.50</td><td>Rs.1,962.70</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">TVSMOTOR</td><td class="co" title="TVS Motor Company Ltd.">TVS Motor Company Ltd.</td><td class="lo">24.6%</td><td class="mid">31.1%</td><td>27.8%</td><td>0.886</td><td class="mid">0.800</td><td>0.661</td><td>3.9</td><td>Rs.4,101.70</td><td>Rs.3,736.29</td><td>2026-09-16</td></tr></tbody></table></div>
+  <div class="diff">
+    <strong>What changed vs quant tabs:</strong> FEDERALBNK rises 4&rarr;2 (vol 25% &lt; ADANIENSOL 39%, similar return). POWERINDIA falls 6&rarr;9 (44% vol, RAM 1.849). LAURUSLABS stays #1 (mom 102% at only 29% vol &rarr; RAM 3.49 still best). Quant-only entrants: NESTLEIND, PHOENIXLTD, SAIL, SUNPHARMA, TVSMOTOR, SIEMENS. Raw-only dropout: ADANIGREEN (vol drag).
+  </div>
+</div>
+
+<div id="sharpe" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Primary quant screen: strict-gated stocks ranked by <strong>z(RAM = 12-month momentum / annualised volatility)</strong>. 47/180 F&amp;O stocks pass the DMA gate &rarr; top 30 shown.</p>
+  <div class="chart-box"><canvas id="chR"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">NESTLEIND</td><td class="co" title="Nestle India Ltd.">Nestle India Ltd.</td><td class="lo">20.1%</td><td class="mid">21.7%</td><td>20.7%</td><td>0.970</td><td class="mid">0.894</td><td>0.714</td><td>14.8</td><td>Rs.1,370.60</td><td>Rs.1,355.79</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">APLAPOLLO</td><td class="co" title="APL Apollo Tubes Ltd.">APL Apollo Tubes Ltd.</td><td class="lo">24.7%</td><td class="lo">9.4%</td><td>26.1%</td><td>0.946</td><td class="mid">0.867</td><td>0.160</td><td>-9.1</td><td>Rs.2,148.50</td><td>Rs.1,962.70</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">PHOENIXLTD</td><td class="co" title="Phoenix Mills Ltd.">Phoenix Mills Ltd.</td><td class="lo">24.3%</td><td class="mid">23.9%</td><td>26.8%</td><td>0.905</td><td class="mid">0.820</td><td>0.736</td><td>14.0</td><td>Rs.1,872.20</td><td>Rs.1,809.82</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">SAIL</td><td class="co" title="Steel Authority of India Ltd.">Steel Authority of India</td><td class="lo">31.2%</td><td class="lo">13.5%</td><td>34.6%</td><td>0.902</td><td class="mid">0.817</td><td>0.484</td><td>4.1</td><td>Rs.175.01</td><td>Rs.165.68</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">SUNPHARMA</td><td class="co" title="Sun Pharmaceutical Industries Ltd.">Sun Pharmaceutical Indus</td><td class="lo">17.0%</td><td class="lo">5.2%</td><td>19.0%</td><td>0.899</td><td class="mid">0.814</td><td>0.416</td><td>15.1</td><td>Rs.1,867.30</td><td>Rs.1,805.97</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">TVSMOTOR</td><td class="co" title="TVS Motor Company Ltd.">TVS Motor Company Ltd.</td><td class="lo">24.6%</td><td class="mid">31.1%</td><td>27.8%</td><td>0.886</td><td class="mid">0.800</td><td>0.661</td><td>3.9</td><td>Rs.4,101.70</td><td>Rs.3,736.29</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SIEMENS</td><td class="co" title="Siemens Ltd.">Siemens Ltd.</td><td class="lo">25.9%</td><td class="mid">23.4%</td><td>30.2%</td><td>0.857</td><td class="lo">0.767</td><td>0.680</td><td>11.7</td><td>Rs.3,763.50</td><td>Rs.3,476.58</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+<div id="ensemble" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Multi-signal ranking: <strong>0.35&middot;z(12M) + 0.20&middot;z(6M) + 0.15&middot;z(residual 12+6) + 0.20&middot;z(TrendT) + 0.10&middot;z(RAM)</strong> — prefers smooth reliable climbs over one-day jumps (beta-neutral vs NIFTY 50).</p>
+  <div class="chart-box"><canvas id="chE"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">OFSS</td><td class="co" title="Oracle Financial Services Software Ltd.">Oracle Financial Service</td><td class="lo">25.5%</td><td class="hi">78.1%</td><td>33.0%</td><td>0.770</td><td class="hi">0.670</td><td>1.699</td><td>33.5</td><td>Rs.11,620.00</td><td>Rs.9,090.38</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="mid">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">BOSCHLTD</td><td class="co" title="Bosch Ltd.">Bosch Ltd.</td><td class="lo">18.8%</td><td class="hi">61.4%</td><td>27.9%</td><td>0.676</td><td class="mid">0.565</td><td>1.158</td><td>17.1</td><td>Rs.47,735.00</td><td>Rs.38,490.18</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">ADANIENT</td><td class="co" title="Adani Enterprises Ltd.">Adani Enterprises Ltd.</td><td class="lo">26.0%</td><td class="hi">52.0%</td><td>37.7%</td><td>0.688</td><td class="mid">0.579</td><td>1.148</td><td>21.9</td><td>Rs.2,923.20</td><td>Rs.2,536.47</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ADANIGREEN</td><td class="co" title="Adani Green Energy Ltd.">Adani Green Energy Ltd.</td><td class="lo">32.4%</td><td class="hi">50.6%</td><td>42.9%</td><td>0.756</td><td class="mid">0.654</td><td>1.094</td><td>15.7</td><td>Rs.1,274.20</td><td>Rs.1,186.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="mid">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="mid">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="mid">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="mid">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="lo">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">GRASIM</td><td class="co" title="Grasim Industries Ltd.">Grasim Industries Ltd.</td><td class="lo">17.7%</td><td class="mid">27.6%</td><td>22.8%</td><td>0.777</td><td class="lo">0.678</td><td>0.750</td><td>16.9</td><td>Rs.3,173.10</td><td>Rs.2,955.18</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">PHOENIXLTD</td><td class="co" title="Phoenix Mills Ltd.">Phoenix Mills Ltd.</td><td class="lo">24.3%</td><td class="mid">23.9%</td><td>26.8%</td><td>0.905</td><td class="lo">0.820</td><td>0.736</td><td>14.0</td><td>Rs.1,872.20</td><td>Rs.1,809.82</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">NESTLEIND</td><td class="co" title="Nestle India Ltd.">Nestle India Ltd.</td><td class="lo">20.1%</td><td class="mid">21.7%</td><td>20.7%</td><td>0.970</td><td class="lo">0.894</td><td>0.714</td><td>14.8</td><td>Rs.1,370.60</td><td>Rs.1,355.79</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">APOLLOHOSP</td><td class="co" title="Apollo Hospitals Enterprise Ltd.">Apollo Hospitals Enterpr</td><td class="lo">12.8%</td><td class="lo">16.8%</td><td>17.9%</td><td>0.717</td><td class="lo">0.611</td><td>0.712</td><td>26.4</td><td>Rs.8,768.50</td><td>Rs.7,942.55</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="lo">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+<div id="formulas" class="tab-panel">
+  <div class="note"><strong>All signals computed from free jugaad-data NSE closes (raw; splits/dividends not adjusted).</strong> Benchmark NIFTY 50 log-returns; beta clamped [0.2, 3.0]; residual momentum = stock log-ret &minus; &beta;&middot;market log-ret, annualised &divide; residual &sigma;.</div>
+  <div class="formula-grid">
+    <div class="formula">
+      mom12 = P[t&minus;21] / P[t&minus;252] &minus; 1<br>
+      mom6  = P[t&minus;21] / P[t&minus;126] &minus; 1<br>
+      vol   = std(ln-returns, 252d ex-skip) &times; &radic;252<br>
+      <strong>RAM</strong> = mom12 / vol<br>
+      <strong>z(RAM)</strong> = cross-sectional z-score
+    </div>
+    <div class="formula">
+      r<sub>i</sub> = ln(P<sub>t</sub>/P<sub>t&minus;1</sub>) &minus; &beta;&middot;ln(NIFTY<sub>t</sub>/NIFTY<sub>t&minus;1</sub>)<br>
+      &beta; &isin; [0.2, 3.0], estimated on 231 sessions<br>
+      <strong>rM12</strong> = &Sigma;r(231d) &times; &radic;252 / (&sigma;<sub>res</sub>&times;&radic;231)<br>
+      <strong>TrendT</strong> = &beta;/SE(&beta;) of ln(P)~t over 126d
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:.8rem;color:#8b949e;line-height:1.8">
+    <strong>F&amp;O gate:</strong> 206 unique stock underlyings from Zerodha instruments master (NFO segment, structured fields not regex); 180 in NIFTY200; 47 pass full gate.<br>
+    <strong>DMA gate:</strong> close &gt; 200-DMA <u>and</u> DMA(today) &gt; DMA(t&minus;21) — rising slope, not just above.<br>
+    <strong>vs actual NSE Momentum 30 (confirmed):</strong> official also requires F&amp;O segment eligibility and selects top 30, but rebalances semi-annually (Jun/Dec) and uses high-level "normalised momentum from 6M/12M return adjusted for volatility"; exact z-score/skip/combination math: unconfirmed &mdash; possible approximation.
+  </div>
+</div>
+
+<div id="universe" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Full master universe (194 NIFTY200 stocks) ranked by z(RAM). Top 30 shown here; full dump in <a href="quant_upgrade_master.csv" style="color:var(--acc)">quant_upgrade_master.csv</a>.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">SHRIRAMFIN</td><td class="co" title="Shriram Finance Ltd.">Shriram Finance Ltd.</td><td class="mid">75.1%</td><td class="lo">10.4%</td><td>34.9%</td><td>2.153</td><td class="hi">2.215</td><td>1.127</td><td>2.9</td><td>Rs.995.00</td><td>Rs.998.63</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">NATIONALUM</td><td class="co" title="National Aluminium Co. Ltd.">National Aluminium Co. L</td><td class="hi">81.0%</td><td class="lo">0.2%</td><td>42.4%</td><td>1.909</td><td class="hi">1.942</td><td>0.924</td><td>-2.2</td><td>Rs.355.70</td><td>Rs.366.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">KEI</td><td class="co" title="KEI Industries Ltd.">KEI Industries Ltd.</td><td class="lo">41.8%</td><td class="mid">39.2%</td><td>32.6%</td><td>1.285</td><td class="mid">1.245</td><td>1.109</td><td>10.6</td><td>Rs.4,560.00</td><td>Rs.4,799.02</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">BAJAJ-AUTO</td><td class="co" title="Bajaj Auto Ltd.">Bajaj Auto Ltd.</td><td class="lo">29.0%</td><td class="mid">27.9%</td><td>23.1%</td><td>1.252</td><td class="mid">1.208</td><td>0.915</td><td>13.2</td><td>Rs.11,500.00</td><td>Rs.10,111.50</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">BSE</td><td class="co" title="BSE Ltd.">BSE Ltd.</td><td class="lo">46.0%</td><td class="lo">18.3%</td><td>39.5%</td><td>1.163</td><td class="mid">1.109</td><td>0.850</td><td>10.0</td><td>Rs.3,259.00</td><td>Rs.3,284.06</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">GVT&D</td><td class="co" title="GE Vernova T&D India Ltd.">GE Vernova T&D India Ltd</td><td class="mid">50.5%</td><td class="lo">16.4%</td><td>43.5%</td><td>1.159</td><td class="mid">1.104</td><td>0.853</td><td>9.4</td><td>Rs.4,341.00</td><td>Rs.3,984.56</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SBIN</td><td class="co" title="State Bank of India">State Bank of India</td><td class="lo">22.9%</td><td class="lo">0.6%</td><td>23.3%</td><td>0.981</td><td class="mid">0.906</td><td>0.062</td><td>-6.6</td><td>Rs.988.70</td><td>Rs.1,040.43</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+<div class="disc">
+  <strong>Files:</strong> fund_portfolio.json / .csv (&#8377;10L holdings) &middot; openalgo_basket.json (real share qty, CNC market orders) &middot; quant_upgrade_master.csv (full 194-rank dump) &middot; quant_upgrade_{sharpe,ensemble,raw}_2026-09-17.csv &middot; openalgo_symbols.txt<br>
+  <strong>Risk:</strong> Educational screening from raw NSE closes (splits/dividends not adjusted). Not investment advice. Fund caps any single name at 12% of NAV; consider a stop-loss and paper-trade first. 6 recent IPOs excluded (&lt;12mo history).
+</div>
+
+<script>
+function showTab(n){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(n).classList.add('active');
+  event.target.classList.add('active');
+}
+function mkChart(el, labels_, ds){
+  return new Chart(document.getElementById(el).getContext('2d'), {
+    type:'bar',
+    data:{labels:labels_, datasets:ds},
+    options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#c9d1d9'}}},
+      scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e'}},
+              y:{grid:{color:'#21262d'},ticks:{color:'#c9d1d9',font:{size:11}}}}}
+  });
+}
+mkChart('chB', ["#1 LAURUSLABS", "#2 ADANIENSOL", "#3 BHEL", "#4 FEDERALBNK", "#5 POWERINDIA", "#6 BHARATFORG", "#7 MOTHERSON", "#8 IDEA", "#9 RADICO", "#10 AUBANK", "#11 AUROPHARMA", "#12 ABB", "#13 SOLARINDS", "#14 DIVISLAB", "#15 TITAN", "#16 HINDALCO", "#17 UNIONBANK", "#18 LTF", "#19 ABCAPITAL", "#20 TORNTPHARM", "#21 INDUSINDBK", "#22 NYKAA", "#23 CUMMINSIND", "#24 ADANIGREEN", "#25 SAIL", "#26 ADANIENT", "#27 SIEMENS", "#28 OFSS", "#29 APLAPOLLO", "#30 TVSMOTOR"], [{label:'12-1 Return %', data:[102.4, 93.2, 85.8, 82.5, 81.4, 73.2, 69.4, 68.9, 64.5, 51.3, 48.3, 46.2, 45.0, 42.8, 40.9, 40.3, 40.0, 39.7, 38.6, 38.4, 35.1, 34.3, 33.0, 32.4, 31.2, 26.0, 25.9, 25.5, 24.7, 24.6], backgroundColor:["#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#69f0ae", "#69f0ae", "#69f0ae", "#69f0ae", "#69f0ae", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#40c4ff", "#40c4ff", "#40c4ff", "#40c4ff", "#40c4ff"], borderRadius:3}]);
+mkChart('chR', ["LAURUSLABS", "FEDERALBNK", "BHARATFORG", "ADANIENSOL", "BHEL", "MOTHERSON", "RADICO", "AUROPHARMA", "POWERINDIA", "DIVISLAB", "TORNTPHARM", "TITAN", "AUBANK", "IDEA", "ABB", "HINDALCO", "SOLARINDS", "NYKAA", "INDUSINDBK", "ABCAPITAL", "UNIONBANK", "CUMMINSIND", "LTF", "NESTLEIND", "APLAPOLLO", "PHOENIXLTD", "SAIL", "SUNPHARMA", "TVSMOTOR", "SIEMENS"],   [{label:'z(RAM)', data:[3.708, 3.484, 2.536, 2.489, 2.473, 2.045, 2.016, 1.877, 1.875, 1.866, 1.826, 1.783, 1.765, 1.578, 1.565, 1.378, 1.368, 1.191, 1.175, 1.165, 1.154, 1.135, 1.101, 0.894, 0.867, 0.82, 0.817, 0.814, 0.8, 0.767], borderRadius:3,
+   backgroundColor:[3.708, 3.484, 2.536, 2.489, 2.473, 2.045, 2.016, 1.877, 1.875, 1.866, 1.826, 1.783, 1.765, 1.578, 1.565, 1.378, 1.368, 1.191, 1.175, 1.165, 1.154, 1.135, 1.101, 0.894, 0.867, 0.82, 0.817, 0.814, 0.8, 0.767].map(v=>v>=1.5?'#3fb950':v>=0.8?'#d29922':'#58a6ff')}]);
+mkChart('chE', ["LAURUSLABS", "ADANIENSOL", "RADICO", "BHEL", "FEDERALBNK", "POWERINDIA", "MOTHERSON", "OFSS", "BHARATFORG", "IDEA", "AUROPHARMA", "SOLARINDS", "DIVISLAB", "BOSCHLTD", "ADANIENT", "NYKAA", "ADANIGREEN", "ABCAPITAL", "AUBANK", "ABB", "TITAN", "TORNTPHARM", "LTF", "INDUSINDBK", "CUMMINSIND", "GRASIM", "PHOENIXLTD", "NESTLEIND", "APOLLOHOSP", "HINDALCO"],   [{label:'z(Ensemble)', data:[3.223, 2.377, 2.347, 2.272, 2.051, 1.746, 1.739, 1.699, 1.646, 1.621, 1.504, 1.429, 1.417, 1.158, 1.148, 1.115, 1.094, 1.067, 1.062, 1.042, 1.025, 0.973, 0.86, 0.852, 0.774, 0.75, 0.736, 0.714, 0.712, 0.703], borderRadius:3,
+   backgroundColor:[3.223, 2.377, 2.347, 2.272, 2.051, 1.746, 1.739, 1.699, 1.646, 1.621, 1.504, 1.429, 1.417, 1.158, 1.148, 1.115, 1.094, 1.067, 1.062, 1.042, 1.025, 0.973, 0.86, 0.852, 0.774, 0.75, 0.736, 0.714, 0.712, 0.703].map(v=>v>=1.5?'#00e676':v>=0.8?'#d29922':'#40c4ff')}]);
+
+// ---- Fund tab: render from fund_portfolio.json ----
+fetch('fund_portfolio.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  document.getElementById('fundStats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],['Holdings',p.holdings_count],
+    ['Gate pass',p.gate_pass_count]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('fundRows').innerHTML=H.map((h,i)=>{
+    const wc=h.actual_weight_pct>=8?'hi':h.actual_weight_pct>=5?'mid':'lo';
+    return `<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td class="co" title="${h.name}">${h.name}</td><td>${h.shares.toLocaleString('en-IN')}</td><td>${inr(h.price)}</td><td>${inr(h.value_rs)}</td><td class="${wc}">${h.actual_weight_pct}%</td><td>${h.z_ram}</td><td class="hi">${h.mom12_pct}%</td></tr>`;
+  }).join('');
+  document.getElementById('fundFoot').innerHTML=`<strong>Method:</strong> ${p.method}. <strong>As of</strong> ${p.as_of}, <strong>rebalance</strong> ${p.rebalance}. Downloads: <a href="fund_portfolio.csv" style="color:#58a6ff">fund_portfolio.csv</a> &middot; <a href="openalgo_basket.json" style="color:#58a6ff">openalgo_basket.json</a> (real share quantities, CNC market orders). Not investment advice; raw unadjusted NSE closes.`;
+  const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2','#bc8cff','#ffa198','#39c5cf','#7ee787','#ffd33d'];
+  new Chart(document.getElementById('chFund').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal,borderColor:'#0d1117',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12}}}}
+  });
+}).catch(e=>{document.getElementById('fundFoot').textContent='Could not load fund_portfolio.json — run build_fund.py first.';});
+
+// ---- Value-Down tab: render from value_dn.json ----
+fetch('value_dn.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2'];
+  document.getElementById('vdnStats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],['Holdings',p.holdings_count],
+    ['Universe',p.universe_size+' ('+p.fin_count+' fin)']
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('vdnRows').innerHTML=H.map((h,i)=>`<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td>${h.type}</td><td class="hi">${(+h._score).toFixed(3)}</td><td>${h.pe?h.pe.toFixed(1):'N/A'}</td><td>${h.pb?h.pb.toFixed(2):'N/A'}</td><td class="mid">${h.roe?(h.roe*100).toFixed(1)+'%':'N/A'}</td><td>${h.cash&&h.mc?((h.cash/h.mc)*100).toFixed(1)+'%':'N/A'}</td><td class="lo">${h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A'}</td><td>${h.shares.toLocaleString('en-IN')}</td><td class="hi">${inr(h.value_rs)}</td></tr>`).join('');
+  document.getElementById('vdnFoot').innerHTML=`<strong>Method:</strong> ${p.score_note}<br><strong>Hard rule:</strong> PE+PB+ROE must all be present (avg missing fields in final picks: 0.0). <strong>As of</strong> ${p.as_of} · rebalance ${p.rebalance}. Downloads: <a href="value_dn.csv" style="color:#58a6ff">value_dn.csv</a>. VEDL excluded only due to missing ROE data. <strong>Data caveat:</strong> fundamentals are yfinance <code>.info</code> first-pass &mdash; known gaps/implausibilities exist (e.g. INFY cash understated vs annual report); validate against exchange-filings before real money. Not investment advice.`;
+  new Chart(document.getElementById('chVdn').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:11},boxWidth:12}}}}
+  });
+}).catch(e=>{document.getElementById('vdnFoot').textContent='Could not load value_dn.json — run build_value_dn.py first.';});
+
+// ---- Momentum-5 tab: render from m5_portfolio.json ----
+fetch('m5_portfolio.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  const pal5=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7'];
+  document.getElementById('m5Stats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],
+    ['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],
+    ['Holdings',p.holdings_count],
+    ['Universe',p.universe_size+' stocks'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('m5Rows').innerHTML=H.map((h,i)=>`
+    <tr>
+      <td>${h.rank}</td>
+      <td class="sym">${h.symbol}</td>
+      <td class="co" title="${h.name}">${h.name}</td>
+      <td class="hi">${h.score.toFixed(3)}</td>
+      <td>${h.zr12.toFixed(3)}</td>
+      <td>${h.zr6.toFixed(3)}</td>
+      <td class="hi">${h.mom12_pct}%</td>
+      <td class="mid">${h.mom6_pct}%</td>
+      <td>${h.vol_pct}%</td>
+      <td>${h.shares.toLocaleString('en-IN')}</td>
+      <td>${inr(h.price)}</td>
+      <td class="hi">${inr(h.value_rs)}</td>
+    </tr>`).join('');
+  document.getElementById('m5Foot').innerHTML=`<strong>Formula:</strong> <code>${p.formula}</code><br><strong>Gates:</strong> ${p.gates}<br><strong>As of</strong> ${p.as_of} · rebalance ${p.rebalance}. Downloads: <a href="m5_portfolio.csv" style="color:#58a6ff">m5_portfolio.csv</a>. Not investment advice.`;
+  new Chart(document.getElementById('chM5').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal5,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:12},boxWidth:14}}}}
+  });
+}).catch(e=>{document.getElementById('m5Foot').textContent='Could not load m5_portfolio.json — run build_m5.py first.';});
+
+// ═══ Combined Fund tab ═══════════════════════════════════════════════════
+function fmtInr(n){return n!=null?'\u20B9'+Math.round(n).toLocaleString('en-IN'):'N/A';}
+function fmtPct(n,dec=1){return n!=null?n.toFixed(dec)+'%':'N/A';}
+function fmtNum(n,dec=2){return n!=null?n.toFixed(dec):'N/A';}
+
+function showModal(sym){
+  const h=_holdings.find(x=>x.symbol===sym)||{};
+  const base=_profiles[sym]||{};
+  const p=Object.assign({},base,h);   // holding data wins — has sleeve/scores/roe_pct
+  if(!p.symbol) return;
+  const inr=fmtInr, pct=fmtPct, num=fmtNum;
+  const flags=(p.red_flags||[]);
+  const flagHtml=flags.length?'<div style="background:#2d1b00;border:1px solid #d29922;border-radius:6px;padding:8px 12px;margin-bottom:12px;color:#d29922;font-size:.8rem">&#9888; '+flags.join(' &nbsp;|&nbsp; ')+'</div>':'';
+  const sleeve=p.sleeve||'';
+  const sleeveCol=sleeve==='A'?'#3fb950':'#58a6ff';
+  const scoreLabel=sleeve==='A'?'M5 score':'Val score';
+  const scoreVal=sleeve==='A'?(p.m5_score!=null?p.m5_score.toFixed(3):'N/A'):(p.val_score!=null?p.val_score.toFixed(3):'N/A');
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:1.4rem;font-weight:700;color:#e6edf3">${sym}</span>
+      <span style="background:${sleeveCol};color:#000;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700">Sleeve ${sleeve||'—'}</span>
+      <span style="color:#8b949e;font-size:.85rem">${p.name||''}</span>
+    </div>
+    ${flagHtml}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Momentum</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">M5 score</td><td style="text-align:right;color:#3fb950;font-weight:700">${fmtNum(p.m5_score,3)}</td></tr>
+          <tr><td style="color:#8b949e">12-month return</td><td style="text-align:right;color:#3fb950">${fmtPct(p.mom12_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">6-month return</td><td style="text-align:right">${fmtPct(p.mom6_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Annualised vol</td><td style="text-align:right">${fmtPct(p.vol_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Above 200-DMA</td><td style="text-align:right">${p.above_dma?'<span style="color:#3fb950">Yes</span>':'<span style="color:#f778ba">No</span>'}</td></tr>
+          <tr><td style="color:#8b949e">F&amp;O eligible</td><td style="text-align:right">${p.in_fno?'<span style="color:#3fb950">Yes</span>':'No'}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Price Damage</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">From 52w high</td><td style="text-align:right;color:#f778ba;font-weight:700">${fmtPct(p.dd_52wh_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 1 month</td><td style="text-align:right;color:#d29922">${fmtPct(p.drop_1m_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 5 days</td><td style="text-align:right">${fmtPct(p.drop_5d_pct,1)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Valuation</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">PE</td><td style="text-align:right">${fmtNum(p.pe,1)}</td></tr>
+          <tr><td style="color:#8b949e">PB</td><td style="text-align:right">${fmtNum(p.pb,2)}</td></tr>
+          <tr><td style="color:#8b949e">ROE</td><td style="text-align:right;color:#3fb950">${fmtPct(p.roe_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Net Margin</td><td style="text-align:right">${fmtPct(p.net_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Gross Margin</td><td style="text-align:right">${fmtPct(p.gross_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">EPS</td><td style="text-align:right">${fmtNum(p.eps,2)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Balance Sheet (yfinance)</div>
+        ${(p.sector||'').includes('Financial')?'<div style="font-size:.7rem;color:#58a6ff;margin-bottom:6px;padding:3px 6px;background:#0d1a2e;border-radius:4px">&#8505; Financial sector: debt/cash &amp; FCF reflect business model (deposits/loans), not financial risk</div>':''}
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">Cash (BS)</td><td style="text-align:right;color:#3fb950">${fmtInr(p.total_cash)}</td></tr>
+          <tr><td style="color:#8b949e">Debt (BS)</td><td style="text-align:right;color:#8b949e">${fmtInr(p.total_debt)}</td></tr>
+          <tr><td style="color:#8b949e">Debt/Cash</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.debt_to_cash||0)>10?'#f778ba':'#c9d1d9'}">${fmtNum(p.debt_to_cash,1)}×${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
+          <tr><td style="color:#8b949e">FCF</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.fcf||1)>0?'#3fb950':'#f778ba'}">${fmtInr(p.fcf)}${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
+          <tr><td style="color:#8b949e">Revenue</td><td style="text-align:right">${fmtInr(p.revenue)}</td></tr>
+          <tr><td style="color:#8b949e">EBITDA</td><td style="text-align:right">${fmtInr(p.ebitda)}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div style="font-size:.73rem;color:#8b949e;padding:8px 10px;background:#0d1117;border-radius:6px;border:1px solid #30363d">
+      Sector: ${p.sector||'N/A'} | Industry: ${p.industry||'N/A'} | Beta: ${fmtNum(p.beta,2)} | Div Yield: ${fmtPct(p.div_yield_pct,2)}<br>
+      <strong style="color:#d29922">Data caveat:</strong> fundamentals from yfinance .info + balance_sheet — first-pass only. Validate cash/debt/ROE against NSE exchange filings.
+    </div>`;
+  document.getElementById('modal').style.display='block';
+}
+
+let _profiles={};
+let _holdings=[];
+fetch('stock_profiles.json').then(r=>r.json()).then(sp=>{ _profiles=sp; });
+
+fetch('combined_portfolio.json').then(r=>r.json()).then(p=>{
+  const H=p.holdings; _holdings=H;  // expose to showModal before any click
+  const palA='#3fb950', palB='#58a6ff';
+  document.getElementById('combStats').innerHTML=[
+    ['Seed',fmtInr(p.seed_rs)],['Deployed',fmtInr(p.deployed_rs)],
+    ['Cash',fmtInr(p.cash_rs)+' ('+p.cash_pct+'%)'],
+    ['Sleeve A \u25b2',fmtInr(p.sleeve_a_rs)+' Momentum'],
+    ['Sleeve B \u25bc',fmtInr(p.sleeve_b_rs)+' Value-Down'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+
+  document.getElementById('combRows').innerHTML=H.map((h,i)=>{
+    const isA=h.sleeve==='A';
+    const sc=isA?(h.m5_score!=null?h.m5_score.toFixed(3):'—'):(h.val_score!=null?h.val_score.toFixed(3):'—');
+    const col=isA?palA:palB;
+    const dd=h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A';
+    const d5=h.drop_5d_pct!=null?h.drop_5d_pct.toFixed(1)+'%':'N/A';
+    const flags=(h.red_flags||[]).length;
+    const flagBadge=flags?`<span style="background:#2d1b00;color:#d29922;padding:1px 6px;border-radius:8px;font-size:.68rem">⚠ ${flags}</span>`:'<span style="color:#3fb950;font-size:.75rem">✓</span>';
+    return `<tr onclick="showModal('${h.symbol}')" style="cursor:pointer">
+      <td>${i+1}</td>
+      <td><span style="background:${col};color:#000;padding:1px 7px;border-radius:9px;font-size:.68rem;font-weight:700">${h.sleeve}</span></td>
+      <td class="sym">${h.symbol}</td>
+      <td class="co" title="${h.name}">${h.name}</td>
+      <td class="${isA?'hi':'lo'}">${sc}</td>
+      <td class="${(h.mom12_pct||0)>30?'hi':'mid'}">${h.mom12_pct!=null?h.mom12_pct.toFixed(1)+'%':'N/A'}</td>
+      <td>${h.pe!=null?h.pe.toFixed(1):'N/A'}</td>
+      <td class="${(h.roe_pct||0)>15?'hi':'mid'}">${h.roe_pct!=null?h.roe_pct+'%':'N/A'}</td>
+      <td style="color:#f778ba">${dd}</td>
+      <td style="color:${(h.drop_5d_pct||0)<-3?'#f778ba':'#c9d1d9'}">${d5}</td>
+      <td class="hi">${fmtInr(h.value_rs)}</td>
+      <td>${flagBadge}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('combFoot').innerHTML=`<strong>Method:</strong> ${p.method}<br><strong>Caveat:</strong> ${p.data_caveat} Downloads: <a href="combined_portfolio.json" style="color:#58a6ff">combined_portfolio.json</a>.`;
+
+  const labels=H.map(h=>h.symbol);
+  const vals=H.map(h=>h.value_rs);
+  const colors=H.map(h=>h.sleeve==='A'?palA:palB);
+  new Chart(document.getElementById('chComb').getContext('2d'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+      plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12,
+        generateLabels:function(chart){return chart.data.labels.map((l,i)=>({
+          text:l,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:'#0d1117',lineWidth:2,hidden:false,index:i
+        }))}
+      }}}
+    }
+  });
+}).catch(e=>{document.getElementById('combFoot').textContent='Could not load combined_portfolio.json — run build_combined.py first.';});
+</script></body></html>
