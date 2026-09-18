@@ -61,43 +61,45 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('combined')">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
-  <button class="tab-btn" onclick="showTab('sr')">&#128200; S&amp;R Daily<span class="badge">live</span></button>
-  <button class="tab-btn" onclick="showTab('vdn')">Value-Down</button>
-  <button class="tab-btn" onclick="showTab('m5')">Momentum-5</button>
-  <button class="tab-btn" onclick="showTab('fund')">Fund 15-stock</button>
-  <button class="tab-btn" onclick="showTab('baseline')">Baseline 12-1 Raw</button>
-  <button class="tab-btn" onclick="showTab('sharpe')">Sharpe-RAM<span class="badge">new</span></button>
-  <button class="tab-btn" onclick="showTab('ensemble')">Ensemble<span class="badge">new</span></button>
-  <button class="tab-btn" onclick="showTab('formulas')">Methodology</button>
-  <button class="tab-btn" onclick="showTab('universe')">Universe</button>
+  <button class="tab-btn active" onclick="showTab('combined',this)">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
+  <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
+  <button class="tab-btn" onclick="showTab('vdn',this)">Value-Down</button>
+  <button class="tab-btn" onclick="showTab('m5',this)">Momentum-5</button>
+  <button class="tab-btn" onclick="showTab('fund',this)">Fund 15-stock</button>
+  <button class="tab-btn" onclick="showTab('baseline',this)">Baseline 12-1 Raw</button>
+  <button class="tab-btn" onclick="showTab('sharpe',this)">Sharpe-RAM<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('ensemble',this)">Ensemble<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
+  <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
 </div>
 
 <!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
 <div id="sr" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
-    <strong style="color:#e6edf3">5-method Support &amp; Resistance screen — run daily after close.</strong><br>
-    M1 Swing H/L (fractal N=5) &nbsp;|&nbsp; M2 Pivot Points (PP/R1/R2/S1/S2) &nbsp;|&nbsp;
-    M3 52w High/Low &nbsp;|&nbsp; M4 K-means 90-session cluster &nbsp;|&nbsp;
-    M5 Volume-at-Price POC + 70% Value Area &nbsp;|&nbsp;
-    Breakout trigger: Donchian 20d + vol &gt;1.5× avg.<br>
-    Proximity: <code>AT</code> = within 0.5 ATR &nbsp; <code>NEAR</code> = within 1.5 ATR.
-    Re-run <code>python daily_sr.py</code> each evening.
+    <strong style="color:#e6edf3">Where is each stock right now — and what to watch.</strong>
+    Auto-refreshed daily after NSE close (not real-time ticks) via GitHub Actions.<br>
+    <span style="color:#3fb950">Floor</span> = price where buyers stepped in before — likely to hold again.
+    <span style="color:#f778ba">Ceiling</span> = price where sellers appeared — needs strong buying to break.
+    <span style="color:#a371f7">VWAP</span> = 20-day average price weighted by volume — the benchmark institutional fund desks use.
+    Price below VWAP = trading at a discount; above = premium.
   </p>
   <div id="srStats" class="stat-strip"></div>
   <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap" id="srFilters">
-    <button onclick="srFilter('ALL')"    class="tab-btn active"  id="sf-ALL">All</button>
-    <button onclick="srFilter('BREAKOUT_UP')"  class="tab-btn" id="sf-BREAKOUT_UP"  style="color:#3fb950">&#9650; Breakout</button>
-    <button onclick="srFilter('BREAKOUT_DN')"  class="tab-btn" id="sf-BREAKOUT_DN"  style="color:#f778ba">&#9660; Breakdown</button>
-    <button onclick="srFilter('AT_RESISTANCE')" class="tab-btn" id="sf-AT_RESISTANCE" style="color:#d29922">At Resistance</button>
-    <button onclick="srFilter('AT_SUPPORT')"    class="tab-btn" id="sf-AT_SUPPORT"    style="color:#3fb950">At Support</button>
-    <button onclick="srFilter('NEAR')"   class="tab-btn" id="sf-NEAR">Near Level</button>
+    <button onclick="srFilter('ALL')"             class="tab-btn active" id="sf-ALL">All stocks</button>
+    <button onclick="srFilter('BREAKOUT_UP')"     class="tab-btn" id="sf-BREAKOUT_UP"   style="color:#3fb950">&#9650; Breaking out</button>
+    <button onclick="srFilter('BREAKOUT_DN')"     class="tab-btn" id="sf-BREAKOUT_DN"   style="color:#f778ba">&#9660; Breaking down</button>
+    <button onclick="srFilter('AT_RESISTANCE')"   class="tab-btn" id="sf-AT_RESISTANCE" style="color:#d29922">At ceiling</button>
+    <button onclick="srFilter('AT_SUPPORT')"      class="tab-btn" id="sf-AT_SUPPORT"    style="color:#3fb950">At floor</button>
+    <button onclick="srFilter('NEAR')"            class="tab-btn" id="sf-NEAR">Approaching level</button>
   </div>
   <div class="scroll" style="max-height:580px"><table><thead><tr>
-    <th>Signal</th><th>Symbol</th><th>Company</th><th>Close &#8377;</th>
-    <th>Vol&#215;</th><th>Nearest R &#8377;</th><th>Dist R (ATR)</th>
-    <th>Nearest S &#8377;</th><th>Dist S (ATR)</th>
-    <th>POC &#8377;</th><th>Pivot PP</th><th>BO Str</th>
+    <th>What's happening</th><th>Stock</th><th>Company</th>
+    <th>Price &#8377;</th><th>VWAP &#8377;</th>
+    <th>Floor &#8377;<br><small style="font-weight:400;color:#8b949e">buy/hold zone</small></th>
+    <th>Ceiling &#8377;<br><small style="font-weight:400;color:#8b949e">watch/sell zone</small></th>
+    <th>Next Target &#8377;<br><small style="font-weight:400;color:#8b949e">if ceiling breaks</small></th>
+    <th>If it drops &#8377;<br><small style="font-weight:400;color:#8b949e">next floor below</small></th>
+    <th>Vol vs avg</th><th>What to do</th>
   </tr></thead><tbody id="srRows"></tbody></table></div>
   <div class="disc" id="srFoot">Loading&hellip;</div>
 </div>
@@ -229,11 +231,11 @@ tr:hover td{background:#1c2128}
 </div>
 
 <script>
-function showTab(n){
+function showTab(n, btn){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(n).classList.add('active');
-  event.target.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 function mkChart(el, labels_, ds){
   return new Chart(document.getElementById(el).getContext('2d'), {
@@ -474,29 +476,28 @@ function renderSR(){
     _srFilter==='NEAR'?_srAll.filter(r=>r.signal.startsWith('NEAR')):
     _srAll.filter(r=>r.signal===_srFilter);
   document.getElementById('srRows').innerHTML=rows.map(r=>{
-    const col=SIG_COL[r.signal]||'#8b949e';
-    const icon=SIG_ICON[r.signal]||'⚪';
-    const nr=r.nearest_resistance!=null?fmtInr(r.nearest_resistance):'—';
-    const ns=r.nearest_support   !=null?fmtInr(r.nearest_support)   :'—';
-    const dr=r.dist_resistance_atr!=null?r.dist_resistance_atr.toFixed(2)+'×':'—';
-    const ds=r.dist_support_atr   !=null?r.dist_support_atr.toFixed(2)  +'×':'—';
-    const poc=r.poc!=null?fmtInr(r.poc):'—';
-    const pp=r.pivot?fmtInr(r.pivot.PP):'—';
-    const bo=r.bo_strength_atr?r.bo_strength_atr.toFixed(2)+'atr':'—';
-    const vr=r.vol_ratio!=null?r.vol_ratio.toFixed(1)+'×':'—';
+    const col  = SIG_COL[r.signal]||'#8b949e';
+    const vwapCol = r.above_vwap ? '#3fb950' : '#f778ba';
+    const vwapLbl = r.above_vwap ? '↑ above' : '↓ below';
+    const vr   = r.vol_ratio!=null ? r.vol_ratio.toFixed(1)+'×' : '—';
+    const vrCol= (r.vol_ratio||0)>1.5 ? '#3fb950' : '#c9d1d9';
     return `<tr>
-      <td><span style="color:${col};font-weight:700">${icon} ${r.signal.replace('_',' ')}</span></td>
+      <td style="max-width:220px;white-space:normal;line-height:1.4">
+        <span style="color:${col};font-weight:700">${r.plain_signal||r.signal}</span>
+      </td>
       <td class="sym">${r.symbol}</td>
       <td class="co" title="${r.name||''}">${r.name||r.symbol}</td>
-      <td>${fmtInr(r.close)}</td>
-      <td style="color:${(r.vol_ratio||0)>1.5?'#3fb950':'#c9d1d9'}">${vr}</td>
-      <td style="color:#f778ba">${nr}</td>
-      <td style="color:${r.dist_resistance_atr!=null&&r.dist_resistance_atr<0.5?'#f778ba':'#c9d1d9'}">${dr}</td>
-      <td style="color:#3fb950">${ns}</td>
-      <td style="color:${r.dist_support_atr!=null&&r.dist_support_atr<0.5?'#3fb950':'#c9d1d9'}">${ds}</td>
-      <td style="color:#a371f7">${poc}</td>
-      <td style="color:#8b949e">${pp}</td>
-      <td style="color:${(r.bo_strength_atr||0)>0?'#3fb950':(r.bo_strength_atr||0)<0?'#f778ba':'#8b949e'}">${bo}</td>
+      <td style="font-weight:700">${fmtInr(r.close)}</td>
+      <td>
+        <span style="color:${vwapCol};font-size:.75rem">${vwapLbl}</span><br>
+        <span style="color:#a371f7">${r.vwap20!=null?fmtInr(r.vwap20):'—'}</span>
+      </td>
+      <td style="color:#3fb950;font-weight:600">${r.floor!=null?fmtInr(r.floor):'—'}</td>
+      <td style="color:#f778ba;font-weight:600">${r.ceiling!=null?fmtInr(r.ceiling):'—'}</td>
+      <td style="color:#58a6ff">${r.next_target!=null?fmtInr(r.next_target):'—'}</td>
+      <td style="color:#d29922">${r.next_floor!=null?fmtInr(r.next_floor):'—'}</td>
+      <td style="color:${vrCol}">${vr}</td>
+      <td style="color:#8b949e;font-size:.78rem;max-width:160px;white-space:normal;line-height:1.3">${r.action||'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -512,7 +513,7 @@ fetch('sr_levels.json').then(r=>r.json()).then(d=>{
     ['At Support', signals.AT_SUPPORT],
     ['Near Level', (signals.NEAR_RESISTANCE+signals.NEAR_SUPPORT)],
   ].map(s=>`<div class="stat"><div class="v" style="font-size:1rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
-  document.getElementById('srFoot').innerHTML=`<strong>Methods (5):</strong> ${d.methods.join(' &middot; ')}<br><strong>Breakout rule:</strong> ${d.breakout_trigger} &middot; <strong>Proximity:</strong> ${d.proximity_rule}<br>Run <code>python daily_sr.py</code> each evening to refresh. Data as of ${d.as_of}.`;
+  document.getElementById('srFoot').innerHTML=`<strong>Methods (${d.methods.length}):</strong> ${d.methods.join(' &middot; ')}<br><strong>Breakout:</strong> ${d.breakout_trigger}<br><strong>Auto-refreshed daily</strong> via GitHub Actions at 16:30 IST (after NSE close) — not real-time ticks. Data as of <strong>${d.as_of}</strong>. You can also run <code>python daily_sr.py</code> manually any time.`;
   renderSR();
 }).catch(e=>{document.getElementById('srFoot').textContent='Run: python daily_sr.py to generate sr_levels.json';});
 </script></body></html>

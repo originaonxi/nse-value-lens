@@ -217,21 +217,24 @@ def analyse(symbol):
     try:
         t   = yf.Ticker(symbol + '.NS')
         df  = t.history(period=FETCH_PD, interval='1d', actions=False)
-        if df.empty or len(df) < 30:
+        if df.empty or len(df) < 32:
             return symbol, {'error': 'insufficient_data'}
         df = df.dropna(subset=['High','Low','Close','Volume'])
-        close  = float(df['Close'].iloc[-1])
-        vol    = float(df['Volume'].iloc[-1])
-        vol20  = float(df['Volume'].tail(VOL_N + 1).iloc[:-1].mean())
-        atr    = atr14(df)
+        # Split: today's row for price/vol display; completed candles for all S/R
+        today   = df.iloc[-1]
+        df_hist = df.iloc[:-1]          # completed candles only — safe intraday & post-close
+        close   = float(today['Close'])
+        vol     = float(today['Volume'])
+        vol20   = float(df_hist['Volume'].tail(VOL_N).mean())
+        atr     = atr14(df_hist)
         if not atr:
             return symbol, {'error': 'atr_failed'}
 
-        # ── Method 1: Swing H/L (fractal) ───────────────────────────────
-        sh, sl = swing_highs_lows(df)
+        # ── Method 1: Swing H/L (fractal) — completed candles only ──────
+        sh, sl = swing_highs_lows(df_hist)
 
-        # ── Method 2: Pivot Points (yesterday's OHLC) ───────────────────
-        yest  = df.iloc[-2]
+        # ── Method 2: Pivot Points (most recent COMPLETED session) ───────
+        yest  = df_hist.iloc[-1]
         H, L, C = float(yest['High']), float(yest['Low']), float(yest['Close'])
         PP  = (H + L + C) / 3
         R1, S1 = 2*PP - L,   2*PP - H
@@ -240,35 +243,41 @@ def analyse(symbol):
         pivot_r = [R1, R2, R3]
         pivot_s = [S1, S2, S3]
 
-        # ── Method 3: 52-week High / Low ────────────────────────────────
-        df52  = df.tail(LOOK_52W)
+        # ── Method 3: 52-week High / Low (completed candles) ─────────────
+        df52  = df_hist.tail(LOOK_52W)
         hi52  = float(df52['High'].max())
         lo52  = float(df52['Low'].min())
 
-        # ── Method 4: K-means on 90-day H+L ────────────────────────────
-        df90  = df.tail(LOOK_90)
-        prices_90 = (list(df90['High'].values) + list(df90['Low'].values))
+        # ── Method 4: K-means on 90-day H+L (completed candles) ─────────
+        df90  = df_hist.tail(LOOK_90)
+        prices_90 = list(df90['High'].values) + list(df90['Low'].values)
         km_levels  = kmeans_levels(prices_90)
         km_res = [l for l in km_levels if l > close]
         km_sup = [l for l in km_levels if l < close]
 
         # ── Method 5: Volume-at-Price POC / Value Area ──────────────────
-        poc, vah, val = volume_poc(df)   # POC = stickiest price; VAH/VAL = 70% value area
+        poc, vah, val = volume_poc(df_hist)
         poc_res = [vah] if vah and vah > close else []
         poc_sup = [val] if val and val < close else []
         if poc and poc > close: poc_res.append(poc)
         if poc and poc < close: poc_sup.append(poc)
 
-        # ── 20-session Donchian (BREAKOUT TRIGGER ONLY, not listed as S/R) ──
-        d20_hi = float(df['High'].tail(21).iloc[:-1].max())   # excl today
-        d20_lo = float(df['Low'].tail(21).iloc[:-1].min())
+        # ── 20-day VWAP — from completed candles only ────────────────────
+        df_vwap = df_hist.tail(20)
+        tp_vwap = (df_vwap['High'] + df_vwap['Low'] + df_vwap['Close']) / 3
+        vwap20  = float((tp_vwap * df_vwap['Volume']).sum() / df_vwap['Volume'].sum())
+        vwap_res = [vwap20] if vwap20 > close else []
+        vwap_sup = [vwap20] if vwap20 < close else []
 
-        # ── Combine all 5-method resistances and supports ─────────────────
+        # ── 20-session Donchian from completed candles (BREAKOUT TRIGGER) ─
+        d20_hi = float(df_hist['High'].tail(20).max())
+        d20_lo = float(df_hist['Low'].tail(20).min())
+        # ── Combine all 6-method resistances and supports ─────────────────
         all_res = dedupe_levels(sorted(set(
-            sh + pivot_r + [hi52] + km_res + poc_res
+            sh + pivot_r + [hi52] + km_res + poc_res + vwap_res
         )), atr)
         all_sup = dedupe_levels(sorted(set(
-            sl + pivot_s + [lo52] + km_sup + poc_sup
+            sl + pivot_s + [lo52] + km_sup + poc_sup + vwap_sup
         )), atr)
         res_above = [r for r in all_res if r > close]
         sup_below = [s for s in all_sup if s < close]
@@ -292,6 +301,37 @@ def analyse(symbol):
         dr = round(abs(close-nr)/atr, 2) if nr else None
         ds = round(abs(close-ns)/atr, 2) if ns else None
 
+        # ── Plain-English output fields ───────────────────────────────────
+        # "floor" = nearest support; "ceiling" = nearest resistance
+        # "next_target" = if price rises, first meaningful resistance above ceiling
+        # "next_floor"  = if price drops, first meaningful support below floor
+        floor   = ns
+        ceiling = nr
+        next_target = sorted([r for r in res_above if r > (nr or 0)], )[0] \
+                      if len(res_above) > 1 else None
+        next_floor  = sorted([s for s in sup_below if s < (ns or close)], reverse=True)[0] \
+                      if len(sup_below) > 1 else None
+
+        PLAIN = {
+            'BREAKOUT_UP':    f"Breaking out 🚀 — cleared ceiling, next target ₹{res_above[1] if len(res_above)>1 else (nr or ''):.0f}" if res_above else "Breaking out 🚀",
+            'BREAKOUT_DN':    f"Breaking down ⚠️ — floor lost, next floor ₹{sorted(sup_below,reverse=True)[1] if len(sup_below)>1 else (ns or ''):.0f}" if sup_below else "Breaking down ⚠️",
+            'AT_RESISTANCE':  f"At ceiling ₹{nr:.0f} — buyers need to push through, or it may fall back to ₹{ns:.0f}" if nr and ns else "At ceiling — watch closely",
+            'AT_SUPPORT':     f"At floor ₹{ns:.0f} — buyers stepping in here; target ₹{nr:.0f} if it holds" if ns and nr else "At floor — potential buy zone",
+            'NEAR_RESISTANCE':f"Approaching ceiling ₹{nr:.0f} — decision point soon" if nr else "Approaching ceiling",
+            'NEAR_SUPPORT':   f"Approaching floor ₹{ns:.0f} — watch for a bounce" if ns else "Approaching floor",
+            'NEUTRAL':        "No key level nearby — wait for price to reach a floor or ceiling",
+        }
+        ACTION = {
+            'BREAKOUT_UP':    "Target next ceiling — trail stop below VWAP or floor",
+            'BREAKOUT_DN':    "Avoid — wait for next floor to hold before entering",
+            'AT_RESISTANCE':  "Wait — buy only if ceiling breaks with high volume",
+            'AT_SUPPORT':     "Buy zone — stop just below floor; target the ceiling",
+            'NEAR_RESISTANCE':"Caution — reduce position or wait for breakout",
+            'NEAR_SUPPORT':   "Watch — good entry if floor holds with volume",
+            'NEUTRAL':        "No action — wait for price to reach floor or ceiling",
+        }
+        above_vwap = close > vwap20
+
         # Signal score for ranking
         score = {'BREAKOUT_UP':6,'BREAKOUT_DN':5,
                  'AT_RESISTANCE':4,'AT_SUPPORT':4,
@@ -299,28 +339,37 @@ def analyse(symbol):
 
         return symbol, {
             'symbol':    symbol,
+            'name':      '',      # filled in main()
             'close':     round(close, 2),
             'atr14':     round(atr, 2),
             'signal':    signal,
             'score':     score,
             'vol_ratio': round(vol / vol20, 2) if vol20 else None,
             'bo_strength_atr': bo_str,
-            # nearest levels
+            # ── Plain-English fields (layman) ─────────────────────────────
+            'plain_signal': PLAIN.get(signal, signal),
+            'action':       ACTION.get(signal, ''),
+            'floor':         round(floor,   2) if floor   else None,
+            'ceiling':       round(ceiling, 2) if ceiling else None,
+            'next_target':   round(next_target, 2) if next_target else None,
+            'next_floor':    round(next_floor,  2) if next_floor  else None,
+            'above_vwap':    above_vwap,
+            'vwap20':        round(vwap20, 2),
+            # ── Technical levels ─────────────────────────────────────────
             'nearest_resistance': round(nr, 2) if nr else None,
             'nearest_support':    round(ns, 2) if ns else None,
             'dist_resistance_atr': dr,
             'dist_support_atr':    ds,
-            # all levels
             'resistances': [round(r,2) for r in res_above[:5]],
             'supports':    [round(s,2) for s in sorted(sup_below,reverse=True)[:5]],
-            # per-method breakdown
+            # ── Per-method breakdown ──────────────────────────────────────
             'pivot': {'PP':round(PP,2),'R1':round(R1,2),'R2':round(R2,2),
                       'S1':round(S1,2),'S2':round(S2,2)},
             'poc': round(poc,2) if poc else None,
             'vah': round(vah,2) if vah else None,
             'val': round(val,2) if val else None,
             'd20_high': round(d20_hi,2), 'd20_low': round(d20_lo,2),
-            'hi52w': round(hi52,2),      'lo52w':   round(lo52,2),
+            'hi52w': round(hi52,2), 'lo52w': round(lo52,2),
             'swing_highs': [round(x,2) for x in sh],
             'swing_lows':  [round(x,2) for x in sl],
             'kmeans_levels': [round(x,2) for x in km_levels],
@@ -365,11 +414,12 @@ def main():
         'fetched':       len(valid),
         'errors':        len(errors),
         'methods': [
-            'Swing High/Low fractal (N=5 bars each side)',
-            'Classic Pivot Points (yesterday OHLC: PP/R1/R2/S1/S2)',
+            'Swing High/Low (fractal, most-recent 5 each side)',
+            'Classic Pivot Points PP/R1/R2/S1/S2 (yesterday OHLC)',
             '52-week High/Low (institutional anchor)',
-            'K-means clustering on 90-session H+L prices (Tengelin/Sopasakis 2020)',
-            'Volume-at-Price POC + 70% Value Area High/Low (Murtazin 2025)',
+            'K-means clustering on 90-session prices (Tengelin/Sopasakis 2020)',
+            'Volume-at-Price POC + 70% Value Area (Murtazin 2025)',
+            '20-day VWAP — institutional fair value benchmark (Downstox 2026)',
         ],
         'breakout_trigger': f'Donchian 20d high/low (prior bars only) + vol > {VOL_MUL}× vol20ma',
         'proximity_rule': f'AT = within {AT_ATR} ATR | NEAR = within {NEAR_ATR} ATR',
