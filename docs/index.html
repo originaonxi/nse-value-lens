@@ -61,7 +61,8 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
+  <button class="tab-btn active" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
+  <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
   <button class="tab-btn" onclick="showTab('combined',this)">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
   <button class="tab-btn" onclick="showTab('vdn',this)">Value-Down</button>
   <button class="tab-btn" onclick="showTab('m5',this)">Momentum-5</button>
@@ -75,7 +76,7 @@ tr:hover td{background:#1c2128}
 </div>
 
 <!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
-<div id="sr" class="tab-panel active">
+<div id="sr" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
     <strong style="color:#e6edf3">Where is each stock right now — and what to watch.</strong>
     Auto-refreshed daily after NSE close (not real-time ticks) via GitHub Actions.<br>
@@ -240,6 +241,32 @@ tr:hover td{background:#1c2128}
   <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">SHRIRAMFIN</td><td class="co" title="Shriram Finance Ltd.">Shriram Finance Ltd.</td><td class="mid">75.1%</td><td class="lo">10.4%</td><td>34.9%</td><td>2.153</td><td class="hi">2.215</td><td>1.127</td><td>2.9</td><td>Rs.995.00</td><td>Rs.998.63</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">NATIONALUM</td><td class="co" title="National Aluminium Co. Ltd.">National Aluminium Co. L</td><td class="hi">81.0%</td><td class="lo">0.2%</td><td>42.4%</td><td>1.909</td><td class="hi">1.942</td><td>0.924</td><td>-2.2</td><td>Rs.355.70</td><td>Rs.366.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">KEI</td><td class="co" title="KEI Industries Ltd.">KEI Industries Ltd.</td><td class="lo">41.8%</td><td class="mid">39.2%</td><td>32.6%</td><td>1.285</td><td class="mid">1.245</td><td>1.109</td><td>10.6</td><td>Rs.4,560.00</td><td>Rs.4,799.02</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">BAJAJ-AUTO</td><td class="co" title="Bajaj Auto Ltd.">Bajaj Auto Ltd.</td><td class="lo">29.0%</td><td class="mid">27.9%</td><td>23.1%</td><td>1.252</td><td class="mid">1.208</td><td>0.915</td><td>13.2</td><td>Rs.11,500.00</td><td>Rs.10,111.50</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">BSE</td><td class="co" title="BSE Ltd.">BSE Ltd.</td><td class="lo">46.0%</td><td class="lo">18.3%</td><td>39.5%</td><td>1.163</td><td class="mid">1.109</td><td>0.850</td><td>10.0</td><td>Rs.3,259.00</td><td>Rs.3,284.06</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">GVT&D</td><td class="co" title="GE Vernova T&D India Ltd.">GE Vernova T&D India Ltd</td><td class="mid">50.5%</td><td class="lo">16.4%</td><td>43.5%</td><td>1.159</td><td class="mid">1.104</td><td>0.853</td><td>9.4</td><td>Rs.4,341.00</td><td>Rs.3,984.56</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SBIN</td><td class="co" title="State Bank of India">State Bank of India</td><td class="lo">22.9%</td><td class="lo">0.6%</td><td>23.3%</td><td>0.981</td><td class="mid">0.906</td><td>0.062</td><td>-6.6</td><td>Rs.988.70</td><td>Rs.1,040.43</td><td>2026-09-16</td></tr></tbody></table></div>
 </div>
 
+
+<!-- ═══ SAM PICKS TAB ══════════════════════════════════════════════════════ -->
+<div id="picks" class="tab-panel active">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Pure math synthesis — all four layers compressed into one ranked action list.</strong><br>
+    <code>SAM = 0.30×monthly_regime + 0.25×daily_S&amp;R_signal + 0.25×(JEV_quality×direction) + 0.20×confluence_strength</code><br>
+    BUY = UP regime + bullish S&amp;R + strong confluence. AVOID = DOWN regime + bearish S&amp;R. Click any row to see every formula behind it.
+    <span style="color:#d29922">Stop = floor − 0.25×ATR. Not SEBI-registered advice. Back-test before sizing.</span>
+  </p>
+  <div id="picksStats" class="stat-strip"></div>
+  <div style="margin:10px 0;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="pf-ALL"      onclick="picksFilter('ALL',this)">All</button>
+    <button class="tab-btn"        id="pf-BUY"      onclick="picksFilter('BUY',this)"       style="color:#3fb950;font-weight:700">🟢 BUY</button>
+    <button class="tab-btn"        id="pf-WATCH_BUY" onclick="picksFilter('WATCH_BUY',this)" style="color:#58a6ff">🔵 WATCH BUY</button>
+    <button class="tab-btn"        id="pf-AVOID"    onclick="picksFilter('AVOID',this)"     style="color:#f778ba">🔴 AVOID</button>
+    <button class="tab-btn"        id="pf-CAUTION"  onclick="picksFilter('CAUTION',this)"   style="color:#d29922">🟠 CAUTION</button>
+    <button class="tab-btn"        id="pf-WATCH"    onclick="picksFilter('WATCH',this)"     style="color:#e3b341">🟡 WATCH</button>
+  </div>
+  <div class="scroll" style="max-height:600px"><table><thead><tr>
+    <th>#</th><th>Action</th><th>Stock</th><th>SAM score</th>
+    <th>Entry</th><th>Stop<br><small style="font-weight:400;color:#8b949e">floor−0.25ATR</small></th>
+    <th>Target<br><small style="font-weight:400;color:#8b949e">nearest ceiling</small></th>
+    <th>R:R</th><th>Regime</th><th>Signal</th><th>Why (short)</th>
+  </tr></thead><tbody id="picksRows"></tbody></table></div>
+  <div class="disc" id="picksFoot">Loading SAM PICKS…</div>
+</div>
 <!-- ═══ MONTHLY REGIME TAB ══════════════════════════════════════════════════ -->
 <div id="regime" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
@@ -788,4 +815,78 @@ fetch('monthly_regimes.json').then(r=>r.json()).then(d=>{
     `Reversal risk = current age ÷ historical mean run length for that direction.`;
   renderRegime();
 }).catch(e=>{ document.getElementById('regimeFoot').textContent='Run: python monthly_regime.py to generate monthly_regimes.json'; });
+// ═══ SAM PICKS tab ════════════════════════════════════════════════════════
+const ACT_COL={'BUY':'#3fb950','WATCH_BUY':'#58a6ff','WATCH':'#e3b341','CAUTION':'#d29922','AVOID':'#f778ba','NEUTRAL':'#8b949e'};
+let _picks=[], _picksFilter='ALL';
+function picksFilter(f,btn){
+  _picksFilter=f;
+  document.querySelectorAll('#picks .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPicks();
+}
+function renderPicks(){
+  const rows=_picksFilter==='ALL'?_picks:_picks.filter(p=>p.action===_picksFilter);
+  document.getElementById('picksRows').innerHTML=rows.map((p,i)=>{
+    const col=ACT_COL[p.action]||'#8b949e';
+    const rr=p.rr!=null?`<strong style="color:${p.rr>=2?'#3fb950':p.rr>=1?'#e3b341':'#f778ba'}">${p.rr}×</strong>`:'—';
+    const rreg=REG_COL[p.regime]||'#8b949e';
+    const why0=(p.why&&p.why[0])||{};
+    const why1=(p.why&&p.why[1])||{};
+    const shortWhy=`${why0.icon||''} ${(why0.layman||'').slice(0,55)}… ${why1.icon||''} ${(why1.layman||'').slice(0,40)}…`;
+    return `<tr onclick="showPicksMath('${p.symbol}')" title="Click to see all maths for ${p.symbol}" style="cursor:pointer">
+      <td style="color:#8b949e;font-size:.8rem">${i+1}</td>
+      <td style="font-weight:700;color:${col};white-space:nowrap">${p.action_label}</td>
+      <td class="sym">${p.symbol}</td>
+      <td><div style="background:#161b22;border-radius:4px;height:6px;width:80px;display:inline-block;vertical-align:middle;margin-right:4px"><div style="background:${col};height:6px;border-radius:4px;width:${Math.min(100,Math.abs(p.sam_score_100))}%"></div></div><span style="color:${col};font-weight:700">${p.sam_score_100>0?'+':''}${p.sam_score_100}</span></td>
+      <td style="font-weight:700">${fmtInr(p.close)}</td>
+      <td style="color:#f778ba">${p.stop!=null?fmtInr(p.stop):'—'}</td>
+      <td style="color:#58a6ff">${p.target1!=null?fmtInr(p.target1):'—'}</td>
+      <td>${rr}</td>
+      <td style="color:${rreg};font-size:.8rem">${p.regime||'?'} ${p.regime_age?p.regime_age+'m':''}</td>
+      <td style="font-size:.78rem;color:${SIG_COL[p.signal]||'#8b949e'}">${p.signal||'—'}</td>
+      <td style="font-size:.72rem;color:#8b949e;max-width:240px;white-space:normal;line-height:1.3">${shortWhy}</td>
+    </tr>`;
+  }).join('');
+}
+function showPicksMath(symbol){
+  const p=_picks.find(x=>x.symbol===symbol); if(!p) return;
+  const col=ACT_COL[p.action]||'#8b949e';
+  const whyHtml=(p.why||[]).map(w=>`
+    <div style="border:1px solid #30363d;border-radius:8px;padding:10px;margin:8px 0;background:#0d1117">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:1.2rem">${w.icon||''}</span>
+        <strong style="color:#e6edf3">${w.layman||''}</strong>
+      </div>
+      <div style="font-size:.76rem;color:#8b949e;margin-top:4px"><code>${w.formula||''}</code></div>
+    </div>`).join('');
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${p.symbol} — <span style="color:${col}">${p.action_label}</span></h2>
+    <div style="color:#8b949e;margin-bottom:12px">${p.name||''} · close <strong style="color:#e6edf3">${fmtInr(p.close)}</strong></div>
+    <div class="stat-strip" style="margin-bottom:14px">
+      <div class="stat"><div class="v" style="color:${col};font-size:1.3rem">${p.sam_score_100>0?'+':''}${p.sam_score_100}</div><div class="l">SAM score</div></div>
+      <div class="stat"><div class="v" style="color:#f778ba">${p.stop!=null?fmtInr(p.stop):'—'}</div><div class="l">Stop loss</div></div>
+      <div class="stat"><div class="v" style="color:#58a6ff">${p.target1!=null?fmtInr(p.target1):'—'}</div><div class="l">Target 1</div></div>
+      <div class="stat"><div class="v" style="color:#a371f7">${p.target2!=null?fmtInr(p.target2):'—'}</div><div class="l">Target 2</div></div>
+      <div class="stat"><div class="v" style="color:${p.rr>=2?'#3fb950':p.rr>=1?'#e3b341':'#f778ba'}">${p.rr!=null?p.rr+'×':'—'}</div><div class="l">R:R</div></div>
+      <div class="stat"><div class="v">${p.regime||'?'} ${p.regime_age?p.regime_age+'m':''}</div><div class="l">Regime</div></div>
+    </div>
+    <h3>Every formula that fired</h3>
+    ${whyHtml}
+    <p style="font-size:.75rem;color:#8b949e;margin-top:12px">Stop = floor − 0.25×ATR. R:R = (target−entry)/(entry−stop). Pure mathematical output. Not SEBI-registered advice. Paper-trade before sizing real capital.</p>`;
+  document.getElementById('modal').style.display='block';
+}
+fetch('sam_picks.json').then(r=>r.json()).then(d=>{
+  _picks=d.picks||[];
+  const sm=d.summary||{};
+  document.getElementById('picksStats').innerHTML=[
+    ['As of',d.as_of],['Formula','SAM score'],
+    ['🟢 BUY',sm.BUY||0],['🔵 Watch',sm.WATCH_BUY||0],
+    ['🔴 Avoid',sm.AVOID||0],['🟠 Caution',sm.CAUTION||0],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('picksFoot').innerHTML=`SAM PICKS as of <strong>${d.as_of}</strong>. `+
+    `Formula: <code>${d.formula}</code>. `+
+    `${sm.BUY||0} BUY · ${sm.AVOID||0} AVOID · ${sm.CAUTION||0} CAUTION · ${sm.WATCH_BUY||0} Watch. `+
+    `Updated daily after NSE close. Click any row for the full formula breakdown.`;
+  renderPicks();
+}).catch(e=>{document.getElementById('picksFoot').textContent='Run: python sam_picks.py to generate sam_picks.json';});
 </script></body></html>

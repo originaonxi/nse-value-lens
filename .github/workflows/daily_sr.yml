@@ -46,6 +46,10 @@ jobs:
           python monthly_regime.py
         continue-on-error: true  # monthly layer is additive; never break daily S&R
 
+      - name: Run SAM PICKS synthesis
+        run: python sam_picks.py
+        continue-on-error: true  # synthesis is additive; never break daily refresh
+
       - name: Copy to docs/ for GitHub Pages
         run: |
           cp screen_output/sr_levels.json docs/sr_levels.json
@@ -62,11 +66,17 @@ jobs:
           else
             echo "monthly_regimes.json missing — keeping previous docs/monthly_regime.*"
           fi
+          if [ -f screen_output/sam_picks.json ]; then
+            cp screen_output/sam_picks.json docs/sam_picks.json
+            cp public/data/sam_picks.js docs/sam_picks.js
+          else
+            echo "sam_picks.json missing — keeping previous docs/sam_picks.*"
+          fi
 
       - name: Commit and push updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js
+          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js screen_output/sam_picks.json public/data/sam_picks.js docs/sam_picks.json docs/sam_picks.js
           git diff --staged --quiet || git commit -m "data: daily S&R + JEV refresh $(date -u +%Y-%m-%d)"
           git push
