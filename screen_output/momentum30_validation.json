@@ -41,12 +41,63 @@
   }
  ],
  "validated_profit_rs": 0,
- "validated_status": "HARD_BLOCKED_NO_PIT_OR_OFFICIAL_DATA",
+ "validated_status": "HARD_BLOCKED_NO_OFFICIAL_MOMENTUM30_DATA",
  "download_verification": {
   "download_folder_checked": "C:/Users/samaa/Downloads",
   "latest_csv": "quant_upgrade_master.csv",
   "latest_csv_mtime": "2026-09-17 12:14:54",
   "nse_download_created_new_csv": false,
   "conclusion": "Clicking Download did not create a new NSE historical CSV to inspect; official TRI download remains unverified/unavailable."
+ },
+ "data_hunt_2026_09_19": {
+  "as_of": "2026-09-19",
+  "validated_profit_rs": 0,
+  "validated_status": "HARD_BLOCKED_NO_OFFICIAL_MOMENTUM30_DATA",
+  "distinction": {
+   "official_index_buy_and_hold": "Nifty200 Momentum 30's OWN historical return is a real auditable number (independent 18-yr study cited ~14% net CAGR with ~-70% max drawdown), but that is buying/holding the official index, NOT our prediction edge.",
+   "our_prediction_edge": "Predicting future Momentum30 constituents/weights before rebalance remains UNVALIDATED; it requires official historical Momentum30 constituents which were not obtainable from this environment."
+  },
+  "data_acquisition_attempts": [
+   {
+    "source": "NSE India Historical Index Data portal",
+    "url": "https://www.nseindia.com/reports-indices-historical-index-data",
+    "method": "SAM Browser real Chrome UI",
+    "result": "NIFTY200 MOMENTUM 30 selected, 1Y + Download clicked -> 'No records available'; no CSV downloaded (Downloads folder verified)."
+   },
+   {
+    "source": "NSE historical indices API",
+    "url": "https://www.nseindia.com/api/historical/indicesHistory",
+    "method": "server requests with cookies",
+    "result": "HTTP 503 / HTML, no data."
+   },
+   {
+    "source": "niftyindices TRI endpoint",
+    "url": "https://www.niftyindices.com/Backpage.aspx/getTotalReturnIndexString",
+    "method": "server requests + session cookies",
+    "result": "HTTP 200 but returns full HTML page (Akamai/ASP.NET gate), not JSON, for all indices incl NIFTY 50."
+   },
+   {
+    "source": "niftyindices TRI via browser origin",
+    "url": "https://www.niftyindices.com/reports/historical-data",
+    "method": "sam_browser_eval",
+    "result": "sam_browser_eval tool unavailable in this session; could not run page-origin fetch."
+   },
+   {
+    "source": "aditya-jha/nse-historical-membership (PIT, CC BY 4.0)",
+    "url": "https://github.com/aditya-jha/nse-historical-membership",
+    "method": "git clone + inspect index_registry.json",
+    "result": "Cloned; 42 indices covered but NOT Nifty 200 and NOT Nifty200 Momentum 30. Useful for future PIT work, insufficient for Momentum30 validation."
+   }
+  ],
+  "still_required": [
+   "Official historical Nifty200 Momentum 30 constituents (per rebalance, effective dates)",
+   "Official Nifty200 Momentum 30 TRI/price history",
+   "Point-in-time Nifty 200 parent universe incl delisted names"
+  ],
+  "candidate_data_sources": [
+   "niftyindices TRI endpoint via a real browser session with valid cookies (getTotalReturnIndexString)",
+   "NSE EOD Index File / paid Data Subscription (official)",
+   "Extend a PIT membership pipeline (like aditya-jha/nse-historical-membership) to add Nifty 200 + Momentum 30"
+  ]
  }
 }
