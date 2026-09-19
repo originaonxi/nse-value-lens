@@ -42,7 +42,7 @@ jobs:
         env:
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
         run: |
-          if [ -z "$TYPESAFE_API_KEY" ]; then echo "Monthly JEV skipped — TYPESAFE_API_KEY secret not set"; fi
+          if [ -z "$TYPESAFE_API_KEY" ]; then echo "Monthly regime skipped — TYPESAFE_API_KEY secret not set"; exit 0; fi
           python monthly_regime.py
         continue-on-error: true  # monthly layer is additive; never break daily S&R
 
