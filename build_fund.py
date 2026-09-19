@@ -17,10 +17,11 @@ Rules (locked in from project spec):
 Outputs (screen_output/):
   fund_portfolio.json   full holdings + weights + cash + metadata
   fund_portfolio.csv    flat holdings table
-  openalgo_basket.json  OpenAlgo basketorder payload with REAL quantities
+  openalgo_basket.json  PAPER-ONLY basket by default; live quantities require explicit env unlock
 """
 import csv
 import json
+import os
 from datetime import date
 from pathlib import Path
 
@@ -32,6 +33,14 @@ SEED = 1_000_000          # Rs 10 lakh
 TOP_N = 15               # target holdings
 CAP = 0.12               # max single-name weight (12%)
 MIN_HOLDINGS = 2         # never a single-stock fund
+LIVE_UNLOCK_ENV = "NSE_MOMENTUM30_LIVE_TRADING"
+LIVE_UNLOCK_VALUE = "I_UNDERSTAND_RISK_ENABLE_LIVE"
+
+
+def live_trading_enabled():
+    """Manual hard gate: no live OpenAlgo-ready quantities unless explicitly unlocked."""
+    return os.environ.get(LIVE_UNLOCK_ENV) == LIVE_UNLOCK_VALUE
+
 
 
 def load_candidates():
@@ -109,8 +118,9 @@ def build():
     for h in holdings:
         h["actual_weight_pct"] = round(h["value_rs"] / SEED * 100, 2)
 
+    live_enabled = live_trading_enabled()
     portfolio = {
-        "fund": "NSE Nifty 200 Open Momentum Fund",
+        "fund": "NSE 200 Momentum 30 Algorithm Prediction — research scaffold portfolio",
         "as_of": date.today().isoformat(),
         "seed_rs": SEED,
         "deployed_rs": round(deployed, 2),
@@ -120,6 +130,8 @@ def build():
         "method": "z(RAM) score-weighted, 12% cap, top 15, strict F&O+rising-200DMA gate",
         "rebalance": "monthly",
         "gate_pass_count": len(cands),
+        "trading_mode": "LIVE_UNLOCKED" if live_enabled else "PAPER_ONLY_BLOCKED",
+        "live_unlock_required": f"Manual server-side unlock required via {LIVE_UNLOCK_ENV}; exact confirmation value is intentionally not emitted in generated artifacts.",
         "holdings": holdings,
     }
 
@@ -132,10 +144,8 @@ def build():
             w.writerow([h["symbol"], h["name"], h["shares"], h["price"],
                         h["value_rs"], h["actual_weight_pct"], h["z_ram"], h["mom12_pct"]])
 
-    basket = {
-        "strategy": f"NSE_OPEN_FUND_{date.today().isoformat()}",
-        "_note": "Rs 10L score-weighted momentum fund; real share quantities.",
-        "orders": [
+    if live_enabled:
+        orders = [
             {
                 "symbol": h["symbol"],
                 "exchange": "NSE",
@@ -145,7 +155,28 @@ def build():
                 "product": "CNC",
             }
             for h in holdings if h["shares"] > 0
-        ],
+        ]
+        note = "LIVE UNLOCKED by explicit environment variable; review manually before sending to broker."
+    else:
+        orders = [
+            {
+                "symbol": h["symbol"],
+                "exchange": "NSE",
+                "action": "BUY",
+                "quantity": 0,
+                "paper_quantity": h["shares"],
+                "pricetype": "MARKET",
+                "product": "CNC",
+                "blocked_reason": f"Paper-only mode. Manual server-side unlock via {LIVE_UNLOCK_ENV} is allowed only after verified walk-forward validation and manual approval.",
+            }
+            for h in holdings if h["shares"] > 0
+        ]
+        note = "PAPER ONLY: live order quantities are zeroed by default; paper_quantity shows simulation size."
+    basket = {
+        "strategy": f"NSE_MOMENTUM30_RESEARCH_{date.today().isoformat()}",
+        "mode": "LIVE_UNLOCKED" if live_enabled else "PAPER_ONLY_BLOCKED",
+        "_note": note,
+        "orders": orders,
     }
     (OUT / "openalgo_basket.json").write_text(json.dumps(basket, indent=2), encoding="utf-8")
 

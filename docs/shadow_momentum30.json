@@ -1,0 +1,494 @@
+{
+ "as_of": "2026-09-17",
+ "contract": {
+  "name": "NSE 200 Momentum 30 Algorithm Prediction",
+  "mode": "research/backtest scaffold only",
+  "date_leakage_guard": "Each rebalance uses only prices available on or before that date.",
+  "survivorship_warning": "This scaffold still uses current surviving symbols; final claims require point-in-time Nifty 200 universe plus delisted names.",
+  "no_return_promise": "No 30-100% or must-make-money claim is encoded; real orders require separate manual enablement after verified walk-forward validation."
+ },
+ "method": {
+  "universe": "194 current cached symbols with >=252 trading days (survivor-biased scaffold)",
+  "score": "0.5*z(6m_return/annualised_vol) + 0.5*z(12m_return/annualised_vol)",
+  "rebalance_test": "monthly scaffold, equal-weight top 30, 0.20% round-trip cost",
+  "official_gap": "Official index uses point-in-time Nifty 200 eligibility, free-float/factor-tilt weights and semi-annual rebalances; production validation must compare predicted past constituents against official constituent history."
+ },
+ "latest_top30": [
+  {
+   "symbol": "LAURUSLABS",
+   "score": 4.20448,
+   "z6": 4.192721,
+   "z12": 4.216239,
+   "close": 1954.0,
+   "mom6": 0.981306,
+   "mom12": 1.189786,
+   "vol": 0.294624
+  },
+  {
+   "symbol": "DIVISLAB",
+   "score": 2.526128,
+   "z6": 2.661904,
+   "z12": 2.390352,
+   "close": 9375.0,
+   "mom6": 0.543223,
+   "mom12": 0.555591,
+   "vol": 0.238833
+  },
+  {
+   "symbol": "BHEL",
+   "score": 2.428149,
+   "z6": 2.348948,
+   "z12": 2.507349,
+   "close": 439.899994,
+   "mom6": 0.745379,
+   "mom12": 0.882038,
+   "vol": 0.362088
+  },
+  {
+   "symbol": "OFSS",
+   "score": 2.294324,
+   "z6": 3.484067,
+   "z12": 1.104582,
+   "close": 11896.0,
+   "mom6": 0.898651,
+   "mom12": 0.354389,
+   "vol": 0.316231
+  },
+  {
+   "symbol": "RADICO",
+   "score": 2.136847,
+   "z6": 2.688689,
+   "z12": 1.585004,
+   "close": 4535.399902,
+   "mom6": 0.743828,
+   "mom12": 0.509669,
+   "vol": 0.324396
+  },
+  {
+   "symbol": "FEDERALBNK",
+   "score": 1.947505,
+   "z6": 1.138066,
+   "z12": 2.756944,
+   "close": 332.75,
+   "mom6": 0.312706,
+   "mom12": 0.682643,
+   "vol": 0.255671
+  },
+  {
+   "symbol": "PAYTM",
+   "score": 1.930043,
+   "z6": 2.57122,
+   "z12": 1.288865,
+   "close": 1849.900024,
+   "mom6": 0.863316,
+   "mom12": 0.50484,
+   "vol": 0.390302
+  },
+  {
+   "symbol": "MCX",
+   "score": 1.817962,
+   "z6": 0.722355,
+   "z12": 2.913569,
+   "close": 3260.0,
+   "mom6": 0.353484,
+   "mom12": 1.063514,
+   "vol": 0.377552
+  },
+  {
+   "symbol": "AUROPHARMA",
+   "score": 1.789766,
+   "z6": 1.267197,
+   "z12": 2.312335,
+   "close": 1734.0,
+   "mom6": 0.342729,
+   "mom12": 0.588494,
+   "vol": 0.261191
+  },
+  {
+   "symbol": "MOTHERSON",
+   "score": 1.590916,
+   "z6": 1.678064,
+   "z12": 1.503768,
+   "close": 162.570007,
+   "mom6": 0.532583,
+   "mom12": 0.498972,
+   "vol": 0.333769
+  },
+  {
+   "symbol": "ADANIENSOL",
+   "score": 1.539967,
+   "z6": 1.251251,
+   "z12": 1.828683,
+   "close": 1436.099976,
+   "mom6": 0.516633,
+   "mom12": 0.714542,
+   "vol": 0.397051
+  },
+  {
+   "symbol": "IDEA",
+   "score": 1.491867,
+   "z6": 1.266352,
+   "z12": 1.717381,
+   "close": 13.92,
+   "mom6": 0.6,
+   "mom12": 0.77551,
+   "vol": 0.457459
+  },
+  {
+   "symbol": "NYKAA",
+   "score": 1.400499,
+   "z6": 1.53969,
+   "z12": 1.261309,
+   "close": 332.149994,
+   "mom6": 0.414909,
+   "mom12": 0.350588,
+   "vol": 0.276571
+  },
+  {
+   "symbol": "BOSCHLTD",
+   "score": 1.370238,
+   "z6": 2.075104,
+   "z12": 0.665373,
+   "close": 47000.0,
+   "mom6": 0.52586,
+   "mom12": 0.199374,
+   "vol": 0.281267
+  },
+  {
+   "symbol": "ADANIENT",
+   "score": 1.326527,
+   "z6": 1.978807,
+   "z12": 0.674248,
+   "close": 3020.0,
+   "mom6": 0.648309,
+   "mom12": 0.257848,
+   "vol": 0.359539
+  },
+  {
+   "symbol": "TITAN",
+   "score": 1.277258,
+   "z6": 0.931177,
+   "z12": 1.623339,
+   "close": 4798.5,
+   "mom6": 0.249447,
+   "mom12": 0.371072,
+   "vol": 0.230898
+  },
+  {
+   "symbol": "ADANIPORTS",
+   "score": 1.222948,
+   "z6": 1.426468,
+   "z12": 1.019428,
+   "close": 1824.0,
+   "mom6": 0.405099,
+   "mom12": 0.296494,
+   "vol": 0.284866
+  },
+  {
+   "symbol": "BAJAJ-AUTO",
+   "score": 1.203004,
+   "z6": 1.182084,
+   "z12": 1.223924,
+   "close": 11414.0,
+   "mom6": 0.278824,
+   "mom12": 0.274178,
+   "vol": 0.222445
+  },
+  {
+   "symbol": "ABCAPITAL",
+   "score": 1.201576,
+   "z6": 1.130495,
+   "z12": 1.272657,
+   "close": 410.049988,
+   "mom6": 0.390236,
+   "mom12": 0.409591,
+   "vol": 0.320428
+  },
+  {
+   "symbol": "ADANIPOWER",
+   "score": 1.118233,
+   "z6": 0.725157,
+   "z12": 1.511309,
+   "close": 206.600006,
+   "mom6": 0.397362,
+   "mom12": 0.636177,
+   "vol": 0.423543
+  },
+  {
+   "symbol": "APOLLOHOSP",
+   "score": 1.084898,
+   "z6": 1.41414,
+   "z12": 0.755656,
+   "close": 8944.5,
+   "mom6": 0.253312,
+   "mom12": 0.142195,
+   "vol": 0.179201
+  },
+  {
+   "symbol": "POWERINDIA",
+   "score": 1.056474,
+   "z6": 0.522759,
+   "z12": 1.590189,
+   "close": 32700.0,
+   "mom6": 0.348498,
+   "mom12": 0.687797,
+   "vol": 0.43642
+  },
+  {
+   "symbol": "SOLARINDS",
+   "score": 1.030126,
+   "z6": 1.388562,
+   "z12": 0.671691,
+   "close": 18555.0,
+   "mom6": 0.493641,
+   "mom12": 0.252764,
+   "vol": 0.353633
+  },
+  {
+   "symbol": "TORNTPHARM",
+   "score": 1.020716,
+   "z6": 0.275573,
+   "z12": 1.765858,
+   "close": 4840.0,
+   "mom6": 0.135689,
+   "mom12": 0.376116,
+   "vol": 0.21607
+  },
+  {
+   "symbol": "BHARATFORG",
+   "score": 1.019653,
+   "z6": 0.103025,
+   "z12": 1.936282,
+   "close": 1962.099976,
+   "mom6": 0.1499,
+   "mom12": 0.559771,
+   "vol": 0.294537
+  },
+  {
+   "symbol": "ADANIGREEN",
+   "score": 1.000829,
+   "z6": 1.197489,
+   "z12": 0.80417,
+   "close": 1334.5,
+   "mom6": 0.546171,
+   "mom12": 0.362499,
+   "vol": 0.43207
+  },
+  {
+   "symbol": "COFORGE",
+   "score": 0.980613,
+   "z6": 1.956909,
+   "z12": 0.004317,
+   "close": 1841.0,
+   "mom6": 0.694013,
+   "mom12": 0.034544,
+   "vol": 0.388138
+  },
+  {
+   "symbol": "AUBANK",
+   "score": 0.977545,
+   "z6": 0.236518,
+   "z12": 1.718573,
+   "close": 1058.599976,
+   "mom6": 0.175405,
+   "mom12": 0.495066,
+   "vol": 0.291838
+  },
+  {
+   "symbol": "ZYDUSLIFE",
+   "score": 0.971152,
+   "z6": 1.538183,
+   "z12": 0.404122,
+   "close": 1160.0,
+   "mom6": 0.349108,
+   "mom12": 0.108024,
+   "vol": 0.232871
+  },
+  {
+   "symbol": "IDFCFIRSTB",
+   "score": 0.958846,
+   "z6": 1.340823,
+   "z12": 0.576869,
+   "close": 85.919998,
+   "mom6": 0.430485,
+   "mom12": 0.197671,
+   "vol": 0.315842
+  }
+ ],
+ "walk_forward_scaffold": {
+  "periods": [
+   {
+    "rebalance": "2025-09-30",
+    "hold_to": "2025-10-30",
+    "ret_pct": 2.54,
+    "equity": 10253821.48,
+    "turnover_pct": 100.0,
+    "held": 30,
+    "top5": [
+     "GVT&D",
+     "LTF",
+     "LAURUSLABS",
+     "TATAINVEST",
+     "FORTIS"
+    ]
+   },
+   {
+    "rebalance": "2025-10-30",
+    "hold_to": "2025-11-30",
+    "ret_pct": 3.47,
+    "equity": 10610066.26,
+    "turnover_pct": 36.7,
+    "held": 30,
+    "top5": [
+     "LTF",
+     "GVT&D",
+     "LAURUSLABS",
+     "ABCAPITAL",
+     "FORTIS"
+    ]
+   },
+   {
+    "rebalance": "2025-11-30",
+    "hold_to": "2025-12-30",
+    "ret_pct": 2.05,
+    "equity": 10827900.06,
+    "turnover_pct": 26.7,
+    "held": 30,
+    "top5": [
+     "LTF",
+     "MUTHOOTFIN",
+     "LAURUSLABS",
+     "ABCAPITAL",
+     "MARUTI"
+    ]
+   },
+   {
+    "rebalance": "2025-12-31",
+    "hold_to": "2026-02-01",
+    "ret_pct": -3.58,
+    "equity": 10440740.78,
+    "turnover_pct": 23.3,
+    "held": 30,
+    "top5": [
+     "LTF",
+     "MARUTI",
+     "MUTHOOTFIN",
+     "M&MFIN",
+     "ASHOKLEY"
+    ]
+   },
+   {
+    "rebalance": "2026-01-29",
+    "hold_to": "2026-03-01",
+    "ret_pct": 2.56,
+    "equity": 10707687.18,
+    "turnover_pct": 26.7,
+    "held": 30,
+    "top5": [
+     "NATIONALUM",
+     "ASHOKLEY",
+     "SHRIRAMFIN",
+     "MCX",
+     "SBIN"
+    ]
+   },
+   {
+    "rebalance": "2026-02-26",
+    "hold_to": "2026-03-26",
+    "ret_pct": -12.09,
+    "equity": 9413371.2,
+    "turnover_pct": 23.3,
+    "held": 30,
+    "top5": [
+     "SBIN",
+     "ASHOKLEY",
+     "SHRIRAMFIN",
+     "FEDERALBNK",
+     "CANBK"
+    ]
+   },
+   {
+    "rebalance": "2026-03-31",
+    "hold_to": "2026-04-30",
+    "ret_pct": 6.22,
+    "equity": 9999182.14,
+    "turnover_pct": 26.7,
+    "held": 30,
+    "top5": [
+     "NATIONALUM",
+     "MCX",
+     "GVT&D",
+     "VEDL",
+     "FEDERALBNK"
+    ]
+   },
+   {
+    "rebalance": "2026-04-30",
+    "hold_to": "2026-05-31",
+    "ret_pct": 2.7,
+    "equity": 10268679.62,
+    "turnover_pct": 33.3,
+    "held": 30,
+    "top5": [
+     "NATIONALUM",
+     "POWERINDIA",
+     "GVT&D",
+     "MCX",
+     "BHARATFORG"
+    ]
+   },
+   {
+    "rebalance": "2026-05-31",
+    "hold_to": "2026-06-30",
+    "ret_pct": -1.39,
+    "equity": 10126283.17,
+    "turnover_pct": 26.7,
+    "held": 30,
+    "top5": [
+     "NATIONALUM",
+     "LAURUSLABS",
+     "HINDALCO",
+     "GVT&D",
+     "CUMMINSIND"
+    ]
+   },
+   {
+    "rebalance": "2026-06-30",
+    "hold_to": "2026-07-30",
+    "ret_pct": -0.59,
+    "equity": 10066348.69,
+    "turnover_pct": 30.0,
+    "held": 30,
+    "top5": [
+     "LAURUSLABS",
+     "POWERINDIA",
+     "BHARATFORG",
+     "GVT&D",
+     "ADANIPOWER"
+    ]
+   },
+   {
+    "rebalance": "2026-07-30",
+    "hold_to": "2026-08-30",
+    "ret_pct": 1.45,
+    "equity": 10212422.23,
+    "turnover_pct": 26.7,
+    "held": 30,
+    "top5": [
+     "LAURUSLABS",
+     "ADANIENSOL",
+     "BHARATFORG",
+     "FEDERALBNK",
+     "RADICO"
+    ]
+   }
+  ],
+  "months": 11,
+  "final_equity": 10212422.23,
+  "total_ret_pct": 2.12,
+  "approx_cagr_pct": 2.32,
+  "win_months_pct": 63.6,
+  "max_drawdown_pct": 13.06
+ },
+ "verdict": "Survivor-biased scaffold only. Do not use for claims or real money until point-in-time universe and official constituent validation are added."
+}

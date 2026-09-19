@@ -1,0 +1,20 @@
+{
+ "as_of": "2026-09-19",
+ "status": "BLOCKED_MISSING_OFFICIAL_VALIDATION_DATA",
+ "constituent_prediction": {
+  "status": "BLOCKED",
+  "required_file": "data\\momentum30_constituents.csv",
+  "reason": "Need official historical Momentum 30 constituents to score precision@30, entrants, exits, and rank hit-rate."
+ },
+ "official_return_benchmark": {
+  "status": "BLOCKED",
+  "required_file": "data\\nifty200_momentum30_tri.csv",
+  "reason": "Need official Momentum 30 TRI/price index history to benchmark shadow portfolio returns."
+ },
+ "acceptable_sources": [
+  "NSE/Nifty Indices official historical index reports/API for index values",
+  "NSE/Nifty Indices official constituent/factsheet archives for Momentum 30 membership",
+  "Licensed third-party historical constituent ledger with effective dates"
+ ],
+ "no_fake_result_rule": "Do not mark the strategy as validated until these files exist and the script reports OK statuses."
+}

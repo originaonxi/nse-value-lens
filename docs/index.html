@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NSE Momentum — Baseline &amp; Quant Upgrade</title>
+<title>NSE 200 Momentum 30 Algorithm Prediction — Research Scaffold</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#c9d1d9;--acc:#58a6ff;--warn:#d29922;--good:#3fb950}
@@ -41,8 +41,8 @@ tr:hover td{background:#1c2128}
 .stat .l{font-size:.72rem;color:#8b949e;margin-top:2px}
 </style></head><body>
 
-<h1>NSE Nifty 200 — Momentum Screener</h1>
-<div class="sub">2026-09-17 &nbsp;·&nbsp; 194/200 eligible &nbsp;·&nbsp; jugaad-data (NSE direct) primary &nbsp;|&nbsp; <a href="quant_upgrade_master.csv">quant_upgrade_master.csv (full ranked dump)</a></div>
+<h1>NSE 200 Momentum 30 Algorithm Prediction — Research Scaffold</h1>
+<div class="sub">Shadow Momentum 30 research/backtest scaffold &nbsp;·&nbsp; predict past first &nbsp;·&nbsp; no real-money automation until verified walk-forward validation</div>
 
 <div class="stat-strip">
   <div class="stat"><div class="v">194</div><div class="l">Stocks fetched</div></div>
@@ -53,14 +53,14 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="warn-banner">
-  <strong>Quant upgrade — F&amp;O + DMA gate + volatility-adjusted ranking</strong><br>
-  NIFTY200 &rarr; F&amp;O-eligible (180) &rarr; close &gt; rising-200-DMA (47 pass) &rarr; top 30 by <code>z(RAM = mom12 / annualised_vol)</code>.<br>
-  Adds: F&amp;O-only eligibility, volatility-normalised momentum, residual momentum vs NIFTY 50, trend quality (OLS t-stat), DMA-slope gate.
-  <strong>Not the official Nifty200 Momentum 30</strong> — labelled <em>possible approximation</em>; exact NSE z-score/skip/combination math still unconfirmed (methodology PDF auth-gated).<br>
-  Prices are raw NSE closes (not split/dividend adjusted). Benchmark: NIFTY 50; beta clamp [0.2, 3.0].
+  <strong>Research contract — prediction before trading, no return promises.</strong><br>
+  Step 1 is a Shadow Momentum 30 scaffold: rank Nifty 200 stocks by volatility-adjusted 6-month and 12-month momentum, then backtest forward periods using only data available at each date.<br>
+  Current scaffold is <strong>survivor-biased</strong> because it uses today's cached 194 symbols; production claims require point-in-time Nifty 200 membership, delisted/removed stocks, and official Momentum 30 constituent validation.<br>
+  Real orders, futures, options, and shares stay disabled until verified walk-forward results pass and a human manually enables paper/live mode.
 </div>
 
 <div class="tabs">
+  <button class="tab-btn" onclick="showTab('shadow30',this)" style="border-color:#d29922;color:#ffd54f;font-weight:700">Shadow Momentum 30<span class="badge" style="background:#d29922;color:#000">scaffold</span></button>
   <button class="tab-btn active" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
   <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
   <button class="tab-btn" onclick="showTab('combined',this)">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
@@ -73,6 +73,20 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
   <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
   <button class="tab-btn" onclick="showTab('regime',this)">📅 Monthly Regime<span class="badge">auto</span></button>
+</div>
+
+<!-- ═══ SHADOW MOMENTUM 30 TAB ═════════════════════════════════════════════ -->
+<div id="shadow30" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Predict the past first — survivor-biased scaffold, not a final claim.</strong><br>
+    Formula: <code>0.5×z(6m return / annualised vol) + 0.5×z(12m return / annualised vol)</code>.
+    Monthly equal-weight top-30 smoke test, 0.20% round-trip cost. Production version must use point-in-time Nifty 200 universe and official constituent validation.
+  </p>
+  <div id="shadowStats" class="stat-strip"></div>
+  <div class="scroll" style="max-height:520px"><table><thead><tr>
+    <th>#</th><th>Symbol</th><th>Score</th><th>6m%</th><th>12m%</th><th>Vol%</th><th>Close</th>
+  </tr></thead><tbody id="shadowRows"></tbody></table></div>
+  <div class="disc" id="shadowFoot">Loading Shadow Momentum 30 scaffold…</div>
 </div>
 
 <!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
@@ -335,7 +349,7 @@ fetch('fund_portfolio.json').then(r=>r.json()).then(p=>{
     const wc=h.actual_weight_pct>=8?'hi':h.actual_weight_pct>=5?'mid':'lo';
     return `<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td class="co" title="${h.name}">${h.name}</td><td>${h.shares.toLocaleString('en-IN')}</td><td>${inr(h.price)}</td><td>${inr(h.value_rs)}</td><td class="${wc}">${h.actual_weight_pct}%</td><td>${h.z_ram}</td><td class="hi">${h.mom12_pct}%</td></tr>`;
   }).join('');
-  document.getElementById('fundFoot').innerHTML=`<strong>Method:</strong> ${p.method}. <strong>As of</strong> ${p.as_of}, <strong>rebalance</strong> ${p.rebalance}. Downloads: <a href="fund_portfolio.csv" style="color:#58a6ff">fund_portfolio.csv</a> &middot; <a href="openalgo_basket.json" style="color:#58a6ff">openalgo_basket.json</a> (real share quantities, CNC market orders). Not investment advice; raw unadjusted NSE closes.`;
+  document.getElementById('fundFoot').innerHTML=`<strong>Method:</strong> ${p.method}. <strong>As of</strong> ${p.as_of}, <strong>rebalance</strong> ${p.rebalance}. Trading mode: <strong>${p.trading_mode||'PAPER_ONLY_BLOCKED'}</strong>. Downloads: <a href="fund_portfolio.csv" style="color:#58a6ff">fund_portfolio.csv</a> &middot; <a href="openalgo_basket.json" style="color:#58a6ff">openalgo_basket.json</a> (paper-only by default; live quantities require explicit env unlock). Not investment advice; raw unadjusted NSE closes.`;
   const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2','#bc8cff','#ffa198','#39c5cf','#7ee787','#ffd33d'];
   new Chart(document.getElementById('chFund').getContext('2d'),{
     type:'doughnut',
@@ -402,6 +416,25 @@ fetch('m5_portfolio.json').then(r=>r.json()).then(p=>{
 function fmtInr(n){return n!=null?'\u20B9'+Math.round(n).toLocaleString('en-IN'):'N/A';}
 function fmtPct(n,dec=1){return n!=null?n.toFixed(dec)+'%':'N/A';}
 function fmtNum(n,dec=2){return n!=null?n.toFixed(dec):'N/A';}
+
+// ═══ Shadow Momentum 30 scaffold tab ══════════════════════════════════════
+fetch('shadow_momentum30.json').then(r=>r.json()).then(d=>{
+  const w=d.walk_forward_scaffold||{}, top=d.latest_top30||[];
+  document.getElementById('shadowStats').innerHTML=[
+    ['As of',d.as_of||'N/A'],
+    ['Months tested',w.months||0],
+    ['Scaffold return',fmtPct(w.total_ret_pct||0,2)],
+    ['Max DD',fmtPct(w.max_drawdown_pct||0,2)],
+    ['Win months',fmtPct(w.win_months_pct||0,1)]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('shadowRows').innerHTML=top.map((r,i)=>`<tr>
+    <td>${i+1}</td><td class="sym">${r.symbol}</td><td class="hi">${fmtNum(r.score,3)}</td>
+    <td>${fmtPct((r.mom6||0)*100,1)}</td><td>${fmtPct((r.mom12||0)*100,1)}</td>
+    <td>${fmtPct((r.vol||0)*100,1)}</td><td>₹${Math.round(r.close||0).toLocaleString('en-IN')}</td>
+  </tr>`).join('');
+  document.getElementById('shadowFoot').innerHTML=
+    `<strong>Verdict:</strong> ${d.verdict}<br><strong>Method:</strong> ${d.method.score}. ${d.method.official_gap}`;
+}).catch(e=>{document.getElementById('shadowFoot').textContent='Run: python shadow_momentum30.py to generate shadow_momentum30.json';});
 
 function showModal(sym){
   const h=_holdings.find(x=>x.symbol===sym)||{};

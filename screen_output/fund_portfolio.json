@@ -1,6 +1,6 @@
 {
-  "fund": "NSE Nifty 200 Open Momentum Fund",
-  "as_of": "2026-09-17",
+  "fund": "NSE 200 Momentum 30 Algorithm Prediction \u2014 research scaffold portfolio",
+  "as_of": "2026-09-19",
   "seed_rs": 1000000,
   "deployed_rs": 956279.06,
   "cash_rs": 43720.94,
@@ -9,6 +9,8 @@
   "method": "z(RAM) score-weighted, 12% cap, top 15, strict F&O+rising-200DMA gate",
   "rebalance": "monthly",
   "gate_pass_count": 47,
+  "trading_mode": "PAPER_ONLY_BLOCKED",
+  "live_unlock_required": "Manual server-side unlock required via NSE_MOMENTUM30_LIVE_TRADING; exact confirmation value is intentionally not emitted in generated artifacts.",
   "holdings": [
     {
       "symbol": "LAURUSLABS",
