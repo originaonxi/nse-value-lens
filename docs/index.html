@@ -60,7 +60,7 @@ tr:hover td{background:#1c2128}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn" onclick="showTab('shadow30',this)" style="border-color:#d29922;color:#ffd54f;font-weight:700">Shadow Momentum 30<span class="badge" style="background:#d29922;color:#000">scaffold</span></button>
+  <button class="tab-btn" onclick="showTab('m30daily',this)" style="border-color:#58a6ff;color:#58a6ff;font-weight:700">Momentum 30 Daily<span class="badge" style="background:#58a6ff;color:#000">auto</span></button>
   <button class="tab-btn active" onclick="showTab('verdict',this)" style="border-color:#f778ba;color:#f778ba;font-weight:700">Backtest Verdict<span class="badge" style="background:#f778ba;color:#000">audit</span></button>
   <button class="tab-btn" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
   <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
@@ -74,6 +74,20 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
   <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
   <button class="tab-btn" onclick="showTab('regime',this)">📅 Monthly Regime<span class="badge">auto</span></button>
+</div>
+
+<!-- ═══ MOMENTUM 30 DAILY TAB ═════════════════════════════════════════════ -->
+<div id="m30daily" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Nifty 200 Momentum 30 style — fresh daily ranking with BUY/WATCH/NEUTRAL signals.</strong><br>
+    Formula: <code>score = 0.5×z(6m_return/annualised_vol) + 0.5×z(12m_return/annualised_vol)</code>.
+    Fresh yfinance OHLCV daily; top 30 ranked; signals: top 10 BUY, next 10 WATCH_BUY, rest NEUTRAL.
+  </p>
+  <div id="m30Stats" class="stat-strip"></div>
+  <div class="scroll" style="max-height:520px"><table><thead><tr>
+    <th>#</th><th>Signal</th><th>Symbol</th><th>Score</th><th>6m%</th><th>12m%</th><th>Vol%</th><th>Close</th><th>Action</th>
+  </tr></thead><tbody id="m30Rows"></tbody></table></div>
+  <div class="disc" id="m30Foot">Loading Momentum 30 Daily…</div>
 </div>
 
 <!-- ═══ BACKTEST VERDICT TAB ═══════════════════════════════════════════════ -->
@@ -473,6 +487,28 @@ fetch('shadow_momentum30.json').then(r=>r.json()).then(d=>{
   document.getElementById('shadowFoot').innerHTML=
     `<strong>Verdict:</strong> ${d.verdict}<br><strong>Method:</strong> ${d.method.score}. ${d.method.official_gap}`;
 }).catch(e=>{document.getElementById('shadowFoot').textContent='Run: python shadow_momentum30.py to generate shadow_momentum30.json';});
+
+// ═══ Momentum 30 Daily tab ══════════════════════════════════════════════════
+fetch('momentum30_daily.json').then(r=>r.json()).then(d=>{
+  const h=d.holdings||[];
+  document.getElementById('m30Stats').innerHTML=[
+    ['As of',d.as_of||'N/A'],
+    ['Universe',d.universe||'N/A'],
+    ['Top N',d.top_n||30],
+    ['BUY',h.filter(x=>x.signal==='BUY').length],
+    ['WATCH_BUY',h.filter(x=>x.signal==='WATCH_BUY').length],
+    ['NEUTRAL',h.filter(x=>x.signal==='NEUTRAL').length]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('m30Rows').innerHTML=h.map((r,i)=>`<tr>
+    <td>${i+1}</td><td style="color:${r.color};font-weight:700">${r.signal}</td>
+    <td class="sym">${r.symbol}</td><td class="hi">${fmtNum(r.score,3)}</td>
+    <td>${fmtPct(r.mom6_pct,1)}</td><td>${r.mom12_pct!=null?fmtPct(r.mom12_pct,1):'N/A'}</td>
+    <td>${fmtPct(r.vol_pct,1)}</td><td>₹${Math.round(r.close||0).toLocaleString('en-IN')}</td>
+    <td style="color:${r.color};font-weight:700">${r.signal}</td>
+  </tr>`).join('');
+  document.getElementById('m30Foot').innerHTML=
+    `<strong>Method:</strong> ${d.method}<br><strong>Note:</strong> ${d.note}`;
+}).catch(e=>{document.getElementById('m30Foot').textContent='Run: python momentum30_daily.py to generate momentum30_daily.json';});
 
 function showModal(sym){
   const h=_holdings.find(x=>x.symbol===sym)||{};

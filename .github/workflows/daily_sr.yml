@@ -46,6 +46,10 @@ jobs:
           python monthly_regime.py
         continue-on-error: true  # monthly layer is additive; never break daily S&R
 
+      - name: Run Momentum 30 Daily
+        run: python momentum30_daily.py
+        continue-on-error: true  # additive; never break daily refresh
+
       - name: Run SAM PICKS synthesis
         run: python sam_picks.py
         continue-on-error: true  # synthesis is additive; never break daily refresh
@@ -66,10 +70,12 @@ jobs:
           else
             echo "monthly_regimes.json missing — keeping previous docs/monthly_regime.*"
           fi
-          # sam_picks.py always stamps as_of = fresh S&R date, so a STALE-flagged
-          # file still matches here and IS published (its own stale flag + UI banner
-          # warn). This guard only skips a total sam_picks.py failure (old as_of),
-          # avoiding a date-regression while other tabs show today.
+          if [ -f screen_output/momentum30_daily.json ] && [ "$(jq -r .as_of screen_output/momentum30_daily.json)" = "$AS_OF" ]; then
+            cp screen_output/momentum30_daily.json docs/momentum30_daily.json
+            echo "Momentum 30 Daily copied for $AS_OF"
+          else
+            echo "momentum30_daily.json missing or not fresh for $AS_OF — keeping previous docs/momentum30_daily.*"
+          fi
           if [ -f screen_output/sam_picks.json ] && [ "$(jq -r .as_of screen_output/sam_picks.json)" = "$AS_OF" ]; then
             cp screen_output/sam_picks.json docs/sam_picks.json
             cp public/data/sam_picks.js docs/sam_picks.js
@@ -84,6 +90,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js screen_output/sam_picks.json public/data/sam_picks.js docs/sam_picks.json docs/sam_picks.js
-          git diff --staged --quiet || git commit -m "data: daily S&R + JEV refresh $(date -u +%Y-%m-%d)"
+          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js screen_output/sam_picks.json public/data/sam_picks.js docs/sam_picks.json docs/sam_picks.js screen_output/momentum30_daily.json docs/momentum30_daily.json
+          git diff --staged --quiet || git commit -m "data: daily S&R + JEV + Momentum30 refresh $(date -u +%Y-%m-%d)"
           git push
