@@ -30,13 +30,29 @@ jobs:
       - name: Run S&R screener
         run: python daily_sr.py
 
+      - name: Run JEV judgment layer
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+        run: |
+          if [ -z "$TYPESAFE_API_KEY" ]; then echo "JEV skipped — TYPESAFE_API_KEY secret not set"; exit 0; fi
+          python jev_rank.py
+        continue-on-error: true  # JEV layer is additive; never break the core S&R refresh
+
       - name: Copy to docs/ for GitHub Pages
-        run: cp screen_output/sr_levels.json docs/sr_levels.json
+        run: |
+          cp screen_output/sr_levels.json docs/sr_levels.json
+          AS_OF=$(jq -r .as_of screen_output/sr_levels.json)
+          if [ -f screen_output/jev_rank.json ] && [ "$(jq -r .as_of screen_output/jev_rank.json)" = "$AS_OF" ]; then
+            cp screen_output/jev_rank.json docs/jev_rank.json
+            cp public/data/jev_rank.js docs/jev_rank.js
+          else
+            echo "JEV ranking stale or missing for $AS_OF — keeping previous docs/jev_rank.*"
+          fi
 
       - name: Commit and push updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add screen_output/sr_levels.json docs/sr_levels.json
-          git diff --staged --quiet || git commit -m "data: daily S&R refresh $(date -u +%Y-%m-%d)"
+          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js
+          git diff --staged --quiet || git commit -m "data: daily S&R + JEV refresh $(date -u +%Y-%m-%d)"
           git push

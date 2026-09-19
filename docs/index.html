@@ -84,6 +84,20 @@ tr:hover td{background:#1c2128}
     Price below VWAP = trading at a discount; above = premium.
   </p>
   <div id="srStats" class="stat-strip"></div>
+  <div style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:14px;margin:12px 0 14px">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <div style="font-size:1rem;font-weight:700;color:#e6edf3">JEV Top Trades — best S&amp;R setups</div>
+        <div id="jevMeta" style="font-size:.78rem;color:#8b949e">Loading TypeSafe/JEV ranking…</div>
+      </div>
+      <div style="font-size:.75rem;color:#8b949e;max-width:520px">
+        JEV scores the daily S&amp;R dossier only: confluence strength, AVWAP, volume profile, touches, rejection, ATR buffer, reclaim/failure flags, and risk/reward. Not SEBI-registered advice.
+      </div>
+    </div>
+    <div class="scroll" style="max-height:330px"><table><thead><tr>
+      <th>#</th><th>Stock</th><th>Signal</th><th>JEV</th><th>Setup</th><th>Follow</th><th>R/R</th><th>Price</th><th>Floor/Ceiling</th><th>Why</th>
+    </tr></thead><tbody id="jevRows"><tr><td colspan="10" style="color:#8b949e">Loading…</td></tr></tbody></table></div>
+  </div>
   <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap" id="srFilters">
     <button onclick="srFilter('ALL')"             class="tab-btn active" id="sf-ALL">All stocks</button>
     <button onclick="srFilter('BREAKOUT_UP')"     class="tab-btn" id="sf-BREAKOUT_UP"   style="color:#3fb950">&#9650; Breaking out</button>
@@ -501,6 +515,34 @@ function renderSR(){
     </tr>`;
   }).join('');
 }
+function renderJEV(j){
+  const bySym=Object.fromEntries(_srAll.map(s=>[s.symbol,s]));
+  const rows=(j.ranking||[]).slice(0,10);
+  document.getElementById('jevMeta').innerHTML=`As of <strong style="color:#e6edf3">${j.as_of}</strong> · ${j.judged}/${j.of_universe} stocks judged · model ${j.model} · weights: setup 35%, follow-through 30%, R/R 35%`;
+  document.getElementById('jevRows').innerHTML=rows.map(r=>{
+    const s=bySym[r.symbol]||{};
+    const col=SIG_COL[r.signal]||SIG_COL[s.signal]||'#8b949e';
+    const score=(r.composite*100).toFixed(1);
+    const setup=(r.setup_quality||0).toFixed(2);
+    const follow=(r.follow_through||0).toFixed(2);
+    const rr=(r.risk_reward||0).toFixed(2);
+    const why=(s.plain_signal||r.signal||'—');
+    return `<tr>
+      <td style="color:#8b949e">${r.rank}</td>
+      <td class="sym">${r.symbol}</td>
+      <td style="color:${col};font-weight:700">${SIG_ICON[r.signal]||''} ${r.signal}</td>
+      <td style="font-weight:800;color:#3fb950">${score}</td>
+      <td>${setup}</td><td>${follow}</td><td>${rr}</td>
+      <td style="font-weight:700">${fmtInr(r.close||s.close)}</td>
+      <td style="font-size:.78rem;line-height:1.35">
+        <span style="color:#3fb950">${s.floor!=null?fmtInr(s.floor):'—'}</span>
+        <span style="color:#8b949e"> / </span>
+        <span style="color:#f778ba">${s.ceiling!=null?fmtInr(s.ceiling):'—'}</span>
+      </td>
+      <td style="font-size:.77rem;color:#8b949e;max-width:280px;white-space:normal;line-height:1.3">${why}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" style="color:#8b949e">No JEV ranking available.</td></tr>';
+}
 fetch('sr_levels.json').then(r=>r.json()).then(d=>{
   _srAll=d.stocks||[];
   const signals=Object.fromEntries(['BREAKOUT_UP','BREAKOUT_DN','AT_RESISTANCE','AT_SUPPORT','NEAR_RESISTANCE','NEAR_SUPPORT','NEUTRAL'].map(s=>[s,0]));
@@ -515,5 +557,11 @@ fetch('sr_levels.json').then(r=>r.json()).then(d=>{
   ].map(s=>`<div class="stat"><div class="v" style="font-size:1rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
   document.getElementById('srFoot').innerHTML=`<strong>Methods (${d.methods.length}):</strong> ${d.methods.join(' &middot; ')}<br><strong>Breakout:</strong> ${d.breakout_trigger}<br><strong>Auto-refreshed daily</strong> via GitHub Actions at 16:30 IST (after NSE close) — not real-time ticks. Data as of <strong>${d.as_of}</strong>. You can also run <code>python daily_sr.py</code> manually any time.`;
   renderSR();
+  fetch('jev_rank.json').then(r=>{if(!r.ok)throw new Error('missing jev_rank.json');return r.json();})
+    .then(renderJEV)
+    .catch(e=>{
+      document.getElementById('jevMeta').textContent='JEV ranking not published yet — run python jev_rank.py and push docs/jev_rank.json.';
+      document.getElementById('jevRows').innerHTML='<tr><td colspan="10" style="color:#8b949e">JEV ranking unavailable.</td></tr>';
+    });
 }).catch(e=>{document.getElementById('srFoot').textContent='Run: python daily_sr.py to generate sr_levels.json';});
 </script></body></html>
