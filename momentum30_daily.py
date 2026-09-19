@@ -32,7 +32,6 @@ TOP_N = 30
 TRADING_DAYS_6M = 126
 TRADING_DAYS_12M = 252
 VOL_DAYS = 252
-MIN_DAYS = 126  # need at least 6 months for any momentum
 
 SIGNAL_MAP = {
     "BUY": "#3fb950",
@@ -72,11 +71,10 @@ def compute_metrics(records: list[dict]) -> dict | None:
     mom12 = closes[-1] / closes[-TRADING_DAYS_12M] - 1.0 if len(closes) >= TRADING_DAYS_12M else None
 
     # Annualized volatility (log returns, need 252d)
-    if len(closes) >= VOL_DAYS + 1:
+    if len(closes) >= 253:
         rets = np.diff(np.log(closes[-(VOL_DAYS + 1):]))
         vol = float(np.std(rets, ddof=0) * math.sqrt(252))
     else:
-        # fallback: use available data, min 60 days
         rets = np.diff(np.log(closes))
         if len(rets) < 60:
             return None
@@ -155,8 +153,13 @@ def main() -> None:
     ranked.sort(key=lambda x: x[0], reverse=True)
     top30 = ranked[:TOP_N]
 
-    # Build output
-    as_of = date.today().isoformat()
+    # Build output - use S&R as_of date from sr_levels.json if available (matches daily workflow)
+    try:
+        sr = json.loads(Path("screen_output/sr_levels.json").read_text())
+        as_of = sr.get("as_of", date.today().isoformat())
+    except Exception:
+        as_of = date.today().isoformat()
+
     holdings = []
     for i, (score, sym) in enumerate(top30, 1):
         m = metrics[sym]
@@ -179,7 +182,7 @@ def main() -> None:
         })
 
     output = {
-        "as_of": date.today().isoformat(),
+        "as_of": as_of,
         "universe": "Nifty 200 EQ (~194 stocks)",
         "method": "Nifty 200 Momentum 30 style: 0.5*z(6m_return/annualised_vol) + 0.5*z(12m_return/annualised_vol); fresh daily yfinance OHLCV",
         "top_n": TOP_N,
