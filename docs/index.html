@@ -71,6 +71,7 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('ensemble',this)">Ensemble<span class="badge">new</span></button>
   <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
   <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
+  <button class="tab-btn" onclick="showTab('regime',this)">📅 Monthly Regime<span class="badge">auto</span></button>
 </div>
 
 <!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
@@ -239,6 +240,32 @@ tr:hover td{background:#1c2128}
   <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">SHRIRAMFIN</td><td class="co" title="Shriram Finance Ltd.">Shriram Finance Ltd.</td><td class="mid">75.1%</td><td class="lo">10.4%</td><td>34.9%</td><td>2.153</td><td class="hi">2.215</td><td>1.127</td><td>2.9</td><td>Rs.995.00</td><td>Rs.998.63</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">NATIONALUM</td><td class="co" title="National Aluminium Co. Ltd.">National Aluminium Co. L</td><td class="hi">81.0%</td><td class="lo">0.2%</td><td>42.4%</td><td>1.909</td><td class="hi">1.942</td><td>0.924</td><td>-2.2</td><td>Rs.355.70</td><td>Rs.366.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">KEI</td><td class="co" title="KEI Industries Ltd.">KEI Industries Ltd.</td><td class="lo">41.8%</td><td class="mid">39.2%</td><td>32.6%</td><td>1.285</td><td class="mid">1.245</td><td>1.109</td><td>10.6</td><td>Rs.4,560.00</td><td>Rs.4,799.02</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">BAJAJ-AUTO</td><td class="co" title="Bajaj Auto Ltd.">Bajaj Auto Ltd.</td><td class="lo">29.0%</td><td class="mid">27.9%</td><td>23.1%</td><td>1.252</td><td class="mid">1.208</td><td>0.915</td><td>13.2</td><td>Rs.11,500.00</td><td>Rs.10,111.50</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">BSE</td><td class="co" title="BSE Ltd.">BSE Ltd.</td><td class="lo">46.0%</td><td class="lo">18.3%</td><td>39.5%</td><td>1.163</td><td class="mid">1.109</td><td>0.850</td><td>10.0</td><td>Rs.3,259.00</td><td>Rs.3,284.06</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">GVT&D</td><td class="co" title="GE Vernova T&D India Ltd.">GE Vernova T&D India Ltd</td><td class="mid">50.5%</td><td class="lo">16.4%</td><td>43.5%</td><td>1.159</td><td class="mid">1.104</td><td>0.853</td><td>9.4</td><td>Rs.4,341.00</td><td>Rs.3,984.56</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SBIN</td><td class="co" title="State Bank of India">State Bank of India</td><td class="lo">22.9%</td><td class="lo">0.6%</td><td>23.3%</td><td>0.981</td><td class="mid">0.906</td><td>0.062</td><td>-6.6</td><td>Rs.988.70</td><td>Rs.1,040.43</td><td>2026-09-16</td></tr></tbody></table></div>
 </div>
 
+<!-- ═══ MONTHLY REGIME TAB ══════════════════════════════════════════════════ -->
+<div id="regime" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Monthly trend regime — where is each stock in its multi-month UP/DOWN/SIDE wave?</strong><br>
+    Trailing 12-month adjusted-close return &gt;+5% = UP, &lt;−5% = DOWN, else SIDE. Current incomplete month excluded.<br>
+    JEV scores each stock on regime quality, persistence odds, and reversal watch (inverted — low = safer). <span style="color:#d29922">Reversal risk ratio</span> = current age ÷ historical mean for that direction; &gt;1.5× = stretched.<br>
+    <span style="color:#8b949e">Not SEBI-registered advice. Run <code>python monthly_regime.py</code> to refresh.</span>
+  </p>
+  <div id="regimeStats" class="stat-strip"></div>
+  <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="rf-ALL" onclick="regimeFilter('ALL',this)">All 200</button>
+    <button class="tab-btn" id="rf-UP"   onclick="regimeFilter('UP',this)"   style="color:#3fb950">▲ UP regime</button>
+    <button class="tab-btn" id="rf-DOWN" onclick="regimeFilter('DOWN',this)" style="color:#f778ba">▼ DOWN regime</button>
+    <button class="tab-btn" id="rf-SIDE" onclick="regimeFilter('SIDE',this)" style="color:#8b949e">↔ SIDE</button>
+    <button class="tab-btn" id="rf-FRESH" onclick="regimeFilter('FRESH',this)" style="color:#58a6ff">🌱 Fresh (&lt;6m)</button>
+    <button class="tab-btn" id="rf-STRETCHED" onclick="regimeFilter('STRETCHED',this)" style="color:#d29922">⚠️ Stretched (&gt;1.5×)</button>
+  </div>
+  <div class="scroll" style="max-height:580px"><table><thead><tr>
+    <th>#</th><th>Symbol</th><th>Regime</th><th>Since</th><th>Age</th>
+    <th>Avg 12m ret</th><th>Mom 12m</th><th>Mom 6m</th>
+    <th>Rev risk<br><small style="font-weight:400;color:#8b949e">age÷hist mean</small></th>
+    <th>JEV<br><small style="font-weight:400;color:#8b949e">quality×persistence</small></th>
+    <th>Regime history</th>
+  </tr></thead><tbody id="regimeRows"></tbody></table></div>
+  <div class="disc" id="regimeFoot">Loading monthly regimes…</div>
+</div>
 <div class="disc">
   <strong>Files:</strong> fund_portfolio.json / .csv (&#8377;10L holdings) &middot; openalgo_basket.json (real share qty, CNC market orders) &middot; quant_upgrade_master.csv (full 194-rank dump) &middot; quant_upgrade_{sharpe,ensemble,raw}_2026-09-17.csv &middot; openalgo_symbols.txt<br>
   <strong>Risk:</strong> Educational screening from raw NSE closes (splits/dividends not adjusted). Not investment advice. Fund caps any single name at 12% of NAV; consider a stop-loss and paper-trade first. 6 recent IPOs excluded (&lt;12mo history).
@@ -639,4 +666,126 @@ fetch('sr_levels.json').then(r=>r.json()).then(d=>{
       document.getElementById('jevRows').innerHTML='<tr><td colspan="10" style="color:#8b949e">JEV ranking unavailable.</td></tr>';
     });
 }).catch(e=>{document.getElementById('srFoot').textContent='Run: python daily_sr.py to generate sr_levels.json';});
+// ═══ Monthly Regime tab ═══════════════════════════════════════════════════
+const REG_COL={UP:'#3fb950',DOWN:'#f778ba',SIDE:'#8b949e','N/A':'#555'};
+let _regAll=[],_regFilter='ALL';
+function regimeFilter(f,btn){
+  _regFilter=f;
+  document.querySelectorAll('#regime .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderRegime();
+}
+function renderRegime(){
+  let rows=_regAll;
+  if(_regFilter==='UP')        rows=_regAll.filter(r=>r.current.label==='UP');
+  else if(_regFilter==='DOWN') rows=_regAll.filter(r=>r.current.label==='DOWN');
+  else if(_regFilter==='SIDE') rows=_regAll.filter(r=>r.current.label==='SIDE');
+  else if(_regFilter==='FRESH') rows=_regAll.filter(r=>r.current.label!=='N/A'&&(r.current.age_months||99)<6);
+  else if(_regFilter==='STRETCHED') rows=_regAll.filter(r=>(r.reversal_risk_ratio||0)>1.5);
+  document.getElementById('regimeRows').innerHTML=rows.map(r=>{
+    if(r.recently_listed) return `<tr><td colspan="11" style="color:#555;font-size:.78rem">${r.symbol} — recently listed, no monthly regime yet</td></tr>`;
+    const cur=r.current||{},j=r.jev||{};
+    const col=REG_COL[cur.label]||'#8b949e';
+    const rr=r.reversal_risk_ratio;
+    const rrCol=rr>1.5?'#d29922':rr>1.2?'#e3b341':'#3fb950';
+    const jev=j.composite!=null?`<span style="font-size:1rem;font-weight:700;color:#3fb950">${(j.composite*100).toFixed(0)}</span><br><small style="color:#8b949e">rq${j.regime_quality} po${j.persistence_odds} rw${j.reversal_watch}</small>`:'—';
+    const segs=(r.recent_segs||[]).slice(-4).map(s=>`<span style="color:${REG_COL[s.label]||'#8b949e'};font-size:.72rem">${s.label}${s.months}m</span>`).join(' → ');
+    return `<tr onclick="showRegimeMath('${r.symbol}')" title="Click to see regime maths for ${r.symbol}" style="cursor:pointer">
+      <td style="color:#8b949e">${r.rank||'—'}</td>
+      <td class="sym">${r.symbol}</td>
+      <td style="font-weight:700;color:${col}">${cur.label}</td>
+      <td style="color:#8b949e;font-size:.8rem">${cur.start||'—'}</td>
+      <td><strong>${cur.age_months||'—'}</strong><small style="color:#8b949e"> mo</small></td>
+      <td style="color:${col}">${cur.avg_12m_ret_pct!=null?cur.avg_12m_ret_pct+'%':'—'}</td>
+      <td style="color:${(r.mom12_pct||0)>0?'#3fb950':'#f778ba'}">${r.mom12_pct!=null?r.mom12_pct+'%':'—'}</td>
+      <td style="color:${(r.mom6_pct||0)>0?'#3fb950':'#f778ba'}">${r.mom6_pct!=null?r.mom6_pct+'%':'—'}</td>
+      <td style="color:${rrCol};font-weight:700">${rr!=null?rr+'×':'—'}</td>
+      <td>${jev}</td>
+      <td style="font-size:.72rem">${segs}</td>
+    </tr>`;
+  }).join('');
+}
+function showRegimeMath(symbol){
+  const s=_regAll.find(x=>x.symbol===symbol);
+  if(!s||s.recently_listed){
+    document.getElementById('modalBody').innerHTML=`<h2>${symbol}</h2><p style="color:#8b949e">Recently listed — no monthly regime history available yet.</p>`;
+    document.getElementById('modal').style.display='block'; return;
+  }
+  const cur=s.current||{},j=s.jev||{},hu=s.hist_up||{},hd=s.hist_down||{};
+  const rr=s.reversal_risk_ratio;
+  const rrCol=rr>1.5?'#d29922':rr>1.2?'#e3b341':'#3fb950';
+  const allSegs=(s.all_segs||[]).map(seg=>{
+    const col=REG_COL[seg.label]||'#8b949e';
+    return `<tr>
+      <td style="color:${col};font-weight:700">${seg.label}</td>
+      <td>${seg.start}</td><td>${seg.end}</td>
+      <td style="font-weight:700">${seg.months}m</td>
+      <td style="color:${seg.ret_pct>0?'#3fb950':'#f778ba'}">${seg.ret_pct}%</td>
+      <td style="color:#8b949e">${seg.avg_12m_ret_pct}% avg</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${s.symbol} — monthly regime explanation</h2>
+    <div style="color:#8b949e;margin-bottom:12px">${s.name||''} · close <strong style="color:#e6edf3">${fmtInr(s.close)}</strong> · data as of <strong>${s.last_bar}</strong></div>
+    <div class="stat-strip" style="margin-bottom:14px">
+      <div class="stat"><div class="v" style="color:${REG_COL[cur.label]};font-size:1.2rem">${cur.label}</div><div class="l">Current regime</div></div>
+      <div class="stat"><div class="v">${cur.age_months}m</div><div class="l">Age</div></div>
+      <div class="stat"><div class="v" style="color:${rrCol}">${rr}×</div><div class="l">Reversal risk</div></div>
+      ${j.composite!=null?`
+      <div class="stat"><div class="v" style="color:#3fb950">${(j.composite*100).toFixed(0)}</div><div class="l">JEV score</div></div>
+      <div class="stat"><div class="v">${j.regime_quality}</div><div class="l">Quality</div></div>
+      <div class="stat"><div class="v">${j.persistence_odds}</div><div class="l">Persistence</div></div>
+      <div class="stat"><div class="v">${j.reversal_watch}</div><div class="l">Rev watch (raw)</div></div>`:''}
+    </div>
+    <h3>The maths</h3>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">12-month trailing return regime</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>regime = Close(t) / Close(t-12) − 1</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        If &gt;+5% → UP &nbsp;|&nbsp; &lt;−5% → DOWN &nbsp;|&nbsp; else → SIDE.<br>
+        Follows Fama-French momentum convention. Current incomplete month always excluded to avoid partial-bar distortion.
+      </div>
+    </div>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">Reversal risk ratio</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>rev_risk = current_age_months ÷ historical_mean_months_for_${cur.label}_regime</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        <span style="color:${rrCol};font-weight:700">${rr}×</span> for ${s.symbol}.
+        This stock's ${cur.label} regimes historically last ~${cur.label==='UP'?hu.mean:hd.mean} months on average.
+        Current age: ${cur.age_months} months. &gt;1.5× = stretched, watch for reversal.
+      </div>
+    </div>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">JEV composite (TypeSafe System One)</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>composite = 0.40×quality_norm + 0.35×persistence_norm + 0.25×(1−reversal_watch_norm)</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        Reversal watch is <em>inverted</em> — a higher watch score (more stretched) reduces the composite.
+        Higher JEV = cleaner, more persistent, less stretched regime.
+      </div>
+    </div>
+    <h3>Historical UP regimes for ${s.symbol}</h3>
+    <p style="font-size:.8rem;color:#8b949e">n=${hu.n||0} regimes · mean ${hu.mean||'—'}m · median ${hu.median||'—'}m · max ${hu.max||'—'}m</p>
+    <h3>Historical DOWN regimes</h3>
+    <p style="font-size:.8rem;color:#8b949e">n=${hd.n||0} regimes · mean ${hd.mean||'—'}m · median ${hd.median||'—'}m · max ${hd.max||'—'}m</p>
+    <h3>Full regime history</h3>
+    <div class="scroll" style="max-height:280px"><table><thead><tr><th>Regime</th><th>Start</th><th>End</th><th>Duration</th><th>Price move</th><th>Avg 12m ret</th></tr></thead>
+    <tbody>${allSegs||'<tr><td colspan="6" style="color:#8b949e">No history</td></tr>'}</tbody></table></div>
+    <p style="font-size:.75rem;color:#8b949e;margin-top:12px">Monthly data from Yahoo Finance adjusted closes. Educational output; not SEBI-registered investment advice.</p>`;
+  document.getElementById('modal').style.display='block';
+}
+fetch('monthly_regimes.json').then(r=>r.json()).then(d=>{
+  _regAll=(d.stocks||[]).filter(s=>!s.recently_listed);
+  const rl=(d.recently_listed||[]).map(s=>({symbol:s,recently_listed:true,current:{label:'N/A'}}));
+  _regAll=[..._regAll,...rl];
+  const sm=d.summary||{};
+  document.getElementById('regimeStats').innerHTML=[
+    ['As of',d.as_of],['UP',sm.UP||0],['DOWN',sm.DOWN||0],['SIDE',sm.SIDE||0],
+    ['Fetched',`${d.fetched}/200`],['JEV model',d.jev_model||'—'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('regimeFoot').innerHTML=`Monthly regime data as of <strong>${d.as_of}</strong> (last complete month). `+
+    `${d.fetched}/200 stocks have regime history; ${(d.recently_listed||[]).length} recently listed (no data). `+
+    `Trailing 12m return >&thinsp;+5%=UP, &lt;&thinsp;−5%=DOWN, else SIDE. Exclude current incomplete month. `+
+    `Reversal risk = current age ÷ historical mean run length for that direction.`;
+  renderRegime();
+}).catch(e=>{ document.getElementById('regimeFoot').textContent='Run: python monthly_regime.py to generate monthly_regimes.json'; });
 </script></body></html>
