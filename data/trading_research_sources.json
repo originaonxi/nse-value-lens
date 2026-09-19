@@ -1,0 +1,93 @@
+{
+  "purpose": "Legal, source-backed research corpus for NSE 200 Momentum 30 Algorithm Prediction. Do not store copyrighted book text or pirated PDFs in this repo.",
+  "copyright_rule": "Use publisher metadata, public abstracts, legally available papers, and our own derived principles only. No full copyrighted book chapters or copied pages.",
+  "project_hypothesis": "Nifty200 Momentum 30 should be studied as a rules-based cross-sectional momentum/factor portfolio, not as a daily high-turnover bot. The research priority is point-in-time universe reconstruction, official constituent validation, transaction-cost-aware backtesting, and regime/risk overlays.",
+  "sources": [
+    {
+      "id": "chan_algorithmic_trading_2013",
+      "title": "Algorithmic Trading: Winning Strategies and Their Rationale",
+      "author": "Ernest P. Chan",
+      "type": "copyrighted_book_metadata_only",
+      "publisher_or_source": "Wiley / DOI 10.1002/9781118676998",
+      "url": "https://www.wiley.com/en-us/Algorithmic+Trading%3A+Winning+Strategies+and+Their+Rationale-p-9781118460146",
+      "project_takeaways": [
+        "Backtesting and automated execution must be treated as engineering problems, not just strategy ideas.",
+        "Mean-reversion, momentum, risk management, and execution costs need separate tests.",
+        "A strategy should be rejected if realistic costs, slippage, borrow/margin constraints, or out-of-sample tests destroy it."
+      ]
+    },
+    {
+      "id": "moskowitz_ooi_pedersen_time_series_momentum",
+      "title": "Time Series Momentum",
+      "author": "Tobias Moskowitz, Yao Hua Ooi, Lasse Heje Pedersen",
+      "type": "public_research_paper",
+      "url": "https://w4.stern.nyu.edu/facdir/lpederse/papers/TimeSeriesMomentum.pdf",
+      "project_takeaways": [
+        "Trend-following should be tested across horizons and asset classes, not assumed from one market.",
+        "The Momentum 30 engine should compare cross-sectional momentum with time-series trend filters.",
+        "Global market trend features may be useful only if tested with strict date availability."
+      ]
+    },
+    {
+      "id": "jegadeesh_titman_1993_winners_losers",
+      "title": "Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency",
+      "author": "Narasimhan Jegadeesh, Sheridan Titman",
+      "type": "canonical_momentum_paper",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1993.tb04702.x",
+      "project_takeaways": [
+        "The correct first benchmark for Momentum 30 is intermediate-horizon winner selection, not intraday prediction.",
+        "Formation and holding periods must be varied in walk-forward tests.",
+        "Post-formation reversal risk should be measured rather than ignored."
+      ]
+    },
+    {
+      "id": "asness_moskowitz_pedersen_value_momentum_everywhere",
+      "title": "Value and Momentum Everywhere",
+      "author": "Clifford Asness, Tobias Moskowitz, Lasse Heje Pedersen",
+      "type": "public_research_paper",
+      "url": "https://w4.stern.nyu.edu/facdir/lpederse/papers/ValMomEverywhere.pdf",
+      "project_takeaways": [
+        "Momentum can be combined with value/quality diversifiers instead of relying on one crowded signal.",
+        "Nifty200 Momentum 30 prediction should track sector/factor crowding and diversification.",
+        "Global lead-lag features should be tested as regime features, not treated as guaranteed causal signals."
+      ]
+    },
+    {
+      "id": "frazzini_israel_moskowitz_trading_costs",
+      "title": "Trading Costs of Asset Pricing Anomalies",
+      "author": "Andrea Frazzini, Ronen Israel, Tobias Moskowitz",
+      "type": "public_research_paper",
+      "url": "https://spinup-000d1a-wp-offload-media.s3.amazonaws.com/faculty/wp-content/uploads/sites/3/2021/08/Trading-Cost-of-Asset-Pricing-Anomalies.pdf",
+      "project_takeaways": [
+        "Any claimed edge must survive costs, turnover, impact, and capacity.",
+        "The model should prefer lower-turnover predictions around semi-annual rebalance cycles over noisy daily trading.",
+        "Backtests must report gross and net returns separately."
+      ]
+    },
+    {
+      "id": "microsoft_qlib",
+      "title": "Qlib: AI-oriented Quant Investment Platform",
+      "author": "Microsoft",
+      "type": "open_source_framework",
+      "url": "https://github.com/microsoft/qlib",
+      "project_takeaways": [
+        "Use experiment tracking, dataset versioning, and reproducible pipelines.",
+        "Separate alpha model, portfolio construction, execution assumptions, and evaluation.",
+        "Future ML work should use walk-forward validation and never random splits across time."
+      ]
+    }
+  ],
+  "strategy_design_rules": [
+    "First replicate the public Momentum 30 rule and validate against official constituents before adding ML.",
+    "Use only point-in-time Nifty 200 membership, prices, flows, and macro/global features available at the prediction date.",
+    "Optimize for precision@30, entrant/exit hit-rate, alpha versus official Momentum 30, turnover, drawdown, and net returns after costs.",
+    "Use JEV as a robustness/overfit/leakage judge, not as an excuse to search until a lucky backtest appears.",
+    "Do not enable live trading until the model passes walk-forward tests and then paper-trades live with zero broker automation by default."
+  ],
+  "next_research_questions": [
+    "Can a shadow rule predict future official Momentum 30 constituents one rebalance ahead?",
+    "Does adding global index regime improve constituent prediction or only overfit?",
+    "Do value/quality/low-vol filters reduce the historical drawdowns of pure momentum?",
+    "How much turnover and cost does an early-entry strategy add versus simply buying the official index?"
+  ]
+}
