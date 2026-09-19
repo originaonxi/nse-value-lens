@@ -61,8 +61,8 @@ tr:hover td{background:#1c2128}
 
 <div class="tabs">
   <button class="tab-btn" onclick="showTab('shadow30',this)" style="border-color:#d29922;color:#ffd54f;font-weight:700">Shadow Momentum 30<span class="badge" style="background:#d29922;color:#000">scaffold</span></button>
-  <button class="tab-btn" onclick="showTab('verdict',this)" style="border-color:#f778ba;color:#f778ba;font-weight:700">Backtest Verdict<span class="badge" style="background:#f778ba;color:#000">audit</span></button>
-  <button class="tab-btn active" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
+  <button class="tab-btn active" onclick="showTab('verdict',this)" style="border-color:#f778ba;color:#f778ba;font-weight:700">Backtest Verdict<span class="badge" style="background:#f778ba;color:#000">audit</span></button>
+  <button class="tab-btn" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
   <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
   <button class="tab-btn" onclick="showTab('combined',this)">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
   <button class="tab-btn" onclick="showTab('vdn',this)">Value-Down</button>
@@ -77,7 +77,7 @@ tr:hover td{background:#1c2128}
 </div>
 
 <!-- ═══ BACKTEST VERDICT TAB ═══════════════════════════════════════════════ -->
-<div id="verdict" class="tab-panel">
+<div id="verdict" class="tab-panel active">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
     <strong style="color:#e6edf3">Which strategy actually made money?</strong><br>
     Audited answer: no validated winner yet. Daily trading strategies lost out-of-sample. Shadow Momentum30 is positive only as a survivor-biased scaffold, so it is not a real-money claim.
@@ -271,7 +271,7 @@ tr:hover td{background:#1c2128}
 
 
 <!-- ═══ SAM PICKS TAB ══════════════════════════════════════════════════════ -->
-<div id="picks" class="tab-panel active">
+<div id="picks" class="tab-panel">
   <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
     <strong style="color:#e6edf3">Pure math synthesis — all four layers compressed into one ranked action list.</strong><br>
     <code>SAM = 0.30×monthly_regime + 0.25×daily_S&amp;R_signal + 0.25×(JEV_quality×direction) + 0.20×confluence_strength</code><br>
