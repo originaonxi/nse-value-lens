@@ -250,6 +250,7 @@ tr:hover td{background:#1c2128}
     BUY = UP regime + bullish S&amp;R + strong confluence. AVOID = DOWN regime + bearish S&amp;R. Click any row to see every formula behind it.
     <span style="color:#d29922">Stop = floor − 0.25×ATR. Not SEBI-registered advice. Back-test before sizing.</span>
   </p>
+  <div id="picksStale" style="display:none;background:#3d1a1a;border:1px solid #f778ba;border-radius:8px;padding:10px 12px;margin-bottom:10px;color:#f778ba;font-size:.82rem"></div>
   <div id="picksStats" class="stat-strip"></div>
   <div style="margin:10px 0;display:flex;gap:8px;flex-wrap:wrap">
     <button class="tab-btn active" id="pf-ALL"      onclick="picksFilter('ALL',this)">All</button>
@@ -883,7 +884,15 @@ fetch('sam_picks.json').then(r=>r.json()).then(d=>{
     ['🟢 BUY',sm.BUY||0],['🔵 Watch',sm.WATCH_BUY||0],
     ['🔴 Avoid',sm.AVOID||0],['🟠 Caution',sm.CAUTION||0],
   ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
-  document.getElementById('picksFoot').innerHTML=`SAM PICKS as of <strong>${d.as_of}</strong>. `+
+  const stEl=document.getElementById('picksStale');
+  if(d.stale){
+    stEl.style.display='block';
+    stEl.innerHTML='⚠️ <strong>Partially stale data</strong> — the SAM score blends monthly regime (30%) + JEV (25%). '+
+      (d.stale_reasons||[]).join(' ')+' S&R signals are current, but scores below may be degraded until the JEV/regime layers refresh (check the TYPESAFE_API_KEY repo secret).';
+  } else { stEl.style.display='none'; }
+  const f=d.data_freshness||{};
+  document.getElementById('picksFoot').innerHTML=`SAM PICKS as of <strong>${d.as_of}</strong> `+
+    `<span style="color:${d.stale?'#f778ba':'#3fb950'}">(S&R ${f.sr_as_of} · JEV ${f.jev_as_of}${f.jev_fresh?'✓':' ⚠ stale'} · regime ${f.regime_as_of}${f.regime_fresh?'✓':' ⚠ stale'})</span>. `+
     `Formula: <code>${d.formula}</code>. `+
     `${sm.BUY||0} BUY · ${sm.AVOID||0} AVOID · ${sm.CAUTION||0} CAUTION · ${sm.WATCH_BUY||0} Watch. `+
     `Updated daily after NSE close. Click any row for the full formula breakdown.`;
