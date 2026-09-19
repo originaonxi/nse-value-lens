@@ -75,6 +75,162 @@
         "Separate alpha model, portfolio construction, execution assumptions, and evaluation.",
         "Future ML work should use walk-forward validation and never random splits across time."
       ]
+    },
+    {
+      "id": "chan_quantitative_trading",
+      "title": "Quantitative Trading: How to Build Your Own Algorithmic Trading Business",
+      "author": "Ernest P. Chan",
+      "type": "copyrighted_book_metadata_only",
+      "url": "https://www.wiley.com/en-us/Quantitative+Trading%3A+How+to+Build+Your+Own+Algorithmic+Trading+Business-p-9780470284889",
+      "project_takeaways": [
+        "Treat data cleaning, slippage, and execution as part of the strategy.",
+        "Small-account practicality matters; avoid strategies that require impossible borrow/liquidity.",
+        "Prefer simple hypotheses that survive walk-forward tests."
+      ]
+    },
+    {
+      "id": "chan_machine_trading",
+      "title": "Machine Trading: Deploying Computer Algorithms to Conquer the Markets",
+      "author": "Ernest P. Chan",
+      "type": "copyrighted_book_metadata_only",
+      "url": "https://www.wiley.com/en-us/Machine+Trading%3A+Deploying+Computer+Algorithms+to+Conquer+the+Markets-p-9781119219606",
+      "project_takeaways": [
+        "ML must be constrained by finance logic and out-of-sample validation.",
+        "Feature engineering should respect market microstructure and date availability.",
+        "Avoid black-box models without explainable failure modes."
+      ]
+    },
+    {
+      "id": "chabot_ghysels_jagannathan_momentum_crashes",
+      "title": "Momentum Trading, Return Chasing, and Predictable Crashes",
+      "author": "Benjamin Chabot, Eric Ghysels, Ravi Jagannathan",
+      "type": "public_research_paper",
+      "url": "https://www.nber.org/system/files/working_papers/w20660/w20660.pdf",
+      "project_takeaways": [
+        "Momentum can crash; drawdown control must be part of the design.",
+        "A Momentum30 predictor should monitor crowding and reversal risk.",
+        "Do not judge a momentum strategy only by CAGR."
+      ]
+    },
+    {
+      "id": "barroso_santa_clara_managing_momentum_crashes",
+      "title": "Momentum Has Its Moments",
+      "author": "Pedro Barroso, Pedro Santa-Clara",
+      "type": "academic_paper_metadata",
+      "url": "https://academic.oup.com/jfec/article/13/1/111/929700",
+      "project_takeaways": [
+        "Volatility-managed momentum should be tested against plain momentum.",
+        "Risk targeting may reduce crash exposure but must be tested after costs.",
+        "Use realized volatility as a regime/risk input, not a return guarantee."
+      ]
+    },
+    {
+      "id": "daniel_moskowitz_momentum_crashes",
+      "title": "Momentum Crashes",
+      "author": "Kent Daniel, Tobias Moskowitz",
+      "type": "academic_paper_metadata",
+      "url": "https://academic.oup.com/rfs/article/29/8/2219/2607162",
+      "project_takeaways": [
+        "Momentum drawdowns cluster in rebounds after market stress.",
+        "Add crash/reversal diagnostics to Momentum30 dashboards.",
+        "Backtests must show worst months and recovery time."
+      ]
+    },
+    {
+      "id": "carhart_1997_four_factor",
+      "title": "On Persistence in Mutual Fund Performance",
+      "author": "Mark M. Carhart",
+      "type": "academic_paper_metadata",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1997.tb03808.x",
+      "project_takeaways": [
+        "Momentum is a recognized factor that should be benchmarked separately from market, size, and value.",
+        "Evaluate alpha versus factor exposure, not just raw return.",
+        "Use factor attribution for Momentum30 portfolio explanations."
+      ]
+    },
+    {
+      "id": "fama_french_1993_common_risk_factors",
+      "title": "Common Risk Factors in the Returns on Stocks and Bonds",
+      "author": "Eugene Fama, Kenneth French",
+      "type": "academic_paper_metadata",
+      "url": "https://www.jstor.org/stable/2329112",
+      "project_takeaways": [
+        "Control for broad factor exposures when claiming alpha.",
+        "Momentum30 should be compared to market/size/value/quality proxies.",
+        "Risk model first, story second."
+      ]
+    },
+    {
+      "id": "zipline_reloaded",
+      "title": "Zipline Reloaded",
+      "author": "stefan-jansen et al.",
+      "type": "open_source_framework",
+      "url": "https://github.com/stefan-jansen/zipline-reloaded",
+      "project_takeaways": [
+        "Event-driven backtests prevent many timing mistakes.",
+        "Portfolio accounting should be separated from signal generation.",
+        "Future production backtests can use mature engines for validation."
+      ]
+    },
+    {
+      "id": "backtrader",
+      "title": "Backtrader",
+      "author": "Backtrader community",
+      "type": "open_source_framework",
+      "url": "https://www.backtrader.com/",
+      "project_takeaways": [
+        "Backtests need explicit broker/cash/commission models.",
+        "Order timing should be represented directly, not assumed.",
+        "Useful comparison engine for simple strategy verification."
+      ]
+    },
+    {
+      "id": "vectorbt",
+      "title": "vectorbt",
+      "author": "Polakowo / community",
+      "type": "open_source_framework",
+      "url": "https://github.com/polakowo/vectorbt",
+      "project_takeaways": [
+        "Vectorized scenario sweeps are useful but easy to overfit.",
+        "Use it for hypothesis screening, then confirm with walk-forward and event-driven tests.",
+        "Separate train selection from held-out reporting."
+      ]
+    },
+    {
+      "id": "nifty_indices_momentum30_methodology",
+      "title": "Nifty200 Momentum 30 Methodology / Factsheet",
+      "author": "NSE Indices",
+      "type": "official_methodology_metadata",
+      "url": "https://www.niftyindices.com/indices/equity/strategy-indices/nifty200-momentum-30",
+      "project_takeaways": [
+        "Official target is a rules-based index; first replicate the public rule.",
+        "Production validation needs official constituents and point-in-time Nifty200 universe.",
+        "The model should predict entrants/exits and weights, not claim secret knowledge."
+      ]
+    },
+    {
+      "id": "backtestindia_momentum30_risk",
+      "title": "Nifty 200 Momentum 30 long-history risk study",
+      "author": "BacktestIndia Research",
+      "type": "independent_research_article",
+      "url": "https://backtestindia.com/blog/momentum-investing-india-backtest",
+      "project_takeaways": [
+        "Momentum can have very large drawdowns and long recoveries.",
+        "Client-facing dashboards must show drawdown/recovery, not just return.",
+        "Independent replication is essential before real money."
+      ]
+    },
+    {
+      "id": "backtestindia_liquidity_momentum",
+      "title": "Momentum factor and liquidity relationship in India",
+      "author": "BacktestIndia Research",
+      "type": "independent_research_article",
+      "url": "https://backtestindia.com/blog/momentum-factor-india-liquidity-premium-scaled-turnover",
+      "project_takeaways": [
+        "Capacity and liquidity can dominate headline factor performance.",
+        "Nifty200 tests must measure turnover and scaled liquidity.",
+        "Avoid assuming all historical alpha is investable at larger capital."
+      ]
     }
   ],
   "strategy_design_rules": [
@@ -89,5 +245,7 @@
     "Does adding global index regime improve constituent prediction or only overfit?",
     "Do value/quality/low-vol filters reduce the historical drawdowns of pure momentum?",
     "How much turnover and cost does an early-entry strategy add versus simply buying the official index?"
-  ]
+  ],
+  "source_count": 19,
+  "expanded_as_of": "2026-09-19"
 }

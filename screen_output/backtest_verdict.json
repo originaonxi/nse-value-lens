@@ -1,0 +1,76 @@
+{
+ "as_of": "2026-09-19",
+ "capital_rs": 10000000,
+ "title": "Audited backtest verdict: no deployable winner yet",
+ "winner_label": "No validated winner yet",
+ "important_warning": "Shadow Momentum30 made money only in a survivor-biased scaffold. It is not an audited winner until point-in-time Nifty200 universe and official Momentum30 constituent/TRI validation exist.",
+ "strategies": [
+  {
+   "strategy": "Daily momentum/breakout bot",
+   "family": "daily trading",
+   "configs": 432,
+   "validation": "held-out 6 months after train sweep",
+   "return_pct": "-6.5 to -9.7",
+   "pnl_rs_range": [
+    -970000,
+    -650000
+   ],
+   "made_money": false,
+   "status": "FAILED_NO_EDGE",
+   "audit_note": "0 configs positive on both training halves; realistic costs included.",
+   "validated_winner": false
+  },
+  {
+   "strategy": "Mean reversion mean-exit",
+   "family": "daily trading",
+   "configs": 432,
+   "validation": "best train survivor tested on held-out 6 months",
+   "return_pct": -1.79,
+   "pnl_rs": -179000,
+   "made_money": false,
+   "status": "FAILED_OOS",
+   "audit_note": "Only 1 config positive on both train halves; OOS lost money. JEV judged survivor likely luck.",
+   "validated_winner": false
+  },
+  {
+   "strategy": "Mean reversion trailing exit",
+   "family": "daily trading",
+   "configs": 378,
+   "validation": "train robustness screen",
+   "return_pct": null,
+   "pnl_rs": 0,
+   "made_money": false,
+   "status": "FAILED_TRAIN",
+   "audit_note": "0 configs positive on both training halves.",
+   "validated_winner": false
+  },
+  {
+   "strategy": "Shadow Momentum30 scaffold",
+   "family": "monthly factor scaffold",
+   "configs": 1,
+   "validation": "11 monthly forward periods, current surviving 194-symbol cache only",
+   "return_pct": 2.12,
+   "pnl_rs": 212000,
+   "made_money": false,
+   "status": "SCAFFOLD_POSITIVE_NOT_VALIDATED",
+   "audit_note": "Positive only in survivor-biased scaffold. Not counted as made money or a validated winner until PIT universe and official Momentum30 constituent/TRI validation pass.",
+   "validated_winner": false,
+   "scaffold_positive": true
+  }
+ ],
+ "jev_verdict": {
+  "demonstrable_edge": 0.06,
+  "survivor_is_luck": 0.87,
+  "safe_to_deploy_live": 0.08,
+  "best_path": "Do NOT deploy; pivot to slow monthly factor-portfolio rebalancing (momentum+quality+low-vol)",
+  "confidence": 0.62
+ },
+ "required_to_validate_winner": [
+  "data/nifty200_base_universe.csv",
+  "data/nifty200_constituent_events.csv",
+  "data/momentum30_constituents.csv",
+  "data/nifty200_momentum30_tri.csv"
+ ],
+ "research_source_count": 19,
+ "validated_winner": false
+}
