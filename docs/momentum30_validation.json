@@ -16,5 +16,30 @@
   "NSE/Nifty Indices official constituent/factsheet archives for Momentum 30 membership",
   "Licensed third-party historical constituent ledger with effective dates"
  ],
- "no_fake_result_rule": "Do not mark the strategy as validated until these files exist and the script reports OK statuses."
+ "no_fake_result_rule": "Do not mark the strategy as validated until these files exist and the script reports OK statuses.",
+ "official_data_attempts": [
+  {
+   "source": "NSE India Historical Index Data page",
+   "url": "https://www.nseindia.com/reports-indices-historical-index-data",
+   "method": "SAM Browser real Chrome",
+   "status": "ACCESSIBLE_PAGE_BUT_NO_RECORDS_FOR_NIFTY200_MOMENTUM_30_1Y",
+   "observed": "Selected NIFTY200 MOMENTUM 30, clicked 1Y and Download CSV; table showed 'No records available'."
+  },
+  {
+   "source": "Nifty Indices Momentum30 official page",
+   "url": "https://www.niftyindices.com/indices/equity/strategy-indices/nifty200-momentum-30",
+   "method": "SAM Browser real Chrome",
+   "status": "BROWSER_PERCEIVE_FAILED_ON_OPEN",
+   "observed": "sam_browser_open returned perceive failed; no downloadable constituent history obtained."
+  },
+  {
+   "source": "NSE historical API probe",
+   "url": "https://www.nseindia.com/api/historical/indicesHistory?indexType=NIFTY200%20MOMENTUM%2030&from=01-01-2024&to=31-12-2024",
+   "method": "requests with NSE page cookies/headers",
+   "status": "HTTP_503",
+   "observed": "Earlier direct API probe returned HTTP 503, so no CSV/JSON was obtained."
+  }
+ ],
+ "validated_profit_rs": 0,
+ "validated_status": "HARD_BLOCKED_NO_PIT_OR_OFFICIAL_DATA"
 }
