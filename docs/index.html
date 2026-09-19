@@ -477,7 +477,7 @@ fetch('combined_portfolio.json').then(r=>r.json()).then(p=>{
 // ═══ S&R Daily tab ═══════════════════════════════════════════════════════
 const SIG_ICON={BREAKOUT_UP:'🟢',BREAKOUT_DN:'🔴',AT_RESISTANCE:'🟡',AT_SUPPORT:'🟢',NEAR_RESISTANCE:'🟠',NEAR_SUPPORT:'🔵',NEUTRAL:'⚪'};
 const SIG_COL ={BREAKOUT_UP:'#3fb950',BREAKOUT_DN:'#f778ba',AT_RESISTANCE:'#d29922',AT_SUPPORT:'#3fb950',NEAR_RESISTANCE:'#d29922',NEAR_SUPPORT:'#58a6ff',NEUTRAL:'#8b949e'};
-let _srAll=[], _srFilter='ALL';
+let _srAll=[], _srFilter='ALL', _jevBySym={};
 function srFilter(f){
   _srFilter=f;
   document.querySelectorAll('#srFilters .tab-btn').forEach(b=>b.classList.remove('active'));
@@ -495,7 +495,7 @@ function renderSR(){
     const vwapLbl = r.above_vwap ? '↑ above' : '↓ below';
     const vr   = r.vol_ratio!=null ? r.vol_ratio.toFixed(1)+'×' : '—';
     const vrCol= (r.vol_ratio||0)>1.5 ? '#3fb950' : '#c9d1d9';
-    return `<tr>
+    return `<tr onclick="showSrMath('${r.symbol}')" title="Click to see the maths behind ${r.symbol} S&R" style="cursor:pointer">
       <td style="max-width:220px;white-space:normal;line-height:1.4">
         <span style="color:${col};font-weight:700">${r.plain_signal||r.signal}</span>
       </td>
@@ -515,7 +515,82 @@ function renderSR(){
     </tr>`;
   }).join('');
 }
+const METHOD_MATH={
+  swing:{name:'Swing structure',formula:'Swing high: Hᵢ = max(Hᵢ₋₅…Hᵢ₊₅); Swing low: Lᵢ = min(Lᵢ₋₅…Lᵢ₊₅)',logic:'A price where the chart previously turned; buyers/sellers proved themselves there.'},
+  pivot:{name:'Classic pivots',formula:'PP=(H+L+C)/3; R1=2×PP−L; S1=2×PP−H; R2=PP+(H−L); S2=PP−(H−L)',logic:'Mechanical levels from the latest completed candle; widely watched by discretionary and systematic traders.'},
+  '52w':{name:'52-week high/low',formula:'52w high=max(High₂₅₂); 52w low=min(Low₂₅₂)',logic:'Long-horizon extremes; many breakouts, stops, and anchoring decisions cluster here.'},
+  kmeans:{name:'K-means price clusters',formula:'Cluster last 90 sessions of highs/lows; centroid = average price of each cluster',logic:'Finds repeated price zones without hand-drawn lines.'},
+  vp:{name:'Volume Profile',formula:'VP(p)=Σ volume traded in price bucket p; POC=argmax VP(p); VAH/VAL bound 70% value area',logic:'Shows where the most shares actually changed hands — the closest proxy for real buyer/seller battle zones.'},
+  vwap:{name:'20-day VWAP',formula:'VWAP₂₀=Σ(TypicalPrice×Volume)/ΣVolume, TypicalPrice=(H+L+C)/3',logic:'Average cost basis over the last 20 completed sessions.'},
+  avwap:{name:'Anchored VWAP',formula:'AVWAPₐ₋ₜ=Σᵢ₌ₐᵗ(TypicalPriceᵢ×Volumeᵢ)/Σᵢ₌ₐᵗ Volumeᵢ',logic:'Average cost since a meaningful event anchor, e.g. swing low/high, 52w extreme, breakout bar.'},
+  round:{name:'Round-number clustering',formula:'Nearest ₹5/₹10/₹20/₹50/₹100 grid depending on price scale',logic:'Human orders and stops often cluster around psychologically clean numbers.'}
+};
+function srcCard(source,label,price){
+  const m=METHOD_MATH[source]||{name:source,formula:'—',logic:'—'};
+  return `<div style="border:1px solid #30363d;border-radius:8px;padding:10px;margin:8px 0;background:#0d1117">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <strong style="color:#e6edf3">${label||m.name}</strong>
+      <span style="color:#58a6ff;font-weight:700">${price!=null?fmtInr(price):''}</span>
+    </div>
+    <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>${m.formula}</code></div>
+    <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">${m.logic}</div>
+  </div>`;
+}
+function clusterBox(title,cl){
+  if(!cl) return `<div style="color:#8b949e">${title}: no cluster found.</div>`;
+  const comps=(cl.components||[]).map(c=>srcCard(c.source,c.label,c.price)).join('');
+  return `<div style="border:1px solid #30363d;border-radius:10px;padding:12px;margin:12px 0">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div><strong style="font-size:1rem;color:#e6edf3">${title}: ${fmtInr(cl.price)}</strong>
+        <div style="font-size:.78rem;color:#8b949e">${cl.n_sources} method buckets agree: ${(cl.sources||[]).join(', ')}</div>
+      </div>
+      <div style="text-align:right;font-size:.8rem;color:#8b949e">
+        Strength <strong style="color:#3fb950">${Math.round((cl.strength||0)*100)}</strong>/100<br>
+        VP ${Math.round((cl.vp_density||0)*100)} · touches ${cl.touches||0} · rejection ${cl.rejection_atr||0} ATR
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:#8b949e;margin-top:8px">
+      <code>Strength = 0.40×VP_density + 0.25×min(touches/4,1) + 0.20×min(rejectionATR/2,1) + 0.15×AVWAP/round_confluence</code>
+    </div>
+    ${comps}
+  </div>`;
+}
+function showSrMath(symbol){
+  const s=_srAll.find(x=>x.symbol===symbol);
+  if(!s) return;
+  const j=_jevBySym[symbol];
+  const c=s.confluence||{};
+  const av=Object.entries(s.avwap||{}).map(([k,v])=>`<tr><td>${k}</td><td>${fmtInr(v)}</td><td>AVWAP from ${k.replaceAll('_',' ')} anchor</td></tr>`).join('');
+  const piv=s.pivot||{};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${s.symbol} — why these S&R levels?</h2>
+    <div style="color:#8b949e;margin-bottom:12px">${s.name||''} · close <strong style="color:#e6edf3">${fmtInr(s.close)}</strong> · signal <strong style="color:${SIG_COL[s.signal]||'#e6edf3'}">${s.signal}</strong></div>
+    ${j?`<div class="stat-strip" style="margin-bottom:12px">
+      <div class="stat"><div class="v">${(j.composite*100).toFixed(1)}</div><div class="l">JEV</div></div>
+      <div class="stat"><div class="v">${j.setup_quality.toFixed(2)}</div><div class="l">Setup</div></div>
+      <div class="stat"><div class="v">${j.follow_through.toFixed(2)}</div><div class="l">Follow</div></div>
+      <div class="stat"><div class="v">${j.risk_reward.toFixed(2)}</div><div class="l">Risk/Reward</div></div>
+    </div>`:''}
+    <p style="color:#c9d1d9">${s.plain_signal||''}</p>
+    ${clusterBox('Nearest floor / buyer zone',c.floor)}
+    ${clusterBox('Nearest ceiling / seller zone',c.ceiling)}
+    <h3>Raw method values for this stock</h3>
+    <table><tbody>
+      <tr><td>Pivot math</td><td>PP ${fmtInr(piv.PP)} · R1 ${fmtInr(piv.R1)} · R2 ${fmtInr(piv.R2)} · S1 ${fmtInr(piv.S1)} · S2 ${fmtInr(piv.S2)}</td></tr>
+      <tr><td>Volume Profile</td><td>POC ${fmtInr(s.poc)} · VAH ${fmtInr(s.vah)} · VAL ${fmtInr(s.val)}</td></tr>
+      <tr><td>52-week anchors</td><td>High ${fmtInr(s.hi52w)} · Low ${fmtInr(s.lo52w)}</td></tr>
+      <tr><td>ATR / breakout</td><td>ATR14 ${fmtInr(s.atr14)} · 20d high ${fmtInr(s.d20_high)} · 20d low ${fmtInr(s.d20_low)} · breakout buffer 0.25×ATR</td></tr>
+      <tr><td>Round levels</td><td>${(s.round_levels||[]).map(fmtInr).join(' · ')||'—'}</td></tr>
+    </tbody></table>
+    <h3>Anchored VWAP anchors</h3>
+    <table><tbody>${av||'<tr><td>No AVWAP anchors</td></tr>'}</tbody></table>
+    <h3>All formulas used</h3>
+    ${Object.entries(METHOD_MATH).map(([src,m])=>srcCard(src,m.name,null)).join('')}
+    <p style="font-size:.75rem;color:#8b949e">This is a rules-based scanner, not a prediction or SEBI-registered advice. The point is to show where historical volume, anchored cost basis, pivots, swings, and volatility-adjusted break conditions agree.</p>`;
+  document.getElementById('modal').style.display='block';
+}
 function renderJEV(j){
+  _jevBySym=Object.fromEntries((j.ranking||[]).map(x=>[x.symbol,x]));
   const bySym=Object.fromEntries(_srAll.map(s=>[s.symbol,s]));
   const rows=(j.ranking||[]).slice(0,10);
   document.getElementById('jevMeta').innerHTML=`As of <strong style="color:#e6edf3">${j.as_of}</strong> · ${j.judged}/${j.of_universe} stocks judged · model ${j.model} · weights: setup 35%, follow-through 30%, R/R 35%`;
@@ -527,7 +602,7 @@ function renderJEV(j){
     const follow=(r.follow_through||0).toFixed(2);
     const rr=(r.risk_reward||0).toFixed(2);
     const why=(s.plain_signal||r.signal||'—');
-    return `<tr>
+    return `<tr onclick="showSrMath('${r.symbol}')" title="Click to see maths behind ${r.symbol}" style="cursor:pointer">
       <td style="color:#8b949e">${r.rank}</td>
       <td class="sym">${r.symbol}</td>
       <td style="color:${col};font-weight:700">${SIG_ICON[r.signal]||''} ${r.signal}</td>

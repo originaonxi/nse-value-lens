@@ -247,7 +247,7 @@ def round_levels(close, atr):
             lvl = round(round(close / g) * g + k * g, 2)
             if abs(lvl - close) <= NEAR_ATR * atr and lvl > 0:
                 out.append(lvl)
-    return out
+    return sorted(set(out))
 
 
 def touches_rejection(df, zone_price, atr, buf=0.25, min_gap=5):
@@ -435,17 +435,25 @@ def analyse(symbol):
         #             + 0.15*(AVWAP or round-number confluence)
         SRC_W = {'vp':1.6,'vwap':1.4,'avwap':1.4,'52w':1.3,'poc':1.6}
         cands = []
-        for p in sh:      cands.append({'price':p,'source':'swing',  'weight':1.0})
-        for p in sl:      cands.append({'price':p,'source':'swing',  'weight':1.0})
-        for p in pivot_r + pivot_s: cands.append({'price':p,'source':'pivot','weight':0.8})
-        cands.append({'price':hi52,'source':'52w','weight':SRC_W['52w']})
-        cands.append({'price':lo52,'source':'52w','weight':SRC_W['52w']})
-        for p in km_levels:  cands.append({'price':p,'source':'kmeans','weight':1.0})
-        for p in [poc, vah, val]:
-            if p: cands.append({'price':p,'source':'vp','weight':SRC_W['vp']})
-        cands.append({'price':vwap20,'source':'vwap','weight':SRC_W['vwap']})
-        for v in avwap_vals: cands.append({'price':v,'source':'avwap','weight':SRC_W['avwap']})
-        for p in rounds:  cands.append({'price':p,'source':'round','weight':0.6})
+        for i, p in enumerate(sh, 1):
+            cands.append({'price':p,'source':'swing','label':f'Swing high #{i}','weight':1.0})
+        for i, p in enumerate(sl, 1):
+            cands.append({'price':p,'source':'swing','label':f'Swing low #{i}','weight':1.0})
+        for label, p in zip(['Pivot R1','Pivot R2','Pivot R3'], pivot_r):
+            cands.append({'price':p,'source':'pivot','label':label,'weight':0.8})
+        for label, p in zip(['Pivot S1','Pivot S2','Pivot S3'], pivot_s):
+            cands.append({'price':p,'source':'pivot','label':label,'weight':0.8})
+        cands.append({'price':hi52,'source':'52w','label':'52-week high','weight':SRC_W['52w']})
+        cands.append({'price':lo52,'source':'52w','label':'52-week low','weight':SRC_W['52w']})
+        for i, p in enumerate(km_levels, 1):
+            cands.append({'price':p,'source':'kmeans','label':f'K-means centroid #{i}','weight':1.0})
+        for label, p in [('Volume Profile POC', poc), ('Volume Profile VAH', vah), ('Volume Profile VAL', val)]:
+            if p: cands.append({'price':p,'source':'vp','label':label,'weight':SRC_W['vp']})
+        cands.append({'price':vwap20,'source':'vwap','label':'20-day VWAP','weight':SRC_W['vwap']})
+        for name, v in avwap.items():
+            cands.append({'price':v,'source':'avwap','label':f'Anchored VWAP {name}','weight':SRC_W['avwap']})
+        for p in rounds:
+            cands.append({'price':p,'source':'round','label':f'Round number {p:g}','weight':0.6})
         clusters = cluster_candidates(cands, atr)
         for cl in clusters:
             p   = cl['price']
@@ -453,9 +461,15 @@ def analyse(symbol):
             tch, rej = touches_rejection(df_hist, p, atr)
             has_avwap = any(abs(a - p) <= 0.5 * atr for a in avwap_vals)
             has_round = any(abs(r - p) <= 0.25 * atr for r in rounds)
+            members = cl.pop('members', [])
             cl.update({
                 'price': round(p, 2),
                 'n_sources': len(cl['sources']),
+                'components': [
+                    {'source': m['source'], 'label': m.get('label', m['source']),
+                     'price': round(m['price'], 2), 'weight': round(m['weight'], 2)}
+                    for m in members
+                ],
                 'vp_density': round(vp_d, 2),
                 'touches': tch,
                 'rejection_atr': round(rej, 2),
@@ -465,7 +479,6 @@ def analyse(symbol):
                                   + 0.20 * min(rej / 2, 1)
                                   + 0.15 * (1 if (has_avwap or has_round) else 0), 2),
             })
-            cl.pop('members', None)
         sup_clusters = sorted((c for c in clusters if c['price'] < close),
                               key=lambda c: c['price'], reverse=True)
         res_clusters = sorted((c for c in clusters if c['price'] > close),
