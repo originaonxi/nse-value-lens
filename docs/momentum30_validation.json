@@ -22,8 +22,8 @@
    "source": "NSE India Historical Index Data page",
    "url": "https://www.nseindia.com/reports-indices-historical-index-data",
    "method": "SAM Browser real Chrome",
-   "status": "ACCESSIBLE_PAGE_BUT_NO_RECORDS_FOR_NIFTY200_MOMENTUM_30_1Y",
-   "observed": "Selected NIFTY200 MOMENTUM 30, clicked 1Y and Download CSV; table showed 'No records available'."
+   "status": "ACCESSIBLE_PAGE_NO_RECORDS_AND_NO_NEW_CSV_DOWNLOAD_VERIFIED",
+   "observed": "Selected NIFTY200 MOMENTUM 30, clicked 1Y and Download CSV; table showed 'No records available'. Downloads folder was checked and no new NSE historical CSV was created."
   },
   {
    "source": "Nifty Indices Momentum30 official page",
@@ -41,5 +41,12 @@
   }
  ],
  "validated_profit_rs": 0,
- "validated_status": "HARD_BLOCKED_NO_PIT_OR_OFFICIAL_DATA"
+ "validated_status": "HARD_BLOCKED_NO_PIT_OR_OFFICIAL_DATA",
+ "download_verification": {
+  "download_folder_checked": "C:/Users/samaa/Downloads",
+  "latest_csv": "quant_upgrade_master.csv",
+  "latest_csv_mtime": "2026-09-17 12:14:54",
+  "nse_download_created_new_csv": false,
+  "conclusion": "Clicking Download did not create a new NSE historical CSV to inspect; official TRI download remains unverified/unavailable."
+ }
 }
