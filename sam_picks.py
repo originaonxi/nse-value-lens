@@ -163,8 +163,9 @@ def risk_reward(sr):
     return stop, ceil_p, rr1
 
 
+
 def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0, dir_sign=0):
-    """Bullet-point math reasons — both layman and formula."""
+    """Elevator-pitch reasons — layman first, real numbers, verifiable, formula underneath."""
     reasons = []
     label   = (mr or {}).get('current', {}).get('label', '?')
     age     = (mr or {}).get('current', {}).get('age_months')
@@ -177,162 +178,336 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
     fl_str  = sr.get('floor_strength')
     cl_str  = sr.get('ceiling_strength')
     atr     = sr.get('atr14')
-    plain   = sr.get('plain_signal', '')
     vwap    = sr.get('vwap20')
     above_v = sr.get('above_vwap')
+    vol_r   = sr.get('vol_ratio')
     reclaim = sr.get('reclaim_support', False)
     bo_conf = sr.get('breakout_confirmed', False)
     conf    = sr.get('confluence') or {}
     fl_cl   = conf.get('floor') or {}
     cl_cl   = conf.get('ceiling') or {}
+    fl_n    = fl_cl.get('n_sources', 0)
+    cl_n    = cl_cl.get('n_sources', 0)
     fl_src  = ', '.join(fl_cl.get('sources') or [])
     cl_src  = ', '.join(cl_cl.get('sources') or [])
+    d_sup   = round(sr.get('dist_support_atr') or 0, 2)
+    d_res   = round(sr.get('dist_resistance_atr') or 0, 2)
+    rsi_val = sr.get('rsi14')
+    ema_t   = sr.get('ema_trend')
+    ema10   = sr.get('ema10')
+    ema20   = sr.get('ema20')
+    ema50   = sr.get('ema50')
+    above50 = sr.get('above_ema50')
+    bb_pctb = sr.get('bb_pct_b')
+    bb_up   = sr.get('bb_upper')
+    bb_mid  = sr.get('bb_mid')
+    bb_lo   = sr.get('bb_lower')
+    st_dir  = sr.get('supertrend_dir')
+    st_val  = sr.get('supertrend')
+    ichi    = sr.get('ichimoku') or {}
+    jconf   = (jev_row or {}).get('confidence_gate')
+    jreg    = str((jev_row or {}).get('regime_jev') or 'n/a').replace('_',' ')
+    jdir    = str((jev_row or {}).get('direction_jev') or 'n/a')
+    jsq     = (jev_row or {}).get('setup_quality')
+    jft     = (jev_row or {}).get('follow_through')
+    jrr_j   = (jev_row or {}).get('risk_reward')
 
-    # Monthly regime
+    # ── 1. SAM SCORE — overall verdict, sorted first ─────────────────────────
+    bear_or_bull = 'bullish' if sam > 0 else 'bearish' if sam < 0 else 'neutral'
+    reasons.append({
+        'icon': '⭐',
+        'layman': (
+            f"SAM score {round(sam*100)}/100 — our composite reads {bear_or_bull} "
+            f"(monthly trend 30% + daily signal 25% + AI setup quality 25% + confluence 20%). "
+            f"Every number below feeds into this single score. Higher = more layers agree."
+        ),
+        'formula': f"SAM = 0.30×({reg_comp:+.3f}) + 0.25×({sig_comp:+.3f}) + 0.25×(jev={jev_comp:.3f}×dir={dir_sign:+d}) + 0.20×({conf_comp:+.3f}) = {sam:+.3f}",
+    })
+
+    # ── 2. Monthly regime ─────────────────────────────────────────────────────
     if label and label != 'N/A':
         stretched = rr_rat and rr_rat > 1.5
+        river = 'flowing upriver' if label == 'UP' else 'flowing downhill — swim against it at your own risk' if label == 'DOWN' else 'going sideways'
+        stretch_note = f" Caution: at {age} months this trend is getting long in the tooth (reversal risk {rr_rat}×) — consider tighter stops." if stretched else ""
         reasons.append({
             'icon': '📅',
-            'layman': f"Monthly trend is {label} for {age} months (avg 12m return {avg12}%{', STRETCHED — could be near end' if stretched else ''})",
-            'formula': f"Trailing 12m return > +5% = UP. Reversal risk = {rr_rat}× (age ÷ hist mean). Component = {reg_comp:+.2f}",
+            'layman': (
+                f"Big-picture trend (last 12 months): {label} for {age} months, avg return {avg12}%. "
+                f"Think of the monthly trend as checking which way the river is {river}. "
+                f"Institutional funds rotate based on this — being aligned with it matters.{stretch_note}"
+            ),
+            'formula': f"12m trailing return > +5% = UP, < -5% = DOWN, else SIDE. Reversal risk ratio = {rr_rat}× (current age ÷ historical mean duration). Component = {reg_comp:+.2f}",
         })
-    # Daily S&R signal
+
+    # ── 3. Volume + daily signal ──────────────────────────────────────────────
+    vol_r_str = f"{vol_r:.1f}× the 20-day avg" if isinstance(vol_r, (int, float)) else "unknown volume vs 20-day avg"
+    vol_txt = ''
+    if isinstance(vol_r, (int, float)):
+        if vol_r >= 2.0:
+            vol_txt = f"Today's volume was {vol_r_str} — very heavy, institutional-level activity. "
+        elif vol_r >= 1.5:
+            vol_txt = f"Today's volume was {vol_r_str} — above-average, real conviction behind the move. "
+        elif vol_r >= 1.0:
+            vol_txt = f"Today's volume was {vol_r_str} — normal; the move is consistent but not exceptional. "
+        else:
+            vol_txt = f"Today's volume was only {vol_r_str} — below-average; treat this signal cautiously. "
+
+    sig_explain = {
+        'BREAKOUT_UP':   f"Price broke ABOVE the 20-day high on {vol_r_str}. {vol_txt}Breakouts with high volume mean real buyers stepped in — low-volume breakouts are traps. Nearest support floor ₹{floor_p} is {d_sup} ATR ({round((d_sup or 0)*atr,0) if atr else '?'}₹) below. ATR (daily range) = ₹{atr}.",
+        'BREAKOUT_DN':   f"Price BROKE BELOW the 20-day low on {vol_r_str}. {vol_txt}Heavy sellers are in control — this is distribution, not a buying opportunity. Nearest ceiling resistance ₹{ceil_p} is {d_res} ATR overhead.",
+        'AT_SUPPORT':    f"Price has pulled back to a known support zone at ₹{floor_p}. {vol_txt}This is the price where buyers defended previously. Floor strength {round((fl_str or 0)*100)}% (backed by {fl_n} independent methods: {fl_src or '—'}). If it holds again, risk is clearly defined: stop below ₹{floor_p}.",
+        'AT_RESISTANCE': f"Price is pressing into resistance at ₹{ceil_p}. {vol_txt}This is where sellers overpowered buyers before. Ceiling strength {round((cl_str or 0)*100)}% (backed by {cl_n} methods: {cl_src or '—'}). A breakout above here on volume = bullish; a rejection = fade.",
+        'NEAR':          f"Price is near a key level (floor ₹{floor_p}, ceiling ₹{ceil_p}). {vol_txt}Watching for a breakout or rejection. ATR = ₹{atr}.",
+    }.get(signal, f"{signal}. Floor ₹{floor_p}, ceiling ₹{ceil_p}. ATR ₹{atr}. {vol_txt}")
+
     reasons.append({
         'icon': '📊',
-        'layman': plain or signal,
-        'formula': f"Signal = {signal} → SR score = {sig_comp:+.2f}. Floor ₹{floor_p} ({round(sr.get('dist_support_atr') or 0,2)} ATR away) · Ceiling ₹{ceil_p} ({round(sr.get('dist_resistance_atr') or 0,2)} ATR away). ATR14 = ₹{atr}.",
+        'layman': sig_explain,
+        'formula': f"Signal = {signal} → SR component = {sig_comp:+.2f}. Floor ₹{floor_p} ({d_sup} ATR away) · Ceiling ₹{ceil_p} ({d_res} ATR away). ATR14 = ₹{atr}.",
     })
-    # Confluence
-    fl_n = fl_cl.get('n_sources', 0)
-    cl_n = cl_cl.get('n_sources', 0)
+
+    # ── 4. Confluence ─────────────────────────────────────────────────────────
     reasons.append({
         'icon': '🔬',
-        'layman': f"Floor backed by {fl_n} independent methods ({fl_src or '—'}), strength {round((fl_str or 0)*100)}%. Ceiling backed by {cl_n} methods ({cl_src or '—'}), strength {round((cl_str or 0)*100)}%.",
-        'formula': f"Strength(L)=0.40×VP_density+0.25×touches/4+0.20×rejection/2+0.15×(AVWAP/round). Floor str={fl_str} → conf_comp={conf_comp:+.2f}.",
+        'layman': (
+            f"Support at ₹{floor_p} confirmed by {fl_n} independent methods ({fl_src or '—'}), strength {round((fl_str or 0)*100)}%. "
+            f"Resistance at ₹{ceil_p} confirmed by {cl_n} methods ({cl_src or '—'}), strength {round((cl_str or 0)*100)}%. "
+            f"When 3+ unrelated methods point to the same price, that's where institutional orders cluster — not random."
+        ),
+        'formula': f"Strength = 0.40×VolumeProfile + 0.25×touches/4 + 0.20×rejection/2 + 0.15×(AVWAP or round). Confluence component = {conf_comp:+.2f}.",
     })
-    # VWAP position
-    reasons.append({
-        'icon': '📈',
-        'layman': f"Price ₹{close} is {'ABOVE' if above_v else 'BELOW'} 20-day VWAP ₹{vwap} — {'premium, buyers in control' if above_v else 'discount, sellers in control'}.",
-        'formula': f"VWAP20 = Σ(TypicalPrice×Volume)/ΣVolume over 20 sessions. Above VWAP = institutional cost basis support.",
-    })
-    # Breakout confirmation
+
+    # ── 5. VWAP ───────────────────────────────────────────────────────────────
+    gap_pct = round((close - vwap) / vwap * 100, 1) if vwap and close else None
+    if vwap:
+        vwap_msg = (
+            f"Price ₹{close} is {'ABOVE' if above_v else 'BELOW'} the 20-day VWAP ₹{vwap} "
+            f"({'+'if gap_pct and gap_pct>=0 else ''}{gap_pct}%). "
+            f"VWAP = volume-weighted average price — the average at which actual trades happened. "
+            f"{'Above = every buyer over the last 20 sessions is sitting on a profit; no forced selling.' if above_v else 'Below = most recent buyers are at a loss; sellers have the psychological edge.'}"
+        )
+        reasons.append({'icon': '📈', 'layman': vwap_msg,
+                        'formula': 'VWAP20 = Σ(TypicalPrice×Volume)/ΣVolume over 20 sessions. Above VWAP = cost-basis support for recent buyers.'})
+
+    # ── 6. Confirmed breakout ─────────────────────────────────────────────────
     if bo_conf:
         reasons.append({
             'icon': '🚀',
-            'layman': f"Breakout is CONFIRMED: price broke the 20-day Donchian channel by >0.25 ATR with volume >1.5× the 20-day median. Real buyers/sellers stepped in.",
-            'formula': f"BO = Close > D20_high + 0.25×ATR AND Vol > 1.5×Median(Vol20). Buffer avoids false Donchian crosses.",
+            'layman': (
+                f"Breakout confirmed by BOTH price AND volume filters: price exceeded the 20-day Donchian channel "
+                f"by more than 0.25 ATR (buffer against false breaks) AND volume was >{1.5:.1f}× the 20-day median. "
+                f"Both must be true simultaneously — volume alone without price or price without volume = filtered out as noise."
+            ),
+            'formula': 'BO = Close > D20_high + 0.25×ATR14 AND Vol > 1.5×Median(Vol,20d). Buffer eliminates single-candle fake-outs.',
         })
+
+    # ── 7. Bear trap / Reclaim ────────────────────────────────────────────────
     if reclaim:
         reasons.append({
             'icon': '🔄',
-            'layman': "Price previously broke below the floor and then bounced back above it. This is a 'bear trap' — sellers pushed it through but couldn't hold. Often marks a reversal.",
-            'formula': f"Reclaim: any of last 5 closes < floor − 0.25×ATR AND today close > floor + 0.25×ATR.",
+            'layman': (
+                f"Bear trap pattern detected: price dipped below the floor ₹{floor_p} (trapping short sellers) "
+                f"then bounced back above it within 5 sessions. "
+                f"Short sellers who shorted the breakdown are now underwater and forced to buy to cover — "
+                f"this fuel often accelerates the recovery. Verify: the reclaim must close above floor, not just touch."
+            ),
+            'formula': f"Reclaim: any of last 5 closes < floor − 0.25×ATR AND today close > floor + 0.25×ATR. Floor = ₹{floor_p}.",
         })
-    # JEV
-    if jev_row:
-        jc = jev_row.get('composite', 0)
-        sq = jev_row.get('setup_quality', 0)
-        ft = jev_row.get('follow_through', 0)
-        rr_jev = jev_row.get('risk_reward', 0)
-        reasons.append({
-            'icon': '🤖',
-            'layman': f"JEV AI model (TypeSafe System One) scored this setup {round(jc*100)}/100 based purely on the numbers. Setup quality {sq}/4, follow-through {ft}/4, risk/reward {rr_jev}/4.",
-            'formula': f"JEV composite = 0.35×setup_quality/4 + 0.30×follow_through/4 + 0.35×risk_reward/4. JEV sees only numeric features — no names.",
-        })
-    # SAM SCORE
-    reasons.append({
-        'icon': '⭐',
-        'layman': f"SAM SCORE = {round(sam*100)}/100. Combined score from monthly trend (30%) + daily signal (25%) + JEV setup quality (25%) + confluence strength (20%).",
-        'formula': f"SAM = 0.30×({reg_comp:+.3f}) + 0.25×({sig_comp:+.3f}) + 0.25×(jev={jev_comp:.3f}×dir={dir_sign:+d}) + 0.20×({conf_comp:+.3f}) = {sam:+.3f}",
-    })
-    # ── RSI14 ─────────────────────────────────────────────────────────────────
-    rsi_val  = sr.get('rsi14')
+
+    # ── 8. RSI14 ─────────────────────────────────────────────────────────────
     if rsi_val is not None:
-        rsi_state = 'overbought >82' if rsi_val>82 else 'overbought >70' if rsi_val>70 else 'oversold <25' if rsi_val<25 else 'oversold <30' if rsi_val<30 else 'neutral'
-        reasons.append({'icon':'🔢','layman':f"RSI14 = {rsi_val:.0f} ({rsi_state}). {'Do not chase — overbought cap applied.' if rsi_val>82 else 'Potential bounce zone.' if rsi_val<25 else ''}",
-                        'formula':'RSI14 = 100 − 100/(1 + avg_gain/avg_loss) over 14 sessions via Wilder EWM. >70 overbought, <30 oversold; >82 hard-caps BUY → WATCH_BUY.'})
-    # ── EMA Trend ─────────────────────────────────────────────────────────────
-    ema_trend = sr.get('ema_trend')
-    if ema_trend:
-        reasons.append({'icon':'📉','layman':f"EMA trend = {ema_trend}. Price {'ABOVE' if sr.get('above_ema50') else 'BELOW'} EMA50 ₹{sr.get('ema50','?')}. EMA10={sr.get('ema10','?')} / EMA20={sr.get('ema20','?')}.",
-                        'formula':'EMA_n = Σ(close × α × (1−α)^k) where α=2/(n+1). Trend: UP=EMA10>EMA20>EMA50, DOWN=EMA10<EMA20<EMA50, else MIXED.'})
-    # ── Bollinger Bands ───────────────────────────────────────────────────────
-    bb_pctb = sr.get('bb_pct_b')
-    if bb_pctb is not None:
-        bb_pos = 'near upper band (overbought zone)' if bb_pctb>0.8 else 'near lower band (oversold zone)' if bb_pctb<0.2 else 'mid-band range'
-        reasons.append({'icon':'📊','layman':f"Bollinger %B = {bb_pctb:.0%} ({bb_pos}). Upper ₹{sr.get('bb_upper','?')} / Mid ₹{sr.get('bb_mid','?')} / Lower ₹{sr.get('bb_lower','?')}.",
-                        'formula':'BB(20,2σ): mid=SMA20, upper=mid+2σ, lower=mid−2σ. %B=(close−lower)/(upper−lower). <0.2=oversold zone, >0.8=overbought zone.'})
-    # ── Supertrend ────────────────────────────────────────────────────────────
-    st_dir = sr.get('supertrend_dir')
+        if rsi_val > 82:
+            rsi_msg = f"RSI = {rsi_val:.0f} — EXTREME overbought. BUY signal downgraded to WATCH_BUY automatically. The stock has run very hard very fast; chasing here historically leads to getting caught in a pullback."
+        elif rsi_val > 70:
+            rsi_msg = f"RSI = {rsi_val:.0f} — entering overbought territory (>70). Momentum is strong but risk of a short-term pullback is elevated. Not a sell signal on its own, but size conservatively."
+        elif rsi_val < 25:
+            rsi_msg = f"RSI = {rsi_val:.0f} — deeply oversold (<25). Selling pressure is typically exhausted at this level; bounces are statistically likely. Not a trend reversal signal alone — wait for price confirmation."
+        elif rsi_val < 30:
+            rsi_msg = f"RSI = {rsi_val:.0f} — oversold (<30). Buyers could step in here. Best used alongside a support level test for a higher-probability entry."
+        else:
+            rsi_msg = f"RSI = {rsi_val:.0f} — healthy momentum zone (30–70), not overbought or oversold. There is room for the move to continue without immediate mean-reversion risk."
+        reasons.append({'icon': '🔢', 'layman': rsi_msg,
+                        'formula': 'RSI14 = 100 − 100/(1 + avg_14d_gain/avg_14d_loss) using Wilder EWM. >70 overbought, <30 oversold; >82 hard-caps BUY → WATCH_BUY.'})
+
+    # ── 9. EMA trend ─────────────────────────────────────────────────────────
+    if ema_t:
+        e50_dist = round((close - ema50) / ema50 * 100, 1) if ema50 and close else '?'
+        if ema_t == 'UP':
+            ema_msg = (
+                f"EMA golden alignment — short-term EMA10 ₹{ema10} > medium EMA20 ₹{ema20} > long EMA50 ₹{ema50}. "
+                f"Price ₹{close} is {'+' if isinstance(e50_dist,float) and e50_dist>=0 else ''}{e50_dist}% vs the 50-day trend line. "
+                f"Buyers at the 50-day EMA are in profit — this acts as a natural support floor. "
+                f"Every dip to the EMA cluster is a potential buy opportunity while this alignment holds."
+            )
+        elif ema_t == 'DOWN':
+            ema_msg = (
+                f"EMA death alignment — EMA10 ₹{ema10} < EMA20 ₹{ema20} < EMA50 ₹{ema50}. "
+                f"Price ₹{close} is {'+' if isinstance(e50_dist,float) and e50_dist>=0 else ''}{e50_dist}% vs the 50-day. "
+                f"Short-term sellers are in control. Every rally into the EMA cluster typically meets selling pressure. "
+                f"Do not buy against a death-aligned EMA stack without a very clear catalyst."
+            )
+        else:
+            ema_msg = (
+                f"EMAs are mixed (MIXED alignment): EMA10 ₹{ema10}, EMA20 ₹{ema20}, EMA50 ₹{ema50}. "
+                f"Price ₹{close} is {'above' if above50 else 'below'} the 50-day. "
+                f"No clear trend — the stock is in a transitional phase. Wait for alignment before committing."
+            )
+        reasons.append({'icon': '📉', 'layman': ema_msg,
+                        'formula': 'EMA_n = α×close + (1-α)×prev_EMA, α=2/(n+1). UP: EMA10>EMA20>EMA50. DOWN: reverse. MIXED: otherwise.'})
+
+    # ── 10. Supertrend ────────────────────────────────────────────────────────
     if st_dir is not None:
-        reasons.append({'icon':'🌊','layman':f"Supertrend(10,3) = {'BULLISH 🟢' if st_dir==1 else 'BEARISH 🔴'} at ₹{sr.get('supertrend','?')}. {'Price above Supertrend = uptrend bias.' if st_dir==1 else 'Price below Supertrend = downtrend bias.'}",
-                        'formula':'Supertrend = (H+L)/2 ± 3×ATR(10, Wilder). Flips bullish when close > upper band; bearish when close < lower band.'})
-    # ── Ichimoku Cloud (no-lookahead) ─────────────────────────────────────────
-    ichi = sr.get('ichimoku') or {}
+        bull = st_dir == 1
+        st_msg = (
+            f"Supertrend (10-period, 3×ATR) is {'BULLISH 🟢' if bull else 'BEARISH 🔴'} — "
+            f"trailing {'support' if bull else 'resistance'} line at ₹{st_val}. "
+            f"{'Price has stayed above this line — the uptrend is mechanically intact. Trend-following funds use this as their stop; as long as it holds, sellers are contained.' if bull else 'Price is below this line — the downtrend is intact. Every bounce will likely be sold at or below the Supertrend line ₹'+str(st_val)+'. A close above it = potential trend flip.'} "
+            f"ATR used = ₹{atr} (average daily price range, Wilder-smoothed)."
+        )
+        reasons.append({'icon': '🌊', 'layman': st_msg,
+                        'formula': f"Supertrend = (H+L)/2 ± 3×ATR(10,Wilder). Flips {'bull when close > upper band' if bull else 'bear when close < lower band'}."})
+
+    # ── 11. Ichimoku cloud ────────────────────────────────────────────────────
     if ichi:
-        cpos = 'ABOVE cloud ✅' if ichi.get('above_cloud') else 'BELOW cloud ❌' if ichi.get('below_cloud') else 'INSIDE cloud ⚠️'
-        reasons.append({'icon':'☁️','layman':f"Ichimoku: {cpos}. Cloud is {'BULLISH (green)' if ichi.get('bullish_cloud') else 'BEARISH (red)'}. Tenkan {'>' if ichi.get('tenkan_above_kijun') else '<'} Kijun. Chikou {'above' if ichi.get('chikou_above') else 'below'} past price.",
-                        'formula':f"Senkou A={ichi.get('senkou_a')} / B={ichi.get('senkou_b')} (today's cloud = values from 26 bars ago, zero lookahead). Tenkan=9H/L mid, Kijun=26H/L mid."})
-    # ── JEV confidence gate ───────────────────────────────────────────────────
-    conf = (jev_row or {}).get('confidence_gate')
-    if conf is not None:
-        cstate = 'HIGH ✅' if conf>=0.7 else 'LOW ⚠️ — action downgraded' if conf<0.45 else 'MODERATE'
-        reasons.append({'icon':'🔒','layman':f"JEV signal confidence = {conf:.0%} ({cstate}). Regime: {str((jev_row or {}).get('regime_jev') or '?').replace('_',' ')}. Direction: {str((jev_row or {}).get('direction_jev') or '?')}.",
-                        'formula':'JEV noul question: do regime/EMA/Supertrend/Ichimoku/signal all agree? Calibrated probability via RLCD. <45% downgrades BUY→WATCH_BUY, AVOID→CAUTION.'})
+        c_top   = ichi.get('cloud_top')
+        c_bot   = ichi.get('cloud_bottom')
+        cpos    = 'ABOVE' if ichi.get('above_cloud') else 'BELOW' if ichi.get('below_cloud') else 'INSIDE'
+        cbull   = ichi.get('bullish_cloud')
+        tk_ab   = ichi.get('tenkan_above_kijun')
+        ch_ab   = ichi.get('chikou_above')
+        cloud_note = (
+            'Price above cloud = medium and long-term buyers in full control. Cloud acts as dynamic support.' if cpos == 'ABOVE' else
+            'Price below cloud = sellers dominating medium and long-term. Cloud acts as resistance overhead.' if cpos == 'BELOW' else
+            'Price inside the cloud = no clear bias; wait for a breakout above or below.'
+        )
+        ichi_msg = (
+            f"Ichimoku cloud: price is {cpos} the cloud (₹{c_bot}–₹{c_top}). {cloud_note} "
+            f"Cloud color: {'BULLISH (green = Senkou A above B, upward momentum)' if cbull else 'BEARISH (red = Senkou B above A, downward momentum)'}. "
+            f"Tenkan (9-day midpoint) {'above' if tk_ab else 'below'} Kijun (26-day): {'bullish short-term crossover' if tk_ab else 'bearish — short-term weaker than medium-term'}. "
+            f"Chikou (today's close plotted 26 days back): {'above' if ch_ab else 'below'} past prices — {'confirms upward bias' if ch_ab else 'confirms downward bias'}. "
+            f"Zero lookahead used (cloud built from data available at the time)."
+        )
+        reasons.append({'icon': '☁️', 'layman': ichi_msg,
+                        'formula': f"Senkou A=(Tenkan+Kijun)/2 shifted +26. Senkou B=(52H+52L)/2 shifted +26. Today's cloud = values from 26 bars ago. Cloud top={c_top}, bottom={c_bot}."})
+
+    # ── 12. Bollinger Bands ───────────────────────────────────────────────────
+    if bb_pctb is not None:
+        if bb_pctb > 1.0:
+            bb_msg = f"Bollinger %B = {bb_pctb:.0%} — price is ABOVE the upper band (₹{bb_up}), which is 2 standard deviations above the 20-day average (₹{bb_mid}). In strong trending moves price can walk the upper band; it signals momentum but risk of snap-back is elevated. Lower band ₹{bb_lo}."
+        elif bb_pctb > 0.8:
+            bb_msg = f"Bollinger %B = {bb_pctb:.0%} — price near the upper band (₹{bb_up}). Overbought short-term; in a strong trend this is normal but chasing at this level risks catching a pullback to the midline ₹{bb_mid}."
+        elif bb_pctb < 0.0:
+            bb_msg = f"Bollinger %B = {bb_pctb:.0%} — price BELOW the lower band (₹{bb_lo}). Statistically extreme — happens only ~5% of the time. Oversold bounce likely but not guaranteed. Wait for a close back inside the band before acting. Mid ₹{bb_mid}."
+        elif bb_pctb < 0.2:
+            bb_msg = f"Bollinger %B = {bb_pctb:.0%} — price near the lower band (₹{bb_lo}), oversold zone. Mean-reversion candidates: if support holds here, target is the midline ₹{bb_mid} (+{round((bb_mid/bb_lo-1)*100,1) if bb_mid and bb_lo else '?'}%). Upper ₹{bb_up}."
+        else:
+            bb_msg = f"Bollinger %B = {bb_pctb:.0%} — price in the neutral mid-band range between ₹{bb_lo} and ₹{bb_up} (mid ₹{bb_mid}). No extreme squeeze or expansion signal. Wait for a move toward either band for a cleaner entry."
+        reasons.append({'icon': '🎯', 'layman': bb_msg,
+                        'formula': 'BB(20,2σ): mid=SMA20, upper=mid+2σ, lower=mid−2σ. %B=(close−lower)/(upper−lower). >1.0=above upper, <0.0=below lower.'})
+
+    # ── 13. JEV AI confidence gate ───────────────────────────────────────────
+    if jconf is not None:
+        gate_state = 'GREEN ✅ (high confidence)' if jconf >= 0.7 else 'RED ⚠️ — signal downgraded' if jconf < 0.45 else 'AMBER (moderate)'
+        sq_txt  = f"{jsq:.1f}/4" if isinstance(jsq,(int,float)) else 'n/a'
+        ft_txt  = f"{jft:.1f}/4" if isinstance(jft,(int,float)) else 'n/a'
+        rr_txt  = f"{jrr_j:.1f}/4" if isinstance(jrr_j,(int,float)) else 'n/a'
+        reasons.append({
+            'icon': '🔒',
+            'layman': (
+                f"TypeSafe AI (JEV) is {jconf:.0%} confident this setup is actionable — gate: {gate_state}. "
+                f"Regime detected: {jreg}. Direction: {jdir}. "
+                f"Three scored dimensions: setup quality {sq_txt} (how good is the technical alignment), "
+                f"follow-through {ft_txt} (odds price moves in signal direction over 1–5 sessions), "
+                f"risk/reward {rr_txt} (floor-to-ceiling vs stop distance). "
+                f"{'Below 45% = BUY automatically downgraded to WATCH_BUY; above 70% = all layers agree, trade with normal sizing.' if jconf < 0.7 else 'At this confidence level all technical layers agree — trade with standard sizing per your plan.'}"
+            ),
+            'formula': (
+                'JEV calibrated via RLCD (Reinforcement Learning from Calibrated Decisions). '
+                'noul probability = P(signals clearly aligned and actionable). '
+                f'Composite = 0.35×setup_quality/4 + 0.30×follow_through/4 + 0.35×risk_reward/4 = {jev_comp:.3f}.'
+            ),
+        })
+
+    # SAM score sorted to front
     reasons.sort(key=lambda r: 0 if r.get('icon') == '⭐' else 1)
     return reasons
 
 
 def indicator_snapshot(sr, jev_row=None):
-    """Compact raw indicator snapshot for the website audit strip.
-    All fields come from daily_sr.py / jev_rank.py JSON generated after close."""
+    """Compact raw indicator snapshot for the website audit strip."""
     rsi = sr.get('rsi14')
     bbp = sr.get('bb_pct_b')
     st_dir = sr.get('supertrend_dir')
     ichi = sr.get('ichimoku') or {}
     return {
-        'rsi14': rsi,
-        'rsi_state': 'HOT>82' if rsi and rsi > 82 else 'overbought>70' if rsi and rsi > 70 else 'oversold<30' if rsi and rsi < 30 else 'neutral',
-        'ema_trend': sr.get('ema_trend'),
-        'ema10': sr.get('ema10'),
-        'ema20': sr.get('ema20'),
-        'ema50': sr.get('ema50'),
-        'above_ema50': sr.get('above_ema50'),
-        'bb_pct_b': bbp,
-        'bb_state': 'upper/hot' if bbp is not None and bbp > 0.80 else 'lower/cold' if bbp is not None and bbp < 0.20 else 'middle',
-        'bb_upper': sr.get('bb_upper'),
-        'bb_mid': sr.get('bb_mid'),
-        'bb_lower': sr.get('bb_lower'),
-        'supertrend': sr.get('supertrend'),
-        'supertrend_dir': st_dir,
+        'rsi14':            rsi,
+        'rsi_state':        'HOT>82' if rsi and rsi > 82 else 'overbought>70' if rsi and rsi > 70 else 'oversold<30' if rsi and rsi < 30 else 'neutral',
+        'ema_trend':        sr.get('ema_trend'),
+        'ema10':            sr.get('ema10'),
+        'ema20':            sr.get('ema20'),
+        'ema50':            sr.get('ema50'),
+        'above_ema50':      sr.get('above_ema50'),
+        'bb_pct_b':         bbp,
+        'bb_state':         'upper/hot' if bbp is not None and bbp > 0.80 else 'lower/cold' if bbp is not None and bbp < 0.20 else 'middle',
+        'bb_upper':         sr.get('bb_upper'),
+        'bb_mid':           sr.get('bb_mid'),
+        'bb_lower':         sr.get('bb_lower'),
+        'supertrend':       sr.get('supertrend'),
+        'supertrend_dir':   st_dir,
         'supertrend_state': 'BULL' if st_dir == 1 else 'BEAR' if st_dir == -1 else 'N/A',
-        'ichimoku_pos': 'ABOVE' if ichi.get('above_cloud') else 'BELOW' if ichi.get('below_cloud') else 'INSIDE',
-        'ichimoku_cloud': 'BULL' if ichi.get('bullish_cloud') else 'BEAR',
+        'ichimoku_pos':     'ABOVE' if ichi.get('above_cloud') else 'BELOW' if ichi.get('below_cloud') else 'INSIDE',
+        'ichimoku_cloud':   'BULL' if ichi.get('bullish_cloud') else 'BEAR',
         'tenkan_above_kijun': ichi.get('tenkan_above_kijun'),
-        'chikou_above': ichi.get('chikou_above'),
-        'jev_confidence': (jev_row or {}).get('confidence_gate'),
-        'jev_regime': (jev_row or {}).get('regime_jev'),
-        'jev_direction': (jev_row or {}).get('direction_jev'),
+        'chikou_above':     ichi.get('chikou_above'),
+        'vol_ratio':        sr.get('vol_ratio'),
+        'jev_confidence':   (jev_row or {}).get('confidence_gate'),
+        'jev_regime':       (jev_row or {}).get('regime_jev'),
+        'jev_direction':    (jev_row or {}).get('direction_jev'),
     }
 
 
 def key_reason(action, sam, sr, mr, jev_row=None):
-    """One-line verdict for the SAM PICKS table; raw details are in indicators/why."""
-    ind = indicator_snapshot(sr, jev_row)
-    rsi = ind.get('rsi14')
-    rsi_txt = f"RSI {rsi:.0f} {ind['rsi_state']}" if isinstance(rsi, (int, float)) else "RSI n/a"
-    bbp = ind.get('bb_pct_b')
-    bb_txt = f"BB {bbp:.0%} {ind['bb_state']}" if isinstance(bbp, (int, float)) else "BB n/a"
-    conf = ind.get('jev_confidence')
-    conf_txt = f"JEV {conf:.0%}" if isinstance(conf, (int, float)) else "JEV n/a"
+    """2-sentence elevator pitch for the SAM PICKS table — real numbers, no jargon."""
+    ind    = indicator_snapshot(sr, jev_row)
+    close  = sr.get('close')
+    floor_p = sr.get('floor')
+    ceil_p = sr.get('ceiling')
+    atr    = sr.get('atr14')
+    vol_r  = ind.get('vol_ratio')
+    rsi    = ind.get('rsi14')
+    ema_t  = ind.get('ema_trend')
+    st     = ind.get('supertrend_state')
+    ichi   = ind.get('ichimoku_pos')
+    bbp    = ind.get('bb_pct_b')
+    jconf  = ind.get('jev_confidence')
     regime = (mr or {}).get('current', {}).get('label', '?')
-    return (
-        f"{action}: SAM {sam*100:+.1f}; regime {regime}; {sr.get('signal','NEUTRAL')}; "
-        f"{rsi_txt}; EMA {ind.get('ema_trend') or '?'}; ST {ind.get('supertrend_state')}; "
-        f"Ichi {ind.get('ichimoku_pos')}; {bb_txt}; {conf_txt}"
-    )
+    signal = sr.get('signal', 'NEUTRAL')
 
+    vol_str = f"{vol_r:.1f}× normal volume" if isinstance(vol_r,(int,float)) else "unknown volume"
+    rsi_str = f"RSI {rsi:.0f}" if isinstance(rsi,(int,float)) else "RSI n/a"
+    bb_str  = f"BB {bbp:.0%}" if isinstance(bbp,(int,float)) else "BB n/a"
+    jc_str  = f"JEV {jconf:.0%} confident" if isinstance(jconf,(int,float)) else "JEV n/a"
+
+    # Build two sentences
+    if action in ('BUY', 'WATCH_BUY'):
+        vol_note = (
+            f"Buyers stepped in with {vol_str} — {'institutional-level conviction' if vol_r and vol_r>=1.8 else 'above-average interest' if vol_r and vol_r>=1.3 else 'moderate interest'}. "
+            if isinstance(vol_r,(int,float)) else ""
+        )
+        s1 = f"{vol_note}Signal: {signal.replace('_',' ')} at ₹{close}."
+        s2 = f"All indicators: {rsi_str} (room to run), EMA {ema_t or '?'}, Supertrend {st}, Ichimoku {ichi}, {bb_str}, {jc_str}. Monthly: {regime}. Stop ₹{floor_p}, target ₹{ceil_p}."
+    elif action in ('AVOID', 'CAUTION'):
+        vol_note = (
+            f"Sellers hit with {vol_str} — {'heavy institutional distribution' if vol_r and vol_r>=1.8 else 'elevated selling pressure' if vol_r and vol_r>=1.3 else 'moderate selling'}. "
+            if isinstance(vol_r,(int,float)) else ""
+        )
+        s1 = f"{vol_note}Signal: {signal.replace('_',' ')} at ₹{close}."
+        s2 = f"Indicators confirm bearish: {rsi_str}, EMA {ema_t or '?'}, Supertrend {st}, Ichimoku {ichi}, {bb_str}, {jc_str}. Monthly: {regime}. Resistance ceiling ₹{ceil_p}."
+    else:
+        s1 = f"No clear signal at ₹{close} ({signal.replace('_',' ')}). Volume {vol_str}."
+        s2 = f"Mixed readings: {rsi_str}, EMA {ema_t or '?'}, ST {st}, Ichi {ichi}, {bb_str}, {jc_str}. Watching floor ₹{floor_p} / ceiling ₹{ceil_p}."
+
+    return s1 + " " + s2
 
 def main():
     sr_data  = json.loads((OUT / 'sr_levels.json').read_text())
