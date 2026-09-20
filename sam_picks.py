@@ -408,9 +408,9 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
     # ── 13. JEV AI confidence gate ───────────────────────────────────────────
     if jconf is not None:
         gate_state = 'GREEN ✅ (high confidence)' if jconf >= 0.7 else 'RED ⚠️ — signal downgraded' if jconf < 0.45 else 'AMBER (moderate)'
-        sq_txt  = f"{jsq:.1f}/4" if isinstance(jsq,(int,float)) else 'n/a'
-        ft_txt  = f"{jft:.1f}/4" if isinstance(jft,(int,float)) else 'n/a'
-        rr_txt  = f"{jrr_j:.1f}/4" if isinstance(jrr_j,(int,float)) else 'n/a'
+        sq_txt  = f"{jsq+1:.1f}/5" if isinstance(jsq,(int,float)) else 'n/a'
+        ft_txt  = f"{jft+1:.1f}/5" if isinstance(jft,(int,float)) else 'n/a'
+        rr_txt  = f"{jrr_j+1:.1f}/5" if isinstance(jrr_j,(int,float)) else 'n/a'
         reasons.append({
             'icon': '🔒',
             'layman': (
@@ -464,6 +464,62 @@ def indicator_snapshot(sr, jev_row=None):
         'jev_regime':       (jev_row or {}).get('regime_jev'),
         'jev_direction':    (jev_row or {}).get('direction_jev'),
     }
+
+
+def plain_english(action, sr, mr, jev_row=None):
+    """Dead-simple causal sentence — no jargon, no leading numbers, plain 'because'.
+    A non-trader must understand it in one read."""
+    ind    = indicator_snapshot(sr, jev_row)
+    signal = sr.get('signal', 'NEUTRAL')
+    vol_r  = ind.get('vol_ratio')
+    ema_t  = ind.get('ema_trend')
+    st     = ind.get('supertrend_state')
+    ichi   = ind.get('ichimoku_pos')
+    rsi    = ind.get('rsi14')
+    regime = (mr or {}).get('current', {}).get('label', '?')
+    jconf  = ind.get('jev_confidence')
+
+    heavy = isinstance(vol_r, (int, float)) and vol_r >= 1.5
+    strong_vol = isinstance(vol_r, (int, float)) and vol_r >= 1.2
+    up_trend   = ema_t == 'UP' and st == 'BULL'
+    down_trend = ema_t == 'DOWN' and st == 'BEAR'
+
+    reasons = []
+    if action in ('BUY', 'WATCH_BUY'):
+        if regime == 'UP':          reasons.append("the long-term trend is up")
+        if up_trend:                reasons.append("short-term momentum is also up")
+        if signal == 'BREAKOUT_UP': reasons.append("the price just broke out to a new high")
+        elif signal == 'AT_SUPPORT':reasons.append("the price bounced off a level buyers have defended before")
+        elif signal == 'NEAR':      reasons.append("the price is coiling near a breakout level")
+        if heavy:                   reasons.append("big buyers are stepping in on unusually strong volume")
+        elif strong_vol:            reasons.append("buying volume is above normal")
+        if ichi == 'ABOVE':         reasons.append("it sits in a strong long-term position")
+        if isinstance(jconf,(int,float)) and jconf >= 0.7:
+            reasons.append("and our AI check agrees with high confidence")
+        if not reasons: reasons.append("several signals lined up on the buy side")
+        verb = "BUY" if action == 'BUY' else "WATCH to buy"
+        return f"{verb} — " + ", ".join(reasons[:4]) + "."
+
+    if action in ('AVOID', 'CAUTION'):
+        if regime == 'DOWN':          reasons.append("the long-term trend is down")
+        if down_trend:                reasons.append("short-term momentum is also down")
+        if signal == 'BREAKOUT_DN':   reasons.append("the price just broke down to a new low")
+        elif signal == 'AT_RESISTANCE':reasons.append("the price got rejected at a level sellers have defended before")
+        if heavy:                     reasons.append("heavy sellers are dumping on strong volume")
+        elif strong_vol:              reasons.append("selling volume is above normal")
+        if ichi == 'BELOW':           reasons.append("it sits in a weak long-term position")
+        if isinstance(rsi,(int,float)) and rsi > 82:
+            reasons.append("and it is badly overbought — too late to chase")
+        if not reasons: reasons.append("several signals lined up on the sell side")
+        verb = "AVOID" if action == 'AVOID' else "BE CAUTIOUS"
+        return f"{verb} — " + ", ".join(reasons[:4]) + "."
+
+    # NEUTRAL / WATCH
+    if signal in ('AT_SUPPORT', 'NEAR') and regime == 'UP':
+        return "SETUP FORMING — the trend is up and the price is near a level where a buy signal could trigger soon; not yet confirmed."
+    if signal == 'AT_RESISTANCE':
+        return "SETUP FORMING — the price is testing resistance; a clean break on volume would turn this into a buy, a rejection into a sell."
+    return "NO CLEAR EDGE — the signals are mixed right now, so the maths says wait for a cleaner setup."
 
 
 def key_reason(action, sam, sr, mr, jev_row=None):
@@ -571,6 +627,7 @@ def main():
         why     = build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp_val, sam, jev_comp=jev_comp, dir_sign=dir_sign)
         ind     = indicator_snapshot(sr, jev_row)
         key     = key_reason(action, sam, sr, mr, jev_row)
+        plain   = plain_english(action, sr, mr, jev_row)
 
         picks.append({
             'symbol':        sym,
@@ -601,6 +658,7 @@ def main():
             'jev_setup':     (jev_row or {}).get('setup_quality'),
             'jev_follow':    (jev_row or {}).get('follow_through'),
             'jev_rr':        (jev_row or {}).get('risk_reward'),
+            'plain':         plain,
             'key_reason':    key,
             'indicators':    ind,
             'why':           why,
