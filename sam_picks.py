@@ -116,6 +116,13 @@ def classify(sam, sr, mr, jev_row=None):
     close   = sr.get('close', 0)
     ema50   = sr.get('ema50') or (close + 1)
     st_dir  = sr.get('supertrend_dir')
+    ema_t   = sr.get('ema_trend')
+    ichi    = sr.get('ichimoku') or {}
+    bearish_tech_count = sum([
+        ema_t == 'DOWN',
+        st_dir == -1,
+        bool(ichi.get('below_cloud')),
+    ])
 
     # ── Hard deterministic vetoes — code owns these, Jev cannot override ─────
     # Veto 1: Supertrend bearish + below EMA50 + DOWN regime + bearish signal → AVOID
@@ -136,6 +143,9 @@ def classify(sam, sr, mr, jev_row=None):
         action = 'CAUTION'
     else:
         action = 'NEUTRAL'
+    # ── Trend contradiction guard: support-bounce only, not a clean BUY ───────
+    if action == 'BUY' and bearish_tech_count >= 2:
+        action = 'WATCH_BUY'
     # ── JEV confidence gate (calibrated probability, paper §V) ───────────────
     confidence = (jev_row or {}).get('confidence_gate')
     if confidence is not None and confidence < 0.45:
@@ -234,7 +244,7 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
             'layman': (
                 f"Big-picture trend (last 12 months): {label} for {age} months, avg return {avg12}%. "
                 f"Think of the monthly trend as checking which way the river is {river}. "
-                f"Institutional funds rotate based on this — being aligned with it matters.{stretch_note}"
+                f"Trend-following systems pay attention to this backdrop — being aligned with it matters.{stretch_note}"
             ),
             'formula': f"12m trailing return > +5% = UP, < -5% = DOWN, else SIDE. Reversal risk ratio = {rr_rat}× (current age ÷ historical mean duration). Component = {reg_comp:+.2f}",
         })
@@ -244,7 +254,7 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
     vol_txt = ''
     if isinstance(vol_r, (int, float)):
         if vol_r >= 2.0:
-            vol_txt = f"Today's volume was {vol_r_str} — very heavy, institutional-level activity. "
+            vol_txt = f"Today's volume was {vol_r_str} — very heavy versus the 20-day average. "
         elif vol_r >= 1.5:
             vol_txt = f"Today's volume was {vol_r_str} — above-average, real conviction behind the move. "
         elif vol_r >= 1.0:
@@ -253,8 +263,8 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
             vol_txt = f"Today's volume was only {vol_r_str} — below-average; treat this signal cautiously. "
 
     sig_explain = {
-        'BREAKOUT_UP':   f"Price broke ABOVE the 20-day high on {vol_r_str}. {vol_txt}Breakouts with high volume mean real buyers stepped in — low-volume breakouts are traps. Nearest support floor ₹{floor_p} is {d_sup} ATR ({round((d_sup or 0)*atr,0) if atr else '?'}₹) below. ATR (daily range) = ₹{atr}.",
-        'BREAKOUT_DN':   f"Price BROKE BELOW the 20-day low on {vol_r_str}. {vol_txt}Heavy sellers are in control — this is distribution, not a buying opportunity. Nearest ceiling resistance ₹{ceil_p} is {d_res} ATR overhead.",
+        'BREAKOUT_UP':   f"Price broke ABOVE the 20-day high on {vol_r_str}. {vol_txt}Buying pressure is visible because price cleared the recent high and volume confirmed the move. Low-volume breakouts are weaker and more likely to fail. Nearest support floor ₹{floor_p} is {d_sup} ATR ({round((d_sup or 0)*atr,0) if atr else '?'}₹) below. ATR (daily range) = ₹{atr}.",
+        'BREAKOUT_DN':   f"Price BROKE BELOW the 20-day low on {vol_r_str}. {vol_txt}Selling pressure is visible because price lost the recent low and volume confirmed the move. Nearest ceiling resistance ₹{ceil_p} is {d_res} ATR overhead.",
         'AT_SUPPORT':    f"Price has pulled back to a known support zone at ₹{floor_p}. {vol_txt}This is the price where buyers defended previously. Floor strength {round((fl_str or 0)*100)}% (backed by {fl_n} independent methods: {fl_src or '—'}). If it holds again, risk is clearly defined: stop below ₹{floor_p}.",
         'AT_RESISTANCE': f"Price is pressing into resistance at ₹{ceil_p}. {vol_txt}This is where sellers overpowered buyers before. Ceiling strength {round((cl_str or 0)*100)}% (backed by {cl_n} methods: {cl_src or '—'}). A breakout above here on volume = bullish; a rejection = fade.",
         'NEAR':          f"Price is near a key level (floor ₹{floor_p}, ceiling ₹{ceil_p}). {vol_txt}Watching for a breakout or rejection. ATR = ₹{atr}.",
@@ -272,7 +282,7 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         'layman': (
             f"Support at ₹{floor_p} confirmed by {fl_n} independent methods ({fl_src or '—'}), strength {round((fl_str or 0)*100)}%. "
             f"Resistance at ₹{ceil_p} confirmed by {cl_n} methods ({cl_src or '—'}), strength {round((cl_str or 0)*100)}%. "
-            f"When 3+ unrelated methods point to the same price, that's where institutional orders cluster — not random."
+            f"When 3+ unrelated methods point to the same price, it is a multi-method price cluster — stronger than a single indicator."
         ),
         'formula': f"Strength = 0.40×VolumeProfile + 0.25×touches/4 + 0.20×rejection/2 + 0.15×(AVWAP or round). Confluence component = {conf_comp:+.2f}.",
     })
@@ -361,7 +371,7 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         st_msg = (
             f"Supertrend (10-period, 3×ATR) is {'BULLISH 🟢' if bull else 'BEARISH 🔴'} — "
             f"trailing {'support' if bull else 'resistance'} line at ₹{st_val}. "
-            f"{'Price has stayed above this line — the uptrend is mechanically intact. Trend-following funds use this as their stop; as long as it holds, sellers are contained.' if bull else 'Price is below this line — the downtrend is intact. Every bounce will likely be sold at or below the Supertrend line ₹'+str(st_val)+'. A close above it = potential trend flip.'} "
+            f"{'Price has stayed above this line — the uptrend is mechanically intact. Many trend systems treat this as a trailing support line; as long as it holds, sellers are contained.' if bull else 'Price is below this line — the downtrend is intact. Every bounce will likely be sold at or below the Supertrend line ₹'+str(st_val)+'. A close above it = potential trend flip.'} "
             f"ATR used = ₹{atr} (average daily price range, Wilder-smoothed)."
         )
         reasons.append({'icon': '🌊', 'layman': st_msg,
@@ -466,69 +476,17 @@ def indicator_snapshot(sr, jev_row=None):
     }
 
 
-def plain_english(action, sr, mr, jev_row=None):
-    """Dead-simple causal sentence — no jargon, no leading numbers, plain 'because'.
-    A non-trader must understand it in one read."""
-    ind    = indicator_snapshot(sr, jev_row)
-    signal = sr.get('signal', 'NEUTRAL')
-    vol_r  = ind.get('vol_ratio')
-    ema_t  = ind.get('ema_trend')
-    st     = ind.get('supertrend_state')
-    ichi   = ind.get('ichimoku_pos')
-    rsi    = ind.get('rsi14')
-    regime = (mr or {}).get('current', {}).get('label', '?')
-    jconf  = ind.get('jev_confidence')
 
-    heavy = isinstance(vol_r, (int, float)) and vol_r >= 1.5
-    strong_vol = isinstance(vol_r, (int, float)) and vol_r >= 1.2
-    up_trend   = ema_t == 'UP' and st == 'BULL'
-    down_trend = ema_t == 'DOWN' and st == 'BEAR'
-
-    reasons = []
-    if action in ('BUY', 'WATCH_BUY'):
-        if regime == 'UP':          reasons.append("the long-term trend is up")
-        if up_trend:                reasons.append("short-term momentum is also up")
-        if signal == 'BREAKOUT_UP': reasons.append("the price just broke out to a new high")
-        elif signal == 'AT_SUPPORT':reasons.append("the price bounced off a level buyers have defended before")
-        elif signal == 'NEAR':      reasons.append("the price is coiling near a breakout level")
-        if heavy:                   reasons.append("big buyers are stepping in on unusually strong volume")
-        elif strong_vol:            reasons.append("buying volume is above normal")
-        if ichi == 'ABOVE':         reasons.append("it sits in a strong long-term position")
-        if isinstance(jconf,(int,float)) and jconf >= 0.7:
-            reasons.append("and our AI check agrees with high confidence")
-        if not reasons: reasons.append("several signals lined up on the buy side")
-        verb = "BUY" if action == 'BUY' else "WATCH to buy"
-        return f"{verb} — " + ", ".join(reasons[:4]) + "."
-
-    if action in ('AVOID', 'CAUTION'):
-        if regime == 'DOWN':          reasons.append("the long-term trend is down")
-        if down_trend:                reasons.append("short-term momentum is also down")
-        if signal == 'BREAKOUT_DN':   reasons.append("the price just broke down to a new low")
-        elif signal == 'AT_RESISTANCE':reasons.append("the price got rejected at a level sellers have defended before")
-        if heavy:                     reasons.append("heavy sellers are dumping on strong volume")
-        elif strong_vol:              reasons.append("selling volume is above normal")
-        if ichi == 'BELOW':           reasons.append("it sits in a weak long-term position")
-        if isinstance(rsi,(int,float)) and rsi > 82:
-            reasons.append("and it is badly overbought — too late to chase")
-        if not reasons: reasons.append("several signals lined up on the sell side")
-        verb = "AVOID" if action == 'AVOID' else "BE CAUTIOUS"
-        return f"{verb} — " + ", ".join(reasons[:4]) + "."
-
-    # NEUTRAL / WATCH
-    if signal in ('AT_SUPPORT', 'NEAR') and regime == 'UP':
-        return "SETUP FORMING — the trend is up and the price is near a level where a buy signal could trigger soon; not yet confirmed."
-    if signal == 'AT_RESISTANCE':
-        return "SETUP FORMING — the price is testing resistance; a clean break on volume would turn this into a buy, a rejection into a sell."
-    return "NO CLEAR EDGE — the signals are mixed right now, so the maths says wait for a cleaner setup."
-
-
-def key_reason(action, sam, sr, mr, jev_row=None):
-    """2-sentence elevator pitch for the SAM PICKS table — real numbers, no jargon."""
-    ind    = indicator_snapshot(sr, jev_row)
-    close  = sr.get('close')
+def action_language(action, sr, mr, jev_row=None):
+    """Plain-English action + trigger plan. Facts only; no institution claims."""
+    ind     = indicator_snapshot(sr, jev_row)
+    close   = sr.get('close')
+    signal  = sr.get('signal', 'NEUTRAL')
     floor_p = sr.get('floor')
-    ceil_p = sr.get('ceiling')
-    atr    = sr.get('atr14')
+    ceil_p  = sr.get('ceiling')
+    nxt     = sr.get('next_target') or ceil_p
+    nxt_floor = sr.get('next_floor') or floor_p
+    stop, target1, rr1 = risk_reward(sr)
     vol_r  = ind.get('vol_ratio')
     rsi    = ind.get('rsi14')
     ema_t  = ind.get('ema_trend')
@@ -537,33 +495,122 @@ def key_reason(action, sam, sr, mr, jev_row=None):
     bbp    = ind.get('bb_pct_b')
     jconf  = ind.get('jev_confidence')
     regime = (mr or {}).get('current', {}).get('label', '?')
-    signal = sr.get('signal', 'NEUTRAL')
 
-    vol_str = f"{vol_r:.1f}× normal volume" if isinstance(vol_r,(int,float)) else "unknown volume"
-    rsi_str = f"RSI {rsi:.0f}" if isinstance(rsi,(int,float)) else "RSI n/a"
-    bb_str  = f"BB {bbp:.0%}" if isinstance(bbp,(int,float)) else "BB n/a"
-    jc_str  = f"JEV {jconf:.0%} confident" if isinstance(jconf,(int,float)) else "JEV n/a"
+    vol_txt = f"{vol_r:.2f}× 20-day average volume" if isinstance(vol_r,(int,float)) else "unknown volume vs 20-day average"
+    vol_ok = isinstance(vol_r,(int,float)) and vol_r >= 1.5
+    buy_trend = (regime == 'UP') or (ema_t == 'UP' and st == 'BULL')
+    sell_trend = (regime == 'DOWN') and (ema_t == 'DOWN' or st == 'BEAR')
+    mixed_bullish = (ema_t != 'DOWN') and (st == 'BULL' or ichi == 'ABOVE')
+    low_jev = isinstance(jconf,(int,float)) and jconf < 0.45
+    high_jev = isinstance(jconf,(int,float)) and jconf >= 0.70
 
-    # Build two sentences
-    if action in ('BUY', 'WATCH_BUY'):
-        vol_note = (
-            f"Buyers stepped in with {vol_str} — {'institutional-level conviction' if vol_r and vol_r>=1.8 else 'above-average interest' if vol_r and vol_r>=1.3 else 'moderate interest'}. "
-            if isinstance(vol_r,(int,float)) else ""
+    def nums():
+        parts = [f"close ₹{close}"]
+        if isinstance(vol_r,(int,float)): parts.append(f"volume {vol_txt}")
+        if rsi is not None: parts.append(f"RSI {rsi:.0f}")
+        parts.append(f"EMA {ema_t or 'n/a'}")
+        parts.append(f"Supertrend {st or 'n/a'}")
+        parts.append(f"Ichimoku {ichi or 'n/a'}")
+        if bbp is not None: parts.append(f"Bollinger {bbp:.0%}")
+        if isinstance(jconf,(int,float)): parts.append(f"JEV confidence {jconf:.0%}")
+        return "; ".join(parts)
+
+    # ── Clean BUY ────────────────────────────────────────────────────────────
+    if action == 'BUY':
+        if signal == 'BREAKOUT_UP':
+            plain = (
+                f"BUY — buying pressure is visible because price closed above its recent high and volume is {vol_txt}; "
+                f"trend signals are aligned upward."
+            )
+        elif signal == 'AT_SUPPORT':
+            plain = (
+                f"BUY — buyers defended support near ₹{floor_p}; price is holding above that floor and trend signals are supportive."
+            )
+        else:
+            plain = f"BUY — buyers have the advantage because trend and support signals are aligned."
+        plan = (
+            f"Entry around ₹{close}; first target ₹{target1}; next target ₹{nxt}; stop/invalid below ₹{stop}. "
+            f"Facts: {nums()}."
         )
-        s1 = f"{vol_note}Signal: {signal.replace('_',' ')} at ₹{close}."
-        s2 = f"All indicators: {rsi_str} (room to run), EMA {ema_t or '?'}, Supertrend {st}, Ichimoku {ichi}, {bb_str}, {jc_str}. Monthly: {regime}. Stop ₹{floor_p}, target ₹{ceil_p}."
-    elif action in ('AVOID', 'CAUTION'):
-        vol_note = (
-            f"Sellers hit with {vol_str} — {'heavy institutional distribution' if vol_r and vol_r>=1.8 else 'elevated selling pressure' if vol_r and vol_r>=1.3 else 'moderate selling'}. "
-            if isinstance(vol_r,(int,float)) else ""
+        return plain, plan
+
+    # ── WATCH BUY / setup forming ────────────────────────────────────────────
+    if action == 'WATCH_BUY' or (action == 'WATCH'):
+        if signal == 'AT_SUPPORT':
+            plain = (
+                f"WATCH TO BUY — setup is forming because price is near support ₹{floor_p}, but buyers still need confirmation."
+            )
+        elif signal == 'AT_RESISTANCE':
+            plain = (
+                f"WATCH TO BUY — price is testing resistance ₹{ceil_p}; buy only after a clean close above it with stronger volume."
+            )
+        else:
+            plain = f"WATCH TO BUY — buyers are improving, but the setup is not confirmed yet."
+        plan = (
+            f"Trigger: close above ₹{ceil_p} on >1.5× 20-day average volume → target ₹{nxt}. "
+            f"Fail/avoid: close below ₹{floor_p} or stop ₹{stop}. Facts: {nums()}."
         )
-        s1 = f"{vol_note}Signal: {signal.replace('_',' ')} at ₹{close}."
-        s2 = f"Indicators confirm bearish: {rsi_str}, EMA {ema_t or '?'}, Supertrend {st}, Ichimoku {ichi}, {bb_str}, {jc_str}. Monthly: {regime}. Resistance ceiling ₹{ceil_p}."
+        return plain, plan
+
+    # ── CAUTION at resistance / mixed internals ──────────────────────────────
+    if action == 'CAUTION' and signal == 'AT_RESISTANCE':
+        plain = (
+            f"BE CAUTIOUS — price is stuck just under strong resistance ₹{ceil_p}; buyers have not confirmed a breakout yet."
+        )
+        if regime == 'DOWN':
+            plain += " Long-term trend is still down, so chasing here is risky."
+        if low_jev:
+            plain += f" AI confidence is low at {jconf:.0%}, so the signal is not clean."
+        plan = (
+            f"Buy trigger: close above ₹{ceil_p} on >1.5× 20-day average volume → target ₹{nxt}. "
+            f"Seller confirmation: rejection from ₹{ceil_p} or close below floor ₹{floor_p} → downside risk toward ₹{nxt_floor}. "
+            f"Facts: {nums()}."
+        )
+        return plain, plan
+
+    # ── Clean AVOID / seller control ─────────────────────────────────────────
+    if action == 'AVOID' or (action == 'CAUTION' and signal == 'BREAKOUT_DN'):
+        if signal == 'BREAKOUT_DN':
+            plain = (
+                f"AVOID — selling pressure is visible because price broke below its recent low on {vol_txt}."
+            )
+        elif signal == 'AT_RESISTANCE':
+            plain = (
+                f"AVOID — price is failing at resistance ₹{ceil_p} and the bigger trend is weak."
+            )
+        else:
+            plain = f"AVOID — sellers have the advantage because trend and price signals are weak."
+        plan = (
+            f"Do not buy until price closes back above ₹{ceil_p} with >1.5× volume. "
+            f"If price loses ₹{floor_p}, next downside level is ₹{nxt_floor}. Facts: {nums()}."
+        )
+        return plain, plan
+
+    # ── NEUTRAL / no edge ────────────────────────────────────────────────────
+    if signal == 'AT_RESISTANCE':
+        plain = f"WAIT — price is under resistance ₹{ceil_p}; buyers must prove strength before this becomes a buy."
+        plan = f"Buy trigger: close above ₹{ceil_p} on >1.5× volume → target ₹{nxt}. Rejection/downside trigger: close below ₹{floor_p} → risk toward ₹{nxt_floor}. Facts: {nums()}."
+    elif signal == 'AT_SUPPORT':
+        plain = f"SETUP FORMING — price is near support ₹{floor_p}; wait to see if buyers defend it."
+        plan = f"Buy trigger: bounce/close above ₹{ceil_p} with >1.5× volume → target ₹{nxt}. Fail trigger: close below ₹{floor_p} → risk toward ₹{nxt_floor}. Facts: {nums()}."
     else:
-        s1 = f"No clear signal at ₹{close} ({signal.replace('_',' ')}). Volume {vol_str}."
-        s2 = f"Mixed readings: {rsi_str}, EMA {ema_t or '?'}, ST {st}, Ichi {ichi}, {bb_str}, {jc_str}. Watching floor ₹{floor_p} / ceiling ₹{ceil_p}."
+        plain = "NO CLEAR EDGE — buyers and sellers are not giving a clean signal yet."
+        plan = f"Wait between floor ₹{floor_p} and resistance ₹{ceil_p}; breakout above ₹{ceil_p} targets ₹{nxt}, breakdown below ₹{floor_p} risks ₹{nxt_floor}. Facts: {nums()}."
+    return plain, plan
 
-    return s1 + " " + s2
+
+def plain_english(action, sr, mr, jev_row=None):
+    return action_language(action, sr, mr, jev_row)[0]
+
+
+def trigger_plan(action, sr, mr, jev_row=None):
+    return action_language(action, sr, mr, jev_row)[1]
+
+
+def key_reason(action, sam, sr, mr, jev_row=None):
+    """Keep this factual; plain action sentence is separate and shown first."""
+    plain, plan = action_language(action, sr, mr, jev_row)
+    return plan
 
 def main():
     sr_data  = json.loads((OUT / 'sr_levels.json').read_text())
@@ -628,6 +675,7 @@ def main():
         ind     = indicator_snapshot(sr, jev_row)
         key     = key_reason(action, sam, sr, mr, jev_row)
         plain   = plain_english(action, sr, mr, jev_row)
+        plan    = trigger_plan(action, sr, mr, jev_row)
 
         picks.append({
             'symbol':        sym,
@@ -660,6 +708,7 @@ def main():
             'jev_rr':        (jev_row or {}).get('risk_reward'),
             'plain':         plain,
             'key_reason':    key,
+            'setup_plan':    plan,
             'indicators':    ind,
             'why':           why,
         })
