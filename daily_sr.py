@@ -54,6 +54,8 @@ from pathlib import Path
 
 warnings.filterwarnings('ignore')
 import yfinance as yf
+import numpy as np
+import pandas as pd
 
 HERE  = Path(__file__).resolve().parent
 IST   = ZoneInfo('Asia/Kolkata')
@@ -85,6 +87,102 @@ def atr14(df):
     for t in tr[ATR_N:]:
         atr = (atr * (ATR_N - 1) + t) / ATR_N
     return atr
+
+
+def compute_rsi(df, n=14):
+    """RSI-14 using Wilder smoothing (EWM com=n-1)."""
+    delta = df['Close'].diff()
+    gain  = delta.clip(lower=0).ewm(com=n-1, adjust=True).mean()
+    loss  = (-delta.clip(upper=0)).ewm(com=n-1, adjust=True).mean()
+    rs    = gain / loss.replace(0, np.nan)
+    rsi   = 100 - 100 / (1 + rs)
+    v = rsi.iloc[-1]
+    return round(float(v), 1) if not np.isnan(v) else None
+
+
+def compute_ema(series, span):
+    """Exponential Moving Average, last value."""
+    return float(series.ewm(span=span, adjust=False).mean().iloc[-1])
+
+
+def compute_bollinger(df, n=20, k=2.0):
+    """Bollinger Bands → (upper, mid, lower, %B, bandwidth). All last-bar values."""
+    c   = df['Close']
+    sma = c.rolling(n).mean()
+    std = c.rolling(n).std(ddof=0)
+    u, m, l = float(sma.iloc[-1] + k*std.iloc[-1]), float(sma.iloc[-1]), float(sma.iloc[-1] - k*std.iloc[-1])
+    bw   = (u - l) / m if m else 0.0
+    pctb = (float(c.iloc[-1]) - l) / (u - l) if (u - l) > 0 else 0.5
+    return round(u,2), round(m,2), round(l,2), round(pctb,3), round(bw,3)
+
+
+def compute_supertrend(df, n=10, mult=3.0):
+    """Supertrend indicator. Returns (line_value, direction) where direction 1=bullish, -1=bearish.
+    Uses numpy arrays to avoid pandas iloc-in-loop issues."""
+    h  = df['High'].to_numpy(dtype=float)
+    lo = df['Low'].to_numpy(dtype=float)
+    c  = df['Close'].to_numpy(dtype=float)
+    # True range (offset by 1 to align with h/lo from bar 1 onward)
+    tr = np.maximum(h[1:]-lo[1:], np.maximum(np.abs(h[1:]-c[:-1]), np.abs(lo[1:]-c[:-1])))
+    # Wilder ATR (EWM with alpha=1/n)
+    alpha   = 1.0 / n
+    atr_arr = np.empty(len(tr))
+    atr_arr[0] = tr[0]
+    for i in range(1, len(tr)):
+        atr_arr[i] = alpha * tr[i] + (1 - alpha) * atr_arr[i-1]
+    hl2   = (h[1:] + lo[1:]) / 2.0
+    upper = hl2 + mult * atr_arr
+    lower = hl2 - mult * atr_arr
+    cs    = c[1:]  # close series aligned with atr
+    fu    = upper.copy(); fl = lower.copy()
+    dirn  = np.ones(len(cs), dtype=int)
+    for i in range(1, len(cs)):
+        fl[i] = lower[i] if (lower[i] > fl[i-1] or cs[i-1] < fl[i-1]) else fl[i-1]
+        fu[i] = upper[i] if (upper[i] < fu[i-1] or cs[i-1] > fu[i-1]) else fu[i-1]
+        if   cs[i] > fu[i-1]: dirn[i] = 1
+        elif cs[i] < fl[i-1]: dirn[i] = -1
+        else:                  dirn[i] = dirn[i-1]
+    d   = int(dirn[-1])
+    val = float(fl[-1]) if d == 1 else float(fu[-1])
+    return round(val, 2), d
+
+
+def compute_ichimoku(df):
+    """Ichimoku Cloud — NO LOOKAHEAD.
+    Today's actionable cloud = Senkou A & B computed 26 bars ago (already plotted forward).
+    Requires ≥ 78 bars (52 + 26 displacement)."""
+    if len(df) < 78:
+        return None
+    h = df['High']; lo = df['Low']; c = df['Close']
+    tenkan  = (h.rolling(9).max()  + lo.rolling(9).min())  / 2  # conversion line
+    kijun   = (h.rolling(26).max() + lo.rolling(26).min()) / 2  # base line
+    sen_a   = (tenkan + kijun) / 2                               # Senkou A (unshifted)
+    sen_b   = (h.rolling(52).max() + lo.rolling(52).min()) / 2  # Senkou B (unshifted)
+    # Today's cloud = values from 26 bars ago (avoids lookahead bias)
+    sa = float(sen_a.iloc[-27]) if len(sen_a) > 26 and not np.isnan(sen_a.iloc[-27]) else None
+    sb = float(sen_b.iloc[-27]) if len(sen_b) > 26 and not np.isnan(sen_b.iloc[-27]) else None
+    tn_now = float(tenkan.iloc[-1]); kj_now = float(kijun.iloc[-1])
+    cl_now = float(c.iloc[-1])
+    chikou_above = bool(cl_now > float(c.iloc[-27])) if len(c) > 26 else None
+    ct = max(sa, sb) if (sa and sb) else None
+    cb = min(sa, sb) if (sa and sb) else None
+    above_cloud   = bool(cl_now > ct)  if ct else None
+    below_cloud   = bool(cl_now < cb)  if cb else None
+    bullish_cloud = bool(sa > sb)      if (sa and sb) else None
+    return {
+        'tenkan':       round(tn_now, 2),
+        'kijun':        round(kj_now, 2),
+        'senkou_a':     round(sa, 2) if sa else None,
+        'senkou_b':     round(sb, 2) if sb else None,
+        'cloud_top':    round(ct, 2) if ct else None,
+        'cloud_bottom': round(cb, 2) if cb else None,
+        'above_cloud':  above_cloud,
+        'below_cloud':  below_cloud,
+        'in_cloud':     (not above_cloud and not below_cloud) if above_cloud is not None else None,
+        'bullish_cloud': bullish_cloud,
+        'chikou_above':  chikou_above,
+        'tenkan_above_kijun': bool(tn_now > kj_now),
+    }
 
 
 def swing_points(df, n=SWING_N):
@@ -351,6 +449,17 @@ def analyse(symbol):
         if not atr:
             return symbol, {'error': 'atr_failed'}
 
+        # ── New: RSI14 / EMA10/20/50 / Bollinger / Supertrend / Ichimoku ────
+        rsi_val  = compute_rsi(df_hist)
+        ema10_v  = compute_ema(df_hist['Close'], 10)
+        ema20_v  = compute_ema(df_hist['Close'], 20)
+        ema50_v  = compute_ema(df_hist['Close'], 50)
+        bb_upper_v, bb_mid_v, bb_lower_v, bb_pctb, bb_bw = compute_bollinger(df_hist)
+        st_val, st_dir = compute_supertrend(df_hist)
+        ichi    = compute_ichimoku(df_hist)
+        ema_trend   = ('UP'   if ema10_v > ema20_v > ema50_v else
+                       'DOWN' if ema10_v < ema20_v < ema50_v else 'MIXED')
+        above_ema50 = close > ema50_v
         # ── Method 1: Swing H/L (fractal) — completed candles only ──────
         sh, sl = swing_highs_lows(df_hist)
 
@@ -630,6 +739,21 @@ def analyse(symbol):
                 'top_supports': sorted(sup_clusters, key=lambda c: c['strength'], reverse=True)[:3],
                 'top_resistances': sorted(res_clusters, key=lambda c: c['strength'], reverse=True)[:3],
             },
+            # ── New technical indicators ─────────────────────────────────
+            'rsi14':          rsi_val,
+            'ema10':          round(ema10_v, 2),
+            'ema20':          round(ema20_v, 2),
+            'ema50':          round(ema50_v, 2),
+            'ema_trend':      ema_trend,
+            'above_ema50':    above_ema50,
+            'bb_upper':       bb_upper_v,
+            'bb_mid':         bb_mid_v,
+            'bb_lower':       bb_lower_v,
+            'bb_pct_b':       bb_pctb,
+            'bb_bandwidth':   bb_bw,
+            'supertrend':     st_val,
+            'supertrend_dir': st_dir,
+            'ichimoku':       ichi,
             'as_of': df.index[-1].strftime('%Y-%m-%d'),
         }
     except Exception as e:

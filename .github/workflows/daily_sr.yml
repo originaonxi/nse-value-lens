@@ -54,6 +54,10 @@ jobs:
         run: python sam_picks.py
         continue-on-error: true  # synthesis is additive; never break daily refresh
 
+      - name: Run JEV calibration logger (Brier Score)
+        run: python jev_calibration.py
+        continue-on-error: true  # additive; never break core refresh
+
       - name: Copy to docs/ for GitHub Pages
         run: |
           cp screen_output/sr_levels.json docs/sr_levels.json
@@ -85,11 +89,15 @@ jobs:
           else
             echo "sam_picks.json missing or not fresh for $AS_OF — keeping previous docs/sam_picks.*"
           fi
+          if [ -f screen_output/jev_calibration.json ]; then
+            cp screen_output/jev_calibration.json docs/jev_calibration.json
+            echo "JEV calibration copied"
+          fi
 
       - name: Commit and push updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js screen_output/sam_picks.json public/data/sam_picks.js docs/sam_picks.json docs/sam_picks.js screen_output/momentum30_daily.json docs/momentum30_daily.json
+          git add screen_output/sr_levels.json screen_output/jev_rank.json public/data/jev_rank.js docs/sr_levels.json docs/jev_rank.json docs/jev_rank.js screen_output/monthly_regimes.json public/data/monthly_regime.js docs/monthly_regimes.json docs/monthly_regime.js screen_output/sam_picks.json public/data/sam_picks.js docs/sam_picks.json docs/sam_picks.js screen_output/momentum30_daily.json docs/momentum30_daily.json screen_output/jev_calibration.json docs/jev_calibration.json screen_output/jev_outcomes.jsonl
           git diff --staged --quiet || git commit -m "data: daily S&R + JEV + Momentum30 refresh $(date -u +%Y-%m-%d)"
           git push

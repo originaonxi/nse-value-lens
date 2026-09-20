@@ -105,26 +105,46 @@ def confluence_comp(sr, signal_score):
         return round(-float(cl.get('strength', 0) or 0), 4)
 
 
-def classify(sam, sr, mr):
+def classify(sam, sr, mr, jev_row=None):
     label   = (mr or {}).get('current', {}).get('label', 'SIDE')
     signal  = sr.get('signal', 'NEUTRAL')
     reclaim = sr.get('reclaim_support', False)
     failed  = sr.get('failed_breakout', False)
     bull    = signal in ('BREAKOUT_UP', 'AT_SUPPORT', 'NEAR_SUPPORT')
     bear    = signal in ('BREAKOUT_DN', 'AT_RESISTANCE', 'NEAR_RESISTANCE')
-    if sam >= 0.50 and label == 'UP' and bull:
-        return 'BUY'
-    if sam >= 0.35 and bull:
-        return 'WATCH_BUY'
-    if sam <= -0.40 and label == 'DOWN' and bear:
+    rsi     = sr.get('rsi14')
+    close   = sr.get('close', 0)
+    ema50   = sr.get('ema50') or (close + 1)
+    st_dir  = sr.get('supertrend_dir')
+
+    # ── Hard deterministic vetoes — code owns these, Jev cannot override ─────
+    # Veto 1: Supertrend bearish + below EMA50 + DOWN regime + bearish signal → AVOID
+    if (st_dir == -1 and close < ema50 and label == 'DOWN' and bear):
         return 'AVOID'
-    if sam <= -0.25 and bear:
-        return 'CAUTION'
-    if reclaim:
-        return 'WATCH'
-    if failed:
-        return 'CAUTION'
-    return 'NEUTRAL'
+    # ── Normal classification ─────────────────────────────────────────────────
+    if sam >= 0.50 and label == 'UP' and bull:
+        action = 'BUY'
+    elif sam >= 0.35 and bull:
+        action = 'WATCH_BUY'
+    elif sam <= -0.40 and label == 'DOWN' and bear:
+        action = 'AVOID'
+    elif sam <= -0.25 and bear:
+        action = 'CAUTION'
+    elif reclaim:
+        action = 'WATCH'
+    elif failed:
+        action = 'CAUTION'
+    else:
+        action = 'NEUTRAL'
+    # ── JEV confidence gate (calibrated probability, paper §V) ───────────────
+    confidence = (jev_row or {}).get('confidence_gate')
+    if confidence is not None and confidence < 0.45:
+        if action == 'BUY':     action = 'WATCH_BUY'
+        elif action == 'AVOID': action = 'CAUTION'
+    # ── RSI hard cap: don't chase extreme overbought for BUY ─────────────────
+    if rsi and rsi > 82 and action == 'BUY':
+        action = 'WATCH_BUY'
+    return action
 
 
 def risk_reward(sr):
@@ -226,6 +246,40 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         'layman': f"SAM SCORE = {round(sam*100)}/100. Combined score from monthly trend (30%) + daily signal (25%) + JEV setup quality (25%) + confluence strength (20%).",
         'formula': f"SAM = 0.30×({reg_comp:+.3f}) + 0.25×({sig_comp:+.3f}) + 0.25×(jev={jev_comp:.3f}×dir={dir_sign:+d}) + 0.20×({conf_comp:+.3f}) = {sam:+.3f}",
     })
+    # ── RSI14 ─────────────────────────────────────────────────────────────────
+    rsi_val  = sr.get('rsi14')
+    if rsi_val is not None:
+        rsi_state = 'overbought >82' if rsi_val>82 else 'overbought >70' if rsi_val>70 else 'oversold <25' if rsi_val<25 else 'oversold <30' if rsi_val<30 else 'neutral'
+        reasons.append({'icon':'🔢','layman':f"RSI14 = {rsi_val:.0f} ({rsi_state}). {'Do not chase — overbought cap applied.' if rsi_val>82 else 'Potential bounce zone.' if rsi_val<25 else ''}",
+                        'formula':'RSI14 = 100 − 100/(1 + avg_gain/avg_loss) over 14 sessions via Wilder EWM. >70 overbought, <30 oversold; >82 hard-caps BUY → WATCH_BUY.'})
+    # ── EMA Trend ─────────────────────────────────────────────────────────────
+    ema_trend = sr.get('ema_trend')
+    if ema_trend:
+        reasons.append({'icon':'📉','layman':f"EMA trend = {ema_trend}. Price {'ABOVE' if sr.get('above_ema50') else 'BELOW'} EMA50 ₹{sr.get('ema50','?')}. EMA10={sr.get('ema10','?')} / EMA20={sr.get('ema20','?')}.",
+                        'formula':'EMA_n = Σ(close × α × (1−α)^k) where α=2/(n+1). Trend: UP=EMA10>EMA20>EMA50, DOWN=EMA10<EMA20<EMA50, else MIXED.'})
+    # ── Bollinger Bands ───────────────────────────────────────────────────────
+    bb_pctb = sr.get('bb_pct_b')
+    if bb_pctb is not None:
+        bb_pos = 'near upper band (overbought zone)' if bb_pctb>0.8 else 'near lower band (oversold zone)' if bb_pctb<0.2 else 'mid-band range'
+        reasons.append({'icon':'📊','layman':f"Bollinger %B = {bb_pctb:.0%} ({bb_pos}). Upper ₹{sr.get('bb_upper','?')} / Mid ₹{sr.get('bb_mid','?')} / Lower ₹{sr.get('bb_lower','?')}.",
+                        'formula':'BB(20,2σ): mid=SMA20, upper=mid+2σ, lower=mid−2σ. %B=(close−lower)/(upper−lower). <0.2=oversold zone, >0.8=overbought zone.'})
+    # ── Supertrend ────────────────────────────────────────────────────────────
+    st_dir = sr.get('supertrend_dir')
+    if st_dir is not None:
+        reasons.append({'icon':'🌊','layman':f"Supertrend(10,3) = {'BULLISH 🟢' if st_dir==1 else 'BEARISH 🔴'} at ₹{sr.get('supertrend','?')}. {'Price above Supertrend = uptrend bias.' if st_dir==1 else 'Price below Supertrend = downtrend bias.'}",
+                        'formula':'Supertrend = (H+L)/2 ± 3×ATR(10, Wilder). Flips bullish when close > upper band; bearish when close < lower band.'})
+    # ── Ichimoku Cloud (no-lookahead) ─────────────────────────────────────────
+    ichi = sr.get('ichimoku') or {}
+    if ichi:
+        cpos = 'ABOVE cloud ✅' if ichi.get('above_cloud') else 'BELOW cloud ❌' if ichi.get('below_cloud') else 'INSIDE cloud ⚠️'
+        reasons.append({'icon':'☁️','layman':f"Ichimoku: {cpos}. Cloud is {'BULLISH (green)' if ichi.get('bullish_cloud') else 'BEARISH (red)'}. Tenkan {'>' if ichi.get('tenkan_above_kijun') else '<'} Kijun. Chikou {'above' if ichi.get('chikou_above') else 'below'} past price.",
+                        'formula':f"Senkou A={ichi.get('senkou_a')} / B={ichi.get('senkou_b')} (today's cloud = values from 26 bars ago, zero lookahead). Tenkan=9H/L mid, Kijun=26H/L mid."})
+    # ── JEV confidence gate ───────────────────────────────────────────────────
+    conf = (jev_row or {}).get('confidence_gate')
+    if conf is not None:
+        cstate = 'HIGH ✅' if conf>=0.7 else 'LOW ⚠️ — action downgraded' if conf<0.45 else 'MODERATE'
+        reasons.append({'icon':'🔒','layman':f"JEV signal confidence = {conf:.0%} ({cstate}). Regime: {str((jev_row or {}).get('regime_jev') or '?').replace('_',' ')}. Direction: {str((jev_row or {}).get('direction_jev') or '?')}.",
+                        'formula':'JEV noul question: do regime/EMA/Supertrend/Ichimoku/signal all agree? Calibrated probability via RLCD. <45% downgrades BUY→WATCH_BUY, AVOID→CAUTION.'})
     return reasons
 
 
@@ -286,7 +340,7 @@ def main():
             4
         )
 
-        action  = classify(sam, sr, mr)
+        action  = classify(sam, sr, mr, jev_row=jev_row)
         stop, target1, rr1 = risk_reward(sr)
         why     = build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp_val, sam, jev_comp=jev_comp, dir_sign=dir_sign)
 
