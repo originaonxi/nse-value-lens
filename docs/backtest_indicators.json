@@ -1,5 +1,12 @@
 {
+ "title": "Deterministic Indicator Backtest (RSI14 + EMA + Supertrend + Ichimoku)",
  "as_of": "2026-09-20",
+ "validated_profit": false,
+ "validated_alpha": false,
+ "survivorship_bias_warning": "SURVIVOR-BIASED: OHLCV cache uses today's surviving 194 symbols only. Stocks that were delisted, removed from Nifty 200, or performed poorly during the backtest window are absent \u2014 this inflates apparent returns. Final profit/loss numbers are a deterministic-proxy smoke test only, NOT validated profit. Point-in-time Nifty 200 membership data required for real validation.",
+ "note": "SURVIVOR-BIASED SMOKE TEST. Uses bt_ohlcv_cache.pkl (today's surviving 194 symbols). Stocks removed from Nifty 200 or delisted during backtest window are excluded \u2014 this can inflate apparent returns by 2-10% annually (per Price Action Lab research on NSE). T+1 open fill and 0.20% round-trip costs applied, but these cannot correct for survivorship bias. Do NOT treat these P/L numbers as validated profit. Point-in-time Nifty 200 membership + delisted names required for real validation.",
+ "what_this_is": "Pure deterministic backtest: RSI14, EMA10/20/50, Supertrend(10,3.0), Ichimoku cloud \u2014 computed on historical OHLCV cache. NO JEV, NO SAM PICKS. JEV confidence gate and 6-question regime/direction answers are live-forward only; they cannot be replayed on historical data without live API calls.",
+ "what_this_is_not": "NOT a replay of SAM PICKS or JEV scores. SAM PICKS on the live site combines S&R + regime + JEV + confluence \u2014 that 4-layer composite cannot be backtested from OHLCV alone without historical JEV API calls stored per bar.",
  "benchmark_eqw_train_pct": 3.42,
  "benchmark_eqw_test_pct": 10.8,
  "configs": [
@@ -1827,12 +1834,7 @@
   }
  ],
  "best_config": "BUY + WATCH_BUY, loose stop",
- "best_alpha": -1.5,
- "honest_conclusion": "Positive return but no alpha vs equal-weight benchmark in test window. Deterministic indicator signals (RSI/EMA/Supertrend/Ichimoku) alone are NOT enough for edge. JEV confidence gate and regime layer are expected to improve live forward signal quality \u2014 but that claim requires real-time tracking (Brier Score calibration now running daily).",
- "note": "T+1 open fill, 0.20% round-trip, max 12 positions, no lookahead. Test window is held-out and was never used for config selection.",
- "title": "Deterministic Indicator Backtest (RSI14 + EMA + Supertrend + Ichimoku)",
- "what_this_is": "Pure deterministic backtest: RSI14, EMA10/20/50, Supertrend(10,3.0), Ichimoku cloud \u2014 computed on historical OHLCV cache. NO JEV, NO SAM PICKS. JEV confidence gate and 6-question regime/direction answers are live-forward only; they cannot be replayed on historical data without live API calls.",
- "what_this_is_not": "NOT a replay of SAM PICKS or JEV scores. SAM PICKS on the live site combines S&R + regime + JEV + confluence \u2014 that 4-layer composite cannot be backtested from OHLCV alone without historical JEV API calls stored per bar.",
  "best_test_ret_pct": 9.3,
- "survivorship_bias_warning": "SURVIVOR-BIASED: OHLCV cache uses today's surviving 194 symbols only. Stocks that were delisted, removed from Nifty 200, or performed poorly during the backtest window are absent \u2014 this inflates apparent returns. Final profit/loss numbers are a deterministic-proxy smoke test only, NOT validated profit. Point-in-time Nifty 200 membership data required for real validation."
+ "best_alpha": -1.5,
+ "honest_conclusion": "Positive return but no alpha vs equal-weight benchmark in test window. Deterministic indicator signals (RSI/EMA/Supertrend/Ichimoku) alone are NOT enough for edge. JEV confidence gate and regime layer are expected to improve live forward signal quality \u2014 but that claim requires real-time tracking (Brier Score calibration now running daily)."
 }

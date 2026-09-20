@@ -101,6 +101,16 @@ tr:hover td{background:#1c2128}
     <th>Strategy</th><th>Family</th><th>Validation</th><th>Return</th><th>₹ P/L on ₹1Cr</th><th>Status</th><th>Audit note</th>
   </tr></thead><tbody id="verdictRows"></tbody></table></div>
   <div class="disc" id="verdictFoot">Loading backtest verdict…</div>
+  <div style="margin-top:16px;border-top:1px solid #30363d;padding-top:14px">
+    <div style="color:#d29922;font-size:.8rem;font-weight:700;margin-bottom:6px">
+      ⚠️ Deterministic Indicator Backtest — survivor-biased smoke test only, NOT validated profit
+    </div>
+    <div id="indiBtStats" class="stat-strip"></div>
+    <div class="scroll" style="max-height:260px"><table><thead><tr>
+      <th>Strategy</th><th>Test return (6m held-out)</th><th>Alpha vs benchmark</th><th>Win%</th><th>Max DD%</th><th>Trades</th>
+    </tr></thead><tbody id="indiBtRows"></tbody></table></div>
+    <div class="disc" id="indiBtFoot">Loading indicator backtest…</div>
+  </div>
 </div>
 
 <!-- ═══ SHADOW MOMENTUM 30 TAB ═════════════════════════════════════════════ -->
@@ -468,6 +478,26 @@ fetch('backtest_verdict.json').then(r=>r.json()).then(d=>{
     `<strong>${d.title}:</strong> ${d.important_warning}<br>`+
     `Required before any real winner claim: <code>${(d.required_to_validate_winner||[]).join('</code>, <code>')}</code>.`;
 }).catch(e=>{document.getElementById('verdictFoot').textContent='Run the backtest verdict generator to create backtest_verdict.json';});
+
+// ═══ Deterministic Indicator Backtest (survivor-biased smoke test) ═════════
+fetch('backtest_indicators.json').then(r=>r.json()).then(d=>{
+  const cfgs=d.configs||[];
+  document.getElementById('indiBtStats').innerHTML=[
+    ['Universe','194 stocks (SURVIVOR-BIASED)'],
+    ['Test window','Mar–Sep 2026 (6m held-out)'],
+    ['Benchmark test',fmtPct(d.benchmark_eqw_test_pct||0,2)],
+    ['Validated profit','NO — smoke test only'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.9rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('indiBtRows').innerHTML=cfgs.map(r=>{
+    const col=r.test.ret>0?'#d29922':'#f778ba';
+    return `<tr><td>${r.label}</td>
+      <td style="color:${col};font-weight:700">${fmtPct(r.test.ret,2)}</td>
+      <td style="color:${r.alpha_vs_benchmark>0?'#3fb950':'#f778ba'}">${fmtPct(r.alpha_vs_benchmark,2)}</td>
+      <td>${fmtPct(r.test.wr,1)}</td><td>${fmtPct(r.test.maxdd,1)}</td><td>${r.test.n}</td></tr>`;
+  }).join('');
+  document.getElementById('indiBtFoot').innerHTML=
+    `<strong>⚠️ ${d.survivorship_bias_warning||d.note}</strong><br>${d.what_this_is_not||''}`;
+}).catch(e=>{document.getElementById('indiBtFoot').textContent='Run backtest_indicators.py to generate backtest_indicators.json';});
 
 // ═══ Shadow Momentum 30 scaffold tab ══════════════════════════════════════
 fetch('shadow_momentum30.json').then(r=>r.json()).then(d=>{
