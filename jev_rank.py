@@ -199,9 +199,9 @@ def ask(state_dict, key):
 
 def parse_answers(answers):
     """Extract typed values from JEV response per dimension type.
-    score  → .score  (0-based index)
-    choice → .value  (selected option name)
-    noul   → .probability (float 0-1)
+    score  → .score  (0-based index/float)
+    choice → .choice (selected option name)
+    noul   → .noul   (float 0-1)
     Returns None for any missing field."""
     out = {}
     for dim, spec in DIMENSIONS.items():
@@ -210,9 +210,9 @@ def parse_answers(answers):
         if t == "score":
             out[dim] = ans.get("score")           # 0-based level index
         elif t == "choice":
-            out[dim] = ans.get("value")            # string option name
+            out[dim] = ans.get("choice", ans.get("value"))            # string option name
         elif t == "noul":
-            out[dim] = ans.get("probability")      # float 0-1
+            out[dim] = ans.get("noul", ans.get("probability"))        # float 0-1
     return out
 
 
@@ -295,8 +295,11 @@ def main():
     OUT_JS.parent.mkdir(parents=True, exist_ok=True)
     OUT_JS.write_text(js)
     print(f"Saved: {OUT_JSON.name} + {OUT_JS.name} ({len(results)} judged of {len(stocks)})")
+    def _gate(r):
+        g = r.get('confidence_gate')
+        return f"{g:.2f}" if isinstance(g, (int, float)) else "n/a"
     print("Top 5:", ", ".join(
-        f"{r['symbol']} {r['composite']:.3f} [{r.get('regime_jev','?')}/{r.get('direction_jev','?')} gate:{r.get('confidence_gate',0):.2f}]"
+        f"{r['symbol']} {r['composite']:.3f} [{r.get('regime_jev','?')}/{r.get('direction_jev','?')} gate:{_gate(r)}]"
         for r in results[:5]
     ))
 

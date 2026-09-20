@@ -280,7 +280,58 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         cstate = 'HIGH ✅' if conf>=0.7 else 'LOW ⚠️ — action downgraded' if conf<0.45 else 'MODERATE'
         reasons.append({'icon':'🔒','layman':f"JEV signal confidence = {conf:.0%} ({cstate}). Regime: {str((jev_row or {}).get('regime_jev') or '?').replace('_',' ')}. Direction: {str((jev_row or {}).get('direction_jev') or '?')}.",
                         'formula':'JEV noul question: do regime/EMA/Supertrend/Ichimoku/signal all agree? Calibrated probability via RLCD. <45% downgrades BUY→WATCH_BUY, AVOID→CAUTION.'})
+    reasons.sort(key=lambda r: 0 if r.get('icon') == '⭐' else 1)
     return reasons
+
+
+def indicator_snapshot(sr, jev_row=None):
+    """Compact raw indicator snapshot for the website audit strip.
+    All fields come from daily_sr.py / jev_rank.py JSON generated after close."""
+    rsi = sr.get('rsi14')
+    bbp = sr.get('bb_pct_b')
+    st_dir = sr.get('supertrend_dir')
+    ichi = sr.get('ichimoku') or {}
+    return {
+        'rsi14': rsi,
+        'rsi_state': 'HOT>82' if rsi and rsi > 82 else 'overbought>70' if rsi and rsi > 70 else 'oversold<30' if rsi and rsi < 30 else 'neutral',
+        'ema_trend': sr.get('ema_trend'),
+        'ema10': sr.get('ema10'),
+        'ema20': sr.get('ema20'),
+        'ema50': sr.get('ema50'),
+        'above_ema50': sr.get('above_ema50'),
+        'bb_pct_b': bbp,
+        'bb_state': 'upper/hot' if bbp is not None and bbp > 0.80 else 'lower/cold' if bbp is not None and bbp < 0.20 else 'middle',
+        'bb_upper': sr.get('bb_upper'),
+        'bb_mid': sr.get('bb_mid'),
+        'bb_lower': sr.get('bb_lower'),
+        'supertrend': sr.get('supertrend'),
+        'supertrend_dir': st_dir,
+        'supertrend_state': 'BULL' if st_dir == 1 else 'BEAR' if st_dir == -1 else 'N/A',
+        'ichimoku_pos': 'ABOVE' if ichi.get('above_cloud') else 'BELOW' if ichi.get('below_cloud') else 'INSIDE',
+        'ichimoku_cloud': 'BULL' if ichi.get('bullish_cloud') else 'BEAR',
+        'tenkan_above_kijun': ichi.get('tenkan_above_kijun'),
+        'chikou_above': ichi.get('chikou_above'),
+        'jev_confidence': (jev_row or {}).get('confidence_gate'),
+        'jev_regime': (jev_row or {}).get('regime_jev'),
+        'jev_direction': (jev_row or {}).get('direction_jev'),
+    }
+
+
+def key_reason(action, sam, sr, mr, jev_row=None):
+    """One-line verdict for the SAM PICKS table; raw details are in indicators/why."""
+    ind = indicator_snapshot(sr, jev_row)
+    rsi = ind.get('rsi14')
+    rsi_txt = f"RSI {rsi:.0f} {ind['rsi_state']}" if isinstance(rsi, (int, float)) else "RSI n/a"
+    bbp = ind.get('bb_pct_b')
+    bb_txt = f"BB {bbp:.0%} {ind['bb_state']}" if isinstance(bbp, (int, float)) else "BB n/a"
+    conf = ind.get('jev_confidence')
+    conf_txt = f"JEV {conf:.0%}" if isinstance(conf, (int, float)) else "JEV n/a"
+    regime = (mr or {}).get('current', {}).get('label', '?')
+    return (
+        f"{action}: SAM {sam*100:+.1f}; regime {regime}; {sr.get('signal','NEUTRAL')}; "
+        f"{rsi_txt}; EMA {ind.get('ema_trend') or '?'}; ST {ind.get('supertrend_state')}; "
+        f"Ichi {ind.get('ichimoku_pos')}; {bb_txt}; {conf_txt}"
+    )
 
 
 def main():
@@ -343,6 +394,8 @@ def main():
         action  = classify(sam, sr, mr, jev_row=jev_row)
         stop, target1, rr1 = risk_reward(sr)
         why     = build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp_val, sam, jev_comp=jev_comp, dir_sign=dir_sign)
+        ind     = indicator_snapshot(sr, jev_row)
+        key     = key_reason(action, sam, sr, mr, jev_row)
 
         picks.append({
             'symbol':        sym,
@@ -373,6 +426,8 @@ def main():
             'jev_setup':     (jev_row or {}).get('setup_quality'),
             'jev_follow':    (jev_row or {}).get('follow_through'),
             'jev_rr':        (jev_row or {}).get('risk_reward'),
+            'key_reason':    key,
+            'indicators':    ind,
             'why':           why,
         })
 
