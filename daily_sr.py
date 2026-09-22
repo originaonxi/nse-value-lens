@@ -973,7 +973,7 @@ def analyse(symbol):
             'supertrend_dir': st_dir,
             'ichimoku':       ichi,
             'swing_structure': swing_struct,
-            'as_of': df.index[-1].strftime('%Y-%m-%d'),
+            'as_of': df_hist.index[-1].strftime('%Y-%m-%d'),
         }
     except Exception as e:
         return symbol, {'error': str(e)}
