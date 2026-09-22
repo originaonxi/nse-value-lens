@@ -200,6 +200,108 @@ def swing_points(df, n=SWING_N):
     return highs, lows
 
 
+def swing_structure(df, n=SWING_N):
+    """Dow Theory swing structure: label HH / HL / LH / LL on consecutive
+    3-bar fractal pivots; classify the stock's structure state and expose
+    the reversal trigger + invalidation levels. Used by S&R, SAM PICKS and
+    the Swing Structure tab."""
+    highs, lows = swing_points(df, n)
+    idx = df.index
+    events = [(i, p, 'H') for i, p in highs] + [(i, p, 'L') for i, p in lows]
+    events.sort(key=lambda x: x[0])
+    labeled = []
+    prev_price = {'H': None, 'L': None}
+    for i, p, t in events:
+        prev = prev_price[t]
+        if prev is not None:
+            if t == 'H':
+                lab = 'HH' if p > prev else 'LH'
+            else:
+                lab = 'HL' if p > prev else 'LL'
+            labeled.append((i, p, t, lab))
+        prev_price[t] = p
+    if not labeled:
+        return None
+    last_h = next((x for x in reversed(labeled) if x[2] == 'H'), None)
+    last_l = next((x for x in reversed(labeled) if x[2] == 'L'), None)
+    if last_h is None or last_l is None:
+        return None
+    def _consec(which_type, target_label):
+        run = 0
+        for x in reversed([y for y in labeled if y[2] == which_type]):
+            if x[3] == target_label:
+                run += 1
+            else:
+                break
+        return run
+    consec_hh = _consec('H', 'HH')
+    consec_lh = _consec('H', 'LH')
+    consec_hl = _consec('L', 'HL')
+    consec_ll = _consec('L', 'LL')
+    # Label sequences for each side, in time order.
+    highs_seq = [x[3] for x in labeled if x[2] == 'H']
+    lows_seq  = [x[3] for x in labeled if x[2] == 'L']
+    # Confidence guard: need at least 2 labelled pivots on each side, else the
+    # structure is under-informed and we must not state a confident trend.
+    if len(highs_seq) < 2 or len(lows_seq) < 2:
+        structure = 'MIXED'
+    # Most recent pivot each side — the structure state is decided by the
+    # *last confirmed* pivot pair, not by earlier history.
+    elif last_h[3] == 'HH' and last_l[3] == 'HL':
+        structure = 'UPTREND'
+    elif last_h[3] == 'LH' and last_l[3] == 'LL':
+        structure = 'DOWNTREND'
+    else:
+        # Which pivot printed most recently decides the reversal direction.
+        # Require evidence of the PRIOR opposite structure so ordinary
+        # continuation is not mislabelled as a reversal setup.
+        last_pivot_type = labeled[-1][2]   # 'H' or 'L'
+        prior_lows  = lows_seq[:-1]   # lows before the newest low
+        prior_highs = highs_seq[:-1]  # highs before the newest high
+        if (last_pivot_type == 'L' and last_l[3] == 'HL'
+                and last_h[3] in ('LH', 'HH') and 'LL' in prior_lows):
+            # ...LL -> LH -> HL(newest): higher low after lower lows = 1-2-3 bottom SETUP
+            structure = 'REVERSAL_UP'
+        elif (last_pivot_type == 'H' and last_h[3] == 'LH'
+                and last_l[3] in ('HL', 'LL') and 'HH' in prior_highs):
+            # ...HH -> HL -> LH(newest): lower high after higher highs = 1-2-3 top SETUP
+            structure = 'REVERSAL_DN'
+        else:
+            structure = 'MIXED'
+    def _info(x):
+        return {'label': x[3], 'price': round(x[1], 2),
+                'date': idx[x[0]].strftime('%Y-%m-%d')}
+    seq = [{'date': idx[i].strftime('%Y-%m-%d'), 'price': round(p, 2), 'label': lbl}
+           for i, p, t, lbl in labeled][-10:]
+    # Reversal trigger + invalidation, only if structure is forming
+    # For REVERSAL_UP: buy on break of the *last swing high* (the LH between the lows)
+    # For REVERSAL_DN: short/breakdown on break of the *last swing low* (the HL before the LH)
+    rev_trigger = rev_invalidate = None
+    if structure == 'REVERSAL_UP':
+        rev_trigger    = {'price': round(last_h[1], 2), 'label': last_h[3], 'level': f"break of {last_h[3]} ₹{round(last_h[1],2)}"}
+        rev_invalidate = {'price': round(last_l[1], 2), 'label': last_l[3], 'level': f"below {last_l[3]} ₹{round(last_l[1],2)}"}
+    elif structure == 'REVERSAL_DN':
+        rev_trigger    = {'price': round(last_l[1], 2), 'label': last_l[3], 'level': f"break of {last_l[3]} ₹{round(last_l[1],2)}"}
+        rev_invalidate = {'price': round(last_h[1], 2), 'label': last_h[3], 'level': f"above {last_h[3]} ₹{round(last_h[1],2)}"}
+    # Extended warnings
+    extended = None
+    if consec_hh >= 3: extended = f'{consec_hh} consecutive HH — extended uptrend, watch for first LH'
+    elif consec_ll >= 3: extended = f'{consec_ll} consecutive LL — extended downtrend, watch for first HL'
+    return {
+        'structure':          structure,
+        'consec_hh':          consec_hh,
+        'consec_lh':          consec_lh,
+        'consec_hl':          consec_hl,
+        'consec_ll':          consec_ll,
+        'last_high':          _info(last_h),
+        'last_low':           _info(last_l),
+        'reversal_trigger':   rev_trigger,
+        'reversal_invalidate':rev_invalidate,
+        'extended_warning':   extended,
+        'sequence':           seq,
+    }
+
+
 def swing_highs_lows(df, n=SWING_N, top=5):
     """Return the most-RECENT swing highs and swing lows (by bar index)."""
     highs, lows = swing_points(df, n)
@@ -504,6 +606,7 @@ def analyse(symbol):
         # breakout bar. AVWAP = volume-weighted participant cost since the
         # turning point [Brian Shannon]. JEV-picked as highest-value add.
         hi_pts, lo_pts = swing_points(df_hist)
+        swing_struct = swing_structure(df_hist)
         i_hi52 = len(df_hist) - len(df52) + int(df52['High'].values.argmax())
         i_lo52 = len(df_hist) - len(df52) + int(df52['Low'].values.argmin())
         # most recent bar whose close exceeded the trailing 20 closes (anchor)
@@ -754,6 +857,7 @@ def analyse(symbol):
             'supertrend':     st_val,
             'supertrend_dir': st_dir,
             'ichimoku':       ichi,
+            'swing_structure': swing_struct,
             'as_of': df.index[-1].strftime('%Y-%m-%d'),
         }
     except Exception as e:

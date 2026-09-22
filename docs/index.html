@@ -74,6 +74,7 @@ tr:hover td{background:#1c2128}
   <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
   <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
   <button class="tab-btn" onclick="showTab('regime',this)">📅 Monthly Regime<span class="badge">auto</span></button>
+  <button class="tab-btn" onclick="showTab('swing',this)" style="border-color:#a371f7;color:#a371f7;font-weight:700">🌀 Swing Structure<span class="badge" style="background:#a371f7;color:#000">HH/HL</span></button>
 </div>
 
 <!-- ═══ MOMENTUM 30 DAILY TAB ═════════════════════════════════════════════ -->
@@ -345,6 +346,34 @@ tr:hover td{background:#1c2128}
     <th>Regime history</th>
   </tr></thead><tbody id="regimeRows"></tbody></table></div>
   <div class="disc" id="regimeFoot">Loading monthly regimes…</div>
+</div>
+<!-- ═══ SWING STRUCTURE TAB ═════════════════════════════════════════════════ -->
+<div id="swing" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Dow Theory swing structure — HH / HL / LH / LL for all 200.</strong><br>
+    A stock in an <span style="color:#3fb950">UPTREND makes Higher Highs + Higher Lows</span>; a <span style="color:#f778ba">DOWNTREND makes Lower Highs + Lower Lows</span>.
+    A <strong style="color:#3fb950">reversal up (double bottom)</strong> = a Higher Low forms after Lower Lows; a <strong style="color:#f778ba">reversal down (double top)</strong> = a Lower High forms after Higher Highs.
+    Each row shows the exact <strong>trigger price</strong> that confirms the turn and the level that invalidates it.<br>
+    <span style="color:#8b949e">Method: 5-bar fractal swing pivots. Structure = last confirmed high+low pair. Not SEBI-registered advice.</span>
+  </p>
+  <div id="swingStats" class="stat-strip"></div>
+  <div style="margin:10px 0;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="sw-ALL"         onclick="swingFilter('ALL',this)">All</button>
+    <button class="tab-btn"        id="sw-REVERSAL_UP" onclick="swingFilter('REVERSAL_UP',this)"  style="color:#3fb950;font-weight:700">🟢 Reversal Up</button>
+    <button class="tab-btn"        id="sw-REVERSAL_DN" onclick="swingFilter('REVERSAL_DN',this)"  style="color:#f778ba;font-weight:700">🔴 Reversal Down</button>
+    <button class="tab-btn"        id="sw-UPTREND"     onclick="swingFilter('UPTREND',this)"      style="color:#3fb950">Uptrend</button>
+    <button class="tab-btn"        id="sw-DOWNTREND"   onclick="swingFilter('DOWNTREND',this)"    style="color:#f778ba">Downtrend</button>
+    <button class="tab-btn"        id="sw-2LL"         onclick="swingFilter('2LL',this)"          style="color:#58a6ff">2nd LL (bottom watch)</button>
+    <button class="tab-btn"        id="sw-2HH"         onclick="swingFilter('2HH',this)"          style="color:#d29922">2nd HH (top watch)</button>
+  </div>
+  <div class="scroll" style="max-height:600px"><table><thead><tr>
+    <th>#</th><th>Stock</th><th>Close</th><th>Structure</th>
+    <th>Last High<br><small style="font-weight:400;color:#8b949e">label · ₹ · date</small></th>
+    <th>Last Low<br><small style="font-weight:400;color:#8b949e">label · ₹ · date</small></th>
+    <th>HH×</th><th>LL×</th>
+    <th>Trigger / plan</th>
+  </tr></thead><tbody id="swingRows"></tbody></table></div>
+  <div class="disc" id="swingFoot">Loading swing structure…</div>
 </div>
 <div class="disc">
   <strong>Files:</strong> fund_portfolio.json / .csv (&#8377;10L holdings) &middot; openalgo_basket.json (real share qty, CNC market orders) &middot; quant_upgrade_master.csv (full 194-rank dump) &middot; quant_upgrade_{sharpe,ensemble,raw}_2026-09-17.csv &middot; openalgo_symbols.txt<br>
@@ -976,7 +1005,8 @@ function renderPicks(){
       chip('ST', ind.supertrend_state||'?', ind.supertrend_state==='BULL'?'#3fb950':'#f778ba'),
       chip('ICH', ind.ichimoku_pos||'?', ind.ichimoku_pos==='ABOVE'?'#3fb950':ind.ichimoku_pos==='BELOW'?'#f778ba':'#d29922'),
       chip('BB', ind.bb_pct_b!=null?Math.round(ind.bb_pct_b*100)+'% '+(ind.bb_state||''):'n/a', ind.bb_pct_b>0.8?'#d29922':ind.bb_pct_b<0.2?'#58a6ff':'#8b949e'),
-      chip('JEV', ind.jev_confidence!=null?Math.round(ind.jev_confidence*100)+'%':'n/a', ind.jev_confidence>=0.7?'#3fb950':ind.jev_confidence<0.45?'#f778ba':'#d29922')
+      chip('JEV', ind.jev_confidence!=null?Math.round(ind.jev_confidence*100)+'%':'n/a', ind.jev_confidence>=0.7?'#3fb950':ind.jev_confidence<0.45?'#f778ba':'#d29922'),
+      chip('SWING', {UPTREND:'UP',DOWNTREND:'DOWN',REVERSAL_UP:'REV↑',REVERSAL_DN:'REV↓',MIXED:'MIX'}[ind.swing_structure]||'?', ind.swing_structure==='UPTREND'||ind.swing_structure==='REVERSAL_UP'?'#3fb950':ind.swing_structure==='DOWNTREND'||ind.swing_structure==='REVERSAL_DN'?'#f778ba':'#8b949e')
     ].join('');
     const plainLine=p.plain?`<div style="color:${col};font-weight:700;font-size:.82rem;margin-bottom:3px">${p.plain}</div>`:'';
     const planLine=(p.setup_plan||p.key_reason)?`<div style="color:#8b949e;margin-top:3px"><strong>Plan:</strong> ${p.setup_plan||p.key_reason}</div>`:'';
@@ -1065,4 +1095,51 @@ fetch('sam_picks.json').then(r=>r.json()).then(d=>{
     `Updated daily after NSE close. Click any row for the full formula breakdown.`;
   renderPicks();
 }).catch(e=>{document.getElementById('picksFoot').textContent='Run: python sam_picks.py to generate sam_picks.json';});
+
+// ═══ SWING STRUCTURE tab ══════════════════════════════════════════════════
+const SW_COL={'UPTREND':'#3fb950','DOWNTREND':'#f778ba','REVERSAL_UP':'#3fb950','REVERSAL_DN':'#f778ba','MIXED':'#8b949e'};
+const SW_SHORT={'UPTREND':'UPTREND','DOWNTREND':'DOWNTREND','REVERSAL_UP':'BULL REV SETUP','REVERSAL_DN':'BEAR REV SETUP','MIXED':'MIXED'};
+let _swing=[], _swingFilter='ALL';
+function swingFilter(f,btn){
+  _swingFilter=f;
+  document.querySelectorAll('#swing .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderSwing();
+}
+function renderSwing(){
+  let rows=_swing;
+  if(_swingFilter==='2LL') rows=_swing.filter(s=>s.at_second_ll);
+  else if(_swingFilter==='2HH') rows=_swing.filter(s=>s.at_second_hh);
+  else if(_swingFilter!=='ALL') rows=_swing.filter(s=>s.structure===_swingFilter);
+  document.getElementById('swingRows').innerHTML=rows.map((s,i)=>{
+    const col=SW_COL[s.structure]||'#8b949e';
+    const lh=s.last_high||{}, ll=s.last_low||{};
+    const lhCol=lh.label==='HH'?'#3fb950':'#f778ba';
+    const llCol=ll.label==='HL'?'#3fb950':'#f778ba';
+    return `<tr>
+      <td style="color:#8b949e;font-size:.8rem">${i+1}</td>
+      <td class="sym">${s.symbol}</td>
+      <td>${fmtInr(s.close)}</td>
+      <td style="font-weight:700;color:${col};white-space:nowrap">${SW_SHORT[s.structure]||s.structure}</td>
+      <td style="color:${lhCol};font-size:.8rem">${lh.label||'—'} ₹${lh.price!=null?lh.price:'—'}<br><small style="color:#8b949e">${lh.date||''}</small></td>
+      <td style="color:${llCol};font-size:.8rem">${ll.label||'—'} ₹${ll.price!=null?ll.price:'—'}<br><small style="color:#8b949e">${ll.date||''}</small></td>
+      <td style="color:${s.consec_hh>=2?'#3fb950':'#8b949e'};text-align:center">${s.consec_hh||0}</td>
+      <td style="color:${s.consec_ll>=2?'#f778ba':'#8b949e'};text-align:center">${s.consec_ll||0}</td>
+      <td style="font-size:.74rem;color:#c9d1d9;max-width:380px;white-space:normal;line-height:1.35">${s.plain||''}</td>
+    </tr>`;
+  }).join('');
+}
+fetch('swing_structure.json').then(r=>r.json()).then(d=>{
+  _swing=d.stocks||[];
+  const c=d.counts||{};
+  document.getElementById('swingStats').innerHTML=[
+    ['As of',d.as_of],
+    ['🟢 Uptrend',c.UPTREND||0],['🔴 Downtrend',c.DOWNTREND||0],
+    ['↑ Reversal',c.REVERSAL_UP||0],['↓ Reversal',c.REVERSAL_DN||0],
+    ['Mixed',c.MIXED||0],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('swingFoot').innerHTML=`Swing structure as of <strong>${d.as_of}</strong>. `+
+    `<code>${d.method}</code>. At 2nd LL: <strong>${(d.second_ll||[]).length}</strong> · At 2nd HH: <strong>${(d.second_hh||[]).length}</strong>. Updated daily after NSE close.`;
+  renderSwing();
+}).catch(e=>{document.getElementById('swingFoot').textContent='Run: python swing_structure.py to generate swing_structure.json';});
 </script></body></html>

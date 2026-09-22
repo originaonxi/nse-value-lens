@@ -400,6 +400,24 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         reasons.append({'icon': '☁️', 'layman': ichi_msg,
                         'formula': f"Senkou A=(Tenkan+Kijun)/2 shifted +26. Senkou B=(52H+52L)/2 shifted +26. Today's cloud = values from 26 bars ago. Cloud top={c_top}, bottom={c_bot}."})
 
+    # ── 11b. Dow swing structure (HH/HL/LH/LL) ────────────────────────────────
+    sw = sr.get('swing_structure')
+    if sw:
+        st_state = sw.get('structure')
+        lh = sw.get('last_high', {}); ll = sw.get('last_low', {})
+        trig = sw.get('reversal_trigger'); inval = sw.get('reversal_invalidate')
+        state_txt = {
+            'UPTREND':     f"UPTREND — higher highs + higher lows. Trend support = last higher low ₹{ll.get('price')}. Dips buyable while it holds; break below = first crack.",
+            'DOWNTREND':   f"DOWNTREND — lower highs + lower lows. Ceiling = last lower high ₹{lh.get('price')}. Rallies get sold; close above ₹{lh.get('price')} = first turn signal.",
+            'REVERSAL_UP': f"REVERSAL UP FORMING — a higher low ₹{ll.get('price')} printed after lower lows (double-bottom setup). Buyers confirm on close above ₹{(trig or {}).get('price')}; fails below ₹{(inval or {}).get('price')}.",
+            'REVERSAL_DN': f"REVERSAL DOWN FORMING — a lower high ₹{lh.get('price')} printed after higher highs (double-top setup). Sellers confirm on close below ₹{(trig or {}).get('price')}; fails above ₹{(inval or {}).get('price')}.",
+            'MIXED':       f"NO CLEAN STRUCTURE — choppy swings. Last swing high ₹{lh.get('price')}, last swing low ₹{ll.get('price')}. Wait for a clear HH/HL or LH/LL sequence.",
+        }.get(st_state, f"Structure: {st_state}")
+        if sw.get('extended_warning'):
+            state_txt += f" ⚠️ {sw['extended_warning']}."
+        reasons.append({'icon': '🌀', 'layman': f"Swing structure (Dow Theory): {state_txt}",
+                        'formula': f"5-bar fractal pivots labelled HH/HL/LH/LL. State from last confirmed high+low pair. Last high {lh.get('label')} ₹{lh.get('price')} ({lh.get('date')}), last low {ll.get('label')} ₹{ll.get('price')} ({ll.get('date')})."})
+
     # ── 12. Bollinger Bands ───────────────────────────────────────────────────
     if bb_pctb is not None:
         if bb_pctb > 1.0:
@@ -473,6 +491,7 @@ def indicator_snapshot(sr, jev_row=None):
         'jev_confidence':   (jev_row or {}).get('confidence_gate'),
         'jev_regime':       (jev_row or {}).get('regime_jev'),
         'jev_direction':    (jev_row or {}).get('direction_jev'),
+        'swing_structure':  (sr.get('swing_structure') or {}).get('structure'),
     }
 
 
