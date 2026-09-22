@@ -287,18 +287,106 @@ def swing_structure(df, n=SWING_N):
     extended = None
     if consec_hh >= 3: extended = f'{consec_hh} consecutive HH — extended uptrend, watch for first LH'
     elif consec_ll >= 3: extended = f'{consec_ll} consecutive LL — extended downtrend, watch for first HL'
+
+    # ── BOS / CHoCH (informational — NOT action-changing until calibrated) ────
+    close_now = float(df['Close'].iloc[-1])
+    def _vfmt(v):
+        if v is None: return 'n/a'
+        if v >= 1e7:  return f"{v/1e7:.1f}Cr"
+        if v >= 1e5:  return f"{v/1e5:.1f}L"
+        return f"{int(v):,}"
+    def _vol(idx_): return float(df['Volume'].iloc[idx_]) if 0 <= idx_ < len(df) else None
+
+    bos   = None   # Break of Structure — trend continuing in its direction
+    choch = None   # Change of Character — structure is weakening / turning
+
+    if structure == 'UPTREND':
+        if close_now > last_h[1]:
+            bos   = {'fired': True, 'dir': 'UP',   'level': round(last_h[1],2),
+                     'desc': f"BOS ✅ closed above last HH ₹{round(last_h[1],2)} — uptrend confirmed continuing"}
+        if close_now < last_l[1]:
+            choch = {'fired': True, 'dir': 'BEAR', 'level': round(last_l[1],2),
+                     'desc': f"CHoCH ⚠️ closed below last HL ₹{round(last_l[1],2)} — uptrend character broken"}
+    elif structure == 'DOWNTREND':
+        if close_now < last_l[1]:
+            bos   = {'fired': True, 'dir': 'DOWN', 'level': round(last_l[1],2),
+                     'desc': f"BOS ✅ closed below last LL ₹{round(last_l[1],2)} — downtrend confirmed continuing"}
+        if close_now > last_h[1]:
+            choch = {'fired': True, 'dir': 'BULL', 'level': round(last_h[1],2),
+                     'desc': f"CHoCH ⚠️ closed above last LH ₹{round(last_h[1],2)} — downtrend character broken"}
+    elif structure == 'REVERSAL_UP':
+        choch = {'fired': True, 'dir': 'BULL', 'level': round(last_l[1],2),
+                 'desc': f"CHoCH ⚠️ already fired — HL ₹{round(last_l[1],2)} formed after lower lows (structure shifted bullish)"}
+        if rev_trigger and close_now > rev_trigger['price']:
+            bos = {'fired': True, 'dir': 'UP', 'level': rev_trigger['price'],
+                   'desc': f"BOS ✅ closed above trigger ₹{rev_trigger['price']} — reversal UP now CONFIRMED, not just a setup"}
+        elif rev_invalidate and close_now < rev_invalidate['price']:
+            choch = {'fired': False, 'dir': 'BULL', 'level': rev_invalidate['price'],
+                     'desc': f"⛔ setup FAILED — closed below HL ₹{rev_invalidate['price']}, reversal invalidated"}
+    elif structure == 'REVERSAL_DN':
+        choch = {'fired': True, 'dir': 'BEAR', 'level': round(last_h[1],2),
+                 'desc': f"CHoCH ⚠️ already fired — LH ₹{round(last_h[1],2)} formed after higher highs (structure shifted bearish)"}
+        if rev_trigger and close_now < rev_trigger['price']:
+            bos = {'fired': True, 'dir': 'DOWN', 'level': rev_trigger['price'],
+                   'desc': f"BOS ✅ closed below trigger ₹{rev_trigger['price']} — reversal DOWN now CONFIRMED, not just a setup"}
+        elif rev_invalidate and close_now > rev_invalidate['price']:
+            choch = {'fired': False, 'dir': 'BEAR', 'level': rev_invalidate['price'],
+                     'desc': f"⛔ setup FAILED — closed above LH ₹{rev_invalidate['price']}, reversal invalidated"}
+
+    # ── Wyckoff volume phase (informational — forward-log to calibration) ─────
+    vol_h = _vol(last_h[0]); vol_l = _vol(last_l[0])
+    wyckoff = None
+    if vol_h and vol_l:
+        if structure == 'UPTREND':
+            high_vol = vol_h >= vol_l * 0.9
+            wyckoff = {'phase': 'MARKUP', 'conviction': 'HIGH' if high_vol else 'LOW',
+                       'vol_at_last_high': int(vol_h), 'vol_at_last_low': int(vol_l),
+                       'note': (f"MARKUP — breakout highs on {_vfmt(vol_h)} vs pullback lows {_vfmt(vol_l)}. "
+                                + ("Healthy: breakouts attract volume." if high_vol
+                                   else "⚠️ Rallies thinning vs pullbacks — watch for distribution."))}
+        elif structure == 'DOWNTREND':
+            down_vol = vol_l >= vol_h * 0.9
+            wyckoff = {'phase': 'MARKDOWN', 'conviction': 'HIGH' if down_vol else 'LOW',
+                       'vol_at_last_high': int(vol_h), 'vol_at_last_low': int(vol_l),
+                       'note': (f"MARKDOWN — breakdown lows on {_vfmt(vol_l)} vs bounce highs {_vfmt(vol_h)}. "
+                                + ("Real sellers driving down." if down_vol
+                                   else "⚠️ Selling on low volume — potential exhaustion."))}
+        elif structure == 'REVERSAL_UP':
+            prior_ll = [x for x in labeled if x[2]=='L' and x[3]=='LL']
+            v_pll = _vol(prior_ll[-1][0]) if prior_ll else None
+            if v_pll:
+                acc = vol_l >= v_pll * 0.70
+                wyckoff = {'phase': 'ACCUMULATION', 'conviction': 'HIGH' if acc else 'LOW',
+                           'vol_at_hl': int(vol_l), 'vol_at_prior_ll': int(v_pll),
+                           'note': (f"ACCUMULATION — vol at HL {_vfmt(vol_l)} vs prior LL {_vfmt(v_pll)}. "
+                                    + ("✅ Buyers sustaining at higher low = real accumulation." if acc
+                                       else "⚠️ Volume thinning at HL = weak bounce, no conviction."))}
+        elif structure == 'REVERSAL_DN':
+            prior_hh = [x for x in labeled if x[2]=='H' and x[3]=='HH']
+            v_phh = _vol(prior_hh[-1][0]) if prior_hh else None
+            if v_phh:
+                dist = vol_h < v_phh * 0.85
+                wyckoff = {'phase': 'DISTRIBUTION', 'conviction': 'HIGH' if dist else 'LOW',
+                           'vol_at_lh': int(vol_h), 'vol_at_prior_hh': int(v_phh),
+                           'note': (f"DISTRIBUTION — vol at LH {_vfmt(vol_h)} vs prior HH {_vfmt(v_phh)}. "
+                                    + ("✅ Buyers fading at lower high = real distribution." if dist
+                                       else "⚠️ Volume still high at LH = buyers fighting, setup less clean."))}
+
     return {
-        'structure':          structure,
-        'consec_hh':          consec_hh,
-        'consec_lh':          consec_lh,
-        'consec_hl':          consec_hl,
-        'consec_ll':          consec_ll,
-        'last_high':          _info(last_h),
-        'last_low':           _info(last_l),
-        'reversal_trigger':   rev_trigger,
-        'reversal_invalidate':rev_invalidate,
-        'extended_warning':   extended,
-        'sequence':           seq,
+        'structure':           structure,
+        'consec_hh':           consec_hh,
+        'consec_lh':           consec_lh,
+        'consec_hl':           consec_hl,
+        'consec_ll':           consec_ll,
+        'last_high':           _info(last_h),
+        'last_low':            _info(last_l),
+        'reversal_trigger':    rev_trigger,
+        'reversal_invalidate': rev_invalidate,
+        'extended_warning':    extended,
+        'sequence':            seq,
+        'bos':                 bos,
+        'choch':               choch,
+        'wyckoff':             wyckoff,
     }
 
 

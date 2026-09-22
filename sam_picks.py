@@ -400,23 +400,45 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
         reasons.append({'icon': '☁️', 'layman': ichi_msg,
                         'formula': f"Senkou A=(Tenkan+Kijun)/2 shifted +26. Senkou B=(52H+52L)/2 shifted +26. Today's cloud = values from 26 bars ago. Cloud top={c_top}, bottom={c_bot}."})
 
-    # ── 11b. Dow swing structure (HH/HL/LH/LL) ────────────────────────────────
+    # ── 11b. Dow swing structure + BOS/CHoCH + Wyckoff (informational only) ───
     sw = sr.get('swing_structure')
     if sw:
         st_state = sw.get('structure')
         lh = sw.get('last_high', {}); ll = sw.get('last_low', {})
         trig = sw.get('reversal_trigger'); inval = sw.get('reversal_invalidate')
+        bos  = sw.get('bos') or {};  choch = sw.get('choch') or {}
+        wy   = sw.get('wyckoff') or {}
         state_txt = {
-            'UPTREND':     f"UPTREND — higher highs + higher lows. Trend support = last higher low ₹{ll.get('price')}. Dips buyable while it holds; break below = first crack.",
-            'DOWNTREND':   f"DOWNTREND — lower highs + lower lows. Ceiling = last lower high ₹{lh.get('price')}. Rallies get sold; close above ₹{lh.get('price')} = first turn signal.",
-            'REVERSAL_UP': f"REVERSAL UP FORMING — a higher low ₹{ll.get('price')} printed after lower lows (double-bottom setup). Buyers confirm on close above ₹{(trig or {}).get('price')}; fails below ₹{(inval or {}).get('price')}.",
-            'REVERSAL_DN': f"REVERSAL DOWN FORMING — a lower high ₹{lh.get('price')} printed after higher highs (double-top setup). Sellers confirm on close below ₹{(trig or {}).get('price')}; fails above ₹{(inval or {}).get('price')}.",
-            'MIXED':       f"NO CLEAN STRUCTURE — choppy swings. Last swing high ₹{lh.get('price')}, last swing low ₹{ll.get('price')}. Wait for a clear HH/HL or LH/LL sequence.",
+            'UPTREND':     f"UPTREND — HH+HL. Trend support = last HL ₹{ll.get('price')}. Buy dips while it holds.",
+            'DOWNTREND':   f"DOWNTREND — LH+LL. Ceiling = last LH ₹{lh.get('price')}. Rallies get sold.",
+            'REVERSAL_UP': f"BULLISH REVERSAL SETUP — HL ₹{ll.get('price')} after lower lows. Confirm: close above ₹{(trig or {}).get('price')}; fails below ₹{(inval or {}).get('price')}.",
+            'REVERSAL_DN': f"BEARISH REVERSAL SETUP — LH ₹{lh.get('price')} after higher highs. Confirm: close below ₹{(trig or {}).get('price')}; fails above ₹{(inval or {}).get('price')}.",
+            'MIXED':       f"NO CLEAN STRUCTURE — last swing high ₹{lh.get('price')}, last swing low ₹{ll.get('price')}.",
         }.get(st_state, f"Structure: {st_state}")
+        # BOS overlay
+        if bos.get('fired'):
+            state_txt += f" {bos['desc']}."
+        elif choch.get('fired') is False:
+            state_txt += f" {choch.get('desc','Setup invalidated')}."
+        elif choch.get('fired'):
+            state_txt += f" {choch['desc']}."
+        # Wyckoff conviction overlay
+        wyckoff_txt = ''
+        if wy.get('note'):
+            conv = wy.get('conviction','')
+            wyckoff_txt = f" Wyckoff {wy.get('phase','')}: {wy['note']}"
         if sw.get('extended_warning'):
             state_txt += f" ⚠️ {sw['extended_warning']}."
-        reasons.append({'icon': '🌀', 'layman': f"Swing structure (Dow Theory): {state_txt}",
-                        'formula': f"5-bar fractal pivots labelled HH/HL/LH/LL. State from last confirmed high+low pair. Last high {lh.get('label')} ₹{lh.get('price')} ({lh.get('date')}), last low {ll.get('label')} ₹{ll.get('price')} ({ll.get('date')})."})
+        reasons.append({
+            'icon': '🌀',
+            'layman': f"Swing structure: {state_txt}{wyckoff_txt}",
+            'formula': (
+                f"5-bar fractal pivots → HH/HL/LH/LL. Last H: {lh.get('label')} ₹{lh.get('price')} ({lh.get('date')}), "
+                f"last L: {ll.get('label')} ₹{ll.get('price')} ({ll.get('date')}). "
+                f"BOS = close beyond last swing in trend direction. CHoCH = close beyond last swing against trend. "
+                f"Wyckoff: vol at pivot bars vs prior opposite pivot. Informational — not action-changing until Brier-calibrated."
+            )
+        })
 
     # ── 12. Bollinger Bands ───────────────────────────────────────────────────
     if bb_pctb is not None:

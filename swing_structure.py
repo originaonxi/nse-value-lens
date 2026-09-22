@@ -36,31 +36,45 @@ STATE_LABEL = {
 
 
 def plain_for(sym, close, ss):
-    """One-line plain English for the structure, with exact trigger numbers."""
-    st = ss['structure']
-    lh = ss['last_high']; ll = ss['last_low']
+    """Plain English for the structure with BOS/CHoCH status and Wyckoff conviction."""
+    st   = ss['structure']
+    lh   = ss['last_high']; ll = ss['last_low']
     trig = ss.get('reversal_trigger'); inval = ss.get('reversal_invalidate')
+    bos  = ss.get('bos') or {}; choch = ss.get('choch') or {}
+    wy   = ss.get('wyckoff') or {}
+
+    # Core structure sentence
     if st == 'UPTREND':
-        msg = (f"UPTREND — price is making higher highs and higher lows. "
-               f"Last higher low ₹{ll['price']} is the trend support; while it holds, dips are buyable. "
-               f"Break below ₹{ll['price']} would be the first crack.")
+        msg = (f"UPTREND — higher highs + higher lows. Last HL ₹{ll['price']} is trend support; "
+               f"dips toward it are buyable. Break below = first crack.")
     elif st == 'DOWNTREND':
-        msg = (f"DOWNTREND — price is making lower highs and lower lows. "
-               f"Last lower high ₹{lh['price']} is the ceiling; rallies into it get sold. "
-               f"A close above ₹{lh['price']} would be the first sign of a turn.")
+        msg = (f"DOWNTREND — lower highs + lower lows. Last LH ₹{lh['price']} is ceiling; "
+               f"rallies into it get sold. Close above = first turn signal.")
     elif st == 'REVERSAL_UP':
         t = trig['price'] if trig else lh['price']
         iv = inval['price'] if inval else ll['price']
-        msg = (f"REVERSAL UP FORMING — a higher low ₹{ll['price']} printed after lower lows (possible double bottom). "
-               f"Buyers confirm on a close above ₹{t}; the setup fails on a close below ₹{iv}.")
+        msg = (f"BULLISH REVERSAL SETUP — HL ₹{ll['price']} formed after lower lows. "
+               f"Confirm on close above ₹{t}; fails below ₹{iv}.")
     elif st == 'REVERSAL_DN':
         t = trig['price'] if trig else ll['price']
         iv = inval['price'] if inval else lh['price']
-        msg = (f"REVERSAL DOWN FORMING — a lower high ₹{lh['price']} printed after higher highs (possible double top). "
-               f"Sellers confirm on a close below ₹{t}; the setup fails on a close above ₹{iv}.")
+        msg = (f"BEARISH REVERSAL SETUP — LH ₹{lh['price']} formed after higher highs. "
+               f"Confirm on close below ₹{t}; fails above ₹{iv}.")
     else:
-        msg = (f"NO CLEAN STRUCTURE — swings are choppy. "
-               f"Last swing high ₹{lh['price']}, last swing low ₹{ll['price']}. Wait for a clear HH/HL or LH/LL sequence.")
+        msg = (f"NO CLEAN STRUCTURE — last swing high ₹{lh['price']}, last swing low ₹{ll['price']}. "
+               f"Wait for HH/HL or LH/LL sequence.")
+
+    # BOS/CHoCH overlay
+    if bos.get('fired'):
+        msg += f" {bos['desc']}."
+    elif choch.get('fired') is False:
+        msg += f" {choch.get('desc','Setup failed')}."
+    elif choch.get('fired'):
+        msg += f" {choch['desc']}."
+
+    # Wyckoff conviction tag
+    if wy.get('note'):
+        msg += f" Wyckoff: {wy['note']}"
     if ss.get('extended_warning'):
         msg += f" ⚠️ {ss['extended_warning']}."
     return msg
@@ -71,11 +85,12 @@ def main():
     as_of = sr.get("as_of", date.today().isoformat())
     rows = []
     for s in sr.get("stocks", []):
-        if 'error' in s:
-            continue
+        if 'error' in s: continue
         ss = s.get("swing_structure")
-        if not ss:
-            continue
+        if not ss: continue
+        bos   = ss.get("bos") or {}
+        choch = ss.get("choch") or {}
+        wy    = ss.get("wyckoff") or {}
         rows.append({
             "symbol":      s["symbol"],
             "name":        s.get("name", ""),
@@ -91,9 +106,20 @@ def main():
             "reversal_trigger":    ss.get("reversal_trigger"),
             "reversal_invalidate": ss.get("reversal_invalidate"),
             "extended_warning":    ss.get("extended_warning"),
+            # BOS / CHoCH
+            "bos":         bos,
+            "bos_fired":   bool(bos.get("fired")),
+            "bos_dir":     bos.get("dir"),
+            "choch":       choch,
+            "choch_fired": bool(choch.get("fired")),
+            "choch_dir":   choch.get("dir"),
+            # Wyckoff
+            "wyckoff":          wy,
+            "wyckoff_phase":    wy.get("phase"),
+            "wyckoff_conviction": wy.get("conviction"),
+            "wyckoff_note":     wy.get("note"),
             "sequence":    ss.get("sequence", []),
             "plain":       plain_for(s["symbol"], s.get("close"), ss),
-            # audit flags the user asked for
             "at_second_ll": ss.get("consec_ll", 0) == 2,
             "at_second_hh": ss.get("consec_hh", 0) == 2,
         })
@@ -108,10 +134,17 @@ def main():
     payload = {
         "as_of":      as_of,
         "universe":   f"Nifty 200 ({len(rows)} stocks)",
-        "method":     "Dow Theory HH/HL/LH/LL on 5-bar fractal swing pivots. Structure = last confirmed high+low pair.",
+        "method":     "Dow HH/HL/LH/LL on 5-bar fractals + BOS/CHoCH labels + Wyckoff volume phase. Informational — not action-changing until calibrated.",
         "counts":     counts,
         "second_ll":  [r["symbol"] for r in rows if r["at_second_ll"]],
         "second_hh":  [r["symbol"] for r in rows if r["at_second_hh"]],
+        "bos_fired":  [r["symbol"] for r in rows if r["bos_fired"]],
+        "choch_fired":[r["symbol"] for r in rows if r["choch_fired"]],
+        "high_conviction_reversals": [
+            r["symbol"] for r in rows
+            if r["structure"] in ("REVERSAL_UP","REVERSAL_DN")
+            and r.get("wyckoff_conviction") == "HIGH"
+        ],
         "stocks":     rows,
     }
     (OUT / "swing_structure.json").write_text(json.dumps(payload, indent=1))

@@ -78,6 +78,12 @@ def log_today(sr, jev, picks):
             "ema_trend":        s.get("ema_trend"),
             "supertrend_dir":   s.get("supertrend_dir"),
             "ichi_above_cloud": (s.get("ichimoku") or {}).get("above_cloud"),
+            # Swing structure (for BOS/CHoCH/Wyckoff forward calibration)
+            "swing_structure":    (s.get("swing_structure") or {}).get("structure"),
+            "bos_fired":          bool(((s.get("swing_structure") or {}).get("bos") or {}).get("fired")),
+            "choch_fired":        bool(((s.get("swing_structure") or {}).get("choch") or {}).get("fired")),
+            "wyckoff_phase":      ((s.get("swing_structure") or {}).get("wyckoff") or {}).get("phase"),
+            "wyckoff_conviction": ((s.get("swing_structure") or {}).get("wyckoff") or {}).get("conviction"),
             # Outcomes to be filled later
             "ret_h5":   None,  # 5-day return, filled when price available
             "ret_h10":  None,  # 10-day return
