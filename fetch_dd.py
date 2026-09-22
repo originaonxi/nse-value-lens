@@ -17,18 +17,34 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 import yfinance as yf
 
+try:
+    from nse_bhavcopy import load_latest_bhavcopy
+    _BHAVCOPY_AVAILABLE = True
+except ImportError:
+    _BHAVCOPY_AVAILABLE = False
+    def load_latest_bhavcopy(*a, **kw): return {}, None
+
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "screen_output"
 UNIVERSE = HERE / "nifty200.csv"
 
 
-def fetch_one(symbol):
+def fetch_one(symbol, bhav_data=None, bhav_date=None):
     try:
         t = yf.Ticker(symbol + '.NS')
         h = t.history(period='1y', interval='1d', actions=False)
         if h.empty or len(h) < 10:
             return symbol, {}
         closes = h['Close'].dropna()
+        # ── Patch latest close from bhavcopy if yfinance is stale ────────────
+        last_yf_date = h.index[-1].date() if hasattr(h.index[-1], 'date') else None
+        if bhav_data and bhav_date and last_yf_date and last_yf_date < bhav_date:
+            if symbol in bhav_data and bhav_data[symbol]['close'] > 0:
+                import pandas as pd
+                import numpy as np
+                bhav_close = bhav_data[symbol]['close']
+                new_idx = pd.Timestamp(bhav_date).tz_localize(h.index.tz or 'UTC')
+                closes = pd.concat([closes, pd.Series([bhav_close], index=[new_idx])])
         today = float(closes.iloc[-1])
         hi52w = float(closes.max())
         # 5d and 1m ago
@@ -39,7 +55,7 @@ def fetch_one(symbol):
         return symbol, {
             'price': round(today, 2),
             'hi52w': round(hi52w, 2),
-            'dd_52wh_pct': round((today / hi52w - 1) * 100, 2),   # negative = below peak
+            'dd_52wh_pct': round((today / hi52w - 1) * 100, 2),
             'drop_5d_pct': ret(5),
             'drop_1m_pct': ret(21),
             'drop_2m_pct': ret(42),
@@ -54,9 +70,15 @@ def main():
     syms = [r['Symbol'].strip() for r in rows if r.get('Series','EQ').strip()=='EQ']
     print(f"Fetching 1y price history for {len(syms)} symbols...")
 
+    bhav_data, bhav_date = load_latest_bhavcopy()
+    if bhav_date:
+        print(f"[bhavcopy] patching latest close from {bhav_date}")
+    else:
+        print("[bhavcopy] not available; using yfinance only")
+
     out = {}
     with ThreadPoolExecutor(max_workers=10) as ex:
-        futures = {ex.submit(fetch_one, s): s for s in syms}
+        futures = {ex.submit(fetch_one, s, bhav_data, bhav_date): s for s in syms}
         done = 0
         for f in as_completed(futures):
             sym, data = f.result()

@@ -1,12 +1,14 @@
 name: Daily S&R Refresh
 
-# Runs every weekday at 16:30 IST (11:00 UTC) — 1 hour after NSE closes at 15:30
-# NSE closes 15:30 IST = 10:00 UTC; we wait 1 hour for yfinance data to settle
-# Also triggerable manually from GitHub Actions tab
+# Runs every weekday at 14:00 UTC (19:30 IST) — after NSE closes AND after
+# NSE CM Bhavcopy is published (~18:00–18:30 IST). Bhavcopy is used to patch
+# any yfinance data-lag so as_of always reflects the actual trading session.
+# NSE closes 15:30 IST = 10:00 UTC; Bhavcopy available ~12:30 UTC.
+# Also triggerable manually from GitHub Actions tab.
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'   # 11:00 UTC = 16:30 IST, weekdays only
+    - cron: '0 14 * * 1-5'   # 14:00 UTC = 19:30 IST, weekdays only (after bhavcopy)
   workflow_dispatch:           # manual trigger any time
 
 permissions:

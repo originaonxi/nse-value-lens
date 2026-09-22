@@ -56,6 +56,13 @@ warnings.filterwarnings('ignore')
 import yfinance as yf
 import numpy as np
 import pandas as pd
+try:
+    from nse_bhavcopy import load_latest_bhavcopy, patch_df_with_bhavcopy
+    _BHAVCOPY_AVAILABLE = True
+except ImportError:
+    _BHAVCOPY_AVAILABLE = False
+    def load_latest_bhavcopy(*a, **kw): return {}, None
+    def patch_df_with_bhavcopy(df, *a, **kw): return df
 
 HERE  = Path(__file__).resolve().parent
 IST   = ZoneInfo('Asia/Kolkata')
@@ -633,13 +640,19 @@ def classify(close, resistances, supports, atr):
     return signal, nr, ns, round(dr, 2), round(ds, 2)
 
 
-def analyse(symbol):
+def analyse(symbol, bhav_data=None, bhav_date=None):
     try:
         t   = yf.Ticker(symbol + '.NS')
         df  = t.history(period=FETCH_PD, interval='1d', actions=False)
         if df.empty or len(df) < 32:
             return symbol, {'error': 'insufficient_data'}
         df = df.dropna(subset=['High','Low','Close','Volume'])
+        # ── Bhavcopy patch: if yfinance is stale, append today's official OHLCV ──
+        if bhav_data and bhav_date:
+            df = patch_df_with_bhavcopy(df, symbol, bhav_data, bhav_date)
+            df = df.dropna(subset=['High','Low','Close','Volume'])
+        if df.empty or len(df) < 32:
+            return symbol, {'error': 'insufficient_data'}
         # Market-date guard: only drop the last row from S/R history when it is
         # actually the CURRENT session (possibly incomplete intraday bar).
         # On holidays/weekends the last row is a completed session and MUST
@@ -985,9 +998,16 @@ def main():
              for r in rows if r.get('Series','EQ').strip()=='EQ']
     print(f"Fetching OHLCV + computing S/R for {len(syms)} stocks…")
 
+    # ── Pre-load bhavcopy once (avoids 200 separate downloads) ───────────────
+    bhav_data, bhav_date = load_latest_bhavcopy()
+    if bhav_date:
+        print(f"[bhavcopy] will patch yfinance data → {bhav_date}")
+    else:
+        print("[bhavcopy] not available; using yfinance only")
+
     results = {}
     with ThreadPoolExecutor(max_workers=12) as ex:
-        futs = {ex.submit(analyse, s): (s, n) for s, n in syms}
+        futs = {ex.submit(analyse, s, bhav_data, bhav_date): (s, n) for s, n in syms}
         done = 0
         for f in as_completed(futs):
             sym, _ = futs[f]
