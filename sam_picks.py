@@ -413,6 +413,8 @@ def build_why(sr, mr, jev_row, reg_comp, sig_comp, conf_comp, sam, jev_comp=0.0,
             'DOWNTREND':   f"DOWNTREND — LH+LL. Ceiling = last LH ₹{lh.get('price')}. Rallies get sold.",
             'REVERSAL_UP': f"BULLISH REVERSAL SETUP — HL ₹{ll.get('price')} after lower lows. Confirm: close above ₹{(trig or {}).get('price')}; fails below ₹{(inval or {}).get('price')}.",
             'REVERSAL_DN': f"BEARISH REVERSAL SETUP — LH ₹{lh.get('price')} after higher highs. Confirm: close below ₹{(trig or {}).get('price')}; fails above ₹{(inval or {}).get('price')}.",
+            'UPTREND_BROKEN':   f"UPTREND BROKEN (CHoCH ⚠️) — closed below last HL ₹{ll.get('price')}. Character change, NOT a confirmed downtrend; reclaim ₹{ll.get('price')} to repair.",
+            'DOWNTREND_BROKEN': f"DOWNTREND BROKEN (CHoCH ⚠️) — closed above last LH ₹{lh.get('price')}. Character change, NOT a confirmed uptrend; lose ₹{lh.get('price')} to resume down.",
             'MIXED':       f"NO CLEAN STRUCTURE — last swing high ₹{lh.get('price')}, last swing low ₹{ll.get('price')}.",
         }.get(st_state, f"Structure: {st_state}")
         # BOS overlay

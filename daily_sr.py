@@ -372,8 +372,35 @@ def swing_structure(df, n=SWING_N):
                                     + ("✅ Buyers fading at lower high = real distribution." if dist
                                        else "⚠️ Volume still high at LH = buyers fighting, setup less clean."))}
 
+    # ── Character-change override (CHoCH-driven honest headline state) ─────────
+    # A single close BEYOND the last opposite pivot is a CHANGE OF CHARACTER,
+    # NOT a confirmed opposite trend — the confirmed pivots are still HH/HL (or
+    # LH/LL). Emit a distinct honest state instead of (a) leaving a stale
+    # UPTREND/DOWNTREND label or (b) mislabelling it as a confirmed opposite
+    # trend. A fresh opposite pivot pair is required to confirm the flip.
+    raw_structure = structure
+    if structure == 'UPTREND' and choch and choch.get('fired') and choch.get('dir') == 'BEAR':
+        structure = 'UPTREND_BROKEN'
+        extended = None
+        wyckoff = {'phase': 'DISTRIBUTION?', 'conviction': 'LOW',
+                   'vol_at_last_high': int(vol_h) if vol_h else None,
+                   'vol_at_last_low':  int(vol_l) if vol_l else None,
+                   'note': (f"Character change — closed ₹{round(close_now,2)} below last HL "
+                            f"₹{round(last_l[1],2)}. Markup over; early distribution/markdown risk. "
+                            f"Reclaim ₹{round(last_l[1],2)} repairs it; a fresh LH+LL confirms a downtrend.")}
+    elif structure == 'DOWNTREND' and choch and choch.get('fired') and choch.get('dir') == 'BULL':
+        structure = 'DOWNTREND_BROKEN'
+        extended = None
+        wyckoff = {'phase': 'ACCUMULATION?', 'conviction': 'LOW',
+                   'vol_at_last_high': int(vol_h) if vol_h else None,
+                   'vol_at_last_low':  int(vol_l) if vol_l else None,
+                   'note': (f"Character change — closed ₹{round(close_now,2)} above last LH "
+                            f"₹{round(last_h[1],2)}. Markdown paused; early accumulation possible. "
+                            f"Lose ₹{round(last_h[1],2)} resumes down; a fresh HH+HL confirms an uptrend.")}
+
     return {
         'structure':           structure,
+        'raw_structure':       raw_structure,
         'consec_hh':           consec_hh,
         'consec_lh':           consec_lh,
         'consec_hl':           consec_hl,

@@ -31,6 +31,8 @@ STATE_LABEL = {
     'DOWNTREND':   'Downtrend (LH + LL)',
     'REVERSAL_UP': 'Bullish reversal SETUP (unconfirmed)',
     'REVERSAL_DN': 'Bearish reversal SETUP (unconfirmed)',
+    'UPTREND_BROKEN':   'Uptrend broken — CHoCH ⚠️ (unconfirmed)',
+    'DOWNTREND_BROKEN': 'Downtrend broken — CHoCH ⚠️ (unconfirmed)',
     'MIXED':       'No clean structure',
 }
 
@@ -60,6 +62,14 @@ def plain_for(sym, close, ss):
         iv = inval['price'] if inval else lh['price']
         msg = (f"BEARISH REVERSAL SETUP — LH ₹{lh['price']} formed after higher highs. "
                f"Confirm on close below ₹{t}; fails above ₹{iv}.")
+    elif st == 'UPTREND_BROKEN':
+        msg = (f"UPTREND BROKEN (CHoCH ⚠️) — closed ₹{close} below last HL ₹{ll['price']}. "
+               f"Character change, NOT a confirmed downtrend yet (pivots still HH/HL). "
+               f"Reclaim ₹{ll['price']} to repair; a fresh LH+LL confirms downtrend.")
+    elif st == 'DOWNTREND_BROKEN':
+        msg = (f"DOWNTREND BROKEN (CHoCH ⚠️) — closed ₹{close} above last LH ₹{lh['price']}. "
+               f"Character change, NOT a confirmed uptrend yet (pivots still LH/LL). "
+               f"Lose ₹{lh['price']} to resume down; a fresh HH+HL confirms uptrend.")
     else:
         msg = (f"NO CLEAN STRUCTURE — last swing high ₹{lh['price']}, last swing low ₹{ll['price']}. "
                f"Wait for HH/HL or LH/LL sequence.")
@@ -96,6 +106,7 @@ def main():
             "name":        s.get("name", ""),
             "close":       s.get("close"),
             "structure":   ss["structure"],
+            "raw_structure":   ss.get("raw_structure", ss["structure"]),
             "structure_label": STATE_LABEL.get(ss["structure"], ss["structure"]),
             "last_high":   ss["last_high"],
             "last_low":    ss["last_low"],
@@ -125,7 +136,7 @@ def main():
         })
 
     # Sort: reversals first (actionable), then trends, then mixed
-    order = {'REVERSAL_UP': 0, 'REVERSAL_DN': 1, 'UPTREND': 2, 'DOWNTREND': 3, 'MIXED': 4}
+    order = {'REVERSAL_UP': 0, 'REVERSAL_DN': 1, 'UPTREND_BROKEN': 2, 'DOWNTREND_BROKEN': 3, 'UPTREND': 4, 'DOWNTREND': 5, 'MIXED': 6}
     rows.sort(key=lambda r: (order.get(r["structure"], 9), r["symbol"]))
 
     from collections import Counter
