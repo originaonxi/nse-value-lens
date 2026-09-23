@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const cache = new Map(), inflight = new Map();
 async function loadSwing(name) {
-  if (!['swing_desk','swing_evidence'].includes(name)) throw new Error('Unknown swing dataset');
+  if (!['swing_desk','swing_evidence','expanded_research','cross_asset_research','futures_research','research_data_audit'].includes(name)) throw new Error('Unknown swing dataset');
   const existing = cache.get(name);
   if (existing && existing.expires > Date.now()) return existing;
   if (inflight.has(name)) return inflight.get(name);
@@ -15,7 +15,7 @@ async function loadSwing(name) {
       if (!res.ok) throw new Error('Upstream HTTP '+res.status);
       payload = await res.json();
       if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.as_of || '') ||
-          (name === 'swing_desk' ? !Array.isArray(payload.candidates) : !payload.results))
+          (name === 'swing_desk' ? !Array.isArray(payload.candidates) : name === 'research_data_audit' ? !Number.isFinite(payload.opening_bars) : !payload.results))
         throw new Error('Invalid upstream dataset');
       source = 'github';
     } catch {

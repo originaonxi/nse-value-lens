@@ -1,0 +1,55 @@
+﻿{
+  "version": 1,
+  "scope": "Research only; no trading authorization",
+  "created_at": "2026-09-23",
+  "evaluation": "Earlier period after 210-session warmup; middle 252 sessions; latest 252 sessions. Retrospective previously inspected data, not pristine OOS.",
+  "daily_candidates": [
+    {
+      "id": "rotation_momentum",
+      "hold": 20,
+      "side": "LONG",
+      "selection": "Close > SMA200, 126-session return positive; rank return126 / daily volatility63",
+      "market_gate": "none"
+    },
+    {
+      "id": "rotation_lowvol",
+      "hold": 20,
+      "side": "LONG",
+      "selection": "Close > SMA200 and 63-session return positive; rank lowest volatility63",
+      "market_gate": "none"
+    },
+    {
+      "id": "weekly_reversal",
+      "hold": 5,
+      "side": "LONG",
+      "selection": "Close > SMA200 and 5-session return negative; rank most negative return5",
+      "market_gate": "Nifty close > SMA50"
+    },
+    {
+      "id": "intraday_long",
+      "hold": 1,
+      "side": "LONG",
+      "selection": "Prior close > SMA50 > SMA200 and return20 > 0; rank largest return20",
+      "market_gate": "Prior Nifty close > SMA50"
+    },
+    {
+      "id": "intraday_short",
+      "hold": 1,
+      "side": "SHORT",
+      "selection": "Prior close < SMA50 < SMA200 and return20 < 0; rank smallest return20",
+      "market_gate": "Prior Nifty close < SMA50"
+    },
+    {
+      "id": "intraday_reversal",
+      "hold": 1,
+      "side": "BOTH",
+      "selection": "Fade previous daily close-to-close move exceeding 3%; rank absolute move",
+      "market_gate": "none"
+    }
+  ],
+  "daily_rules": "Previous completed session only; min price Rs50; prior average turnover Rs10cr; 0.5-6% ATR/price. Max 5 positions, 2 per current industry, 20% notional/name, 0.5% risk/name, no leverage. Swing enters every hold-length sessions, initial 2ATR stop, no profit target, close on holding limit. Intraday enters next open; 1ATR stop, 1.5ATR target, close same session. Stop-first ambiguous bars.",
+  "costs": "Swing per side 0.15% fee/tax scenario + 0.05% slippage. Intraday per side 0.05% fee/tax scenario + 0.05% slippage. Double both for stress. Fees not verified broker tariffs.",
+  "orb_candidate": "5-minute opening-range direction, relative first-bar volume >=1.5 against prior 20 valid openings; top five. Stop opposite opening-range edge. Earliest entry next bar, order cancels after 11:00 IST, time exit 15:10 bar close. No profit target. No leverage. Same intraday cost/risk caps. No same-bar ordering advantage.",
+  "validation_gate": "No live winner. Exploratory candidate only if each of 3 periods positive, recent doubled-cost positive, recent >=30 closed trades and >=252 benchmark sessions. All results disclosed, including failures.",
+  "limitations": "Current constituent survivors; fixed current industry labels; no historical intraday short eligibility or circuit-state ledger. Recent minute data only gives a smoke test. Futures/options need actual contracts, expiry, bid/ask, historical lot sizes, margin and fees. Spot-derived option P&L is prohibited."
+}

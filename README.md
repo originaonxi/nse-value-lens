@@ -8,6 +8,8 @@ entry/stop/target plans and risk sizing, and hides expired entries.
 drawdowns, two historical windows, and a doubled-cost stress test. Current
 constituents introduce survivorship bias. No automatic orders are placed.
 
+- [Expanded strategy lab: 12 additional experiments/benchmarks and dated trades](https://originaonxi.github.io/nse-value-lens/strategy-lab.html)
+- [Expanded methods, failures, data audit and reproduction](docs/EXPANDED_RESEARCH.md)
 - [Open the swing desk](https://originaonxi.github.io/nse-value-lens/)
 - [Rules, evidence and GitHub comparison](docs/SWING_RESEARCH.md)
 - Full historical dashboards remain linked under **Full research**.

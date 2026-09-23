@@ -1,0 +1,11 @@
+﻿{
+  "label": "Nifty futures: official contract data; fixed rules before results",
+  "capital_rs": 2000000,
+  "contracts": "Choose highest prior-session-volume NIFTY index future with expiry more than 3 calendar days away. Actual historical lot size; full notional collateral, no leverage.",
+  "strategies": {
+    "futures_swing": "Prior Nifty close > SMA50 means long; otherwise short. Enter next open, 2 prior ATR initial stop, 20-session time exit, exit when within 3 calendar days of expiry.",
+    "futures_intraday": "Same prior-session direction. Enter next open, 1 prior ATR stop, close same session."
+  },
+  "costs": "0.05% fee/tax scenario +0.02% slippage per side, doubled stress. Not broker-reconciled tariffs.",
+  "limitations": "Two years of end-of-day data; no depth/spreads, no margin modelling (full notional collateral). No options-performance inference. Different capital/exposure from other experiments."
+}
