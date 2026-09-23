@@ -86,6 +86,33 @@ This is a research scanner, not a validated profitable system or a list of order
 
 Primary formula context: [TradingView pivot points high/low](https://www.tradingview.com/support/solutions/43000589195-pivot-points-high-low/). This explains pivots, not profitable NSE execution.
 
-## Chart structure overlay
+## Top 10 current setups and strategy charts
 
-The daily refresh also supplies the full chart window of confirmed swing events. HH/HL are green; LH/LL are red; EH/EL indicate equal extremes. Click a label for its price, original pivot date and later confirmation date. Labels compare consecutive same-type confirmed pivots. The zigzag connects alternating extremes, keeping the most extreme point in a run of same-type pivots. If one daily bar is both a swing high and low, the line breaks because intraday order cannot be inferred. The newest two candles have no confirmed swing labels. Price-zone and structure toggles are independent. Mobile charts scroll horizontally to keep candles readable.
+The shortlist is a review order under the existing `hhhl_h10_nifty_above_200` rule, not a ranking by expected profit. It updates with every daily scan and contains up to 10 stocks; it is never padded with stocks that fail the stock-level screens.
+
+1. Eligible fresh closing breakouts.
+2. Fresh closing breakouts blocked by the Nifty market/data gate, still labelled **Caution**.
+3. Confirmed HH/HL structures waiting below their trigger, labelled **Watch**.
+4. Structures already above the trigger without a fresh cross, placed last.
+
+Within each group, the smaller absolute distance between close and trigger, divided by ATR14, ranks first. Symbol breaks ties. Complete prices, sufficient history, two rising highs and lows, price, turnover and ATR screens must pass; an active structure exit excludes the stock. A high shortlist rank never overrides an entry gate. This ordering has not been validated as a return predictor.
+
+### Reading a stock's chart
+
+- **H1/H2 and L1/L2:** the last two confirmed highs and last two confirmed lows used by the current rule. Pair cards show their prices and dates; dashed guides show whether each pair rises. Only these four labels are emphasized initially. Enable **All swing labels** to inspect older HH, HL, LH, LL and equal extremes.
+- **Confirmation:** strict pivots use two bars on each side. Click any label for the original pivot date and the date two sessions later when it became usable. Price levels begin on that confirmation date (or the beginning of the visible window if confirmed earlier). The newest two candles are shaded because their pivots are still unconfirmed.
+- **Zigzag context:** a faint line connects alternating confirmed extremes, keeping the most extreme point in a run of same-type pivots. The line breaks on a daily bar that is both a high and a low because its intraday order is unknown. This display is separate from the four pivots used by the strategy; it does not add a percentage-reversal filter or an unconfirmed projected leg.
+- **Closing events:** blue triangles mark fresh HH/HL closing crosses; red triangles mark the start of a close-below-confirmed-low condition. Click for the event date and level. These are historical structure events, not executed trades or proof that the historical market, liquidity and execution gates passed.
+- **Price zones:** the closing trigger and structure exit are labelled on the price axis. The current watch band is shown from the latest candle forward. A conditional next-open band appears only for a fresh setup and stays amber/blocked when entry is ineligible. The stop reference assumes entry at the signal close; an actual initial stop must use the actual fill minus two signal-day ATR. No fixed profit target is added.
+- **Rule checks:** nine checks identify which conditions pass, wait or block entry. Volume bars and their previous-20-session average are context; volume expansion is not a new entry requirement.
+- **Controls:** 35, 70 and 140-session views, independent structure, historical label, zone, event and volume controls, plus candle OHLCV inspection. Mobile charts scroll horizontally to preserve readable candles.
+
+The existing maximum hold is 10 trading sessions. A confirmed-low break exits at the next open; the initial stop and time exit can act independently of today's scanner status. The chart does not track real holdings or place orders.
+
+### Reference conventions
+
+[TradingView's Zig Zag description](https://www.tradingview.com/support/solutions/43000591664-zigzag-indicator/) explains pivot confirmation and why projected/recent zigzag legs can change. This scanner uses its own fixed two-left/two-right pivot rule and shows only confirmed events. [StockCharts' Dow Theory guide](https://chartschool.stockcharts.com/table-of-contents/market-analysis/dow-theory) provides background on rising highs/lows and trend confirmation. These sources explain chart conventions; neither validates this scanner's profitability in the NSE universe.
+
+### Verification
+
+Python regressions check causal chart metadata, prior-session volume averages, entry checks and shortlist order/exclusions. JavaScript tests check active pivot selection, confirmation dates and windowing. The daily GitHub workflow checks both public sites in Chromium: shortlist, active labels, confirmation clicks, price levels, blocked-entry treatment, all three chart windows, toggles and mobile layout. Workflow artifacts include screenshots and a JSON chart report.

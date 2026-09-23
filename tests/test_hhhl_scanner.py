@@ -138,6 +138,37 @@ class HHHLScannerTests(unittest.TestCase):
                 if event["price"] != previous:
                     self.assertEqual(event["label"], expected)
 
+    def test_chart_carries_causal_levels_signals_and_prior_volume_average(self):
+        frame=self.frame()
+        row=self.scan(frame,str(frame.index[-1].date()))
+        features=feature_frame(frame)
+        for bar in row["chart"]:
+            ref=features.loc[bar["date"]]
+            self.assertEqual(bar["structure_breakout"],bool(ref.breakout))
+            self.assertEqual(bar["structure_exit"],bool(ref.exit_trigger))
+            if np.isfinite(ref.confirmed_high):
+                self.assertAlmostEqual(bar["confirmed_high"],float(ref.confirmed_high),places=3)
+            if np.isfinite(ref.volume_average20):
+                self.assertEqual(bar["volume_average20"],round(float(ref.volume_average20)))
+        self.assertEqual(len(row["entry_checks"]),9)
+        self.assertEqual(row["entry_allowed"],all(c["state"]=="pass" for c in row["entry_checks"]))
+
+    def test_top_ten_ranks_rule_fit_without_promoting_blocked_entries(self):
+        from hhhl_scanner import priority_watchlist
+        def candidate(symbol,status="WATCH",fresh=False,close=99):
+            return {"symbol":symbol,"structure":"HH / HL","complete_for_session":True,
+                    "zones":{"breakout_above":100},"status":status,"fresh_breakout":fresh,
+                    "close":close,"atr":10,"entry_checks":[{"key":"liquidity","state":"pass"}]}
+        rows=[candidate("WAIT_FAR",close=90),candidate("BLOCKED","CAUTION",True,101),
+              candidate("ELIGIBLE","BUY",True,101),candidate("WAIT_NEAR",close=99)]
+        picks=priority_watchlist(rows)
+        self.assertEqual([p["symbol"] for p in picks],["ELIGIBLE","BLOCKED","WAIT_NEAR","WAIT_FAR"])
+        self.assertEqual(picks[1]["status"],"CAUTION")
+        self.assertIn("blocked",picks[1]["reason"])
+        self.assertEqual(len(priority_watchlist([candidate("S"+str(i)) for i in range(20)])),10)
+        rows[0]["entry_checks"][0]["state"]="fail"
+        self.assertNotIn("WAIT_FAR",[p["symbol"] for p in priority_watchlist(rows)])
+
 
 if __name__ == "__main__":
     unittest.main()

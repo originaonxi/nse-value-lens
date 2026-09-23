@@ -1,7 +1,8 @@
-"""Visual and interactive checks for confirmed HH/HL chart overlays."""
+"""Acceptance checks for the top-ten strategy chart on current scanner data."""
 import argparse
 import json
 from pathlib import Path
+from urllib.parse import urljoin
 from playwright.sync_api import sync_playwright
 
 parser=argparse.ArgumentParser()
@@ -19,20 +20,36 @@ with sync_playwright() as p:
         page.route("**/hhhl_scan.json",lambda route:route.fulfill(status=200,body=payload,content_type="application/json"))
     page.goto(args.url,wait_until="networkidle")
     page.wait_for_function("document.querySelector('#count-ALL').textContent==='200'")
-
-    from urllib.parse import urljoin
     data=json.loads(payload) if args.fixture else page.request.get(urljoin(args.url,(page.locator("body").get_attribute("data-source") or "")+"hhhl_scan.json")).json()
-    eligible=[r for r in data["rows"] if len(r.get("chart_swings",[]))>4 and len(r["chart"])==70]
+    picks=data["priority_watchlist"]
+    assert page.locator(".priority-card").count()==len(picks)<=10
+    eligible=[r for r in data["rows"] if len(r.get("chart_swings",[]))>4 and len(r["chart"])>=70]
     assert eligible, "No full confirmed swing history available"
-    row=next((r for r in eligible if r["structure"]=="HH / HL"),eligible[0])
-    page.locator("#search").fill(row["symbol"])
-    page.locator('button.stock-name[data-symbol="'+row["symbol"]+'"]').click()
+    row=next((r for r in eligible if picks and r["symbol"]==picks[0]["symbol"]),eligible[0])
+    if row["symbol"] in [q["symbol"] for q in picks]:
+        page.locator('.priority-card[data-symbol="'+row["symbol"]+'"]').click()
+    else:
+        page.locator("#search").fill(row["symbol"])
+        page.locator('button.stock-name[data-symbol="'+row["symbol"]+'"]').click()
     page.locator(".swing-marker").first.wait_for()
-    assert page.locator(".swing-marker").count()>4, "Full confirmed swing history missing"
-    assert page.locator(".structure-zigzag").count()>0
+    active=page.locator(".active-pivot").count()
+    assert 0<active<=4
+    assert page.locator(".swing-marker").count()==active
+    assert page.locator(".strategy-check").count()==9
     assert page.locator(".daily-candle").count()==70
+    assert page.locator(".volume-bar").count()==70
+    if not row["entry_allowed"]:
+        assert "No new entry is eligible" in page.locator("#strategy-story").inner_text()
+    for level in page.locator(".confirmed-level").all():
+        assert level.get_attribute("data-start-date")>=level.get_attribute("data-known-from")
+    if row["entry_plan"]:
+        assert page.locator(".execution-overlay").get_attribute("data-eligible")==str(row["entry_allowed"]).lower()
     page.locator(".swing-marker").last.click()
     assert "Confirmed:" in page.locator("#chart-inspect").inner_text()
+    page.locator("#chart-all-pivots").check()
+    assert page.locator(".swing-marker").count()>active
+    assert page.locator(".structure-zigzag").count()>0
+    page.locator("#chart-all-pivots").uncheck()
     page.locator("#chart-swings").uncheck()
     assert page.locator(".swing-marker").count()==0
     assert page.locator(".structure-zigzag").count()==0
@@ -40,7 +57,16 @@ with sync_playwright() as p:
     page.locator("#chart-levels").uncheck()
     assert page.locator(".chart-zone").count()==0
     page.locator("#chart-levels").check()
+    page.locator("#chart-window").select_option("35")
+    assert page.locator(".daily-candle").count()==35
+    page.locator("#chart-window").select_option("140")
+    assert page.locator(".daily-candle").count()==min(140,len(row["chart"]))
+    page.locator("#chart-window").select_option("70")
+    page.locator("#chart-volume").uncheck()
+    assert page.locator(".volume-bar").count()==0
+    page.locator("#chart-volume").check()
     page.locator("#stock-detail").screenshot(path=str(out/"hhhl-chart-desktop.png"))
+    page.locator(".priority-section").screenshot(path=str(out/"hhhl-priority-desktop.png"))
     page.set_viewport_size({"width":390,"height":844})
     assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1")
     assert page.locator("#stock-chart").evaluate("(el)=>el.scrollWidth>el.clientWidth")
@@ -49,5 +75,9 @@ with sync_playwright() as p:
     assert "Confirmed:" in page.locator("#chart-inspect").inner_text()
     page.locator("#stock-detail").screenshot(path=str(out/"hhhl-chart-mobile.png"))
     assert not errors,errors
-    print(json.dumps({"url":args.url,"candles":70,"labels":page.locator(".swing-marker").count(),"zigzag":True,"toggle_controls":True,"confirmation_details":True,"mobile_scroll":True,"errors":errors}))
+    report={"url":args.url,"symbol":row["symbol"],"top_setups":len(picks),"active_pivots":active,
+            "default_candles":70,"zoom_windows":True,"strategy_checks":9,"causal_levels":True,
+            "volume_panel":True,"entry_eligibility_preserved":True,"mobile_scroll":True,"errors":errors}
+    (out/"hhhl-chart-report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
+    print(json.dumps(report))
     browser.close()

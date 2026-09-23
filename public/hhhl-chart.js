@@ -36,7 +36,21 @@
     if(current.length>1) result.push(current);
     return result;
   }
-  const api={points,segments};
+  function windowRow(row,count=70) {return {...row,chart:(row.chart||[]).slice(-count)};}
+  function activePoints(row) {
+    const keys=new Map();
+    for(const kind of ['high','low']) (row.pivots?.[kind]||[]).slice(-2).forEach((p,i)=>{
+      keys.set(kind+':'+p.pivot_date,(kind==='high'?'H':'L')+(i+1));
+    });
+    return points(row).filter(p=>keys.has(p.kind+':'+p.pivot_date))
+      .map(p=>({...p,sequence:keys.get(p.kind+':'+p.pivot_date)}));
+  }
+  function levelStart(row,kind) {
+    const day=row.pivots?.[kind]?.at(-1)?.confirmed_on;
+    if(!day||day>row.data_date)return null;
+    return day;
+  }
+  const api={points,segments,windowRow,activePoints,levelStart};
   if(typeof module==='object'&&module.exports) module.exports=api;
   else root.HHHLChart=api;
 })(typeof globalThis==='object'?globalThis:this);

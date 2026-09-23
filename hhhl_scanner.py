@@ -55,6 +55,8 @@ def feature_frame(frame):
     d = d.join(confirmed_structure(d, width=2))
     d["breakout"] = (d.rising_structure & cross(c, d.confirmed_high)).fillna(False)
     d["exit_condition"] = (c < d.confirmed_low).fillna(False)
+    d["exit_trigger"] = d.exit_condition & ~d.exit_condition.shift(1, fill_value=False)
+    d["volume_average20"] = d.Volume.rolling(20).mean().shift(1)
     return d
 
 
@@ -137,7 +139,7 @@ def scan_stock(meta, frame, invalid_dates, as_of, market, calendar):
         "fresh_breakout": False, "exit_condition": False, "sell_triggered_today": False,
         "last_breakout_date": None, "distance_to_breakout_pct": None,
         "pivots": {"high": [], "low": []}, "zones": {}, "chart": [],
-        "data_warnings": [], "entry_allowed": False, "entry_plan": None, "chart_swings": [],
+        "data_warnings": [], "entry_allowed": False, "entry_plan": None, "chart_swings": [], "entry_checks": [], "volume_ratio": None,
     }
     if frame.empty:
         return base
@@ -199,9 +201,32 @@ def scan_stock(meta, frame, invalid_dates, as_of, market, calendar):
             }
     signals = d.index[d.breakout]
     chart = [{
-        "date": str(day.date()), "open": number(row.Open, 2), "high": number(row.High, 2),
-        "low": number(row.Low, 2), "close": number(row.Close, 2),
-    } for day, row in frame.tail(70).iterrows()]
+        "date": str(day.date()), "open": number(row.Open), "high": number(row.High),
+        "low": number(row.Low), "close": number(row.Close), "volume": number(row.Volume, 0),
+        "volume_average20": number(row.volume_average20, 0),
+        "confirmed_high": number(row.confirmed_high), "confirmed_low": number(row.confirmed_low),
+        "structure_breakout": bool(row.breakout), "structure_exit": bool(row.exit_trigger),
+    } for day, row in d.tail(140).iterrows()]
+    def check(key, label, passed, detail, waiting=False):
+        return {"key": key, "label": label, "state": "pass" if passed else "wait" if waiting else "fail", "detail": detail}
+    checks = [
+        check("data", "Complete session & history", fresh and enough and not gaps and r.Volume > 0,
+              "Complete prices, enough confirmed pivots and no recent missing sessions required."),
+        check("higher_highs", "Two rising highs", hh, f"Previous {previous_high}; latest {high}."),
+        check("higher_lows", "Two rising lows", hl, f"Previous {previous_low}; latest {low}."),
+        check("trigger", "Fresh closing breakout", fresh and bool(r.breakout),
+              "A new closing cross over the confirmed high is required; an intraday wick is insufficient.",
+              waiting=bool(r.rising_structure) and not bool(r.exit_condition)),
+        check("market", "Nifty above 200-session average", market["data_ready"] and market["reference_filter_passed"],
+              "Benchmark must be complete and above its 200-session average."),
+        check("price", "Price at least Rs 50", r.Close >= 50, f"Latest close Rs {number(r.Close)}."),
+        check("liquidity", "Average turnover at least Rs 10 crore", np.isfinite(r.turnover) and r.turnover >= 1e8,
+              f"20-session average Rs {number(r.turnover/1e7, 2)} crore."),
+        check("volatility", "ATR between 0.5% and 6%", atr_pct is not None and .5 <= atr_pct <= 6,
+              f"ATR14 is {atr_pct}% of price."),
+        check("structure_exit", "Structure exit not triggered", not bool(r.exit_condition),
+              "A close below the confirmed low is an exit condition for existing longs."),
+    ]
     base.update({
         "data_date": last_date, "complete_for_session": fresh, "status": status, "reason": reason,
         "close": number(r.Close), "atr": number(r.atr), "atr_pct": atr_pct,
@@ -212,9 +237,31 @@ def scan_stock(meta, frame, invalid_dates, as_of, market, calendar):
         "distance_to_breakout_pct": number(100*(high/r.Close-1), 2) if high else None,
         "pivots": {"high": highs[-2:], "low": lows[-2:]},
         "zones": zones, "chart": chart, "chart_swings": chart_swings(pivots, chart[0]["date"]), "data_warnings": warnings,
-        "entry_allowed": status == "BUY", "entry_plan": entry_plan,
+        "entry_allowed": status == "BUY", "entry_plan": entry_plan, "entry_checks": checks,
+        "volume_ratio": number(r.Volume/r.volume_average20, 2) if r.volume_average20 > 0 else None,
     })
     return base
+
+
+def priority_watchlist(rows, limit=10):
+    """Deterministic review order, not a return forecast or new entry rule."""
+    pool = [r for r in rows if r["structure"] == "HH / HL"
+            and r["complete_for_session"] and r["zones"]
+            and r["status"] in ("BUY", "WATCH", "CAUTION")
+            and all(c["state"] == "pass" for c in r.get("entry_checks", [])
+                    if c["key"] not in ("trigger", "market"))]
+    def key(row):
+        tier = 0 if row["status"] == "BUY" else 1 if row["fresh_breakout"] else 2 if row["status"] == "WATCH" else 3
+        distance = abs(row["close"]-row["zones"]["breakout_above"])/row["atr"] if row["atr"] else float("inf")
+        return tier, distance, row["symbol"]
+    pool.sort(key=key)
+    return [{"rank": i+1, "symbol": r["symbol"], "status": r["status"],
+             "distance_atr": number(abs(r["close"]-r["zones"]["breakout_above"])/r["atr"], 2),
+             "reason": "Eligible fresh breakout" if r["status"] == "BUY" else
+                       "Fresh breakout; entry blocked" if r["fresh_breakout"] else
+                       "Rising structure; waiting for a close above the trigger" if r["status"] == "WATCH" else
+                       "Already above the trigger; no fresh entry"}
+            for i, r in enumerate(pool[:limit])]
 
 
 def normalize_sessions(loaded, minimum_symbols=100):
@@ -276,6 +323,8 @@ def build(as_of, cache_dir=ROOT/".cache/swing", universe_path=ROOT/"nifty200.csv
         "universe_count": len(universe), "complete_count": sum(r["complete_for_session"] for r in rows),
         "classifiable_count": sum(bool(r["zones"]) for r in rows), "counts": counts,
         "market": market, "rows": rows, "failures": failures,
+        "priority_watchlist": priority_watchlist(rows),
+        "priority_method": "Review order: eligible breakouts, blocked fresh breakouts, then waiting HH/HL setups nearest their trigger in ATR units. Late setups last. No forecast score or promise of profit.",
         "data_audit": {
             "price_source": "Previously downloaded Yahoo adjusted daily OHLCV; dates and OHLC checked locally.",
             "latest_recheck": "Local history scan; fetch provenance is supplied by hhhl_refresh.py for automated runs.",

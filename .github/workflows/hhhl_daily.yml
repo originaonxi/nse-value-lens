@@ -105,7 +105,7 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Verify published prices, all filters and both websites
         run: python tests/verify_hhhl_live.py --run-id "$GITHUB_RUN_ID" --timeout 360
-      - name: Verify confirmed swing labels and zigzag on both sites
+      - name: Verify top-ten shortlist and strategy charts on both sites
         run: |
           python tests/browser_hhhl_chart.py --url https://originaonxi.github.io/nse-value-lens/hhhl.html
           python tests/browser_hhhl_chart.py --url https://nifty.up.railway.app/hhhl.html
@@ -115,5 +115,6 @@ jobs:
           name: hhhl-end-to-end
           path: |
             artifacts/hhhl-live-*
-            artifacts/hhhl-chart-*.png
+            artifacts/hhhl-chart-*
+            artifacts/hhhl-priority-*.png
           retention-days: 90
