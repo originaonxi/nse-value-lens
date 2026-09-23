@@ -110,3 +110,18 @@ preserved and must not be blended with these new results.
 
 Railway serves refreshed GitHub datasets with a five-minute cache and a local fallback.
 The browser expires fallback entry levels too. Refresh aborts below 90% universe coverage.
+
+## Last 10 filled setups
+
+History combines the base-cost earlier and recent simulations, never the duplicate
+stress run. Sort is setup date descending, entry date descending, then symbol and
+strategy. Filtering happens before taking ten rows. Strategies represent separate
+portfolios; the same stock may appear in different strategies.
+
+Each row records the signal's session, actual simulated fill dates/prices,
+initial stop, fill-adjusted target, and net P/L after modelled costs. Net percentage
+return uses the position's entry cost including fees, not whole-account capital.
+Prices are adjusted historical prices including simulated slippage.
+Open-at-window-end records have no invented exit price, realized P/L or sell date.
+This is a retrospective reconstruction, not a log of recommendations published
+on those historical dates. Skipped and unfilled signals are not included.

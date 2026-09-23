@@ -41,7 +41,35 @@ function sizePosition() {
   if (qty < 1) return $('size-result').textContent = 'Capital is too small for one share within these risk limits.';
   $('size-result').textContent = qty+' shares · estimated entry '+money(entry)+' · capital used '+money(qty*entry*1.0015)+' · stop '+money(p.stop)+' · target '+money(entry+2*risk)+' · price risk '+money(qty*risk)+' before costs / gaps.';
 }
+
+let historyRows = [];
+const tradeDate = value => value ? esc(value) : 'Pending';
+function renderHistory() {
+  const selected = $('history-strategy').value;
+  const matches = historyRows.filter(row => selected === 'all' || row.strategy === selected);
+  const rows = matches.slice(0, 10);
+  $('history-note').textContent = rows.length
+    ? 'Showing '+rows.length+' of '+matches.length+' filled setups. Dates are NSE session dates. Prices include simulated slippage; net results include estimated costs. Open positions are as of the evidence snapshot.'
+    : 'No filled setups available for this selection.';
+  $('history-rows').innerHTML = rows.length ? rows.map(t => {
+    const closed = t.status === 'CLOSED';
+    return '<tr><td>'+esc(t.symbol)+'<br><small>'+esc(names[t.strategy])+'</small></td>'+
+      '<td>'+tradeDate(t.signal_date)+'</td><td>Buy &rarr; sell<br><small>Long</small></td>'+
+      '<td>'+tradeDate(t.entry_date)+'<br><strong>'+money(t.entry_price)+'</strong></td>'+
+      '<td>'+(closed ? tradeDate(t.exit_date)+'<br><strong>'+money(t.exit_price)+'</strong>' : 'Open<br><small>No sell fill yet</small>')+'</td>'+
+      '<td>'+money(t.stop)+'<br>'+money(t.target)+'</td>'+
+      '<td class="'+(closed ? (t.pnl >= 0 ? 'positive' : 'negative') : '')+'">'+
+      (closed ? money(t.pnl)+'<br><small>'+pct(t.return_pct)+'</small>' : 'Unrealized')+'</td>'+
+      '<td>'+esc(t.reason)+'<br><small>'+esc(t.sessions)+' sessions</small></td></tr>';
+  }).join('') : '<tr><td colspan="8">No historical fills to display.</td></tr>';
+}
+
 function renderEvidence(e) {
+  historyRows = Object.entries(e.results).flatMap(([strategy, result]) => ['earlier', 'recent'].flatMap(window => {
+    const r = result[window];
+    return [...(r?.trade_log || []), ...(r?.open_trade_log || [])].filter(t => t.signal_date && Number.isFinite(t.entry_price)).map(t => ({...t, strategy}));
+  })).sort((a,b) => b.signal_date.localeCompare(a.signal_date) || b.entry_date.localeCompare(a.entry_date) || a.symbol.localeCompare(b.symbol) || a.strategy.localeCompare(b.strategy));
+  renderHistory();
   $('evidence-note').textContent = 'Earlier: '+e.windows.earlier.join(' → ')+'. Recent: '+e.windows.recent.join(' → ')+'. Fixed rules, no parameter search. Current constituents create survivorship bias; these retrospective results are not proof of future profits.'+(e.as_of !== desk?.as_of ? ' Evidence snapshot: '+e.as_of+'.' : '');
   $('results').innerHTML = Object.entries(e.results).map(([key,v]) => '<tr><td>'+esc(names[key])+'</td><td>'+pct(v.earlier.return_pct)+'</td><td class="'+(v.recent.return_pct>=0?'positive':'negative')+'">'+pct(v.recent.return_pct)+'</td><td>'+v.recent.max_drawdown_pct.toFixed(2)+'%</td><td>'+v.recent.trades+'</td><td>'+(v.recent.win_rate_pct == null ? '—' : v.recent.win_rate_pct.toFixed(1)+'%')+'</td><td>'+pct(v.stress.return_pct)+'</td></tr>').join('');
   $('cost-note').textContent = e.cost_note+' '+e.benchmark_note+' Open holdings are marked to the last available close with estimated exit costs reserved; closed-trade statistics exclude those holdings.';
@@ -98,8 +126,9 @@ async function start() {
   }
   $('download').href=document.body.dataset.source+'swing_evidence.json';
   if(evidence.status==='fulfilled')renderEvidence(evidence.value);
-  else{$('evidence-note').textContent='Historical comparison unavailable. No performance claim can be made.';$('results').innerHTML='<tr><td colspan="7">Evidence has not loaded.</td></tr>';}
+  else{$('history-note').textContent='Trade history unavailable until evidence loads.';$('evidence-note').textContent='Historical comparison unavailable. No performance claim can be made.';$('results').innerHTML='<tr><td colspan="7">Evidence has not loaded.</td></tr>';}
 }
+$('history-strategy').addEventListener('change', renderHistory);
 start().catch(()=>{$('notice').textContent='Research data is invalid or incomplete. Reload after a successful refresh.';$('notice').classList.add('warning');$('cards').replaceChildren();});
 
 

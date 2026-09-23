@@ -10,9 +10,20 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True)
     page=browser.new_page(viewport={"width":1440,"height":1080},device_scale_factor=1)
     page.on("pageerror",lambda e:errors.append(str(e)))
+    evidence=json.loads((root/"public/data/swing_evidence.json").read_text())
+    page.route("**/swing_evidence.json",lambda route:route.fulfill(json=evidence))
     page.goto("http://localhost:3217",wait_until="networkidle")
     page.locator("#results").wait_for()
     assert page.locator("#results tr").count()==3
+    assert page.locator("#history-rows tr").count()==10
+    signal_dates=page.locator("#history-rows tr td:nth-child(2)").all_text_contents()
+    assert signal_dates==sorted(signal_dates,reverse=True)
+    assert "Buy" in page.locator("#history-rows").inner_text()
+    page.locator("#history-strategy").select_option("pullback")
+    assert page.locator("#history-rows tr").count()==10
+    assert all("Trend pullback" in x for x in page.locator("#history-rows tr td:first-child").all_text_contents())
+    page.locator("#history-strategy").select_option("all")
+    page.locator("#history").screenshot(path=str(root/"artifacts/swing-history.png"))
     assert "Cash is a position" in page.locator("#cards").inner_text()
     page.screenshot(path=str(root/"artifacts/swing-desktop.png"),full_page=True)
     page.set_viewport_size({"width":390,"height":844})

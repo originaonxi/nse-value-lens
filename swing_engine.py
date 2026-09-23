@@ -107,7 +107,7 @@ def backtest(frames, market, sectors, strategy, start, end, cost_scale=1):
                 continue
             pos = fill(plan, bars[symbol].Open, equity, cash, fee, slip)
             if pos:
-                pos.update(symbol=symbol, sector=sector, entry_date=str(day.date()), mark=pos["entry"])
+                pos.update(symbol=symbol, sector=sector, signal_date=plan["signal_date"], entry_date=str(day.date()), mark=pos["entry"])
                 cash -= pos["cost"]
                 positions[symbol] = pos
         pending = []
@@ -123,7 +123,11 @@ def backtest(frames, market, sectors, strategy, start, end, cost_scale=1):
                 price, reason = outcome
                 proceeds = pos["qty"]*price*(1-fee)
                 cash += proceeds
-                trades.append({"symbol": symbol, "entry_date": pos["entry_date"],
+                trades.append({"symbol": symbol, "strategy": strategy, "direction": "LONG", "status": "CLOSED",
+                               "signal_date": pos["signal_date"], "entry_date": pos["entry_date"],
+                               "entry_price": pos["entry"], "exit_price": price,
+                               "stop": pos["stop"], "target": pos["target"], "quantity": pos["qty"],
+                               "return_pct": 100*(proceeds/pos["cost"]-1),
                                "exit_date": str(day.date()), "pnl": round(proceeds-pos["cost"], 2),
                                "r": (proceeds-pos["cost"])/pos["risk_cash"], "reason": reason,
                                "sessions": pos["age"]})
@@ -134,7 +138,7 @@ def backtest(frames, market, sectors, strategy, start, end, cost_scale=1):
             if symbol not in positions:
                 plan = setup(bar, market_rows[day], strategy)
                 if plan:
-                    pending.append((symbol, plan))
+                    pending.append((symbol, dict(plan, signal_date=str(day.date()))))
         pending.sort(key=lambda x: (-x[1]["relative_strength"], x[0]))
     # Reserve closing costs on residual positions without inventing fills.
     equity = cash+sum(p["qty"]*p["mark"]*(1-fee-slip) for p in positions.values())
@@ -153,4 +157,12 @@ def backtest(frames, market, sectors, strategy, start, end, cost_scale=1):
             "expectancy_r": round(float(np.mean([t["r"] for t in trades])), 3) if trades else None,
             "open_positions": len(positions), "missing_position_bars": missing,
             "benchmark_price_return_pct": round(100*(market.loc[dates[-1]].Close/market.loc[dates[0]].Open-1), 2) if dates else None,
-            "start": start, "end": end, "curve": curve, "trade_log": trades}
+            "start": start, "end": end, "curve": curve, "trade_log": trades,
+            "open_trade_log": [
+                {"symbol": symbol, "strategy": strategy, "direction": "LONG", "status": "OPEN",
+                 "signal_date": pos["signal_date"], "entry_date": pos["entry_date"],
+                 "entry_price": pos["entry"], "exit_date": None, "exit_price": None,
+                 "stop": pos["stop"], "target": pos["target"], "quantity": pos["qty"],
+                 "pnl": None, "return_pct": None, "reason": "Still open at window end",
+                 "sessions": pos["age"]}
+                for symbol, pos in positions.items()]}

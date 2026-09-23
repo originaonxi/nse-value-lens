@@ -44,7 +44,16 @@ class SwingTests(unittest.TestCase):
         with patch("swing_engine.setup", return_value=self.plan()):
             result = backtest({"A":d},d,{"A":"X"},"breakout","2025-01-01","2025-01-10")
         first = result["trade_log"][0]
+        self.assertEqual(first["signal_date"], "2025-01-01")
         self.assertEqual(first["entry_date"], "2025-01-02")
+        self.assertEqual(first["direction"], "LONG")
+        self.assertEqual(first["status"], "CLOSED")
+        self.assertGreater(first["entry_price"], 100)
+        self.assertLess(first["exit_price"], 100)
+        self.assertAlmostEqual(first["pnl"], first["quantity"]*(first["exit_price"]*.9985-first["entry_price"]*1.0015), places=2)
+        self.assertLess(first["return_pct"], 0)
+        self.assertEqual(result["open_trade_log"][0]["status"], "OPEN")
+        self.assertIsNone(result["open_trade_log"][0]["exit_price"])
         self.assertEqual(first["exit_date"], "2025-01-08")
         self.assertEqual(first["sessions"], 5)
         self.assertLess(first["pnl"], 0)
