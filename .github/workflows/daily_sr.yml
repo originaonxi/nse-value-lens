@@ -1,21 +1,46 @@
 name: Daily S&R Refresh
 
-# Runs every weekday at 14:00 UTC (19:30 IST) — after NSE closes AND after
-# NSE CM Bhavcopy is published (~18:00–18:30 IST). Bhavcopy is used to patch
-# any yfinance data-lag so as_of always reflects the actual trading session.
-# NSE closes 15:30 IST = 10:00 UTC; Bhavcopy available ~12:30 UTC.
-# Also triggerable manually from GitHub Actions tab.
+# Three staggered schedules guard against GitHub's unreliable cron scheduler.
+# Primary fires at 14:00 UTC (19:30 IST); backups at 15:00 and 16:00 UTC.
+# A lightweight `guard` job reads docs/sr_levels.json — if as_of is already
+# today (IST), the expensive refresh-sr job is skipped entirely (idempotent).
+# NSE closes 15:30 IST = 10:00 UTC; Bhavcopy available ~12:30 UTC (~18:00 IST).
+# workflow_dispatch always runs regardless of the idempotency check.
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5'   # 14:00 UTC = 19:30 IST, weekdays only (after bhavcopy)
+    - cron: '0 14 * * 1-5'   # 14:00 UTC = 19:30 IST (primary)
+    - cron: '0 15 * * 1-5'   # 15:00 UTC = 20:30 IST (fallback 1)
+    - cron: '0 16 * * 1-5'   # 16:00 UTC = 21:30 IST (fallback 2)
   workflow_dispatch:           # manual trigger any time
 
 permissions:
   contents: write              # needed to commit sr_levels.json back to repo
 
 jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if already refreshed today (IST)
+        id: check
+        run: |
+          TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
+          AS_OF=$(jq -r '.as_of // empty' docs/sr_levels.json 2>/dev/null || echo "")
+          if [ "$AS_OF" = "$TODAY" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Already refreshed for $TODAY — skipping this scheduled run."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Will refresh: as_of=${AS_OF:-missing} today=$TODAY event=${{ github.event_name }}"
+          fi
+
   refresh-sr:
+    needs: guard
+    if: needs.guard.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
