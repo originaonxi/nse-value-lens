@@ -8,6 +8,7 @@ entry/stop/target plans and risk sizing, and hides expired entries.
 drawdowns, two historical windows, and a doubled-cost stress test. Current
 constituents introduce survivorship bias. No automatic orders are placed.
 
+- [Kasandra scanner: public record and accounting audit](docs/KASANDRA_REVIEW.md)
 - [50-source research library: access checks and NSE applications](docs/RESEARCH_LIBRARY.md)
 - [Top 100 indicator rules: ranked evidence and trade logs](https://originaonxi.github.io/nse-value-lens/indicator-lab.html)
 - [Indicator methods and reproduction](docs/INDICATOR_RESEARCH.md)

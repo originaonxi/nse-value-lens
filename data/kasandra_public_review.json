@@ -1,0 +1,136 @@
+{
+  "reviewed_on": "2026-09-23",
+  "status": "public_output_accounting_review_not_independent_strategy_backtest",
+  "sources": {
+    "home": "https://kasandra-scanner.com/",
+    "guide": "https://kasandra-scanner.com/guide.html",
+    "track_record": "https://kasandra-scanner.com/track.html",
+    "public_record_json": "https://kasandra-scanner.com/api/record",
+    "demo": "https://app.kasandra-scanner.com/demo",
+    "demo_snapshot": "https://app.kasandra-scanner.com/api/demo?sym=XAUUSD.s&tf=15&n=3000"
+  },
+  "provenance": {
+    "record": {
+      "local_file": "artifacts/kasandra_record.json",
+      "sha256": "bec7fc9c3ae461bbe1df66b89b695480c1ff458786d4efa120a1d923f958ef74",
+      "file_modified_utc": "2026-09-23T19:49:02.806580+00:00"
+    },
+    "demo": {
+      "local_file": "artifacts/kasandra_demo_snapshot.json",
+      "sha256": "ff61d262a8bba6295d975ad4acc92ddfc9ddb8d4e2cc2c464fa5ca043c135ad1",
+      "file_modified_utc": "2026-09-23T20:09:30.714616+00:00"
+    }
+  },
+  "record_response_at_utc": "2026-09-23T19:48:39+00:00",
+  "demo_delay_seconds": 1800,
+  "demo_version": "5.0",
+  "engines_as_reported": [
+    {
+      "key": "XAUUSD.s",
+      "name": "Gold \u00b7 ZONES",
+      "version": "5.0",
+      "since_timestamp_as_supplied": 1789188293,
+      "since_date_from_epoch": "2026-09-12",
+      "reported_closed": 74,
+      "reported_wins": 55,
+      "reported_losses": 19,
+      "reported_win_rate_pct": 74.32,
+      "reported_net": -67.3,
+      "reported_unit": "pips",
+      "reported_open": 0,
+      "visible_rows": 40,
+      "visible_rows_cover_reported_count": false
+    },
+    {
+      "key": "DJ30.s",
+      "name": "Dow \u00b7 ZONES",
+      "version": "5.0",
+      "since_timestamp_as_supplied": 1789132939,
+      "since_date_from_epoch": "2026-09-11",
+      "reported_closed": 66,
+      "reported_wins": 30,
+      "reported_losses": 36,
+      "reported_win_rate_pct": 45.45,
+      "reported_net": -1080,
+      "reported_unit": "pts",
+      "reported_open": 0,
+      "visible_rows": 40,
+      "visible_rows_cover_reported_count": false
+    },
+    {
+      "key": "XAUUSD.s.tetris",
+      "name": "Gold \u00b7 TETRIS",
+      "version": "1.0",
+      "since_timestamp_as_supplied": 1789206788,
+      "since_date_from_epoch": "2026-09-12",
+      "reported_closed": 1,
+      "reported_wins": 0,
+      "reported_losses": 1,
+      "reported_win_rate_pct": 0.0,
+      "reported_net": -57.6,
+      "reported_unit": "pips",
+      "reported_open": 1,
+      "visible_rows": 1,
+      "visible_rows_cover_reported_count": true
+    },
+    {
+      "key": "BTCUSD.dip",
+      "name": "Bitcoin \u00b7 BTC DIP",
+      "version": "1.0",
+      "since_timestamp_as_supplied": 1789216708,
+      "since_date_from_epoch": "2026-09-12",
+      "reported_closed": 4,
+      "reported_wins": 3,
+      "reported_losses": 1,
+      "reported_win_rate_pct": 75.0,
+      "reported_net": 112.6,
+      "reported_unit": "$",
+      "reported_open": 0,
+      "visible_rows": 4,
+      "visible_rows_cover_reported_count": true
+    }
+  ],
+  "gold_loaded_demo_ledger": {
+    "signals": 168,
+    "closed_base_trades": 168,
+    "positive_base_trades": 119,
+    "unresolved_positions_or_runners": 0,
+    "base_realized_price_units": -169.008712,
+    "runner_realized_price_units": 208.941597,
+    "combined_realized_price_units": 39.932885,
+    "profile_spread_price_units_per_entry": 0.32000000000000006,
+    "spread_allowance_price_units": 53.76,
+    "realized_after_profile_spread_price_units": -13.827115,
+    "units": "gold quote-price movement per initial position unit; not account cash or percentage return",
+    "cost_scope": "Replicates the public demo's one profile spread allowance per closed base trade; no slippage, commission or financing."
+  },
+  "gold_record_window_reconstruction": {
+    "signals": 74,
+    "closed_base_trades": 74,
+    "positive_base_trades": 55,
+    "unresolved_positions_or_runners": 0,
+    "base_realized_price_units": -67.308229,
+    "runner_realized_price_units": 21.080204,
+    "combined_realized_price_units": -46.228024,
+    "profile_spread_price_units_per_entry": 0.32000000000000006,
+    "spread_allowance_price_units": 23.68,
+    "realized_after_profile_spread_price_units": -69.908024,
+    "units": "gold quote-price movement per initial position unit; not account cash or percentage return",
+    "cost_scope": "Replicates the public demo's one profile spread allowance per closed base trade; no slippage, commission or financing."
+  },
+  "reconciliation": {
+    "gold_closed_count_matches": true,
+    "gold_reported_net_matches_base_subtotal_with_rounding": true,
+    "interpretation": "If both checks match, the reported gold net agrees with the base-trade subtotal before linked runners and the demo spread formula. This does not establish what costs may be embedded in the vendor's supplied fills."
+  },
+  "limitations": [
+    "Rules and filters remain server-side; no exact algorithm was copied or independently backtested.",
+    "Public output is vendor-supplied and is not independently verified broker execution.",
+    "Short version-specific records cannot establish a durable edge; Bitcoin Dip has only four closed trades in this snapshot.",
+    "Gold and Dow public record lists are capped at 40 visible rows, below their reported totals.",
+    "Some site pips labels differ from the demo profile's quote-price/pip conversion; retain reported units and do not interpret them as cash returns.",
+    "Event clocks require normalization: instrument metadata reports a server offset of 180 minutes.",
+    "The homepage advertises Gold Scalp 5, but this public record response contains Dow Zones instead.",
+    "No NSE instruments, historical NSE membership or NSE execution costs were tested."
+  ]
+}
