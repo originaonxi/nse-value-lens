@@ -23,6 +23,20 @@ with sync_playwright() as p:
     data=json.loads(payload) if args.fixture else page.request.get(urljoin(args.url,(page.locator("body").get_attribute("data-source") or "")+"hhhl_scan.json")).json()
     picks=data["priority_watchlist"]
     assert page.locator(".priority-card").count()==len(picks)<=10
+    for pick in picks:
+        stock=next(r for r in data["rows"] if r["symbol"]==pick["symbol"])
+        page.locator('.priority-card[data-symbol="'+stock["symbol"]+'"]').click()
+        assert page.locator("#detail-title").inner_text().startswith(stock["symbol"]+" / ")
+        assert page.locator(".strategy-check").count()==9
+        assert page.locator(".daily-candle").count()==min(70,len(stock["chart"]))
+        assert page.locator("#stock-chart svg").count()==1
+        assert "NaN" not in page.locator("#stock-chart").inner_html()
+        if stock["entry_plan"]:
+            assert page.locator(".execution-overlay").get_attribute("data-eligible")==str(stock["entry_allowed"]).lower()
+        else:
+            assert page.locator(".execution-overlay").count()==0
+        for level in page.locator(".confirmed-level").all():
+            assert level.get_attribute("data-start-date")>=level.get_attribute("data-known-from")
     eligible=[r for r in data["rows"] if len(r.get("chart_swings",[]))>4 and len(r["chart"])>=70]
     assert eligible, "No full confirmed swing history available"
     row=next((r for r in eligible if picks and r["symbol"]==picks[0]["symbol"]),eligible[0])
@@ -75,7 +89,7 @@ with sync_playwright() as p:
     assert "Confirmed:" in page.locator("#chart-inspect").inner_text()
     page.locator("#stock-detail").screenshot(path=str(out/"hhhl-chart-mobile.png"))
     assert not errors,errors
-    report={"url":args.url,"symbol":row["symbol"],"top_setups":len(picks),"active_pivots":active,
+    report={"url":args.url,"symbol":row["symbol"],"top_setups":len(picks),"shortlist_charts_checked":len(picks),"active_pivots":active,
             "default_candles":70,"zoom_windows":True,"strategy_checks":9,"causal_levels":True,
             "volume_panel":True,"entry_eligibility_preserved":True,"mobile_scroll":True,"errors":errors}
     (out/"hhhl-chart-report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
