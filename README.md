@@ -9,6 +9,8 @@ drawdowns, two historical windows, and a doubled-cost stress test. Current
 constituents introduce survivorship bias. No automatic orders are placed.
 
 - [Nifty 200 HH/HL scanner: all stocks, states and zones](https://originaonxi.github.io/nse-value-lens/hhhl.html)
+- [Daily HH/HL automation: 4 pm IST, retries and freshness checks](docs/HHHL_AUTOMATION.md)
+- [10/10 real automation runs passed, including live chart verification](docs/HHHL_AUTOMATION_TEST_REPORT.md)
 - [Kasandra scanner: public record and accounting audit](docs/KASANDRA_REVIEW.md)
 - [50-source research library: access checks and NSE applications](docs/RESEARCH_LIBRARY.md)
 - [Top 100 indicator rules: ranked evidence and trade logs](https://originaonxi.github.io/nse-value-lens/indicator-lab.html)
