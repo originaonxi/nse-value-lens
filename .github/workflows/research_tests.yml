@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
   pull_request:
-    paths: ['indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
 permissions:
   contents: read
 jobs:

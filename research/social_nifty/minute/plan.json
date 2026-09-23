@@ -1,0 +1,43 @@
+{
+  "frozen_before_results": true,
+  "created": "2026-09-23",
+  "dataset": "https://zenodo.org/records/10899828",
+  "md5": "240aecc77a7275ec2f05a092b976bf91",
+  "status": "Exploratory third-party continuous NIFTY_F1 futures proxy, not exchange contract-level validation; no tuning after outcomes.",
+  "rules": {
+    "gap_fade": "Spot first normal-session open differs from previous observed 15:30 close by at least 0.5%. Fade gap at futures bar labelled 09:22 open; signal determined by 09:20. Stop 0.5 prior daily spot ATR14; target 1.0 ATR. Exit bar labelled15:15 open.",
+    "gap_fade_confirmed": "Same gap fade, additionally spot close labelled09:20 lies strictly between opening spot price and previous session close (partial reversal, not already filled).",
+    "opening_range": "Futures range of labels09:16..09:30. First close above high or below low after09:30 and no later12:00 triggers corresponding direction. Fill open two timestamp-minutes later. Stop opposite range end; target2R. Skip if entry no longer outside range. Exit label15:15 open. One signal/day."
+  },
+  "capital": 2000000,
+  "lot_size": 75,
+  "lot_source": "https://archives.nseindia.com/content/circulars/FAOP47854.pdf",
+  "sizing": "Integer lots, full notional <= equity and planned stop loss including estimated costs <=0.5% equity; one trade/day. No financing, cash interest or personal income taxes. Gap-through stops can lose more.",
+  "cost_scenarios": {
+    "lower_cost": {
+      "fee_per_side": 0.0001,
+      "slippage_per_side": 0.0002
+    },
+    "conservative": {
+      "fee_per_side": 0.0005,
+      "slippage_per_side": 0.0002
+    },
+    "stress": {
+      "fee_per_side": 0.001,
+      "slippage_per_side": 0.0004
+    }
+  },
+  "cost_note": "Scenarios, not exact historical broker tariffs. Lower cost may understate current taxes. Stress doubles conservative assumptions.",
+  "execution": "No bar-close fills. Gap stops use worse opening price; if stop and target touched same minute stop first; take-profit requires trade through target by0.05. No overnight positions. Never infer order from OHLC. Timestamp convention undocumented; at least one full timestamp minute between signal close label and entry-bar start under either start/end label convention.",
+  "windows": {
+    "earlier": [
+      "2017-01-01",
+      "2018-12-31"
+    ],
+    "later": [
+      "2019-01-01",
+      "2020-12-31"
+    ]
+  },
+  "audit": "Do not silently drop losses or repair prices. Exclude only bars outside09:16..15:30 from regular-session calculations. Missing held minute bars are flagged, never filled forward. All selected-trade logs retained."
+}
