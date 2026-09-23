@@ -96,7 +96,7 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(refresh.choose_state(scan,"2026-09-24",True,200),"waiting")
 
     def test_refresh_failure_publishes_status_not_a_fabricated_scan(self):
-        with patch.object(refresh, "holidays_for", return_value=([],False)), patch.object(refresh, "refresh_universe", side_effect=RuntimeError("offline")), patch.object(refresh, "publish") as publish:
+        with patch.dict(refresh.os.environ, {"GITHUB_STEP_SUMMARY": ""}), patch("builtins.print"), patch.object(refresh, "holidays_for", return_value=([],False)), patch.object(refresh, "refresh_universe", side_effect=RuntimeError("offline")), patch.object(refresh, "publish") as publish:
             result = refresh.run(datetime(2026,9,23,12,tzinfo=timezone.utc))
         self.assertEqual(result["state"], "failed")
         self.assertEqual(publish.call_count, 1)

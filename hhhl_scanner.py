@@ -74,6 +74,27 @@ def pivot_events(frame):
     return found
 
 
+def chart_swings(pivots, first_date):
+    """Labels use full-history confirmed pivots, not rounded chart candles."""
+    events = []
+    for kind in ("high", "low"):
+        previous = None
+        for point in pivots[kind]:
+            price = point["price"]
+            if previous is None:
+                label = "H" if kind == "high" else "L"
+            elif price == previous:
+                label = "EH" if kind == "high" else "EL"
+            elif kind == "high":
+                label = "HH" if price > previous else "LH"
+            else:
+                label = "HL" if price > previous else "LL"
+            if point["pivot_date"] >= first_date:
+                events.append(dict(point, kind=kind, label=label))
+            previous = price
+    return sorted(events, key=lambda p: (p["pivot_date"], p["kind"]))
+
+
 def classify(*, fresh, enough, gaps, volume, exit_condition, structure,
              breakout, above_high, market_ready, market_on, price, turnover, atr_pct):
     if not fresh:
@@ -116,7 +137,7 @@ def scan_stock(meta, frame, invalid_dates, as_of, market, calendar):
         "fresh_breakout": False, "exit_condition": False, "sell_triggered_today": False,
         "last_breakout_date": None, "distance_to_breakout_pct": None,
         "pivots": {"high": [], "low": []}, "zones": {}, "chart": [],
-        "data_warnings": [], "entry_allowed": False, "entry_plan": None,
+        "data_warnings": [], "entry_allowed": False, "entry_plan": None, "chart_swings": [],
     }
     if frame.empty:
         return base
@@ -190,7 +211,7 @@ def scan_stock(meta, frame, invalid_dates, as_of, market, calendar):
         "last_breakout_date": str(signals[-1].date()) if len(signals) else None,
         "distance_to_breakout_pct": number(100*(high/r.Close-1), 2) if high else None,
         "pivots": {"high": highs[-2:], "low": lows[-2:]},
-        "zones": zones, "chart": chart, "data_warnings": warnings,
+        "zones": zones, "chart": chart, "chart_swings": chart_swings(pivots, chart[0]["date"]), "data_warnings": warnings,
         "entry_allowed": status == "BUY", "entry_plan": entry_plan,
     })
     return base

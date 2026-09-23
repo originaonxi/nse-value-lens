@@ -55,32 +55,80 @@
   }
 
   function chart(row) {
-    const bars = row.chart || [];
-    if (bars.length < 2) return '<p class="muted">Not enough complete prices to draw a chart.</p>';
-    const w=780, h=310, left=18, right=85, top=25, bottom=35;
-    const levels=[row.zones.breakout_above, row.zones.structure_exit_below].filter(numeric);
-    let lo=Math.min(...bars.map(b=>b.low), ...levels), hi=Math.max(...bars.map(b=>b.high), ...levels);
-    const pad=Math.max((hi-lo)*.09, 1); lo-=pad; hi+=pad;
+    const bars=row.chart||[];
+    if(bars.length<2) return '<p class="muted">Not enough complete prices to draw a chart.</p>';
+    const w=1100,h=430,left=20,right=100,top=34,bottom=36;
+    const levels=[row.zones.breakout_above,row.zones.structure_exit_below].filter(numeric);
+    let lo=Math.min(...bars.map(b=>b.low),...levels),hi=Math.max(...bars.map(b=>b.high),...levels);
+    const pad=Math.max((hi-lo)*.16,1);lo-=pad;hi+=pad;
     const y=p=>top+(hi-p)/(hi-lo)*(h-top-bottom);
-    const step=(w-left-right)/bars.length, x=i=>left+step*(i+.5);
-    let svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(row.symbol)+' daily candlesticks through '+esc(row.data_date)+'"><rect width="'+w+'" height="'+h+'" fill="white"/>';
-    for(let i=0;i<5;i++) {
-      const price=lo+(hi-lo)*i/4, py=y(price);
-      svg+='<line x1="'+left+'" y1="'+py+'" x2="'+(w-right)+'" y2="'+py+'" stroke="#edf0e8"/><text x="'+(w-right+9)+'" y="'+(py+4)+'" font-size="10" fill="#65716a">'+fmt(price)+'</text>';
+    const step=(w-left-right)/bars.length,x=i=>left+step*(i+.5);
+    const indices=new Map(bars.map((b,i)=>[b.date,i]));
+    const swings=HHHLChart.points(row);
+    const stamp=p=>x(indices.get(p.pivot_date))+','+y(p.price);
+    let svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(row.symbol)+' candles with confirmed HH HL LH LL labels and zigzag through '+esc(row.data_date)+'"><rect width="'+w+'" height="'+h+'" fill="#fff"/>';
+    svg+='<rect x="'+(left+step*Math.max(0,bars.length-2))+'" y="'+top+'" width="'+(2*step)+'" height="'+(h-top-bottom)+'" fill="#f5eddb" opacity=".75"><title>These final two candles cannot yet be confirmed swing points.</title></rect>';
+    for(let i=0;i<7;i++){
+      const price=lo+(hi-lo)*i/6,py=y(price);
+      svg+='<line x1="'+left+'" y1="'+py+'" x2="'+(w-right)+'" y2="'+py+'" stroke="#e9eee9" stroke-dasharray="3 5"/><text x="'+(w-right+12)+'" y="'+(py+4)+'" font-size="11" fill="#748078">'+fmt(price)+'</text>';
+    }
+    if($('chart-levels').checked&&Array.isArray(row.zones.watch_band)){
+      const band=row.zones.watch_band;
+      svg+='<rect class="chart-zone" x="'+left+'" y="'+y(band[1])+'" width="'+(w-left-right)+'" height="'+Math.max(0,y(band[0])-y(band[1]))+'" fill="#e8eff8" opacity=".7"><title>Watch band: '+esc(range(band))+'; wait for a fresh confirmed breakout.</title></rect>';
     }
     bars.forEach((b,i)=>{
-      const c=b.close>=b.open?'#317858':'#b75b4b', py=Math.min(y(b.open),y(b.close)), bh=Math.max(1,Math.abs(y(b.open)-y(b.close)));
-      svg+='<line x1="'+x(i)+'" y1="'+y(b.high)+'" x2="'+x(i)+'" y2="'+y(b.low)+'" stroke="'+c+'"/><rect x="'+(x(i)-step*.28)+'" y="'+py+'" width="'+Math.max(1,step*.56)+'" height="'+bh+'" fill="'+c+'"/>';
+      const c=b.close>=b.open?'#2e8767':'#c56a5b',py=Math.min(y(b.open),y(b.close)),bh=Math.max(1.5,Math.abs(y(b.open)-y(b.close)));
+      svg+='<g class="daily-candle"><title>'+esc(b.date)+' | O '+fmt(b.open)+' H '+fmt(b.high)+' L '+fmt(b.low)+' C '+fmt(b.close)+'</title><line x1="'+x(i)+'" y1="'+y(b.high)+'" x2="'+x(i)+'" y2="'+y(b.low)+'" stroke="'+c+'" stroke-width="1.3"/><rect x="'+(x(i)-step*.29)+'" y="'+py+'" width="'+Math.max(1,step*.58)+'" height="'+bh+'" rx=".8" fill="'+c+'"/></g>';
     });
-    [[row.zones.breakout_above,'HIGH','#3066a0'],[row.zones.structure_exit_below,'LOW','#ad4037']].forEach(([price,label,color])=>{
-      if(!numeric(price)) return;
-      svg+='<line x1="'+left+'" y1="'+y(price)+'" x2="'+(w-right)+'" y2="'+y(price)+'" stroke="'+color+'" stroke-dasharray="5 4"/><text x="'+(left+4)+'" y="'+(y(price)-6)+'" font-size="10" font-weight="700" fill="'+color+'">'+label+' '+fmt(price)+'</text>';
+    if($('chart-levels').checked){
+      [[row.zones.breakout_above,'BREAKOUT','#3a679b'],[row.zones.structure_exit_below,'STRUCTURE EXIT','#ac594d']].forEach(([price,label,color])=>{
+        if(!numeric(price))return;
+        svg+='<g class="chart-zone"><line x1="'+left+'" y1="'+y(price)+'" x2="'+(w-right)+'" y2="'+y(price)+'" stroke="'+color+'" stroke-width="1.1" stroke-dasharray="7 5"/><rect x="'+left+'" y="'+(y(price)-19)+'" width="'+(label.length*6.5+82)+'" height="16" rx="3" fill="white" opacity=".92"/><text x="'+(left+5)+'" y="'+(y(price)-7)+'" font-size="10" font-weight="700" fill="'+color+'">'+label+' '+fmt(price)+'</text></g>';
+      });
+    }
+    if($('chart-swings').checked){
+      HHHLChart.segments(swings).forEach(segment=>{
+        const points=segment.map(stamp).join(' ');
+        svg+='<polyline class="structure-zigzag" points="'+points+'" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round" opacity=".8"/><polyline class="structure-zigzag" points="'+points+'" fill="none" stroke="#526f9a" stroke-width="1.8" stroke-linejoin="round"/>';
+      });
+      swings.forEach((p,i)=>{
+        const px=x(indices.get(p.pivot_date)),py=y(p.price),high=p.kind==='high';
+        const color=['HH','HL'].includes(p.label)?'#246f53':['LH','LL'].includes(p.label)?'#a44d44':'#64736b';
+        const fill=['HH','HL'].includes(p.label)?'#e7f3ea':['LH','LL'].includes(p.label)?'#f9ebe6':'#eef1ec';
+        const ly=high?py-29:py+10;
+        const title=p.label+' | '+money(p.price)+' | pivot '+p.pivot_date+' | confirmed '+p.confirmed_on;
+        svg+='<g class="swing-marker" role="button" tabindex="0" data-pivot="'+i+'" aria-label="'+esc(title)+'"><title>'+esc(title)+'</title><circle cx="'+px+'" cy="'+py+'" r="3.1" fill="white" stroke="'+color+'" stroke-width="1.8"/><line x1="'+px+'" y1="'+(high?py-4:py+4)+'" x2="'+px+'" y2="'+(high?ly+19:ly)+'" stroke="'+color+'" opacity=".45"/><rect x="'+(px-17)+'" y="'+ly+'" width="34" height="19" rx="5" fill="'+fill+'" stroke="'+color+'" stroke-opacity=".25"/><text x="'+px+'" y="'+(ly+13)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+color+'">'+p.label+'</text></g>';
+      });
+    }
+    const last=bars.at(-1),lastY=y(last.close);
+    svg+='<line x1="'+x(bars.length-1)+'" y1="'+lastY+'" x2="'+(w-right+5)+'" y2="'+lastY+'" stroke="#293e34" stroke-dasharray="2 3"/><rect x="'+(w-right+5)+'" y="'+(lastY-10)+'" width="89" height="20" rx="4" fill="#293e34"/><text x="'+(w-right+49)+'" y="'+(lastY+4)+'" text-anchor="middle" font-size="11" fill="white">'+fmt(last.close)+'</text>';
+    [0,Math.floor((bars.length-1)/3),Math.floor(2*(bars.length-1)/3),bars.length-1].forEach((i,n)=>{
+      svg+='<text x="'+x(i)+'" y="'+(h-10)+'" text-anchor="'+(n===0?'start':n===3?'end':'middle')+'" fill="#748078" font-size="10">'+esc(bars[i].date)+'</text>';
     });
-    svg+='<text x="'+left+'" y="'+(h-9)+'" fill="#65716a" font-size="10">'+esc(bars[0].date)+'</text><text x="'+(w-right)+'" y="'+(h-9)+'" text-anchor="end" fill="#65716a" font-size="10">'+esc(bars[bars.length-1].date)+'</text></svg>';
-    return svg;
+    return svg+'</svg>';
   }
 
-  function showDetail(symbol) {
+  function renderChart(row) {
+    $('stock-chart').innerHTML=chart(row);
+    const bars=row.chart||[],previous=bars.at(-2)?.close,last=bars.at(-1)?.close;
+    const change=previous?100*(last/previous-1):null;
+    $('chart-price').textContent=money(last)+(numeric(change)?'  '+(change>=0?'+':'')+fmt(change)+'%':'')+' / '+row.data_date;
+    $('chart-inspect').textContent='Tap a swing label for its price, pivot date and confirmation date.';
+  }
+
+  function inspectSwing(event) {
+    const marker=event.target.closest('[data-pivot]');
+    if(!marker||!selected)return;
+    if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+    if(event.type==='keydown')event.preventDefault();
+    const row=dataset.rows.find(r=>r.symbol===selected),point=HHHLChart.points(row)[Number(marker.dataset.pivot)];
+    if(!point)return;
+    const names={HH:'Higher high',HL:'Higher low',LH:'Lower high',LL:'Lower low',EH:'Equal high',EL:'Equal low',H:'Swing high',L:'Swing low'};
+    $('chart-inspect').textContent=point.label+' / '+names[point.label]+' / '+money(point.price)+' / Pivot: '+date(point.pivot_date)+' / Confirmed: '+date(point.confirmed_on)+'. This point was not known on its original candle.';
+    document.querySelectorAll('.swing-marker').forEach(el=>el.classList.toggle('selected-pivot',el===marker));
+  }
+
+  function showDetail(symbol, options={scroll:true}) {
     const r = dataset.rows.find(row => row.symbol === symbol);
     if (!r) return;
     selected = symbol;
@@ -90,7 +138,7 @@
     $('detail-badge').className = 'state ' + r.status;
     $('detail-badge').textContent = r.status;
     $('detail-reason').textContent = r.reason;
-    $('stock-chart').innerHTML = chart(r);
+    renderChart(r);
     const z=r.zones, p=r.entry_plan;
     const item=(title,value,note,classes='')=>'<div class="zone-item '+classes+'"><span>'+esc(title)+'</span><strong>'+esc(value)+'</strong><small>'+esc(note)+'</small></div>';
     let zones=item('BREAKOUT REFERENCE',money(z.breakout_above),'A close above this level needs rising structure and a fresh cross.')+
@@ -106,8 +154,7 @@
     $('pivot-detail').innerHTML='<div class="pivot-grid">'+pivots('high')+pivots('low')+'</div><p>ATR14: '+money(r.atr)+' \u00b7 average daily traded value: '+fmt(r.turnover_crore)+' crore \u00b7 last structure breakout: '+esc(r.last_breakout_date || 'none in available history')+'</p><p>'+esc(r.data_source)+'</p>'+
       r.data_warnings.map(w=>'<p class="caution-text">'+esc(w)+'</p>').join('');
     document.querySelectorAll('#stock-rows tr[data-symbol]').forEach(tr=>tr.classList.toggle('selected',tr.dataset.symbol===symbol));
-    $('stock-detail').scrollIntoView({behavior:'auto',block:'start'});
-    $('detail-title').focus({preventScroll:true});
+    if(options.scroll){$('stock-detail').scrollIntoView({behavior:'auto',block:'start'});$('detail-title').focus({preventScroll:true});}
   }
 
   function exportCsv() {
@@ -163,6 +210,11 @@
   });
   $('stock-rows').addEventListener('click',event=>{const button=event.target.closest('button[data-symbol]');if(button) showDetail(button.dataset.symbol);});
   $('download-csv').addEventListener('click',exportCsv);
+  for(const id of ['chart-swings','chart-levels']) $(id).addEventListener('change',()=>{
+    if(selected)renderChart(dataset.rows.find(r=>r.symbol===selected));
+  });
+  $('stock-chart').addEventListener('click',inspectSwing);
+  $('stock-chart').addEventListener('keydown',inspectSwing);
   function loadRefreshStatus() {
     const el=$('refresh-status');
     fetch((document.body.dataset.source || '')+'hhhl_refresh_status.json',{cache:'no-store'}).then(async response=>{
@@ -188,7 +240,7 @@
   fetch((document.body.dataset.source || '')+'hhhl_scan.json',{cache:'no-store'}).then(response=>{
     if(!response.ok) throw new Error('HTTP '+response.status);
     return response.json();
-  }).then(data=>{validate(data);dataset=data;renderSummary();loadRefreshStatus();}).catch(()=>{
+  }).then(data=>{validate(data);dataset=data;renderSummary();if(selected)showDetail(selected,{scroll:false});loadRefreshStatus();}).catch(()=>{
     dataset=null;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
     $('session-date').textContent='Unavailable';$('coverage').textContent='Data check failed';$('result-count').textContent='No verified rows to display.';
     $('stock-rows').innerHTML='';$('stock-detail').hidden=true;

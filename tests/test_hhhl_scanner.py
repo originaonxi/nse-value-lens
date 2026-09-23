@@ -122,6 +122,22 @@ class HHHLScannerTests(unittest.TestCase):
         self.assertIsNone(row["entry_plan"])
         self.assertEqual(row["zones"], {})
 
+    def test_chart_swings_keep_full_history_labels_and_confirmation_dates(self):
+        frame = self.frame()
+        row = self.scan(frame, str(frame.index[-1].date()))
+        self.assertGreater(len(row["chart_swings"]), 4)
+        all_pivots = pivot_events(frame)
+        for event in row["chart_swings"]:
+            group = all_pivots[event["kind"]]
+            index = next(i for i,p in enumerate(group) if p["pivot_date"] == event["pivot_date"])
+            self.assertLessEqual(event["confirmed_on"], row["data_date"])
+            self.assertGreaterEqual(event["pivot_date"], row["chart"][0]["date"])
+            if index:
+                previous = group[index-1]["price"]
+                expected = ("HH" if event["price"] > previous else "LH") if event["kind"] == "high" else ("HL" if event["price"] > previous else "LL")
+                if event["price"] != previous:
+                    self.assertEqual(event["label"], expected)
+
 
 if __name__ == "__main__":
     unittest.main()

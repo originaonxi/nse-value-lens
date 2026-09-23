@@ -85,3 +85,7 @@ Browser checks cover all 200 rows, each status filter, empty Buy results, search
 This is a research scanner, not a validated profitable system or a list of orders. Historical membership, price adjustments and corporate actions require further validation. There is no earnings-event gate. A real position's stop or maximum holding time can require selling even when today's stock label is Watch or Avoid. The page does not know your holdings.
 
 Primary formula context: [TradingView pivot points high/low](https://www.tradingview.com/support/solutions/43000589195-pivot-points-high-low/). This explains pivots, not profitable NSE execution.
+
+## Chart structure overlay
+
+The daily refresh also supplies the full chart window of confirmed swing events. HH/HL are green; LH/LL are red; EH/EL indicate equal extremes. Click a label for its price, original pivot date and later confirmation date. Labels compare consecutive same-type confirmed pivots. The zigzag connects alternating extremes, keeping the most extreme point in a run of same-type pivots. If one daily bar is both a swing high and low, the line breaks because intraday order cannot be inferred. The newest two candles have no confirmed swing labels. Price-zone and structure toggles are independent. Mobile charts scroll horizontally to keep candles readable.
