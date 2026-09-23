@@ -1,3 +1,24 @@
+# NSE Value Lens - swing desk
+
+The main website now focuses on delivery swing research lasting 5-20 sessions.
+It compares three fixed strategies using shared scanner/backtest rules, displays
+entry/stop/target plans and risk sizing, and hides expired entries.
+
+**No strategy is a validated winner.** The evidence panel includes costs,
+drawdowns, two historical windows, and a doubled-cost stress test. Current
+constituents introduce survivorship bias. No automatic orders are placed.
+
+- [Open the swing desk](https://originaonxi.github.io/nse-value-lens/)
+- [Rules, evidence and GitHub comparison](docs/SWING_RESEARCH.md)
+- Full historical dashboards remain linked under **Full research**.
+- Refresh: python swing_research.py; cached replay: python swing_research.py --cached.
+- Tests: python -m unittest discover -s tests -p test_swing.py -v, and npm test.
+
+---
+
+The following is legacy investment-platform documentation describing
+the older long-horizon value screen, not the new swing strategy.
+
 <div align="center">
 
 # NSE Value Lens

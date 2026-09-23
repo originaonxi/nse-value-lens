@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NSE 200 Momentum 30 Algorithm Prediction — Research Scaffold</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#c9d1d9;--acc:#58a6ff;--warn:#d29922;--good:#3fb950}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;padding:20px}
+h1{color:#e6edf3;font-size:1.32rem;margin-bottom:2px}
+.sub{color:#8b949e;font-size:.8rem;margin-bottom:14px}
+.sub a{color:var(--acc)}
+.warn-banner{background:#2d2000;border:1px solid var(--warn);border-radius:8px;padding:11px 14px;margin-bottom:16px;color:var(--warn);font-size:.8rem;line-height:1.65}
+.warn-banner strong{color:#f0c040}
+.warn-banner code{background:#1a1400;padding:1px 5px;border-radius:3px;color:#ffd54f}
+.note{background:#0d1117;border:1px solid #58a6ff;border-radius:8px;padding:11px 14px;margin-bottom:16px;color:#79a8ff;font-size:.8rem;line-height:1.7}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab-btn{background:var(--card);border:1px solid var(--bd);border-bottom:none;padding:8px 18px;cursor:pointer;color:#8b949e;font-size:.85rem;border-radius:6px 6px 0 0;font-weight:600}
+.tab-btn.active{background:#1c2128;color:#e6edf3;border-color:var(--acc)}
+.tab-panel{display:none;background:#161b22;border:1px solid var(--acc);border-radius:0 8px 8px 8px;padding:18px;margin-bottom:16px}
+.tab-panel.active{display:block}
+.badge{display:inline-block;background:var(--acc);color:#000;padding:1px 7px;border-radius:9px;font-size:.68rem;font-weight:700;margin-left:6px;vertical-align:middle}
+table{width:100%;border-collapse:collapse}
+th{background:#0d1117;color:#8b949e;font-weight:600;text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;z-index:1}
+td{padding:5px 8px;border-bottom:1px solid #21262d;vertical-align:middle}
+tr:hover td{background:#1c2128}
+.sym{font-weight:700;color:var(--acc)}
+.co{color:#8b949e;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi{color:var(--good);font-weight:700}.mid{color:var(--warn);font-weight:600}.lo{color:var(--acc)}
+.chart-box{height:380px;position:relative;margin-bottom:16px}
+.scroll{max-height:520px;overflow-y:auto}
+.diff{font-size:.76rem;color:#8b949e;margin-top:12px;padding:10px;background:#161b22;border-radius:6px;border:1px solid var(--bd);line-height:1.7}
+.diff strong{color:#e6edf3}
+.disc{font-size:.73rem;color:#8b949e;margin-top:14px;padding:10px 14px;border:1px solid var(--bd);border-radius:6px;background:var(--card);line-height:1.7}
+.disc strong{color:#e6edf3}
+.formula-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.formula{font-family:monospace;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px 14px;font-size:.8rem;color:#ffd54f;line-height:1.9}
+.stat-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;min-width:110px}
+.stat .v{font-size:1.4rem;font-weight:700;color:var(--acc)}
+.stat .l{font-size:.72rem;color:#8b949e;margin-top:2px}
+</style></head><body>
+
+<h1>NSE 200 Momentum 30 Algorithm Prediction — Research Scaffold</h1>
+<div class="sub">Shadow Momentum 30 research/backtest scaffold &nbsp;·&nbsp; predict past first &nbsp;·&nbsp; no real-money automation until verified walk-forward validation</div>
+
+<div class="stat-strip">
+  <div class="stat"><div class="v">194</div><div class="l">Stocks fetched</div></div>
+  <div class="stat"><div class="v">180</div><div class="l">F&amp;O eligible</div></div>
+  <div class="stat"><div class="v">47</div><div class="l">Strict gate pass</div></div>
+  <div class="stat"><div class="v">30</div><div class="l">Top picks per tab</div></div>
+  <div class="stat"><div class="v">6</div><div class="l">Recent IPOs excluded</div></div>
+</div>
+
+<div class="warn-banner">
+  <strong>Research contract — prediction before trading, no return promises.</strong><br>
+  Step 1 is a Shadow Momentum 30 scaffold: rank Nifty 200 stocks by volatility-adjusted 6-month and 12-month momentum, then backtest forward periods using only data available at each date.<br>
+  Current scaffold is <strong>survivor-biased</strong> because it uses today's cached 194 symbols; production claims require point-in-time Nifty 200 membership, delisted/removed stocks, and official Momentum 30 constituent validation.<br>
+  Real orders, futures, options, and shares stay disabled until verified walk-forward results pass and a human manually enables paper/live mode.
+</div>
+
+<div class="tabs">
+  <button class="tab-btn" onclick="showTab('m30daily',this)" style="border-color:#58a6ff;color:#58a6ff;font-weight:700">Momentum 30 Daily<span class="badge" style="background:#58a6ff;color:#000">auto</span></button>
+  <button class="tab-btn active" onclick="showTab('verdict',this)" style="border-color:#f778ba;color:#f778ba;font-weight:700">Backtest Verdict<span class="badge" style="background:#f778ba;color:#000">audit</span></button>
+  <button class="tab-btn" onclick="showTab('picks',this)" style="background:#1a2f1a;border-color:#3fb950;color:#3fb950;font-weight:700">⭐ SAM PICKS<span class="badge" style="background:#3fb950;color:#000">daily</span></button>
+  <button class="tab-btn" onclick="showTab('sr',this)">&#128200; S&amp;R Daily<span class="badge">auto</span></button>
+  <button class="tab-btn" onclick="showTab('combined',this)">&#127381; Open Fund &#8377;10L<span class="badge">both worlds</span></button>
+  <button class="tab-btn" onclick="showTab('vdn',this)">Value-Down</button>
+  <button class="tab-btn" onclick="showTab('m5',this)">Momentum-5</button>
+  <button class="tab-btn" onclick="showTab('fund',this)">Fund 15-stock</button>
+  <button class="tab-btn" onclick="showTab('baseline',this)">Baseline 12-1 Raw</button>
+  <button class="tab-btn" onclick="showTab('sharpe',this)">Sharpe-RAM<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('ensemble',this)">Ensemble<span class="badge">new</span></button>
+  <button class="tab-btn" onclick="showTab('formulas',this)">Methodology</button>
+  <button class="tab-btn" onclick="showTab('universe',this)">Universe</button>
+  <button class="tab-btn" onclick="showTab('regime',this)">📅 Monthly Regime<span class="badge">auto</span></button>
+  <button class="tab-btn" onclick="showTab('swing',this)" style="border-color:#a371f7;color:#a371f7;font-weight:700">🌀 Swing Structure<span class="badge" style="background:#a371f7;color:#000">HH/HL</span></button>
+</div>
+
+<!-- ═══ MOMENTUM 30 DAILY TAB ═════════════════════════════════════════════ -->
+<div id="m30daily" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Nifty 200 Momentum 30 style — fresh daily ranking with BUY/WATCH/NEUTRAL signals.</strong><br>
+    Formula: <code>score = 0.5×z(6m_return/annualised_vol) + 0.5×z(12m_return/annualised_vol)</code>.
+    Fresh yfinance OHLCV daily; top 30 ranked; signals: top 10 BUY, next 10 WATCH_BUY, rest NEUTRAL.
+  </p>
+  <div id="m30Stats" class="stat-strip"></div>
+  <div class="scroll" style="max-height:520px"><table><thead><tr>
+    <th>#</th><th>Signal</th><th>Symbol</th><th>Score</th><th>6m%</th><th>12m%</th><th>Vol%</th><th>Close</th><th>Action</th>
+  </tr></thead><tbody id="m30Rows"></tbody></table></div>
+  <div class="disc" id="m30Foot">Loading Momentum 30 Daily…</div>
+</div>
+
+<!-- ═══ BACKTEST VERDICT TAB ═══════════════════════════════════════════════ -->
+<div id="verdict" class="tab-panel active">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Which strategy actually made money?</strong><br>
+    Audited answer: no validated winner yet. Daily trading strategies lost out-of-sample. Shadow Momentum30 is positive only as a survivor-biased scaffold, so it is not a real-money claim.
+  </p>
+  <div id="verdictStats" class="stat-strip"></div>
+  <div class="scroll" style="max-height:520px"><table><thead><tr>
+    <th>Strategy</th><th>Family</th><th>Validation</th><th>Return</th><th>₹ P/L on ₹1Cr</th><th>Status</th><th>Audit note</th>
+  </tr></thead><tbody id="verdictRows"></tbody></table></div>
+  <div class="disc" id="verdictFoot">Loading backtest verdict…</div>
+  <div style="margin-top:16px;border-top:1px solid #30363d;padding-top:14px">
+    <div style="color:#d29922;font-size:.8rem;font-weight:700;margin-bottom:6px">
+      ⚠️ Deterministic Indicator Backtest — survivor-biased smoke test only, NOT validated profit
+    </div>
+    <div id="indiBtStats" class="stat-strip"></div>
+    <div class="scroll" style="max-height:260px"><table><thead><tr>
+      <th>Strategy</th><th>Test return (6m held-out)</th><th>Alpha vs benchmark</th><th>Win%</th><th>Max DD%</th><th>Trades</th>
+    </tr></thead><tbody id="indiBtRows"></tbody></table></div>
+    <div class="disc" id="indiBtFoot">Loading indicator backtest…</div>
+  </div>
+</div>
+
+<!-- ═══ SHADOW MOMENTUM 30 TAB ═════════════════════════════════════════════ -->
+<div id="shadow30" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Predict the past first — survivor-biased scaffold, not a final claim.</strong><br>
+    Formula: <code>0.5×z(6m return / annualised vol) + 0.5×z(12m return / annualised vol)</code>.
+    Monthly equal-weight top-30 smoke test, 0.20% round-trip cost. Production version must use point-in-time Nifty 200 universe and official constituent validation.
+  </p>
+  <div id="shadowStats" class="stat-strip"></div>
+  <div class="scroll" style="max-height:520px"><table><thead><tr>
+    <th>#</th><th>Symbol</th><th>Score</th><th>6m%</th><th>12m%</th><th>Vol%</th><th>Close</th>
+  </tr></thead><tbody id="shadowRows"></tbody></table></div>
+  <div class="disc" id="shadowFoot">Loading Shadow Momentum 30 scaffold…</div>
+</div>
+
+<!-- ═══ S&R DAILY TAB ═════════════════════════════════════════════════════ -->
+<div id="sr" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Where is each stock right now — and what to watch.</strong>
+    Auto-refreshed daily after NSE close (not real-time ticks) via GitHub Actions.<br>
+    <span style="color:#3fb950">Floor</span> = price where buyers stepped in before — likely to hold again.
+    <span style="color:#f778ba">Ceiling</span> = price where sellers appeared — needs strong buying to break.
+    <span style="color:#a371f7">VWAP</span> = 20-day average price weighted by volume — the benchmark institutional fund desks use.
+    Price below VWAP = trading at a discount; above = premium.
+  </p>
+  <div id="srStats" class="stat-strip"></div>
+  <div style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:14px;margin:12px 0 14px">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <div style="font-size:1rem;font-weight:700;color:#e6edf3">JEV Top Trades — best S&amp;R setups</div>
+        <div id="jevMeta" style="font-size:.78rem;color:#8b949e">Loading TypeSafe/JEV ranking…</div>
+      </div>
+      <div style="font-size:.75rem;color:#8b949e;max-width:520px">
+        JEV scores the daily S&amp;R dossier only: confluence strength, AVWAP, volume profile, touches, rejection, ATR buffer, reclaim/failure flags, and risk/reward. Not SEBI-registered advice.
+      </div>
+    </div>
+    <div class="scroll" style="max-height:330px"><table><thead><tr>
+      <th>#</th><th>Stock</th><th>Signal</th><th>JEV</th><th>Setup</th><th>Follow</th><th>R/R</th><th>Price</th><th>Floor/Ceiling</th><th>Why</th>
+    </tr></thead><tbody id="jevRows"><tr><td colspan="10" style="color:#8b949e">Loading…</td></tr></tbody></table></div>
+  </div>
+  <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap" id="srFilters">
+    <button onclick="srFilter('ALL')"             class="tab-btn active" id="sf-ALL">All stocks</button>
+    <button onclick="srFilter('BREAKOUT_UP')"     class="tab-btn" id="sf-BREAKOUT_UP"   style="color:#3fb950">&#9650; Breaking out</button>
+    <button onclick="srFilter('BREAKOUT_DN')"     class="tab-btn" id="sf-BREAKOUT_DN"   style="color:#f778ba">&#9660; Breaking down</button>
+    <button onclick="srFilter('AT_RESISTANCE')"   class="tab-btn" id="sf-AT_RESISTANCE" style="color:#d29922">At ceiling</button>
+    <button onclick="srFilter('AT_SUPPORT')"      class="tab-btn" id="sf-AT_SUPPORT"    style="color:#3fb950">At floor</button>
+    <button onclick="srFilter('NEAR')"            class="tab-btn" id="sf-NEAR">Approaching level</button>
+  </div>
+  <div class="scroll" style="max-height:580px"><table><thead><tr>
+    <th>What's happening</th><th>Stock</th><th>Company</th>
+    <th>Price &#8377;</th><th>VWAP &#8377;</th>
+    <th>Floor &#8377;<br><small style="font-weight:400;color:#8b949e">buy/hold zone</small></th>
+    <th>Ceiling &#8377;<br><small style="font-weight:400;color:#8b949e">watch/sell zone</small></th>
+    <th>Next Target &#8377;<br><small style="font-weight:400;color:#8b949e">if ceiling breaks</small></th>
+    <th>If it drops &#8377;<br><small style="font-weight:400;color:#8b949e">next floor below</small></th>
+    <th>Vol vs avg</th><th>What to do</th>
+  </tr></thead><tbody id="srRows"></tbody></table></div>
+  <div class="disc" id="srFoot">Loading&hellip;</div>
+</div>
+
+<!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:#161b22;border:1px solid #30363d;border-radius:10px;max-width:680px;margin:40px auto;padding:24px;position:relative">
+  <button onclick="document.getElementById('modal').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:1.3rem;cursor:pointer">✕</button>
+  <div id="modalBody"></div>
+</div></div>
+
+<!-- ═══ COMBINED FUND TAB ════════════════════════════════════════════════ -->
+<div id="combined" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">&#8377;10L across two orthogonal strategies — insurance by design.</strong><br>
+    <span style="color:#3fb950">&#9650; Sleeve A &#8377;5L</span>: top-5 by M5 momentum score
+    <code>(z(mom6/vol)+z(mom12/vol))/2</code> — stocks already going up.<br>
+    <span style="color:#58a6ff">&#9660; Sleeve B &#8377;5L</span>: top-5 by fundamental value score
+    (PE+PB+ROE proven, sector-aware, price beaten down from 52w high).<br>
+    Gate: non-fin stocks replaced if debt/cash&gt;20× AND FCF&lt;0.
+    <strong>Click any row for deep analysis.</strong>
+  </p>
+  <div id="combStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:320px"><canvas id="chComb"></canvas></div>
+    <div class="scroll"><table><thead><tr>
+      <th>#</th><th>Sleeve</th><th>Symbol</th><th>Company</th>
+      <th>Score</th><th>12m%</th><th>PE</th><th>ROE%</th>
+      <th>52w DD%</th><th>5d%</th><th>Value &#8377;</th><th>Flags</th>
+    </tr></thead><tbody id="combRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="combFoot">Loading&hellip;</div>
+</div>
+
+<div id="vdn" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Fundamentally good, price beaten down.</strong>
+    Sector-aware: industrials scored on PE+PB+cash-yield (40%) / ROE+margin+low-debt (35%) / price-damage (25%); banks on PE+PB (50%) / ROE (30%) / price-damage (20%).<br>
+    Price-damage = 50% drawdown from 52w high + 30% 1-month return + 20% 5-day return &mdash; catches yesterday's selloff, not just 6m losers.<br>
+    Hard rule: PE, PB, ROE must all be present &mdash; no data gaps &rarr; not scored as "good funda". Top 10 &rarr; &#8377;1L each.
+  </p>
+  <div id="vdnStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:300px"><canvas id="chVdn"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Sector</th><th>Score</th><th>PE</th><th>PB</th><th>ROE%</th><th>CashYld%</th><th>52w DD%</th><th>Shares</th><th>Value &#8377;</th></tr></thead><tbody id="vdnRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="vdnFoot">Loading&hellip;</div>
+</div>
+
+<div id="m5" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">
+    <strong style="color:#e6edf3">Pure mathematics. No gates. No human filters.</strong>
+    Every one of the 194 Nifty 200 stocks competes on the same formula:<br>
+    <code>ram6 = mom6% / vol%</code> &nbsp;&nbsp; <code>ram12 = mom12% / vol%</code> &nbsp;&nbsp;
+    <code>score = ( z(ram6) + z(ram12) ) / 2</code><br>
+    Vol-adjust first, z-score the risk-adjusted ratios cross-sectionally, average the two horizons. Top 5 → &#8377;2L each.
+  </p>
+  <div id="m5Stats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start;margin-bottom:14px">
+    <div class="chart-box" style="height:300px"><canvas id="chM5"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>Score</th><th>z(ram12)</th><th>z(ram6)</th><th>12m%</th><th>6m%</th><th>Vol%</th><th>Shares</th><th>Price &#8377;</th><th>Value &#8377;</th></tr></thead><tbody id="m5Rows"></tbody></table></div>
+  </div>
+  <div class="disc" id="m5Foot">Loading&hellip;</div>
+</div>
+
+<div id="fund" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Investable <strong style="color:#e6edf3">&#8377;10,00,000</strong> portfolio built from the strict-gate winners: <code>in F&amp;O &amp; above rising 200-DMA</code> &rarr; ranked by z(RAM) &rarr; top 15, score-weighted, 12% single-name cap. Integer shares at last close; residual held as cash. Rebalanced monthly.</p>
+  <div id="fundStats" class="stat-strip"></div>
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start">
+    <div class="chart-box" style="height:340px"><canvas id="chFund"></canvas></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>Shares</th><th>Price</th><th>Value &#8377;</th><th>Weight%</th><th>z(RAM)</th><th>12-1%</th></tr></thead><tbody id="fundRows"></tbody></table></div>
+  </div>
+  <div class="disc" id="fundFoot">Loading portfolio&hellip;</div>
+</div>
+
+<div id="baseline" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Original screen: raw 12-1 return, 200-DMA filter, top 30. No F&amp;O filter, no vol adjustment, no residual, no trend-quality. Kept for comparison. All columns shown for reference; ranking is by raw 12-1 %.</p>
+  <div class="chart-box"><canvas id="chB"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ADANIGREEN</td><td class="co" title="Adani Green Energy Ltd.">Adani Green Energy Ltd.</td><td class="lo">32.4%</td><td class="hi">50.6%</td><td>42.9%</td><td>0.756</td><td class="lo">0.654</td><td>1.094</td><td>15.7</td><td>Rs.1,274.20</td><td>Rs.1,186.62</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">SAIL</td><td class="co" title="Steel Authority of India Ltd.">Steel Authority of India</td><td class="lo">31.2%</td><td class="lo">13.5%</td><td>34.6%</td><td>0.902</td><td class="mid">0.817</td><td>0.484</td><td>4.1</td><td>Rs.175.01</td><td>Rs.165.68</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">ADANIENT</td><td class="co" title="Adani Enterprises Ltd.">Adani Enterprises Ltd.</td><td class="lo">26.0%</td><td class="hi">52.0%</td><td>37.7%</td><td>0.688</td><td class="lo">0.579</td><td>1.148</td><td>21.9</td><td>Rs.2,923.20</td><td>Rs.2,536.47</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">SIEMENS</td><td class="co" title="Siemens Ltd.">Siemens Ltd.</td><td class="lo">25.9%</td><td class="mid">23.4%</td><td>30.2%</td><td>0.857</td><td class="lo">0.767</td><td>0.680</td><td>11.7</td><td>Rs.3,763.50</td><td>Rs.3,476.58</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">OFSS</td><td class="co" title="Oracle Financial Services Software Ltd.">Oracle Financial Service</td><td class="lo">25.5%</td><td class="hi">78.1%</td><td>33.0%</td><td>0.770</td><td class="lo">0.670</td><td>1.699</td><td>33.5</td><td>Rs.11,620.00</td><td>Rs.9,090.38</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">APLAPOLLO</td><td class="co" title="APL Apollo Tubes Ltd.">APL Apollo Tubes Ltd.</td><td class="lo">24.7%</td><td class="lo">9.4%</td><td>26.1%</td><td>0.946</td><td class="mid">0.867</td><td>0.160</td><td>-9.1</td><td>Rs.2,148.50</td><td>Rs.1,962.70</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">TVSMOTOR</td><td class="co" title="TVS Motor Company Ltd.">TVS Motor Company Ltd.</td><td class="lo">24.6%</td><td class="mid">31.1%</td><td>27.8%</td><td>0.886</td><td class="mid">0.800</td><td>0.661</td><td>3.9</td><td>Rs.4,101.70</td><td>Rs.3,736.29</td><td>2026-09-16</td></tr></tbody></table></div>
+  <div class="diff">
+    <strong>What changed vs quant tabs:</strong> FEDERALBNK rises 4&rarr;2 (vol 25% &lt; ADANIENSOL 39%, similar return). POWERINDIA falls 6&rarr;9 (44% vol, RAM 1.849). LAURUSLABS stays #1 (mom 102% at only 29% vol &rarr; RAM 3.49 still best). Quant-only entrants: NESTLEIND, PHOENIXLTD, SAIL, SUNPHARMA, TVSMOTOR, SIEMENS. Raw-only dropout: ADANIGREEN (vol drag).
+  </div>
+</div>
+
+<div id="sharpe" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Primary quant screen: strict-gated stocks ranked by <strong>z(RAM = 12-month momentum / annualised volatility)</strong>. 47/180 F&amp;O stocks pass the DMA gate &rarr; top 30 shown.</p>
+  <div class="chart-box"><canvas id="chR"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">NESTLEIND</td><td class="co" title="Nestle India Ltd.">Nestle India Ltd.</td><td class="lo">20.1%</td><td class="mid">21.7%</td><td>20.7%</td><td>0.970</td><td class="mid">0.894</td><td>0.714</td><td>14.8</td><td>Rs.1,370.60</td><td>Rs.1,355.79</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">APLAPOLLO</td><td class="co" title="APL Apollo Tubes Ltd.">APL Apollo Tubes Ltd.</td><td class="lo">24.7%</td><td class="lo">9.4%</td><td>26.1%</td><td>0.946</td><td class="mid">0.867</td><td>0.160</td><td>-9.1</td><td>Rs.2,148.50</td><td>Rs.1,962.70</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">PHOENIXLTD</td><td class="co" title="Phoenix Mills Ltd.">Phoenix Mills Ltd.</td><td class="lo">24.3%</td><td class="mid">23.9%</td><td>26.8%</td><td>0.905</td><td class="mid">0.820</td><td>0.736</td><td>14.0</td><td>Rs.1,872.20</td><td>Rs.1,809.82</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">SAIL</td><td class="co" title="Steel Authority of India Ltd.">Steel Authority of India</td><td class="lo">31.2%</td><td class="lo">13.5%</td><td>34.6%</td><td>0.902</td><td class="mid">0.817</td><td>0.484</td><td>4.1</td><td>Rs.175.01</td><td>Rs.165.68</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">SUNPHARMA</td><td class="co" title="Sun Pharmaceutical Industries Ltd.">Sun Pharmaceutical Indus</td><td class="lo">17.0%</td><td class="lo">5.2%</td><td>19.0%</td><td>0.899</td><td class="mid">0.814</td><td>0.416</td><td>15.1</td><td>Rs.1,867.30</td><td>Rs.1,805.97</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">TVSMOTOR</td><td class="co" title="TVS Motor Company Ltd.">TVS Motor Company Ltd.</td><td class="lo">24.6%</td><td class="mid">31.1%</td><td>27.8%</td><td>0.886</td><td class="mid">0.800</td><td>0.661</td><td>3.9</td><td>Rs.4,101.70</td><td>Rs.3,736.29</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SIEMENS</td><td class="co" title="Siemens Ltd.">Siemens Ltd.</td><td class="lo">25.9%</td><td class="mid">23.4%</td><td>30.2%</td><td>0.857</td><td class="lo">0.767</td><td>0.680</td><td>11.7</td><td>Rs.3,763.50</td><td>Rs.3,476.58</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+<div id="ensemble" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Multi-signal ranking: <strong>0.35&middot;z(12M) + 0.20&middot;z(6M) + 0.15&middot;z(residual 12+6) + 0.20&middot;z(TrendT) + 0.10&middot;z(RAM)</strong> — prefers smooth reliable climbs over one-day jumps (beta-neutral vs NIFTY 50).</p>
+  <div class="chart-box"><canvas id="chE"></canvas></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">OFSS</td><td class="co" title="Oracle Financial Services Software Ltd.">Oracle Financial Service</td><td class="lo">25.5%</td><td class="hi">78.1%</td><td>33.0%</td><td>0.770</td><td class="hi">0.670</td><td>1.699</td><td>33.5</td><td>Rs.11,620.00</td><td>Rs.9,090.38</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="mid">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">BOSCHLTD</td><td class="co" title="Bosch Ltd.">Bosch Ltd.</td><td class="lo">18.8%</td><td class="hi">61.4%</td><td>27.9%</td><td>0.676</td><td class="mid">0.565</td><td>1.158</td><td>17.1</td><td>Rs.47,735.00</td><td>Rs.38,490.18</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">ADANIENT</td><td class="co" title="Adani Enterprises Ltd.">Adani Enterprises Ltd.</td><td class="lo">26.0%</td><td class="hi">52.0%</td><td>37.7%</td><td>0.688</td><td class="mid">0.579</td><td>1.148</td><td>21.9</td><td>Rs.2,923.20</td><td>Rs.2,536.47</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ADANIGREEN</td><td class="co" title="Adani Green Energy Ltd.">Adani Green Energy Ltd.</td><td class="lo">32.4%</td><td class="hi">50.6%</td><td>42.9%</td><td>0.756</td><td class="mid">0.654</td><td>1.094</td><td>15.7</td><td>Rs.1,274.20</td><td>Rs.1,186.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="mid">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="mid">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="mid">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="mid">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="lo">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">GRASIM</td><td class="co" title="Grasim Industries Ltd.">Grasim Industries Ltd.</td><td class="lo">17.7%</td><td class="mid">27.6%</td><td>22.8%</td><td>0.777</td><td class="lo">0.678</td><td>0.750</td><td>16.9</td><td>Rs.3,173.10</td><td>Rs.2,955.18</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">PHOENIXLTD</td><td class="co" title="Phoenix Mills Ltd.">Phoenix Mills Ltd.</td><td class="lo">24.3%</td><td class="mid">23.9%</td><td>26.8%</td><td>0.905</td><td class="lo">0.820</td><td>0.736</td><td>14.0</td><td>Rs.1,872.20</td><td>Rs.1,809.82</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">NESTLEIND</td><td class="co" title="Nestle India Ltd.">Nestle India Ltd.</td><td class="lo">20.1%</td><td class="mid">21.7%</td><td>20.7%</td><td>0.970</td><td class="lo">0.894</td><td>0.714</td><td>14.8</td><td>Rs.1,370.60</td><td>Rs.1,355.79</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">APOLLOHOSP</td><td class="co" title="Apollo Hospitals Enterprise Ltd.">Apollo Hospitals Enterpr</td><td class="lo">12.8%</td><td class="lo">16.8%</td><td>17.9%</td><td>0.717</td><td class="lo">0.611</td><td>0.712</td><td>26.4</td><td>Rs.8,768.50</td><td>Rs.7,942.55</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="lo">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+<div id="formulas" class="tab-panel">
+  <div class="note"><strong>All signals computed from free jugaad-data NSE closes (raw; splits/dividends not adjusted).</strong> Benchmark NIFTY 50 log-returns; beta clamped [0.2, 3.0]; residual momentum = stock log-ret &minus; &beta;&middot;market log-ret, annualised &divide; residual &sigma;.</div>
+  <div class="formula-grid">
+    <div class="formula">
+      mom12 = P[t&minus;21] / P[t&minus;252] &minus; 1<br>
+      mom6  = P[t&minus;21] / P[t&minus;126] &minus; 1<br>
+      vol   = std(ln-returns, 252d ex-skip) &times; &radic;252<br>
+      <strong>RAM</strong> = mom12 / vol<br>
+      <strong>z(RAM)</strong> = cross-sectional z-score
+    </div>
+    <div class="formula">
+      r<sub>i</sub> = ln(P<sub>t</sub>/P<sub>t&minus;1</sub>) &minus; &beta;&middot;ln(NIFTY<sub>t</sub>/NIFTY<sub>t&minus;1</sub>)<br>
+      &beta; &isin; [0.2, 3.0], estimated on 231 sessions<br>
+      <strong>rM12</strong> = &Sigma;r(231d) &times; &radic;252 / (&sigma;<sub>res</sub>&times;&radic;231)<br>
+      <strong>TrendT</strong> = &beta;/SE(&beta;) of ln(P)~t over 126d
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:.8rem;color:#8b949e;line-height:1.8">
+    <strong>F&amp;O gate:</strong> 206 unique stock underlyings from Zerodha instruments master (NFO segment, structured fields not regex); 180 in NIFTY200; 47 pass full gate.<br>
+    <strong>DMA gate:</strong> close &gt; 200-DMA <u>and</u> DMA(today) &gt; DMA(t&minus;21) — rising slope, not just above.<br>
+    <strong>vs actual NSE Momentum 30 (confirmed):</strong> official also requires F&amp;O segment eligibility and selects top 30, but rebalances semi-annually (Jun/Dec) and uses high-level "normalised momentum from 6M/12M return adjusted for volatility"; exact z-score/skip/combination math: unconfirmed &mdash; possible approximation.
+  </div>
+</div>
+
+<div id="universe" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:12px">Full master universe (194 NIFTY200 stocks) ranked by z(RAM). Top 30 shown here; full dump in <a href="quant_upgrade_master.csv" style="color:var(--acc)">quant_upgrade_master.csv</a>.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Symbol</th><th>Company</th><th>12-1 Ret%</th><th>6M Ret%</th><th>Vol/yr%</th><th>RAM(12m/V)</th><th>z(RAM)</th><th>z(Ens)</th><th>TrendT</th><th>Price</th><th>200-DMA</th><th>LastBar</th></tr></thead><tbody><tr><td>1</td><td class="sym">LAURUSLABS</td><td class="co" title="Laurus Labs Ltd.">Laurus Labs Ltd.</td><td class="hi">102.4%</td><td class="hi">80.8%</td><td>29.3%</td><td>3.490</td><td class="hi">3.708</td><td>3.223</td><td>43.8</td><td>Rs.1,948.10</td><td>Rs.1,304.00</td><td>2026-09-16</td></tr><tr><td>2</td><td class="sym">FEDERALBNK</td><td class="co" title="Federal Bank Ltd.">Federal Bank Ltd.</td><td class="hi">82.5%</td><td class="mid">36.0%</td><td>25.1%</td><td>3.289</td><td class="hi">3.484</td><td>2.051</td><td>19.4</td><td>Rs.332.75</td><td>Rs.300.70</td><td>2026-09-16</td></tr><tr><td>3</td><td class="sym">BHARATFORG</td><td class="co" title="Bharat Forge Ltd.">Bharat Forge Ltd.</td><td class="mid">73.2%</td><td class="mid">25.3%</td><td>30.0%</td><td>2.440</td><td class="hi">2.536</td><td>1.646</td><td>20.0</td><td>Rs.1,918.70</td><td>Rs.1,822.51</td><td>2026-09-16</td></tr><tr><td>4</td><td class="sym">ADANIENSOL</td><td class="co" title="Adani Energy Solutions Ltd.">Adani Energy Solutions L</td><td class="hi">93.2%</td><td class="hi">60.9%</td><td>38.8%</td><td>2.399</td><td class="hi">2.489</td><td>2.377</td><td>27.4</td><td>Rs.1,386.80</td><td>Rs.1,267.00</td><td>2026-09-16</td></tr><tr><td>5</td><td class="sym">BHEL</td><td class="co" title="Bharat Heavy Electricals Ltd.">Bharat Heavy Electricals</td><td class="hi">85.8%</td><td class="hi">67.7%</td><td>36.0%</td><td>2.384</td><td class="hi">2.473</td><td>2.272</td><td>20.6</td><td>Rs.429.20</td><td>Rs.338.94</td><td>2026-09-16</td></tr><tr><td>6</td><td class="sym">SHRIRAMFIN</td><td class="co" title="Shriram Finance Ltd.">Shriram Finance Ltd.</td><td class="mid">75.1%</td><td class="lo">10.4%</td><td>34.9%</td><td>2.153</td><td class="hi">2.215</td><td>1.127</td><td>2.9</td><td>Rs.995.00</td><td>Rs.998.63</td><td>2026-09-16</td></tr><tr><td>7</td><td class="sym">MOTHERSON</td><td class="co" title="Samvardhana Motherson International Ltd.">Samvardhana Motherson In</td><td class="mid">69.4%</td><td class="mid">49.7%</td><td>34.7%</td><td>2.001</td><td class="hi">2.045</td><td>1.739</td><td>15.2</td><td>Rs.161.87</td><td>Rs.133.71</td><td>2026-09-16</td></tr><tr><td>8</td><td class="sym">RADICO</td><td class="co" title="Radico Khaitan Ltd">Radico Khaitan Ltd</td><td class="mid">64.5%</td><td class="hi">69.0%</td><td>32.7%</td><td>1.975</td><td class="hi">2.016</td><td>2.347</td><td>41.0</td><td>Rs.4,380.00</td><td>Rs.3,464.04</td><td>2026-09-16</td></tr><tr><td>9</td><td class="sym">NATIONALUM</td><td class="co" title="National Aluminium Co. Ltd.">National Aluminium Co. L</td><td class="hi">81.0%</td><td class="lo">0.2%</td><td>42.4%</td><td>1.909</td><td class="hi">1.942</td><td>0.924</td><td>-2.2</td><td>Rs.355.70</td><td>Rs.366.65</td><td>2026-09-16</td></tr><tr><td>10</td><td class="sym">AUROPHARMA</td><td class="co" title="Aurobindo Pharma Ltd.">Aurobindo Pharma Ltd.</td><td class="lo">48.3%</td><td class="mid">26.9%</td><td>26.1%</td><td>1.850</td><td class="hi">1.877</td><td>1.504</td><td>31.6</td><td>Rs.1,690.00</td><td>Rs.1,389.90</td><td>2026-09-16</td></tr><tr><td>11</td><td class="sym">POWERINDIA</td><td class="co" title="Hitachi Energy India Ltd.">Hitachi Energy India Ltd</td><td class="hi">81.4%</td><td class="mid">46.0%</td><td>44.0%</td><td>1.849</td><td class="hi">1.875</td><td>1.746</td><td>14.2</td><td>Rs.31,230.00</td><td>Rs.27,869.65</td><td>2026-09-16</td></tr><tr><td>12</td><td class="sym">DIVISLAB</td><td class="co" title="Divi's Laboratories Ltd.">Divi's Laboratories Ltd.</td><td class="lo">42.8%</td><td class="mid">41.5%</td><td>23.2%</td><td>1.841</td><td class="hi">1.866</td><td>1.417</td><td>17.4</td><td>Rs.9,323.00</td><td>Rs.6,885.73</td><td>2026-09-16</td></tr><tr><td>13</td><td class="sym">TORNTPHARM</td><td class="co" title="Torrent Pharmaceuticals Ltd.">Torrent Pharmaceuticals </td><td class="lo">38.4%</td><td class="lo">13.2%</td><td>21.3%</td><td>1.805</td><td class="hi">1.826</td><td>0.973</td><td>17.4</td><td>Rs.4,875.00</td><td>Rs.4,379.01</td><td>2026-09-16</td></tr><tr><td>14</td><td class="sym">TITAN</td><td class="co" title="Titan Company Ltd.">Titan Company Ltd.</td><td class="lo">40.9%</td><td class="mid">23.4%</td><td>23.1%</td><td>1.767</td><td class="hi">1.783</td><td>1.025</td><td>10.9</td><td>Rs.4,841.00</td><td>Rs.4,358.60</td><td>2026-09-16</td></tr><tr><td>15</td><td class="sym">AUBANK</td><td class="co" title="AU Small Finance Bank Ltd.">AU Small Finance Bank Lt</td><td class="mid">51.3%</td><td class="mid">21.6%</td><td>29.3%</td><td>1.750</td><td class="hi">1.765</td><td>1.062</td><td>9.3</td><td>Rs.1,039.30</td><td>Rs.1,002.09</td><td>2026-09-16</td></tr><tr><td>16</td><td class="sym">IDEA</td><td class="co" title="Vodafone Idea Ltd.">Vodafone Idea Ltd.</td><td class="mid">68.9%</td><td class="hi">52.3%</td><td>43.5%</td><td>1.583</td><td class="hi">1.578</td><td>1.621</td><td>12.6</td><td>Rs.14.22</td><td>Rs.12.09</td><td>2026-09-16</td></tr><tr><td>17</td><td class="sym">ABB</td><td class="co" title="ABB India Ltd.">ABB India Ltd.</td><td class="lo">46.2%</td><td class="lo">18.0%</td><td>29.4%</td><td>1.571</td><td class="hi">1.565</td><td>1.042</td><td>16.6</td><td>Rs.7,130.50</td><td>Rs.6,458.62</td><td>2026-09-16</td></tr><tr><td>18</td><td class="sym">HINDALCO</td><td class="co" title="Hindalco Industries Ltd.">Hindalco Industries Ltd.</td><td class="lo">40.3%</td><td class="lo">14.5%</td><td>28.7%</td><td>1.404</td><td class="mid">1.378</td><td>0.703</td><td>4.6</td><td>Rs.980.50</td><td>Rs.970.56</td><td>2026-09-16</td></tr><tr><td>19</td><td class="sym">SOLARINDS</td><td class="co" title="Solar Industries India Ltd.">Solar Industries India L</td><td class="lo">45.0%</td><td class="mid">42.3%</td><td>32.3%</td><td>1.395</td><td class="mid">1.368</td><td>1.429</td><td>23.9</td><td>Rs.18,815.00</td><td>Rs.15,894.94</td><td>2026-09-16</td></tr><tr><td>20</td><td class="sym">KEI</td><td class="co" title="KEI Industries Ltd.">KEI Industries Ltd.</td><td class="lo">41.8%</td><td class="mid">39.2%</td><td>32.6%</td><td>1.285</td><td class="mid">1.245</td><td>1.109</td><td>10.6</td><td>Rs.4,560.00</td><td>Rs.4,799.02</td><td>2026-09-16</td></tr><tr><td>21</td><td class="sym">BAJAJ-AUTO</td><td class="co" title="Bajaj Auto Ltd.">Bajaj Auto Ltd.</td><td class="lo">29.0%</td><td class="mid">27.9%</td><td>23.1%</td><td>1.252</td><td class="mid">1.208</td><td>0.915</td><td>13.2</td><td>Rs.11,500.00</td><td>Rs.10,111.50</td><td>2026-09-16</td></tr><tr><td>22</td><td class="sym">NYKAA</td><td class="co" title="FSN E-Commerce Ventures Ltd.">FSN E-Commerce Ventures </td><td class="lo">34.3%</td><td class="mid">34.6%</td><td>27.8%</td><td>1.236</td><td class="mid">1.191</td><td>1.115</td><td>18.4</td><td>Rs.323.75</td><td>Rs.280.44</td><td>2026-09-16</td></tr><tr><td>23</td><td class="sym">INDUSINDBK</td><td class="co" title="IndusInd Bank Ltd.">IndusInd Bank Ltd.</td><td class="lo">35.1%</td><td class="mid">24.6%</td><td>28.7%</td><td>1.222</td><td class="mid">1.175</td><td>0.852</td><td>10.6</td><td>Rs.958.20</td><td>Rs.919.23</td><td>2026-09-16</td></tr><tr><td>24</td><td class="sym">ABCAPITAL</td><td class="co" title="Aditya Birla Capital Ltd.">Aditya Birla Capital Ltd</td><td class="lo">38.6%</td><td class="mid">29.4%</td><td>31.8%</td><td>1.213</td><td class="mid">1.165</td><td>1.067</td><td>18.1</td><td>Rs.390.00</td><td>Rs.362.69</td><td>2026-09-16</td></tr><tr><td>25</td><td class="sym">UNIONBANK</td><td class="co" title="Union Bank of India">Union Bank of India</td><td class="lo">40.0%</td><td class="lo">6.7%</td><td>33.2%</td><td>1.203</td><td class="mid">1.154</td><td>0.400</td><td>-4.8</td><td>Rs.178.09</td><td>Rs.172.99</td><td>2026-09-16</td></tr><tr><td>26</td><td class="sym">CUMMINSIND</td><td class="co" title="Cummins India Ltd.">Cummins India Ltd.</td><td class="lo">33.0%</td><td class="lo">15.1%</td><td>27.9%</td><td>1.186</td><td class="mid">1.135</td><td>0.774</td><td>15.4</td><td>Rs.5,020.00</td><td>Rs.4,976.23</td><td>2026-09-16</td></tr><tr><td>27</td><td class="sym">BSE</td><td class="co" title="BSE Ltd.">BSE Ltd.</td><td class="lo">46.0%</td><td class="lo">18.3%</td><td>39.5%</td><td>1.163</td><td class="mid">1.109</td><td>0.850</td><td>10.0</td><td>Rs.3,259.00</td><td>Rs.3,284.06</td><td>2026-09-16</td></tr><tr><td>28</td><td class="sym">GVT&D</td><td class="co" title="GE Vernova T&D India Ltd.">GE Vernova T&D India Ltd</td><td class="mid">50.5%</td><td class="lo">16.4%</td><td>43.5%</td><td>1.159</td><td class="mid">1.104</td><td>0.853</td><td>9.4</td><td>Rs.4,341.00</td><td>Rs.3,984.56</td><td>2026-09-16</td></tr><tr><td>29</td><td class="sym">LTF</td><td class="co" title="L&T Finance Ltd.">L&T Finance Ltd.</td><td class="lo">39.7%</td><td class="mid">26.0%</td><td>34.3%</td><td>1.156</td><td class="mid">1.101</td><td>0.860</td><td>8.7</td><td>Rs.302.30</td><td>Rs.294.11</td><td>2026-09-16</td></tr><tr><td>30</td><td class="sym">SBIN</td><td class="co" title="State Bank of India">State Bank of India</td><td class="lo">22.9%</td><td class="lo">0.6%</td><td>23.3%</td><td>0.981</td><td class="mid">0.906</td><td>0.062</td><td>-6.6</td><td>Rs.988.70</td><td>Rs.1,040.43</td><td>2026-09-16</td></tr></tbody></table></div>
+</div>
+
+
+<!-- ═══ SAM PICKS TAB ══════════════════════════════════════════════════════ -->
+<div id="picks" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Pure math synthesis — daily close SAM PICKS with full indicator audit.</strong><br>
+    <code>SAM = 0.30×monthly_regime + 0.25×daily_S&amp;R_signal + 0.25×(JEV_quality×direction) + 0.20×confluence_strength</code><br>
+    Every row now shows the daily generated verdict plus RSI14, EMA10/20/50, Supertrend, Ichimoku, Bollinger %B, and JEV confidence. Click any row to audit every formula and raw number.
+    <span style="color:#d29922">Auto-refreshes after market close through GitHub Actions. Stop = floor − 0.25×ATR. Not SEBI-registered advice. Paper-trade first.</span>
+  </p>
+  <div id="picksStale" style="display:none;background:#3d1a1a;border:1px solid #f778ba;border-radius:8px;padding:10px 12px;margin-bottom:10px;color:#f778ba;font-size:.82rem"></div>
+  <div id="picksStats" class="stat-strip"></div>
+  <div style="margin:10px 0;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="pf-ALL"      onclick="picksFilter('ALL',this)">All</button>
+    <button class="tab-btn"        id="pf-BUY"      onclick="picksFilter('BUY',this)"       style="color:#3fb950;font-weight:700">🟢 BUY</button>
+    <button class="tab-btn"        id="pf-WATCH_BUY" onclick="picksFilter('WATCH_BUY',this)" style="color:#58a6ff">🔵 WATCH BUY</button>
+    <button class="tab-btn"        id="pf-AVOID"    onclick="picksFilter('AVOID',this)"     style="color:#f778ba">🔴 AVOID</button>
+    <button class="tab-btn"        id="pf-CAUTION"  onclick="picksFilter('CAUTION',this)"   style="color:#d29922">🟠 CAUTION</button>
+    <button class="tab-btn"        id="pf-WATCH"    onclick="picksFilter('WATCH',this)"     style="color:#e3b341">🟡 WATCH</button>
+  </div>
+  <div class="scroll" style="max-height:600px"><table><thead><tr>
+    <th>#</th><th>Action</th><th>Stock</th><th>SAM score</th>
+    <th>Entry</th><th>Stop<br><small style="font-weight:400;color:#8b949e">floor−0.25ATR</small></th>
+    <th>Target<br><small style="font-weight:400;color:#8b949e">nearest ceiling</small></th>
+    <th>R:R</th><th>Regime</th><th>Signal</th><th>Why — plain English + live indicators</th>
+  </tr></thead><tbody id="picksRows"></tbody></table></div>
+  <div class="disc" id="picksFoot">Loading SAM PICKS…</div>
+</div>
+<!-- ═══ MONTHLY REGIME TAB ══════════════════════════════════════════════════ -->
+<div id="regime" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Monthly trend regime — where is each stock in its multi-month UP/DOWN/SIDE wave?</strong><br>
+    Trailing 12-month adjusted-close return &gt;+5% = UP, &lt;−5% = DOWN, else SIDE. Current incomplete month excluded.<br>
+    JEV scores each stock on regime quality, persistence odds, and reversal watch (inverted — low = safer). <span style="color:#d29922">Reversal risk ratio</span> = current age ÷ historical mean for that direction; &gt;1.5× = stretched.<br>
+    <span style="color:#8b949e">Not SEBI-registered advice. Run <code>python monthly_regime.py</code> to refresh.</span>
+  </p>
+  <div id="regimeStats" class="stat-strip"></div>
+  <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="rf-ALL" onclick="regimeFilter('ALL',this)">All 200</button>
+    <button class="tab-btn" id="rf-UP"   onclick="regimeFilter('UP',this)"   style="color:#3fb950">▲ UP regime</button>
+    <button class="tab-btn" id="rf-DOWN" onclick="regimeFilter('DOWN',this)" style="color:#f778ba">▼ DOWN regime</button>
+    <button class="tab-btn" id="rf-SIDE" onclick="regimeFilter('SIDE',this)" style="color:#8b949e">↔ SIDE</button>
+    <button class="tab-btn" id="rf-FRESH" onclick="regimeFilter('FRESH',this)" style="color:#58a6ff">🌱 Fresh (&lt;6m)</button>
+    <button class="tab-btn" id="rf-STRETCHED" onclick="regimeFilter('STRETCHED',this)" style="color:#d29922">⚠️ Stretched (&gt;1.5×)</button>
+  </div>
+  <div class="scroll" style="max-height:580px"><table><thead><tr>
+    <th>#</th><th>Symbol</th><th>Regime</th><th>Since</th><th>Age</th>
+    <th>Avg 12m ret</th><th>Mom 12m</th><th>Mom 6m</th>
+    <th>Rev risk<br><small style="font-weight:400;color:#8b949e">age÷hist mean</small></th>
+    <th>JEV<br><small style="font-weight:400;color:#8b949e">quality×persistence</small></th>
+    <th>Regime history</th>
+  </tr></thead><tbody id="regimeRows"></tbody></table></div>
+  <div class="disc" id="regimeFoot">Loading monthly regimes…</div>
+</div>
+<!-- ═══ SWING STRUCTURE TAB ═════════════════════════════════════════════════ -->
+<div id="swing" class="tab-panel">
+  <p style="font-size:.8rem;color:#8b949e;margin-bottom:8px">
+    <strong style="color:#e6edf3">Dow Theory swing structure — HH / HL / LH / LL for all 200.</strong><br>
+    A stock in an <span style="color:#3fb950">UPTREND makes Higher Highs + Higher Lows</span>; a <span style="color:#f778ba">DOWNTREND makes Lower Highs + Lower Lows</span>.
+    A <strong style="color:#3fb950">reversal up (double bottom)</strong> = a Higher Low forms after Lower Lows; a <strong style="color:#f778ba">reversal down (double top)</strong> = a Lower High forms after Higher Highs.
+    Each row shows the exact <strong>trigger price</strong> that confirms the turn and the level that invalidates it.<br>
+    <span style="color:#8b949e">Method: 5-bar fractal swing pivots. Structure = last confirmed high+low pair. Not SEBI-registered advice.</span>
+  </p>
+  <div id="swingStats" class="stat-strip"></div>
+  <div style="margin:10px 0;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="tab-btn active" id="sw-ALL"         onclick="swingFilter('ALL',this)">All</button>
+    <button class="tab-btn"        id="sw-REVERSAL_UP" onclick="swingFilter('REVERSAL_UP',this)"  style="color:#3fb950;font-weight:700">🟢 Reversal Up</button>
+    <button class="tab-btn"        id="sw-REVERSAL_DN" onclick="swingFilter('REVERSAL_DN',this)"  style="color:#f778ba;font-weight:700">🔴 Reversal Down</button>
+    <button class="tab-btn"        id="sw-UPTREND"     onclick="swingFilter('UPTREND',this)"      style="color:#3fb950">Uptrend</button>
+    <button class="tab-btn"        id="sw-DOWNTREND"   onclick="swingFilter('DOWNTREND',this)"    style="color:#f778ba">Downtrend</button>
+    <button class="tab-btn" id="sw-BROKEN" onclick="swingFilter('BROKEN',this)" style="color:#d29922;font-weight:700">⚠️ Broken (CHoCH)</button>
+    <button class="tab-btn"        id="sw-2LL"         onclick="swingFilter('2LL',this)"          style="color:#58a6ff">2nd LL (bottom watch)</button>
+    <button class="tab-btn"        id="sw-2HH"         onclick="swingFilter('2HH',this)"          style="color:#d29922">2nd HH (top watch)</button>
+  </div>
+  <div class="scroll" style="max-height:600px"><table><thead><tr>
+    <th>#</th><th>Stock</th><th>Close</th><th>Structure</th>
+    <th>Last High<br><small style="font-weight:400;color:#8b949e">label · ₹ · date</small></th>
+    <th>Last Low<br><small style="font-weight:400;color:#8b949e">label · ₹ · date</small></th>
+    <th>HH×</th><th>LL×</th>
+    <th>BOS / CHoCH<br><small style="font-weight:400;color:#8b949e">trend signal</small></th>
+    <th>Wyckoff<br><small style="font-weight:400;color:#8b949e">volume phase</small></th>
+    <th>Plain English</th>
+  </tr></thead><tbody id="swingRows"></tbody></table></div>
+  <div class="disc" id="swingFoot">Loading swing structure…</div>
+</div>
+<div class="disc">
+  <strong>Files:</strong> fund_portfolio.json / .csv (&#8377;10L holdings) &middot; openalgo_basket.json (real share qty, CNC market orders) &middot; quant_upgrade_master.csv (full 194-rank dump) &middot; quant_upgrade_{sharpe,ensemble,raw}_2026-09-17.csv &middot; openalgo_symbols.txt<br>
+  <strong>Risk:</strong> Educational screening from raw NSE closes (splits/dividends not adjusted). Not investment advice. Fund caps any single name at 12% of NAV; consider a stop-loss and paper-trade first. 6 recent IPOs excluded (&lt;12mo history).
+</div>
+
+<script>
+function showTab(n, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(n).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function mkChart(el, labels_, ds){
+  return new Chart(document.getElementById(el).getContext('2d'), {
+    type:'bar',
+    data:{labels:labels_, datasets:ds},
+    options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#c9d1d9'}}},
+      scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e'}},
+              y:{grid:{color:'#21262d'},ticks:{color:'#c9d1d9',font:{size:11}}}}}
+  });
+}
+mkChart('chB', ["#1 LAURUSLABS", "#2 ADANIENSOL", "#3 BHEL", "#4 FEDERALBNK", "#5 POWERINDIA", "#6 BHARATFORG", "#7 MOTHERSON", "#8 IDEA", "#9 RADICO", "#10 AUBANK", "#11 AUROPHARMA", "#12 ABB", "#13 SOLARINDS", "#14 DIVISLAB", "#15 TITAN", "#16 HINDALCO", "#17 UNIONBANK", "#18 LTF", "#19 ABCAPITAL", "#20 TORNTPHARM", "#21 INDUSINDBK", "#22 NYKAA", "#23 CUMMINSIND", "#24 ADANIGREEN", "#25 SAIL", "#26 ADANIENT", "#27 SIEMENS", "#28 OFSS", "#29 APLAPOLLO", "#30 TVSMOTOR"], [{label:'12-1 Return %', data:[102.4, 93.2, 85.8, 82.5, 81.4, 73.2, 69.4, 68.9, 64.5, 51.3, 48.3, 46.2, 45.0, 42.8, 40.9, 40.3, 40.0, 39.7, 38.6, 38.4, 35.1, 34.3, 33.0, 32.4, 31.2, 26.0, 25.9, 25.5, 24.7, 24.6], backgroundColor:["#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#69f0ae", "#69f0ae", "#69f0ae", "#69f0ae", "#69f0ae", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#d29922", "#40c4ff", "#40c4ff", "#40c4ff", "#40c4ff", "#40c4ff"], borderRadius:3}]);
+mkChart('chR', ["LAURUSLABS", "FEDERALBNK", "BHARATFORG", "ADANIENSOL", "BHEL", "MOTHERSON", "RADICO", "AUROPHARMA", "POWERINDIA", "DIVISLAB", "TORNTPHARM", "TITAN", "AUBANK", "IDEA", "ABB", "HINDALCO", "SOLARINDS", "NYKAA", "INDUSINDBK", "ABCAPITAL", "UNIONBANK", "CUMMINSIND", "LTF", "NESTLEIND", "APLAPOLLO", "PHOENIXLTD", "SAIL", "SUNPHARMA", "TVSMOTOR", "SIEMENS"],   [{label:'z(RAM)', data:[3.708, 3.484, 2.536, 2.489, 2.473, 2.045, 2.016, 1.877, 1.875, 1.866, 1.826, 1.783, 1.765, 1.578, 1.565, 1.378, 1.368, 1.191, 1.175, 1.165, 1.154, 1.135, 1.101, 0.894, 0.867, 0.82, 0.817, 0.814, 0.8, 0.767], borderRadius:3,
+   backgroundColor:[3.708, 3.484, 2.536, 2.489, 2.473, 2.045, 2.016, 1.877, 1.875, 1.866, 1.826, 1.783, 1.765, 1.578, 1.565, 1.378, 1.368, 1.191, 1.175, 1.165, 1.154, 1.135, 1.101, 0.894, 0.867, 0.82, 0.817, 0.814, 0.8, 0.767].map(v=>v>=1.5?'#3fb950':v>=0.8?'#d29922':'#58a6ff')}]);
+mkChart('chE', ["LAURUSLABS", "ADANIENSOL", "RADICO", "BHEL", "FEDERALBNK", "POWERINDIA", "MOTHERSON", "OFSS", "BHARATFORG", "IDEA", "AUROPHARMA", "SOLARINDS", "DIVISLAB", "BOSCHLTD", "ADANIENT", "NYKAA", "ADANIGREEN", "ABCAPITAL", "AUBANK", "ABB", "TITAN", "TORNTPHARM", "LTF", "INDUSINDBK", "CUMMINSIND", "GRASIM", "PHOENIXLTD", "NESTLEIND", "APOLLOHOSP", "HINDALCO"],   [{label:'z(Ensemble)', data:[3.223, 2.377, 2.347, 2.272, 2.051, 1.746, 1.739, 1.699, 1.646, 1.621, 1.504, 1.429, 1.417, 1.158, 1.148, 1.115, 1.094, 1.067, 1.062, 1.042, 1.025, 0.973, 0.86, 0.852, 0.774, 0.75, 0.736, 0.714, 0.712, 0.703], borderRadius:3,
+   backgroundColor:[3.223, 2.377, 2.347, 2.272, 2.051, 1.746, 1.739, 1.699, 1.646, 1.621, 1.504, 1.429, 1.417, 1.158, 1.148, 1.115, 1.094, 1.067, 1.062, 1.042, 1.025, 0.973, 0.86, 0.852, 0.774, 0.75, 0.736, 0.714, 0.712, 0.703].map(v=>v>=1.5?'#00e676':v>=0.8?'#d29922':'#40c4ff')}]);
+
+// ---- Fund tab: render from fund_portfolio.json ----
+fetch('fund_portfolio.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  document.getElementById('fundStats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],['Holdings',p.holdings_count],
+    ['Gate pass',p.gate_pass_count]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('fundRows').innerHTML=H.map((h,i)=>{
+    const wc=h.actual_weight_pct>=8?'hi':h.actual_weight_pct>=5?'mid':'lo';
+    return `<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td class="co" title="${h.name}">${h.name}</td><td>${h.shares.toLocaleString('en-IN')}</td><td>${inr(h.price)}</td><td>${inr(h.value_rs)}</td><td class="${wc}">${h.actual_weight_pct}%</td><td>${h.z_ram}</td><td class="hi">${h.mom12_pct}%</td></tr>`;
+  }).join('');
+  document.getElementById('fundFoot').innerHTML=`<strong>Method:</strong> ${p.method}. <strong>As of</strong> ${p.as_of}, <strong>rebalance</strong> ${p.rebalance}. Trading mode: <strong>${p.trading_mode||'PAPER_ONLY_BLOCKED'}</strong>. Downloads: <a href="fund_portfolio.csv" style="color:#58a6ff">fund_portfolio.csv</a> &middot; <a href="openalgo_basket.json" style="color:#58a6ff">openalgo_basket.json</a> (paper-only by default; live quantities require explicit env unlock). Not investment advice; raw unadjusted NSE closes.`;
+  const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2','#bc8cff','#ffa198','#39c5cf','#7ee787','#ffd33d'];
+  new Chart(document.getElementById('chFund').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal,borderColor:'#0d1117',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12}}}}
+  });
+}).catch(e=>{document.getElementById('fundFoot').textContent='Could not load fund_portfolio.json — run build_fund.py first.';});
+
+// ---- Value-Down tab: render from value_dn.json ----
+fetch('value_dn.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  const pal=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2'];
+  document.getElementById('vdnStats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],['Holdings',p.holdings_count],
+    ['Universe',p.universe_size+' ('+p.fin_count+' fin)']
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('vdnRows').innerHTML=H.map((h,i)=>`<tr><td>${i+1}</td><td class="sym">${h.symbol}</td><td>${h.type}</td><td class="hi">${(+h._score).toFixed(3)}</td><td>${h.pe?h.pe.toFixed(1):'N/A'}</td><td>${h.pb?h.pb.toFixed(2):'N/A'}</td><td class="mid">${h.roe?(h.roe*100).toFixed(1)+'%':'N/A'}</td><td>${h.cash&&h.mc?((h.cash/h.mc)*100).toFixed(1)+'%':'N/A'}</td><td class="lo">${h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A'}</td><td>${h.shares.toLocaleString('en-IN')}</td><td class="hi">${inr(h.value_rs)}</td></tr>`).join('');
+  document.getElementById('vdnFoot').innerHTML=`<strong>Method:</strong> ${p.score_note}<br><strong>Hard rule:</strong> PE+PB+ROE must all be present (avg missing fields in final picks: 0.0). <strong>As of</strong> ${p.as_of} · rebalance ${p.rebalance}. Downloads: <a href="value_dn.csv" style="color:#58a6ff">value_dn.csv</a>. VEDL excluded only due to missing ROE data. <strong>Data caveat:</strong> fundamentals are yfinance <code>.info</code> first-pass &mdash; known gaps/implausibilities exist (e.g. INFY cash understated vs annual report); validate against exchange-filings before real money. Not investment advice.`;
+  new Chart(document.getElementById('chVdn').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:11},boxWidth:12}}}}
+  });
+}).catch(e=>{document.getElementById('vdnFoot').textContent='Could not load value_dn.json — run build_value_dn.py first.';});
+
+// ---- Momentum-5 tab: render from m5_portfolio.json ----
+fetch('m5_portfolio.json').then(r=>r.json()).then(p=>{
+  const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+  const pal5=['#58a6ff','#3fb950','#d29922','#f778ba','#a371f7'];
+  document.getElementById('m5Stats').innerHTML=[
+    ['Seed',inr(p.seed_rs)],
+    ['Deployed',inr(p.deployed_rs)],
+    ['Cash',inr(p.cash_rs)+' ('+p.cash_pct+'%)'],
+    ['Holdings',p.holdings_count],
+    ['Universe',p.universe_size+' stocks'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const H=p.holdings;
+  document.getElementById('m5Rows').innerHTML=H.map((h,i)=>`
+    <tr>
+      <td>${h.rank}</td>
+      <td class="sym">${h.symbol}</td>
+      <td class="co" title="${h.name}">${h.name}</td>
+      <td class="hi">${h.score.toFixed(3)}</td>
+      <td>${h.zr12.toFixed(3)}</td>
+      <td>${h.zr6.toFixed(3)}</td>
+      <td class="hi">${h.mom12_pct}%</td>
+      <td class="mid">${h.mom6_pct}%</td>
+      <td>${h.vol_pct}%</td>
+      <td>${h.shares.toLocaleString('en-IN')}</td>
+      <td>${inr(h.price)}</td>
+
+      <td class="hi">${inr(h.value_rs)}</td>
+    </tr>`).join('');
+  document.getElementById('m5Foot').innerHTML=`<strong>Formula:</strong> <code>${p.formula}</code><br><strong>Gates:</strong> ${p.gates}<br><strong>As of</strong> ${p.as_of} · rebalance ${p.rebalance}. Downloads: <a href="m5_portfolio.csv" style="color:#58a6ff">m5_portfolio.csv</a>. Not investment advice.`;
+  new Chart(document.getElementById('chM5').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:H.map(h=>h.symbol),datasets:[{data:H.map(h=>h.value_rs),backgroundColor:pal5,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:12},boxWidth:14}}}}
+  });
+}).catch(e=>{document.getElementById('m5Foot').textContent='Could not load m5_portfolio.json — run build_m5.py first.';});
+
+// ═══ Combined Fund tab ═══════════════════════════════════════════════════
+function fmtInr(n){return n!=null?'\u20B9'+Math.round(n).toLocaleString('en-IN'):'N/A';}
+function fmtPct(n,dec=1){return n!=null?n.toFixed(dec)+'%':'N/A';}
+function fmtNum(n,dec=2){return n!=null?n.toFixed(dec):'N/A';}
+
+// ═══ Backtest Verdict tab ══════════════════════════════════════════════════
+fetch('backtest_verdict.json').then(r=>r.json()).then(d=>{
+  const rows=d.strategies||[];
+  const money=n=>n==null?'N/A':(n<0?'-₹':'₹')+Math.abs(Math.round(n)).toLocaleString('en-IN');
+  const ret=v=>v==null?'N/A':(typeof v==='number'?fmtPct(v,2):v+'%');
+  document.getElementById('verdictStats').innerHTML=[
+    ['Capital',money(d.capital_rs)],
+    ['Configs tested',rows.reduce((a,r)=>a+(r.configs||0),0).toLocaleString('en-IN')],
+    ['Validated winner',d.winner_label],
+    ['Research sources',d.research_source_count||0]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('verdictRows').innerHTML=rows.map(r=>{
+    const col=r.status&&r.status.includes('POSITIVE')?'#d29922':(r.made_money?'#3fb950':'#f778ba');
+    const pnl=r.pnl_rs_range?`${money(r.pnl_rs_range[0])} to ${money(r.pnl_rs_range[1])}`:money(r.pnl_rs);
+    return `<tr><td class="sym">${r.strategy}</td><td>${r.family}</td><td>${r.validation}</td>
+      <td style="color:${col};font-weight:700">${ret(r.return_pct)}</td><td style="color:${col};font-weight:700">${pnl}</td>
+      <td>${r.status}</td><td>${r.audit_note}</td></tr>`;
+  }).join('');
+  document.getElementById('verdictFoot').innerHTML=
+    `<strong>${d.title}:</strong> ${d.important_warning}<br>`+
+    `Required before any real winner claim: <code>${(d.required_to_validate_winner||[]).join('</code>, <code>')}</code>.`;
+}).catch(e=>{document.getElementById('verdictFoot').textContent='Run the backtest verdict generator to create backtest_verdict.json';});
+
+// ═══ Deterministic Indicator Backtest (survivor-biased smoke test) ═════════
+fetch('backtest_indicators.json').then(r=>r.json()).then(d=>{
+  const cfgs=d.configs||[];
+  document.getElementById('indiBtStats').innerHTML=[
+    ['Universe','194 stocks (SURVIVOR-BIASED)'],
+    ['Test window','Mar–Sep 2026 (6m held-out)'],
+    ['Benchmark test',fmtPct(d.benchmark_eqw_test_pct||0,2)],
+    ['Validated profit','NO — smoke test only'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.9rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('indiBtRows').innerHTML=cfgs.map(r=>{
+    const col=r.test.ret>0?'#d29922':'#f778ba';
+    return `<tr><td>${r.label}</td>
+      <td style="color:${col};font-weight:700">${fmtPct(r.test.ret,2)}</td>
+      <td style="color:${r.alpha_vs_benchmark>0?'#3fb950':'#f778ba'}">${fmtPct(r.alpha_vs_benchmark,2)}</td>
+      <td>${fmtPct(r.test.wr,1)}</td><td>${fmtPct(r.test.maxdd,1)}</td><td>${r.test.n}</td></tr>`;
+  }).join('');
+  document.getElementById('indiBtFoot').innerHTML=
+    `<strong>⚠️ ${d.survivorship_bias_warning||d.note}</strong><br>${d.what_this_is_not||''}`;
+}).catch(e=>{document.getElementById('indiBtFoot').textContent='Run backtest_indicators.py to generate backtest_indicators.json';});
+
+// ═══ Shadow Momentum 30 scaffold tab ══════════════════════════════════════
+fetch('shadow_momentum30.json').then(r=>r.json()).then(d=>{
+  const w=d.walk_forward_scaffold||{}, top=d.latest_top30||[];
+  document.getElementById('shadowStats').innerHTML=[
+    ['As of',d.as_of||'N/A'],
+    ['Months tested',w.months||0],
+    ['Scaffold return',fmtPct(w.total_ret_pct||0,2)],
+    ['Max DD',fmtPct(w.max_drawdown_pct||0,2)],
+    ['Win months',fmtPct(w.win_months_pct||0,1)]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('shadowRows').innerHTML=top.map((r,i)=>`<tr>
+    <td>${i+1}</td><td class="sym">${r.symbol}</td><td class="hi">${fmtNum(r.score,3)}</td>
+    <td>${fmtPct((r.mom6||0)*100,1)}</td><td>${fmtPct((r.mom12||0)*100,1)}</td>
+    <td>${fmtPct((r.vol||0)*100,1)}</td><td>₹${Math.round(r.close||0).toLocaleString('en-IN')}</td>
+  </tr>`).join('');
+  document.getElementById('shadowFoot').innerHTML=
+    `<strong>Verdict:</strong> ${d.verdict}<br><strong>Method:</strong> ${d.method.score}. ${d.method.official_gap}`;
+}).catch(e=>{document.getElementById('shadowFoot').textContent='Run: python shadow_momentum30.py to generate shadow_momentum30.json';});
+
+// ═══ Momentum 30 Daily tab ══════════════════════════════════════════════════
+fetch('momentum30_daily.json').then(r=>r.json()).then(d=>{
+  const h=d.holdings||[];
+  document.getElementById('m30Stats').innerHTML=[
+    ['As of',d.as_of||'N/A'],
+    ['Universe',d.universe||'N/A'],
+    ['Top N',d.top_n||30],
+    ['BUY',h.filter(x=>x.signal==='BUY').length],
+    ['WATCH_BUY',h.filter(x=>x.signal==='WATCH_BUY').length],
+    ['NEUTRAL',h.filter(x=>x.signal==='NEUTRAL').length]
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1.05rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('m30Rows').innerHTML=h.map((r,i)=>`<tr>
+    <td>${i+1}</td><td style="color:${r.color};font-weight:700">${r.signal}</td>
+    <td class="sym">${r.symbol}</td><td class="hi">${fmtNum(r.score,3)}</td>
+    <td>${fmtPct(r.mom6_pct,1)}</td><td>${r.mom12_pct!=null?fmtPct(r.mom12_pct,1):'N/A'}</td>
+    <td>${fmtPct(r.vol_pct,1)}</td><td>₹${Math.round(r.close||0).toLocaleString('en-IN')}</td>
+    <td style="color:${r.color};font-weight:700">${r.signal}</td>
+  </tr>`).join('');
+  document.getElementById('m30Foot').innerHTML=
+    `<strong>Method:</strong> ${d.method}<br><strong>Note:</strong> ${d.note}`;
+}).catch(e=>{document.getElementById('m30Foot').textContent='Run: python momentum30_daily.py to generate momentum30_daily.json';});
+
+function showModal(sym){
+  const h=_holdings.find(x=>x.symbol===sym)||{};
+  const base=_profiles[sym]||{};
+  const p=Object.assign({},base,h);   // holding data wins — has sleeve/scores/roe_pct
+  if(!p.symbol) return;
+  const inr=fmtInr, pct=fmtPct, num=fmtNum;
+  const flags=(p.red_flags||[]);
+  const flagHtml=flags.length?'<div style="background:#2d1b00;border:1px solid #d29922;border-radius:6px;padding:8px 12px;margin-bottom:12px;color:#d29922;font-size:.8rem">&#9888; '+flags.join(' &nbsp;|&nbsp; ')+'</div>':'';
+  const sleeve=p.sleeve||'';
+  const sleeveCol=sleeve==='A'?'#3fb950':'#58a6ff';
+  const scoreLabel=sleeve==='A'?'M5 score':'Val score';
+  const scoreVal=sleeve==='A'?(p.m5_score!=null?p.m5_score.toFixed(3):'N/A'):(p.val_score!=null?p.val_score.toFixed(3):'N/A');
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:1.4rem;font-weight:700;color:#e6edf3">${sym}</span>
+      <span style="background:${sleeveCol};color:#000;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700">Sleeve ${sleeve||'—'}</span>
+      <span style="color:#8b949e;font-size:.85rem">${p.name||''}</span>
+    </div>
+    ${flagHtml}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Momentum</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">M5 score</td><td style="text-align:right;color:#3fb950;font-weight:700">${fmtNum(p.m5_score,3)}</td></tr>
+          <tr><td style="color:#8b949e">12-month return</td><td style="text-align:right;color:#3fb950">${fmtPct(p.mom12_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">6-month return</td><td style="text-align:right">${fmtPct(p.mom6_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Annualised vol</td><td style="text-align:right">${fmtPct(p.vol_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Above 200-DMA</td><td style="text-align:right">${p.above_dma?'<span style="color:#3fb950">Yes</span>':'<span style="color:#f778ba">No</span>'}</td></tr>
+          <tr><td style="color:#8b949e">F&amp;O eligible</td><td style="text-align:right">${p.in_fno?'<span style="color:#3fb950">Yes</span>':'No'}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Price Damage</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">From 52w high</td><td style="text-align:right;color:#f778ba;font-weight:700">${fmtPct(p.dd_52wh_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 1 month</td><td style="text-align:right;color:#d29922">${fmtPct(p.drop_1m_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Last 5 days</td><td style="text-align:right">${fmtPct(p.drop_5d_pct,1)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Valuation</div>
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">PE</td><td style="text-align:right">${fmtNum(p.pe,1)}</td></tr>
+          <tr><td style="color:#8b949e">PB</td><td style="text-align:right">${fmtNum(p.pb,2)}</td></tr>
+          <tr><td style="color:#8b949e">ROE</td><td style="text-align:right;color:#3fb950">${fmtPct(p.roe_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Net Margin</td><td style="text-align:right">${fmtPct(p.net_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">Gross Margin</td><td style="text-align:right">${fmtPct(p.gross_margin_pct,1)}</td></tr>
+          <tr><td style="color:#8b949e">EPS</td><td style="text-align:right">${fmtNum(p.eps,2)}</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px">
+        <div style="color:#8b949e;font-size:.72rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Balance Sheet (yfinance)</div>
+        ${(p.sector||'').includes('Financial')?'<div style="font-size:.7rem;color:#58a6ff;margin-bottom:6px;padding:3px 6px;background:#0d1a2e;border-radius:4px">&#8505; Financial sector: debt/cash &amp; FCF reflect business model (deposits/loans), not financial risk</div>':''}
+        <table style="width:100%;font-size:.82rem"><tbody>
+          <tr><td style="color:#8b949e">Cash (BS)</td><td style="text-align:right;color:#3fb950">${fmtInr(p.total_cash)}</td></tr>
+          <tr><td style="color:#8b949e">Debt (BS)</td><td style="text-align:right;color:#8b949e">${fmtInr(p.total_debt)}</td></tr>
+          <tr><td style="color:#8b949e">Debt/Cash</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.debt_to_cash||0)>10?'#f778ba':'#c9d1d9'}">${fmtNum(p.debt_to_cash,1)}×${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
+          <tr><td style="color:#8b949e">FCF</td><td style="text-align:right;color:${(p.sector||'').includes('Financial')?'#8b949e':(p.fcf||1)>0?'#3fb950':'#f778ba'}">${fmtInr(p.fcf)}${(p.sector||'').includes('Financial')?' (info)':''}</td></tr>
+          <tr><td style="color:#8b949e">Revenue</td><td style="text-align:right">${fmtInr(p.revenue)}</td></tr>
+          <tr><td style="color:#8b949e">EBITDA</td><td style="text-align:right">${fmtInr(p.ebitda)}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div style="font-size:.73rem;color:#8b949e;padding:8px 10px;background:#0d1117;border-radius:6px;border:1px solid #30363d">
+      Sector: ${p.sector||'N/A'} | Industry: ${p.industry||'N/A'} | Beta: ${fmtNum(p.beta,2)} | Div Yield: ${fmtPct(p.div_yield_pct,2)}<br>
+      <strong style="color:#d29922">Data caveat:</strong> fundamentals from yfinance .info + balance_sheet — first-pass only. Validate cash/debt/ROE against NSE exchange filings.
+    </div>`;
+  document.getElementById('modal').style.display='block';
+}
+
+let _profiles={};
+let _holdings=[];
+fetch('stock_profiles.json').then(r=>r.json()).then(sp=>{ _profiles=sp; });
+
+fetch('combined_portfolio.json').then(r=>r.json()).then(p=>{
+  const H=p.holdings; _holdings=H;  // expose to showModal before any click
+  const palA='#3fb950', palB='#58a6ff';
+  document.getElementById('combStats').innerHTML=[
+    ['Seed',fmtInr(p.seed_rs)],['Deployed',fmtInr(p.deployed_rs)],
+    ['Cash',fmtInr(p.cash_rs)+' ('+p.cash_pct+'%)'],
+    ['Sleeve A \u25b2',fmtInr(p.sleeve_a_rs)+' Momentum'],
+    ['Sleeve B \u25bc',fmtInr(p.sleeve_b_rs)+' Value-Down'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+
+  document.getElementById('combRows').innerHTML=H.map((h,i)=>{
+    const isA=h.sleeve==='A';
+    const sc=isA?(h.m5_score!=null?h.m5_score.toFixed(3):'—'):(h.val_score!=null?h.val_score.toFixed(3):'—');
+    const col=isA?palA:palB;
+    const dd=h.dd_52wh_pct!=null?h.dd_52wh_pct.toFixed(1)+'%':'N/A';
+    const d5=h.drop_5d_pct!=null?h.drop_5d_pct.toFixed(1)+'%':'N/A';
+    const flags=(h.red_flags||[]).length;
+    const flagBadge=flags?`<span style="background:#2d1b00;color:#d29922;padding:1px 6px;border-radius:8px;font-size:.68rem">⚠ ${flags}</span>`:'<span style="color:#3fb950;font-size:.75rem">✓</span>';
+    return `<tr onclick="showModal('${h.symbol}')" style="cursor:pointer">
+      <td>${i+1}</td>
+      <td><span style="background:${col};color:#000;padding:1px 7px;border-radius:9px;font-size:.68rem;font-weight:700">${h.sleeve}</span></td>
+      <td class="sym">${h.symbol}</td>
+      <td class="co" title="${h.name}">${h.name}</td>
+      <td class="${isA?'hi':'lo'}">${sc}</td>
+      <td class="${(h.mom12_pct||0)>30?'hi':'mid'}">${h.mom12_pct!=null?h.mom12_pct.toFixed(1)+'%':'N/A'}</td>
+      <td>${h.pe!=null?h.pe.toFixed(1):'N/A'}</td>
+      <td class="${(h.roe_pct||0)>15?'hi':'mid'}">${h.roe_pct!=null?h.roe_pct+'%':'N/A'}</td>
+      <td style="color:#f778ba">${dd}</td>
+      <td style="color:${(h.drop_5d_pct||0)<-3?'#f778ba':'#c9d1d9'}">${d5}</td>
+      <td class="hi">${fmtInr(h.value_rs)}</td>
+      <td>${flagBadge}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('combFoot').innerHTML=`<strong>Method:</strong> ${p.method}<br><strong>Caveat:</strong> ${p.data_caveat} Downloads: <a href="combined_portfolio.json" style="color:#58a6ff">combined_portfolio.json</a>.`;
+
+  const labels=H.map(h=>h.symbol);
+  const vals=H.map(h=>h.value_rs);
+  const colors=H.map(h=>h.sleeve==='A'?palA:palB);
+  new Chart(document.getElementById('chComb').getContext('2d'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderColor:'#0d1117',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+      plugins:{legend:{position:'bottom',labels:{color:'#c9d1d9',font:{size:10},boxWidth:12,
+        generateLabels:function(chart){return chart.data.labels.map((l,i)=>({
+          text:l,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:'#0d1117',lineWidth:2,hidden:false,index:i
+        }))}
+      }}}
+    }
+  });
+}).catch(e=>{document.getElementById('combFoot').textContent='Could not load combined_portfolio.json — run build_combined.py first.';});
+
+// ═══ S&R Daily tab ═══════════════════════════════════════════════════════
+const SIG_ICON={BREAKOUT_UP:'🟢',BREAKOUT_DN:'🔴',AT_RESISTANCE:'🟡',AT_SUPPORT:'🟢',NEAR_RESISTANCE:'🟠',NEAR_SUPPORT:'🔵',NEUTRAL:'⚪'};
+const SIG_COL ={BREAKOUT_UP:'#3fb950',BREAKOUT_DN:'#f778ba',AT_RESISTANCE:'#d29922',AT_SUPPORT:'#3fb950',NEAR_RESISTANCE:'#d29922',NEAR_SUPPORT:'#58a6ff',NEUTRAL:'#8b949e'};
+let _srAll=[], _srFilter='ALL', _jevBySym={};
+function srFilter(f){
+  _srFilter=f;
+  document.querySelectorAll('#srFilters .tab-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('sf-'+f)||document.getElementById('sf-ALL');
+  if(btn) btn.classList.add('active');
+  renderSR();
+}
+function renderSR(){
+  const rows=_srFilter==='ALL'?_srAll:
+    _srFilter==='NEAR'?_srAll.filter(r=>r.signal.startsWith('NEAR')):
+    _srAll.filter(r=>r.signal===_srFilter);
+  document.getElementById('srRows').innerHTML=rows.map(r=>{
+    const col  = SIG_COL[r.signal]||'#8b949e';
+    const vwapCol = r.above_vwap ? '#3fb950' : '#f778ba';
+    const vwapLbl = r.above_vwap ? '↑ above' : '↓ below';
+    const vr   = r.vol_ratio!=null ? r.vol_ratio.toFixed(1)+'×' : '—';
+    const vrCol= (r.vol_ratio||0)>1.5 ? '#3fb950' : '#c9d1d9';
+    return `<tr onclick="showSrMath('${r.symbol}')" title="Click to see the maths behind ${r.symbol} S&R" style="cursor:pointer">
+      <td style="max-width:220px;white-space:normal;line-height:1.4">
+        <span style="color:${col};font-weight:700">${r.plain_signal||r.signal}</span>
+      </td>
+      <td class="sym">${r.symbol}</td>
+      <td class="co" title="${r.name||''}">${r.name||r.symbol}</td>
+      <td style="font-weight:700">${fmtInr(r.close)}</td>
+      <td>
+        <span style="color:${vwapCol};font-size:.75rem">${vwapLbl}</span><br>
+        <span style="color:#a371f7">${r.vwap20!=null?fmtInr(r.vwap20):'—'}</span>
+      </td>
+      <td style="color:#3fb950;font-weight:600">${r.floor!=null?fmtInr(r.floor):'—'}</td>
+      <td style="color:#f778ba;font-weight:600">${r.ceiling!=null?fmtInr(r.ceiling):'—'}</td>
+      <td style="color:#58a6ff">${r.next_target!=null?fmtInr(r.next_target):'—'}</td>
+      <td style="color:#d29922">${r.next_floor!=null?fmtInr(r.next_floor):'—'}</td>
+      <td style="color:${vrCol}">${vr}</td>
+      <td style="color:#8b949e;font-size:.78rem;max-width:160px;white-space:normal;line-height:1.3">${r.action||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+const METHOD_MATH={
+  swing:{name:'Swing structure',formula:'Swing high: Hᵢ = max(Hᵢ₋₅…Hᵢ₊₅); Swing low: Lᵢ = min(Lᵢ₋₅…Lᵢ₊₅)',logic:'A price where the chart previously turned; buyers/sellers proved themselves there.'},
+  pivot:{name:'Classic pivots',formula:'PP=(H+L+C)/3; R1=2×PP−L; S1=2×PP−H; R2=PP+(H−L); S2=PP−(H−L)',logic:'Mechanical levels from the latest completed candle; widely watched by discretionary and systematic traders.'},
+  '52w':{name:'52-week high/low',formula:'52w high=max(High₂₅₂); 52w low=min(Low₂₅₂)',logic:'Long-horizon extremes; many breakouts, stops, and anchoring decisions cluster here.'},
+  kmeans:{name:'K-means price clusters',formula:'Cluster last 90 sessions of highs/lows; centroid = average price of each cluster',logic:'Finds repeated price zones without hand-drawn lines.'},
+  vp:{name:'Volume Profile',formula:'VP(p)=Σ volume traded in price bucket p; POC=argmax VP(p); VAH/VAL bound 70% value area',logic:'Shows where the most shares actually changed hands — the closest proxy for real buyer/seller battle zones.'},
+  vwap:{name:'20-day VWAP',formula:'VWAP₂₀=Σ(TypicalPrice×Volume)/ΣVolume, TypicalPrice=(H+L+C)/3',logic:'Average cost basis over the last 20 completed sessions.'},
+  avwap:{name:'Anchored VWAP',formula:'AVWAPₐ₋ₜ=Σᵢ₌ₐᵗ(TypicalPriceᵢ×Volumeᵢ)/Σᵢ₌ₐᵗ Volumeᵢ',logic:'Average cost since a meaningful event anchor, e.g. swing low/high, 52w extreme, breakout bar.'},
+  round:{name:'Round-number clustering',formula:'Nearest ₹5/₹10/₹20/₹50/₹100 grid depending on price scale',logic:'Human orders and stops often cluster around psychologically clean numbers.'}
+};
+function srcCard(source,label,price){
+  const m=METHOD_MATH[source]||{name:source,formula:'—',logic:'—'};
+  return `<div style="border:1px solid #30363d;border-radius:8px;padding:10px;margin:8px 0;background:#0d1117">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <strong style="color:#e6edf3">${label||m.name}</strong>
+      <span style="color:#58a6ff;font-weight:700">${price!=null?fmtInr(price):''}</span>
+    </div>
+    <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>${m.formula}</code></div>
+    <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">${m.logic}</div>
+  </div>`;
+}
+function clusterBox(title,cl){
+  if(!cl) return `<div style="color:#8b949e">${title}: no cluster found.</div>`;
+  const comps=(cl.components||[]).map(c=>srcCard(c.source,c.label,c.price)).join('');
+  return `<div style="border:1px solid #30363d;border-radius:10px;padding:12px;margin:12px 0">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div><strong style="font-size:1rem;color:#e6edf3">${title}: ${fmtInr(cl.price)}</strong>
+        <div style="font-size:.78rem;color:#8b949e">${cl.n_sources} method buckets agree: ${(cl.sources||[]).join(', ')}</div>
+      </div>
+      <div style="text-align:right;font-size:.8rem;color:#8b949e">
+        Strength <strong style="color:#3fb950">${Math.round((cl.strength||0)*100)}</strong>/100<br>
+        VP ${Math.round((cl.vp_density||0)*100)} · touches ${cl.touches||0} · rejection ${cl.rejection_atr||0} ATR
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:#8b949e;margin-top:8px">
+      <code>Strength = 0.40×VP_density + 0.25×min(touches/4,1) + 0.20×min(rejectionATR/2,1) + 0.15×AVWAP/round_confluence</code>
+    </div>
+    ${comps}
+  </div>`;
+}
+function showSrMath(symbol){
+  const s=_srAll.find(x=>x.symbol===symbol);
+  if(!s) return;
+  const j=_jevBySym[symbol];
+  const c=s.confluence||{};
+  const av=Object.entries(s.avwap||{}).map(([k,v])=>`<tr><td>${k}</td><td>${fmtInr(v)}</td><td>AVWAP from ${k.replaceAll('_',' ')} anchor</td></tr>`).join('');
+  const piv=s.pivot||{};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${s.symbol} — why these S&R levels?</h2>
+    <div style="color:#8b949e;margin-bottom:12px">${s.name||''} · close <strong style="color:#e6edf3">${fmtInr(s.close)}</strong> · signal <strong style="color:${SIG_COL[s.signal]||'#e6edf3'}">${s.signal}</strong></div>
+    ${j?`<div class="stat-strip" style="margin-bottom:12px">
+      <div class="stat"><div class="v">${(j.composite*100).toFixed(1)}</div><div class="l">JEV</div></div>
+      <div class="stat"><div class="v">${j.setup_quality.toFixed(2)}</div><div class="l">Setup</div></div>
+      <div class="stat"><div class="v">${j.follow_through.toFixed(2)}</div><div class="l">Follow</div></div>
+      <div class="stat"><div class="v">${j.risk_reward.toFixed(2)}</div><div class="l">Risk/Reward</div></div>
+    </div>`:''}
+    <p style="color:#c9d1d9">${s.plain_signal||''}</p>
+    ${clusterBox('Nearest floor / buyer zone',c.floor)}
+    ${clusterBox('Nearest ceiling / seller zone',c.ceiling)}
+    <h3>Raw method values for this stock</h3>
+    <table><tbody>
+      <tr><td>Pivot math</td><td>PP ${fmtInr(piv.PP)} · R1 ${fmtInr(piv.R1)} · R2 ${fmtInr(piv.R2)} · S1 ${fmtInr(piv.S1)} · S2 ${fmtInr(piv.S2)}</td></tr>
+      <tr><td>Volume Profile</td><td>POC ${fmtInr(s.poc)} · VAH ${fmtInr(s.vah)} · VAL ${fmtInr(s.val)}</td></tr>
+      <tr><td>52-week anchors</td><td>High ${fmtInr(s.hi52w)} · Low ${fmtInr(s.lo52w)}</td></tr>
+      <tr><td>ATR / breakout</td><td>ATR14 ${fmtInr(s.atr14)} · 20d high ${fmtInr(s.d20_high)} · 20d low ${fmtInr(s.d20_low)} · breakout buffer 0.25×ATR</td></tr>
+      <tr><td>Round levels</td><td>${(s.round_levels||[]).map(fmtInr).join(' · ')||'—'}</td></tr>
+    </tbody></table>
+    <h3>Anchored VWAP anchors</h3>
+    <table><tbody>${av||'<tr><td>No AVWAP anchors</td></tr>'}</tbody></table>
+    <h3>All formulas used</h3>
+    ${Object.entries(METHOD_MATH).map(([src,m])=>srcCard(src,m.name,null)).join('')}
+    <p style="font-size:.75rem;color:#8b949e">This is a rules-based scanner, not a prediction or SEBI-registered advice. The point is to show where historical volume, anchored cost basis, pivots, swings, and volatility-adjusted break conditions agree.</p>`;
+  document.getElementById('modal').style.display='block';
+}
+function renderJEV(j){
+  _jevBySym=Object.fromEntries((j.ranking||[]).map(x=>[x.symbol,x]));
+  const bySym=Object.fromEntries(_srAll.map(s=>[s.symbol,s]));
+  const rows=(j.ranking||[]).slice(0,10);
+  document.getElementById('jevMeta').innerHTML=`As of <strong style="color:#e6edf3">${j.as_of}</strong> · ${j.judged}/${j.of_universe} stocks judged · model ${j.model} · weights: setup 35%, follow-through 30%, R/R 35%`;
+  document.getElementById('jevRows').innerHTML=rows.map(r=>{
+    const s=bySym[r.symbol]||{};
+    const col=SIG_COL[r.signal]||SIG_COL[s.signal]||'#8b949e';
+    const score=(r.composite*100).toFixed(1);
+    const setup=(r.setup_quality||0).toFixed(2);
+    const follow=(r.follow_through||0).toFixed(2);
+    const rr=(r.risk_reward||0).toFixed(2);
+    const why=(s.plain_signal||r.signal||'—');
+    return `<tr onclick="showSrMath('${r.symbol}')" title="Click to see maths behind ${r.symbol}" style="cursor:pointer">
+      <td style="color:#8b949e">${r.rank}</td>
+      <td class="sym">${r.symbol}</td>
+      <td style="color:${col};font-weight:700">${SIG_ICON[r.signal]||''} ${r.signal}</td>
+      <td style="font-weight:800;color:#3fb950">${score}</td>
+      <td>${setup}</td><td>${follow}</td><td>${rr}</td>
+      <td style="font-weight:700">${fmtInr(r.close||s.close)}</td>
+      <td style="font-size:.78rem;line-height:1.35">
+        <span style="color:#3fb950">${s.floor!=null?fmtInr(s.floor):'—'}</span>
+        <span style="color:#8b949e"> / </span>
+        <span style="color:#f778ba">${s.ceiling!=null?fmtInr(s.ceiling):'—'}</span>
+      </td>
+      <td style="font-size:.77rem;color:#8b949e;max-width:280px;white-space:normal;line-height:1.3">${why}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" style="color:#8b949e">No JEV ranking available.</td></tr>';
+}
+fetch('sr_levels.json').then(r=>r.json()).then(d=>{
+  _srAll=d.stocks||[];
+  const signals=Object.fromEntries(['BREAKOUT_UP','BREAKOUT_DN','AT_RESISTANCE','AT_SUPPORT','NEAR_RESISTANCE','NEAR_SUPPORT','NEUTRAL'].map(s=>[s,0]));
+  _srAll.forEach(r=>{ if(signals[r.signal]!==undefined) signals[r.signal]++; });
+  document.getElementById('srStats').innerHTML=[
+    ['As of', d.as_of],
+    ['Breakout ▲', signals.BREAKOUT_UP],
+    ['Breakdown ▼', signals.BREAKOUT_DN],
+    ['At Resistance', signals.AT_RESISTANCE],
+    ['At Support', signals.AT_SUPPORT],
+    ['Near Level', (signals.NEAR_RESISTANCE+signals.NEAR_SUPPORT)],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:1rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('srFoot').innerHTML=`<strong>Methods (${d.methods.length}):</strong> ${d.methods.join(' &middot; ')}<br><strong>Breakout:</strong> ${d.breakout_trigger}<br><strong>Auto-refreshed daily</strong> via GitHub Actions at 16:30 IST (after NSE close) — not real-time ticks. Data as of <strong>${d.as_of}</strong>. You can also run <code>python daily_sr.py</code> manually any time.`;
+  renderSR();
+  fetch('jev_rank.json').then(r=>{if(!r.ok)throw new Error('missing jev_rank.json');return r.json();})
+    .then(renderJEV)
+    .catch(e=>{
+      document.getElementById('jevMeta').textContent='JEV ranking not published yet — run python jev_rank.py and push docs/jev_rank.json.';
+      document.getElementById('jevRows').innerHTML='<tr><td colspan="10" style="color:#8b949e">JEV ranking unavailable.</td></tr>';
+    });
+}).catch(e=>{document.getElementById('srFoot').textContent='Run: python daily_sr.py to generate sr_levels.json';});
+// ═══ Monthly Regime tab ═══════════════════════════════════════════════════
+const REG_COL={UP:'#3fb950',DOWN:'#f778ba',SIDE:'#8b949e','N/A':'#555'};
+let _regAll=[],_regFilter='ALL';
+function regimeFilter(f,btn){
+  _regFilter=f;
+  document.querySelectorAll('#regime .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderRegime();
+}
+function renderRegime(){
+  let rows=_regAll;
+  if(_regFilter==='UP')        rows=_regAll.filter(r=>r.current.label==='UP');
+  else if(_regFilter==='DOWN') rows=_regAll.filter(r=>r.current.label==='DOWN');
+  else if(_regFilter==='SIDE') rows=_regAll.filter(r=>r.current.label==='SIDE');
+  else if(_regFilter==='FRESH') rows=_regAll.filter(r=>r.current.label!=='N/A'&&(r.current.age_months||99)<6);
+  else if(_regFilter==='STRETCHED') rows=_regAll.filter(r=>(r.reversal_risk_ratio||0)>1.5);
+  document.getElementById('regimeRows').innerHTML=rows.map(r=>{
+    if(r.recently_listed) return `<tr><td colspan="11" style="color:#555;font-size:.78rem">${r.symbol} — recently listed, no monthly regime yet</td></tr>`;
+    const cur=r.current||{},j=r.jev||{};
+    const col=REG_COL[cur.label]||'#8b949e';
+    const rr=r.reversal_risk_ratio;
+    const rrCol=rr>1.5?'#d29922':rr>1.2?'#e3b341':'#3fb950';
+    const jev=j.composite!=null?`<span style="font-size:1rem;font-weight:700;color:#3fb950">${(j.composite*100).toFixed(0)}</span><br><small style="color:#8b949e">rq${j.regime_quality} po${j.persistence_odds} rw${j.reversal_watch}</small>`:'—';
+    const segs=(r.recent_segs||[]).slice(-4).map(s=>`<span style="color:${REG_COL[s.label]||'#8b949e'};font-size:.72rem">${s.label}${s.months}m</span>`).join(' → ');
+    return `<tr onclick="showRegimeMath('${r.symbol}')" title="Click to see regime maths for ${r.symbol}" style="cursor:pointer">
+      <td style="color:#8b949e">${r.rank||'—'}</td>
+      <td class="sym">${r.symbol}</td>
+      <td style="font-weight:700;color:${col}">${cur.label}</td>
+      <td style="color:#8b949e;font-size:.8rem">${cur.start||'—'}</td>
+      <td><strong>${cur.age_months||'—'}</strong><small style="color:#8b949e"> mo</small></td>
+      <td style="color:${col}">${cur.avg_12m_ret_pct!=null?cur.avg_12m_ret_pct+'%':'—'}</td>
+      <td style="color:${(r.mom12_pct||0)>0?'#3fb950':'#f778ba'}">${r.mom12_pct!=null?r.mom12_pct+'%':'—'}</td>
+      <td style="color:${(r.mom6_pct||0)>0?'#3fb950':'#f778ba'}">${r.mom6_pct!=null?r.mom6_pct+'%':'—'}</td>
+      <td style="color:${rrCol};font-weight:700">${rr!=null?rr+'×':'—'}</td>
+      <td>${jev}</td>
+      <td style="font-size:.72rem">${segs}</td>
+    </tr>`;
+  }).join('');
+}
+function showRegimeMath(symbol){
+  const s=_regAll.find(x=>x.symbol===symbol);
+  if(!s||s.recently_listed){
+    document.getElementById('modalBody').innerHTML=`<h2>${symbol}</h2><p style="color:#8b949e">Recently listed — no monthly regime history available yet.</p>`;
+    document.getElementById('modal').style.display='block'; return;
+  }
+  const cur=s.current||{},j=s.jev||{},hu=s.hist_up||{},hd=s.hist_down||{};
+  const rr=s.reversal_risk_ratio;
+  const rrCol=rr>1.5?'#d29922':rr>1.2?'#e3b341':'#3fb950';
+  const allSegs=(s.all_segs||[]).map(seg=>{
+    const col=REG_COL[seg.label]||'#8b949e';
+    return `<tr>
+      <td style="color:${col};font-weight:700">${seg.label}</td>
+      <td>${seg.start}</td><td>${seg.end}</td>
+      <td style="font-weight:700">${seg.months}m</td>
+      <td style="color:${seg.ret_pct>0?'#3fb950':'#f778ba'}">${seg.ret_pct}%</td>
+      <td style="color:#8b949e">${seg.avg_12m_ret_pct}% avg</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${s.symbol} — monthly regime explanation</h2>
+    <div style="color:#8b949e;margin-bottom:12px">${s.name||''} · close <strong style="color:#e6edf3">${fmtInr(s.close)}</strong> · data as of <strong>${s.last_bar}</strong></div>
+    <div class="stat-strip" style="margin-bottom:14px">
+      <div class="stat"><div class="v" style="color:${REG_COL[cur.label]};font-size:1.2rem">${cur.label}</div><div class="l">Current regime</div></div>
+      <div class="stat"><div class="v">${cur.age_months}m</div><div class="l">Age</div></div>
+      <div class="stat"><div class="v" style="color:${rrCol}">${rr}×</div><div class="l">Reversal risk</div></div>
+      ${j.composite!=null?`
+      <div class="stat"><div class="v" style="color:#3fb950">${(j.composite*100).toFixed(0)}</div><div class="l">JEV score</div></div>
+      <div class="stat"><div class="v">${j.regime_quality}</div><div class="l">Quality</div></div>
+      <div class="stat"><div class="v">${j.persistence_odds}</div><div class="l">Persistence</div></div>
+      <div class="stat"><div class="v">${j.reversal_watch}</div><div class="l">Rev watch (raw)</div></div>`:''}
+    </div>
+    <h3>The maths</h3>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">12-month trailing return regime</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>regime = Close(t) / Close(t-12) − 1</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        If &gt;+5% → UP &nbsp;|&nbsp; &lt;−5% → DOWN &nbsp;|&nbsp; else → SIDE.<br>
+        Follows Fama-French momentum convention. Current incomplete month always excluded to avoid partial-bar distortion.
+      </div>
+    </div>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">Reversal risk ratio</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>rev_risk = current_age_months ÷ historical_mean_months_for_${cur.label}_regime</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        <span style="color:${rrCol};font-weight:700">${rr}×</span> for ${s.symbol}.
+        This stock's ${cur.label} regimes historically last ~${cur.label==='UP'?hu.mean:hd.mean} months on average.
+        Current age: ${cur.age_months} months. &gt;1.5× = stretched, watch for reversal.
+      </div>
+    </div>
+    <div style="border:1px solid #30363d;border-radius:8px;padding:12px;margin:8px 0;background:#0d1117">
+      <strong style="color:#e6edf3">JEV composite (TypeSafe System One)</strong>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:5px"><code>composite = 0.40×quality_norm + 0.35×persistence_norm + 0.25×(1−reversal_watch_norm)</code></div>
+      <div style="font-size:.8rem;color:#c9d1d9;margin-top:5px">
+        Reversal watch is <em>inverted</em> — a higher watch score (more stretched) reduces the composite.
+        Higher JEV = cleaner, more persistent, less stretched regime.
+      </div>
+    </div>
+    <h3>Historical UP regimes for ${s.symbol}</h3>
+    <p style="font-size:.8rem;color:#8b949e">n=${hu.n||0} regimes · mean ${hu.mean||'—'}m · median ${hu.median||'—'}m · max ${hu.max||'—'}m</p>
+    <h3>Historical DOWN regimes</h3>
+    <p style="font-size:.8rem;color:#8b949e">n=${hd.n||0} regimes · mean ${hd.mean||'—'}m · median ${hd.median||'—'}m · max ${hd.max||'—'}m</p>
+    <h3>Full regime history</h3>
+    <div class="scroll" style="max-height:280px"><table><thead><tr><th>Regime</th><th>Start</th><th>End</th><th>Duration</th><th>Price move</th><th>Avg 12m ret</th></tr></thead>
+    <tbody>${allSegs||'<tr><td colspan="6" style="color:#8b949e">No history</td></tr>'}</tbody></table></div>
+    <p style="font-size:.75rem;color:#8b949e;margin-top:12px">Monthly data from Yahoo Finance adjusted closes. Educational output; not SEBI-registered investment advice.</p>`;
+  document.getElementById('modal').style.display='block';
+}
+fetch('monthly_regimes.json').then(r=>r.json()).then(d=>{
+  _regAll=(d.stocks||[]).filter(s=>!s.recently_listed);
+  const rl=(d.recently_listed||[]).map(s=>({symbol:s,recently_listed:true,current:{label:'N/A'}}));
+  _regAll=[..._regAll,...rl];
+  const sm=d.summary||{};
+  document.getElementById('regimeStats').innerHTML=[
+    ['As of',d.as_of],['UP',sm.UP||0],['DOWN',sm.DOWN||0],['SIDE',sm.SIDE||0],
+    ['Fetched',`${d.fetched}/200`],['JEV model',d.jev_model||'—'],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('regimeFoot').innerHTML=`Monthly regime data as of <strong>${d.as_of}</strong> (last complete month). `+
+    `${d.fetched}/200 stocks have regime history; ${(d.recently_listed||[]).length} recently listed (no data). `+
+    `Trailing 12m return >&thinsp;+5%=UP, &lt;&thinsp;−5%=DOWN, else SIDE. Exclude current incomplete month. `+
+    `Reversal risk = current age ÷ historical mean run length for that direction.`;
+  renderRegime();
+}).catch(e=>{ document.getElementById('regimeFoot').textContent='Run: python monthly_regime.py to generate monthly_regimes.json'; });
+// ═══ SAM PICKS tab ════════════════════════════════════════════════════════
+const ACT_COL={'BUY':'#3fb950','WATCH_BUY':'#58a6ff','WATCH':'#e3b341','CAUTION':'#d29922','AVOID':'#f778ba','NEUTRAL':'#8b949e'};
+let _picks=[], _picksFilter='ALL';
+function picksFilter(f,btn){
+  _picksFilter=f;
+  document.querySelectorAll('#picks .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPicks();
+}
+function renderPicks(){
+  const rows=_picksFilter==='ALL'?_picks:_picks.filter(p=>p.action===_picksFilter);
+  document.getElementById('picksRows').innerHTML=rows.map((p,i)=>{
+    const col=ACT_COL[p.action]||'#8b949e';
+    const rr=p.rr!=null?`<strong style="color:${p.rr>=2?'#3fb950':p.rr>=1?'#e3b341':'#f778ba'}">${p.rr}×</strong>`:'—';
+    const rreg=REG_COL[p.regime]||'#8b949e';
+    const ind=p.indicators||{};
+    const chip=(k,v,c)=>`<span style="display:inline-block;border:1px solid ${c};color:${c};border-radius:999px;padding:1px 6px;margin:2px 3px 0 0;font-size:.68rem;white-space:nowrap">${k} ${v}</span>`;
+    const indicatorChips=[
+      chip('RSI', ind.rsi14!=null?Number(ind.rsi14).toFixed(0)+' '+(ind.rsi_state||''):'n/a', (ind.rsi14>70?'#d29922':ind.rsi14<30?'#58a6ff':'#8b949e')),
+      chip('EMA', ind.ema_trend||'?', ind.ema_trend==='UP'?'#3fb950':ind.ema_trend==='DOWN'?'#f778ba':'#8b949e'),
+      chip('ST', ind.supertrend_state||'?', ind.supertrend_state==='BULL'?'#3fb950':'#f778ba'),
+      chip('ICH', ind.ichimoku_pos||'?', ind.ichimoku_pos==='ABOVE'?'#3fb950':ind.ichimoku_pos==='BELOW'?'#f778ba':'#d29922'),
+      chip('BB', ind.bb_pct_b!=null?Math.round(ind.bb_pct_b*100)+'% '+(ind.bb_state||''):'n/a', ind.bb_pct_b>0.8?'#d29922':ind.bb_pct_b<0.2?'#58a6ff':'#8b949e'),
+      chip('JEV', ind.jev_confidence!=null?Math.round(ind.jev_confidence*100)+'%':'n/a', ind.jev_confidence>=0.7?'#3fb950':ind.jev_confidence<0.45?'#f778ba':'#d29922'),
+      (()=>{const sw=p.indicators&&p.indicators.swing_structure;const brk=sw==='UPTREND_BROKEN'||sw==='DOWNTREND_BROKEN';const swCol=brk?'#d29922':(sw==='UPTREND'||sw==='REVERSAL_UP'?'#3fb950':sw==='DOWNTREND'||sw==='REVERSAL_DN'?'#f778ba':'#8b949e');const swLbl={UPTREND:'UP',DOWNTREND:'DOWN',REVERSAL_UP:'REV↑',REVERSAL_DN:'REV↓',UPTREND_BROKEN:'UP⚠',DOWNTREND_BROKEN:'DN⚠',MIXED:'MIX'}[sw]||'?';const swWhy=p.why&&p.why.find(w=>w.icon==='🌀');const hasBos=swWhy&&swWhy.layman&&swWhy.layman.includes('BOS ✅');const hasChoch=swWhy&&swWhy.layman&&swWhy.layman.includes('CHoCH ⚠️');const overlay=hasBos?' BOS✅':hasChoch?' CHoCH⚠️':'';return chip('SWING',swLbl+overlay,hasBos?'#3fb950':hasChoch?'#d29922':swCol);})()
+    ].join('');
+    const plainLine=p.plain?`<div style="color:${col};font-weight:700;font-size:.82rem;margin-bottom:3px">${p.plain}</div>`:'';
+    const planLine=(p.setup_plan||p.key_reason)?`<div style="color:#8b949e;margin-top:3px"><strong>Plan:</strong> ${p.setup_plan||p.key_reason}</div>`:'';
+    const auditWhy=`${plainLine}${planLine}<br>${indicatorChips}`;
+    return `<tr onclick="showPicksMath('${p.symbol}')" title="Click to see all maths for ${p.symbol}" style="cursor:pointer">
+      <td style="color:#8b949e;font-size:.8rem">${i+1}</td>
+      <td style="font-weight:700;color:${col};white-space:nowrap">${p.action_label}</td>
+      <td class="sym">${p.symbol}</td>
+      <td><div style="background:#161b22;border-radius:4px;height:6px;width:80px;display:inline-block;vertical-align:middle;margin-right:4px"><div style="background:${col};height:6px;border-radius:4px;width:${Math.min(100,Math.abs(p.sam_score_100))}%"></div></div><span style="color:${col};font-weight:700">${p.sam_score_100>0?'+':''}${p.sam_score_100}</span></td>
+      <td style="font-weight:700">${fmtInr(p.close)}</td>
+      <td style="color:#f778ba">${p.stop!=null?fmtInr(p.stop):'—'}</td>
+      <td style="color:#58a6ff">${p.target1!=null?fmtInr(p.target1):'—'}</td>
+      <td>${rr}</td>
+      <td style="color:${rreg};font-size:.8rem">${p.regime||'?'} ${p.regime_age?p.regime_age+'m':''}</td>
+      <td style="font-size:.78rem;color:${SIG_COL[p.signal]||'#8b949e'}">${p.signal||'—'}</td>
+      <td style="font-size:.72rem;color:#c9d1d9;max-width:420px;min-width:320px;white-space:normal;line-height:1.35">${auditWhy}</td>
+    </tr>`;
+  }).join('');
+}
+function showPicksMath(symbol){
+  const p=_picks.find(x=>x.symbol===symbol); if(!p) return;
+  const col=ACT_COL[p.action]||'#8b949e';
+  const ind=p.indicators||{};
+  const iCol=(kind,val)=>{
+    if(kind==='rsi') return val>70?'#d29922':val<30?'#58a6ff':'#8b949e';
+    if(kind==='bull') return val==='BULL'||val==='UP'||val==='ABOVE'?'#3fb950':(val==='BEAR'||val==='DOWN'||val==='BELOW'?'#f778ba':'#d29922');
+    if(kind==='conf') return val>=0.7?'#3fb950':val<0.45?'#f778ba':'#d29922';
+    return '#8b949e';
+  };
+  const indicatorStats=`
+    <h3>Indicator audit strip — raw numbers from today's daily JSON</h3>
+    <div class="stat-strip" style="margin-bottom:12px">
+      <div class="stat"><div class="v" style="color:${iCol('rsi',ind.rsi14)}">${ind.rsi14!=null?Number(ind.rsi14).toFixed(0):'—'}</div><div class="l">RSI14 · ${ind.rsi_state||'n/a'}</div></div>
+      <div class="stat"><div class="v" style="color:${iCol('bull',ind.ema_trend)}">${ind.ema_trend||'—'}</div><div class="l">EMA10 ${ind.ema10||'—'} / 20 ${ind.ema20||'—'} / 50 ${ind.ema50||'—'}</div></div>
+      <div class="stat"><div class="v" style="color:${iCol('bull',ind.supertrend_state)}">${ind.supertrend_state||'—'}</div><div class="l">Supertrend ${ind.supertrend||'—'}</div></div>
+      <div class="stat"><div class="v" style="color:${iCol('bull',ind.ichimoku_pos)}">${ind.ichimoku_pos||'—'}</div><div class="l">Ichimoku cloud ${ind.ichimoku_cloud||'—'} · Tenkan>Kijun ${ind.tenkan_above_kijun?'yes':'no'}</div></div>
+      <div class="stat"><div class="v" style="color:${ind.bb_pct_b>0.8?'#d29922':ind.bb_pct_b<0.2?'#58a6ff':'#8b949e'}">${ind.bb_pct_b!=null?Math.round(ind.bb_pct_b*100)+'%':'—'}</div><div class="l">Bollinger %B · ${ind.bb_state||'n/a'}</div></div>
+      <div class="stat"><div class="v" style="color:${iCol('conf',ind.jev_confidence)}">${ind.jev_confidence!=null?Math.round(ind.jev_confidence*100)+'%':'—'}</div><div class="l">JEV confidence · ${ind.jev_direction||'n/a'}</div></div>
+    </div>`;
+  const whyHtml=(p.why||[]).map(w=>`
+    <div style="border:1px solid #30363d;border-radius:8px;padding:10px;margin:8px 0;background:#0d1117">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:1.2rem">${w.icon||''}</span>
+        <strong style="color:#e6edf3">${w.layman||''}</strong>
+      </div>
+      <div style="font-size:.76rem;color:#8b949e;margin-top:4px"><code>${w.formula||''}</code></div>
+    </div>`).join('');
+  document.getElementById('modalBody').innerHTML=`
+    <h2 style="margin-top:0">${p.symbol} — <span style="color:${col}">${p.action_label}</span></h2>
+    <div style="color:#8b949e;margin-bottom:8px">${p.name||''} · close <strong style="color:#e6edf3">${fmtInr(p.close)}</strong></div>
+    ${p.plain?`<div style="background:${col}1a;border-left:4px solid ${col};border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:1rem;font-weight:700;color:#e6edf3">${p.plain}</div>`:''}
+    ${p.setup_plan?`<div style="color:#8b949e;font-size:.86rem;margin-bottom:12px"><strong style="color:#e6edf3">Plan:</strong> ${p.setup_plan}</div>`:(p.key_reason?`<div style="color:#8b949e;font-size:.82rem;margin-bottom:12px">${p.key_reason}</div>`:'')}
+    <div class="stat-strip" style="margin-bottom:14px">
+      <div class="stat"><div class="v" style="color:${col};font-size:1.3rem">${p.sam_score_100>0?'+':''}${p.sam_score_100}</div><div class="l">SAM score</div></div>
+      <div class="stat"><div class="v" style="color:#f778ba">${p.stop!=null?fmtInr(p.stop):'—'}</div><div class="l">Stop loss</div></div>
+      <div class="stat"><div class="v" style="color:#58a6ff">${p.target1!=null?fmtInr(p.target1):'—'}</div><div class="l">Target 1</div></div>
+      <div class="stat"><div class="v" style="color:#a371f7">${p.target2!=null?fmtInr(p.target2):'—'}</div><div class="l">Target 2</div></div>
+      <div class="stat"><div class="v" style="color:${p.rr>=2?'#3fb950':p.rr>=1?'#e3b341':'#f778ba'}">${p.rr!=null?p.rr+'×':'—'}</div><div class="l">R:R</div></div>
+      <div class="stat"><div class="v">${p.regime||'?'} ${p.regime_age?p.regime_age+'m':''}</div><div class="l">Regime</div></div>
+    </div>
+    ${indicatorStats}
+    <h3>Every formula that fired</h3>
+    ${whyHtml}
+    <p style="font-size:.75rem;color:#8b949e;margin-top:12px">Stop = floor − 0.25×ATR. R:R = (target−entry)/(entry−stop). Pure mathematical output. Not SEBI-registered advice. Paper-trade before sizing real capital.</p>`;
+  document.getElementById('modal').style.display='block';
+}
+fetch('sam_picks.json').then(r=>r.json()).then(d=>{
+  _picks=d.picks||[];
+  const sm=d.summary||{};
+  document.getElementById('picksStats').innerHTML=[
+    ['As of',d.as_of],['Formula','SAM score'],
+    ['🟢 BUY',sm.BUY||0],['🔵 Watch',sm.WATCH_BUY||0],
+    ['🔴 Avoid',sm.AVOID||0],['🟠 Caution',sm.CAUTION||0],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  const stEl=document.getElementById('picksStale');
+  if(d.stale){
+    stEl.style.display='block';
+    stEl.innerHTML='⚠️ <strong>Partially stale data</strong> — the SAM score blends monthly regime (30%) + JEV (25%). '+
+      (d.stale_reasons||[]).join(' ')+' S&R signals are current, but scores below may be degraded until the JEV/regime layers refresh (check the TYPESAFE_API_KEY repo secret).';
+  } else { stEl.style.display='none'; }
+  const f=d.data_freshness||{};
+  document.getElementById('picksFoot').innerHTML=`SAM PICKS as of <strong>${d.as_of}</strong> `+
+    `<span style="color:${d.stale?'#f778ba':'#3fb950'}">(S&R ${f.sr_as_of} · JEV ${f.jev_as_of}${f.jev_fresh?'✓':' ⚠ stale'} · regime ${f.regime_as_of}${f.regime_fresh?'✓':' ⚠ stale'})</span>. `+
+    `Formula: <code>${d.formula}</code>. `+
+    `${sm.BUY||0} BUY · ${sm.AVOID||0} AVOID · ${sm.CAUTION||0} CAUTION · ${sm.WATCH_BUY||0} Watch. `+
+    `Updated daily after NSE close. Click any row for the full formula breakdown.`;
+  renderPicks();
+}).catch(e=>{document.getElementById('picksFoot').textContent='Run: python sam_picks.py to generate sam_picks.json';});
+
+// ═══ SWING STRUCTURE tab ══════════════════════════════════════════════════
+const SW_COL={'UPTREND':'#3fb950','DOWNTREND':'#f778ba','REVERSAL_UP':'#3fb950','REVERSAL_DN':'#f778ba','UPTREND_BROKEN':'#d29922','DOWNTREND_BROKEN':'#d29922','MIXED':'#8b949e'};
+const SW_SHORT={'UPTREND':'UPTREND','DOWNTREND':'DOWNTREND','REVERSAL_UP':'BULL REV SETUP','REVERSAL_DN':'BEAR REV SETUP','UPTREND_BROKEN':'UP BROKEN ⚠️','DOWNTREND_BROKEN':'DOWN BROKEN ⚠️','MIXED':'MIXED'};
+let _swing=[], _swingFilter='ALL';
+function swingFilter(f,btn){
+  _swingFilter=f;
+  document.querySelectorAll('#swing .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderSwing();
+}
+function renderSwing(){
+  let rows=_swing;
+  if(_swingFilter==='2LL') rows=_swing.filter(s=>s.at_second_ll);
+  else if(_swingFilter==='2HH') rows=_swing.filter(s=>s.at_second_hh);
+  else if(_swingFilter==='BROKEN') rows=_swing.filter(s=>s.structure==='UPTREND_BROKEN'||s.structure==='DOWNTREND_BROKEN');
+  else if(_swingFilter!=='ALL') rows=_swing.filter(s=>s.structure===_swingFilter);
+  document.getElementById('swingRows').innerHTML=rows.map((s,i)=>{
+    const col=SW_COL[s.structure]||'#8b949e';
+    const lh=s.last_high||{}, ll=s.last_low||{};
+    const lhCol=lh.label==='HH'?'#3fb950':'#f778ba';
+    const llCol=ll.label==='HL'?'#3fb950':'#f778ba';
+    // BOS / CHoCH cell
+    const bos=s.bos||{}, choch=s.choch||{};
+    let bosCell='<span style="color:#8b949e;font-size:.72rem">waiting</span>';
+    if(bos.fired) bosCell=`<span style="color:#3fb950;font-weight:700;font-size:.72rem">BOS ✅</span><br><small style="color:#8b949e">₹${bos.level}</small>`;
+    else if(choch.fired===false) bosCell=`<span style="color:#f778ba;font-size:.72rem">⛔ failed</span>`;
+    else if(choch.fired) bosCell=`<span style="color:#d29922;font-weight:700;font-size:.72rem">CHoCH ⚠️</span><br><small style="color:#8b949e">₹${choch.level||''}</small>`;
+    // Wyckoff cell
+    const wy=s.wyckoff||{};
+    const wyCol=wy.conviction==='HIGH'?'#3fb950':wy.conviction==='LOW'?'#f778ba':'#8b949e';
+    const wyCell=wy.phase?`<span style="color:${wyCol};font-weight:700;font-size:.72rem">${wy.phase}</span><br><small style="color:${wyCol}">${wy.conviction||''}</small>`:'<span style="color:#8b949e;font-size:.72rem">—</span>';
+    return `<tr>
+      <td style="color:#8b949e;font-size:.8rem">${i+1}</td>
+      <td class="sym">${s.symbol}</td>
+      <td>${fmtInr(s.close)}</td>
+      <td style="font-weight:700;color:${col};white-space:nowrap;font-size:.78rem">${SW_SHORT[s.structure]||s.structure}</td>
+      <td style="color:${lhCol};font-size:.78rem">${lh.label||'—'} ₹${lh.price!=null?lh.price:'—'}<br><small style="color:#8b949e">${lh.date||''}</small></td>
+      <td style="color:${llCol};font-size:.78rem">${ll.label||'—'} ₹${ll.price!=null?ll.price:'—'}<br><small style="color:#8b949e">${ll.date||''}</small></td>
+      <td style="color:${s.consec_hh>=2?'#3fb950':'#8b949e'};text-align:center">${s.consec_hh||0}</td>
+      <td style="color:${s.consec_ll>=2?'#f778ba':'#8b949e'};text-align:center">${s.consec_ll||0}</td>
+      <td style="text-align:center">${bosCell}</td>
+      <td style="text-align:center">${wyCell}</td>
+      <td style="font-size:.72rem;color:#c9d1d9;max-width:340px;white-space:normal;line-height:1.35">${s.plain||''}</td>
+    </tr>`;
+  }).join('');
+}
+fetch('swing_structure.json').then(r=>r.json()).then(d=>{
+  _swing=d.stocks||[];
+  const c=d.counts||{};
+  document.getElementById('swingStats').innerHTML=[
+    ['As of',d.as_of],
+    ['🟢 Uptrend',c.UPTREND||0],['🔴 Downtrend',c.DOWNTREND||0],['⚠️ Broken',(c.UPTREND_BROKEN||0)+(c.DOWNTREND_BROKEN||0)],
+    ['↑ Bull Setup',(c.REVERSAL_UP||0)],['↓ Bear Setup',(c.REVERSAL_DN||0)],
+    ['BOS ✅',(d.bos_fired||[]).length],['CHoCH ⚠️',(d.choch_fired||[]).length],
+    ['High conv.',(d.high_conviction_reversals||[]).length],
+  ].map(s=>`<div class="stat"><div class="v" style="font-size:.95rem">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
+  document.getElementById('swingFoot').innerHTML=
+    `Swing structure as of <strong>${d.as_of}</strong>. `+
+    `At 2nd LL: <strong>${(d.second_ll||[]).length}</strong> · At 2nd HH: <strong>${(d.second_hh||[]).length}</strong> · `+
+    `High-conviction reversals (Wyckoff): <strong>${(d.high_conviction_reversals||[]).join(', ')||'none'}</strong>. `+
+    `BOS/CHoCH + Wyckoff are informational — forward-logged to calibration ledger. Updated daily after NSE close.`;
+  renderSwing();
+}).catch(e=>{document.getElementById('swingFoot').textContent='Run: python swing_structure.py to generate swing_structure.json';});
+</script></body></html>

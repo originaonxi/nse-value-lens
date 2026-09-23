@@ -1,0 +1,37 @@
+name: Swing desk refresh
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 14 * * 1-5'
+    - cron: '20 16 * * 1-5'
+  push:
+    branches: [master]
+    paths: ['swing_engine.py', 'swing_research.py', 'tests/test_swing.py', '.github/workflows/swing_desk.yml']
+permissions:
+  contents: write
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
+jobs:
+  swing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install data dependencies
+        run: pip install -r requirements.txt
+      - name: Test execution mechanics
+        run: python -m unittest discover -s tests -p "test_swing.py" -v
+      - name: Refresh scanner and fixed strategy evidence
+        run: python swing_research.py
+      - name: Commit research snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add screen_output/swing_desk.json screen_output/swing_evidence.json docs/swing_desk.json docs/swing_evidence.json public/data/swing_desk.json public/data/swing_evidence.json
+          git diff --staged --quiet || git commit -m "data: refresh swing desk and strategy evidence"
+          git pull --rebase origin master
+          git push origin HEAD:master

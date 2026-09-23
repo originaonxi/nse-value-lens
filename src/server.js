@@ -59,6 +59,18 @@ app.get(['/', '/index.html'], (_req, res) => {
   res.type('html').send(fs.readFileSync(INDEX_HTML, 'utf8'));
 });
 
+// GitHub Actions refreshes research independently of deployments.
+app.get('/data/:name(swing_desk|swing_evidence).json', async (req, res) => {
+  try {
+    const { payload, source } = await require('./swing-data').loadSwing(req.params.name);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Swing-Source', source);
+    res.json(payload);
+  } catch {
+    res.status(503).json({ error: 'Swing research data unavailable' });
+  }
+});
+
 app.use(express.static(PUBLIC_DIR, {
   setHeaders(res, filePath) {
     if (filePath.endsWith('.html')) setNoCacheHtml(res);

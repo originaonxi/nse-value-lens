@@ -17,6 +17,10 @@ on:
 permissions:
   contents: write              # needed to commit sr_levels.json back to repo
 
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
+
 jobs:
   guard:
     runs-on: ubuntu-latest
