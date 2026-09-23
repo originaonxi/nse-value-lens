@@ -71,4 +71,3 @@ with sync_playwright() as p:
     assert not errors, errors
     browser.close()
 print("PASS: 200 rows; five state filters; market block; search/sector/structure; chart and zones; stale stock; 200-row CSV; mobile; fetch failure; no JS errors.")
-

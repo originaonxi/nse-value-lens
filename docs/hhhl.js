@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 (() => {
   const $ = id => document.getElementById(id);
   const statuses = ['BUY', 'SELL', 'WATCH', 'CAUTION', 'AVOID'];
@@ -171,4 +171,3 @@
     for(const s of ['ALL',...statuses]) $('count-'+s).textContent='--';
   });
 })();
-
