@@ -231,6 +231,96 @@
         "Nifty200 tests must measure turnover and scaled liquidity.",
         "Avoid assuming all historical alpha is investable at larger capital."
       ]
+    },
+    {
+      "id": "aqr_implementing_momentum_2017",
+      "title": "Implementing Momentum: What Have We Learned?",
+      "author": "Adrienne Ross, Tobias Moskowitz, Ronen Israel, Laura Serban",
+      "url": "https://www.aqr.com/Insights/Research/Working-Paper/Implementing-Momentum-What-Have-We-Learned",
+      "review_depth": "publisher_summary",
+      "project_takeaways": [
+        "The authors report momentum survived implementation frictions in studied live portfolios.",
+        "Test turnover and costs; the evidence does not validate NSE 200 positions capped at 20 sessions."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "aqr_trading_costs_2018",
+      "title": "Trading Costs",
+      "author": "Andrea Frazzini, Ronen Israel, Tobias Moskowitz",
+      "url": "https://www.aqr.com/insights/research/working-paper/trading-costs",
+      "review_depth": "publisher_summary",
+      "project_takeaways": [
+        "Execution costs depend on trade and market characteristics.",
+        "Calibrate NSE costs separately from this institutional developed-market sample."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "aqr_quality_minus_junk_2018",
+      "title": "Quality Minus Junk",
+      "author": "Clifford Asness, Andrea Frazzini, Lasse Heje Pedersen",
+      "url": "https://www.aqr.com/Insights/Research/Working-Paper/Quality-Minus-Junk",
+      "review_depth": "publisher_summary",
+      "project_takeaways": [
+        "Use quality as a separately testable stock-selection hypothesis.",
+        "International long/short evidence does not establish long-only Indian swing profitability."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "damodaran_data_coverage_2026",
+      "title": "Damodaran Online: Data",
+      "author": "Aswath Damodaran",
+      "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/data.html",
+      "review_depth": "data_documentation",
+      "project_takeaways": [
+        "Industry and region datasets provide valuation context.",
+        "Company-level data is no longer shared; obtain dated NSE filings for historical company tests."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "sec_13f_disclosure_limits",
+      "title": "Frequently Asked Questions About Form 13F",
+      "author": "US Securities and Exchange Commission",
+      "url": "https://www.sec.gov/rules-regulations/staff-guidance/division-investment-management-frequently-asked-questions/frequently-asked-questions-about-form-13f",
+      "review_depth": "selected_documentation_sections",
+      "project_takeaways": [
+        "Quarterly holdings can be disclosed up to 45 days after quarter-end and exclude shorts.",
+        "Backtest disclosure ideas only from actual public availability."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "alfred_realtime_vintages",
+      "title": "ALFRED: Archival Federal Reserve Economic Data",
+      "author": "Federal Reserve Bank of St. Louis",
+      "url": "https://alfred.stlouisfed.org/",
+      "review_depth": "data_documentation",
+      "project_takeaways": [
+        "Use the historical vintage of a macro series available at the decision date."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
+    },
+    {
+      "id": "housel_psychology_money_2018",
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "url": "https://collabfund.com/blog/the-psychology-of-money/",
+      "review_depth": "selected_essay_sections",
+      "project_takeaways": [
+        "Account for uncertainty and the investor's capacity to endure adverse outcomes.",
+        "This is behavioral context, not performance evidence for an NSE signal."
+      ],
+      "type": "public_source_review",
+      "reviewed_on": "2026-09-23"
     }
   ],
   "strategy_design_rules": [
@@ -246,6 +336,8 @@
     "Do value/quality/low-vol filters reduce the historical drawdowns of pure momentum?",
     "How much turnover and cost does an early-entry strategy add versus simply buying the official index?"
   ],
-  "source_count": 19,
-  "expanded_as_of": "2026-09-19"
+  "source_count": 26,
+  "expanded_as_of": "2026-09-23",
+  "source_directory": "data/research_library.json",
+  "source_review_guide": "docs/RESEARCH_LIBRARY.md"
 }

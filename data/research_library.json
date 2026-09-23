@@ -1,0 +1,669 @@
+{
+  "checked_on": "2026-09-23",
+  "purpose": "Audit of the user's 50-site reading list for NSE Value Lens research.",
+  "scope": "All 50 entrypoints attempted. Selected research summaries and access pages reviewed; not all archives, books, videos, papers or product features. Search-index verification is distinguished from direct page review. Access descriptions are observations, not a full entitlement or licensing audit.",
+  "interpretation": "Research relevance is not evidence of profitable 1-20-session NSE trading. No strategy has been validated by this source review.",
+  "entry_count": 50,
+  "entries": [
+    {
+      "number": 1,
+      "name": "Dataroma",
+      "category": "disclosures",
+      "checked_url": "https://www.dataroma.com/m/home.php",
+      "access": "Public holdings pages",
+      "nse_use_or_limitation": "Study disclosed US investor holdings; portfolio snapshots are delayed and incomplete trading signals.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.dataroma.com/m/home.php",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 2,
+      "name": "WhaleWisdom",
+      "category": "disclosures",
+      "checked_url": "https://whalewisdom.com/pricing",
+      "access": "Free tier; deeper history/tools paid",
+      "nse_use_or_limitation": "13F research ideas. Verify publication dates and licensing before using historical downloads or automation.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://whalewisdom.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 3,
+      "name": "Capitol Trades",
+      "category": "disclosures",
+      "checked_url": "https://www.capitoltrades.com/about-us",
+      "access": "Public pages indexed; direct fetch failed",
+      "nse_use_or_limitation": "US politician transaction disclosures; distinguish transaction date from public disclosure date.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.capitoltrades.com/",
+        "status": "fetch_failed"
+      }
+    },
+    {
+      "number": 4,
+      "name": "OpenInsider",
+      "category": "disclosures",
+      "checked_url": "https://openinsider.com/",
+      "access": "Public screener indexed; direct fetch failed",
+      "nse_use_or_limitation": "US Form 4 transactions. Separate purchases from grants, gifts and option exercises; this is not NSE insider data.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "http://openinsider.com/",
+        "status": "fetch_failed"
+      }
+    },
+    {
+      "number": 5,
+      "name": "13F.info",
+      "category": "disclosures",
+      "checked_url": "https://13f.info/",
+      "access": "Public filing directory",
+      "nse_use_or_limitation": "Readable US fund filings; use filing availability, not quarter-end, as the earliest signal date.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://13f.info/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 6,
+      "name": "SEC EDGAR",
+      "category": "primary_filings",
+      "checked_url": "https://www.sec.gov/search-filings",
+      "access": "Public official filings",
+      "nse_use_or_limitation": "Primary US filings. The supplied /edgar path redirected to submission tools; search-filings is the useful research entry.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://www.sec.gov/edgar",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 7,
+      "name": "Berkshire Hathaway",
+      "category": "investor_letters",
+      "checked_url": "https://www.berkshirehathaway.com/letters/letters.html",
+      "access": "Public letter archive",
+      "nse_use_or_limitation": "Business economics and capital allocation; long-term investment reasoning does not define a weekly entry rule.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.berkshirehathaway.com/letters/letters.html",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 8,
+      "name": "CNBC Buffett Archive",
+      "category": "investor_letters",
+      "checked_url": "https://buffett.cnbc.com/annual-meetings/",
+      "access": "Official archive indexed; direct fetch blocked",
+      "nse_use_or_limitation": "Meeting recordings and transcripts for investing context. No videos watched in this review.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://buffett.cnbc.com/",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://buffett.cnbc.com/: (403) Forbidden"
+      }
+    },
+    {
+      "number": 9,
+      "name": "Oaktree Capital",
+      "category": "investor_letters",
+      "checked_url": "https://www.oaktreecapital.com/insights/memos",
+      "access": "Public memo index",
+      "nse_use_or_limitation": "Risk and cycle research; translate any proposed overlay into a measurable hypothesis.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.oaktreecapital.com/insights/memos",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 10,
+      "name": "Bridgewater",
+      "category": "macro_research",
+      "checked_url": "https://www.bridgewater.com/research-and-insights",
+      "access": "Public research indexed; direct fetch failed",
+      "nse_use_or_limitation": "Macro frameworks; published essays do not reveal the firm's complete trading models.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.bridgewater.com/research-and-insights",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://www.bridgewater.com/research-and-insights: (503) Service Unavailable"
+      }
+    },
+    {
+      "number": 11,
+      "name": "Principles",
+      "category": "education",
+      "checked_url": "https://www.principles.com/",
+      "access": "Public material plus commercial books/products",
+      "nse_use_or_limitation": "Decision processes and risk thinking; the entire commercial catalog is not free.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.principles.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 12,
+      "name": "GMO",
+      "category": "factor_research",
+      "checked_url": "https://www.gmo.com/americas/research-library/",
+      "access": "Public research entry; full entitlements not audited",
+      "nse_use_or_limitation": "Long-horizon valuation and asset-allocation views; use dates and horizons explicitly.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://www.gmo.com/americas/research-library/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 13,
+      "name": "AQR",
+      "category": "factor_research",
+      "checked_url": "https://www.aqr.com/Insights/Research",
+      "access": "Public research and publisher summaries",
+      "nse_use_or_limitation": "Highest research priority here: momentum, quality and implementation costs. International results need separate NSE validation.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://www.aqr.com/Insights/Research",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 14,
+      "name": "Damodaran Online",
+      "category": "valuation",
+      "checked_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/data.html",
+      "access": "Public datasets and models; company-level data restricted",
+      "nse_use_or_limitation": "Industry/region valuation context. Data page says company-level data can no longer be shared.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://pages.stern.nyu.edu/~adamodar/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 15,
+      "name": "Damodaran blog",
+      "category": "valuation",
+      "checked_url": "https://aswathdamodaran.blogspot.com/",
+      "access": "Public essays",
+      "nse_use_or_limitation": "Cash-flow and discount-rate reasoning; a valuation thesis alone does not specify a short holding period.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://aswathdamodaran.blogspot.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 16,
+      "name": "Collaborative Fund",
+      "category": "behavior",
+      "checked_url": "https://collabfund.com/blog/",
+      "access": "Public essays",
+      "nse_use_or_limitation": "Morgan Housel's work informs position sizing and the ability to endure adverse outcomes, rather than a mechanical buy signal.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://collabfund.com/blog/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 17,
+      "name": "Farnam Street",
+      "category": "education",
+      "checked_url": "https://fs.blog/",
+      "access": "Public articles/newsletter; membership and books offered",
+      "nse_use_or_limitation": "Mental models and decision journals; no quantified NSE trading edge established.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://fs.blog/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 18,
+      "name": "JPMorgan Guide to the Markets",
+      "category": "macro_research",
+      "checked_url": "https://am.jpmorgan.com/us/en/asset-management/adv/insights/market-insights/guide-to-the-markets/",
+      "access": "Public guide landing page; full deck not reviewed",
+      "nse_use_or_limitation": "Market and valuation context. Trace each chart to its dated source before adding a feature.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://am.jpmorgan.com/us/en/asset-management/adv/insights/market-insights/guide-to-the-markets/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 19,
+      "name": "ARK Invest",
+      "category": "thematic_research",
+      "checked_url": "https://www.ark-invest.com/research-center",
+      "access": "Public research center indexed; old path failed",
+      "nse_use_or_limitation": "Innovation theses from an asset manager; independently test valuation and forecasts.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.ark-invest.com/research",
+        "status": "fetch_failed",
+        "error": "URL https://www.ark-invest.com/research is not accessible via this tool."
+      }
+    },
+    {
+      "number": 20,
+      "name": "a16z",
+      "category": "thematic_research",
+      "checked_url": "https://a16z.com/",
+      "access": "Public essays",
+      "nse_use_or_limitation": "Venture and technology research; limited direct fit for one-month NSE stock trading.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://a16z.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 21,
+      "name": "CSInvesting",
+      "category": "education",
+      "checked_url": "https://csinvesting.org/",
+      "access": "Unverified: direct access blocked",
+      "nse_use_or_limitation": "User-described value-investing lecture archive. Current content and availability could not be confirmed.",
+      "review_depth": "blocked_unverified",
+      "initial_check": {
+        "url": "https://csinvesting.org/",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://csinvesting.org/: (403) Forbidden"
+      }
+    },
+    {
+      "number": 22,
+      "name": "Columbia value investing",
+      "category": "education",
+      "checked_url": "https://business.columbia.edu/heilbrunn/resources/graham-and-doddsville-newsletter",
+      "access": "Current university pages indexed; old path failed",
+      "nse_use_or_limitation": "Use the Heilbrunn Center and Graham and Doddsville archive for case studies.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.gsb.columbia.edu/valueinvesting",
+        "status": "fetch_failed",
+        "error": "URL https://www.gsb.columbia.edu/valueinvesting is not accessible via this tool."
+      }
+    },
+    {
+      "number": 23,
+      "name": "FRED",
+      "category": "macro_data",
+      "checked_url": "https://fred.stlouisfed.org/",
+      "access": "Public official data",
+      "nse_use_or_limitation": "Macro inputs need release dates and vintages. ALFRED helps prevent use of later revisions in backtests.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://fred.stlouisfed.org/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 24,
+      "name": "Federal Reserve",
+      "category": "macro_data",
+      "checked_url": "https://www.federalreserve.gov/",
+      "access": "Public official publications",
+      "nse_use_or_limitation": "Policy announcements and releases; align actual release time with the next tradable NSE session.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.federalreserve.gov/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 25,
+      "name": "European Central Bank",
+      "category": "macro_data",
+      "checked_url": "https://www.ecb.europa.eu/",
+      "access": "Public official publications",
+      "nse_use_or_limitation": "European policy and macro context; not a direct NSE earnings dataset.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.ecb.europa.eu/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 26,
+      "name": "BIS",
+      "category": "macro_data",
+      "checked_url": "https://www.bis.org/",
+      "access": "Public official research/data entry",
+      "nse_use_or_limitation": "International credit and banking context; reporting frequency may be too slow for short swing signals.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://www.bis.org/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 27,
+      "name": "Trading Economics",
+      "category": "macro_data",
+      "checked_url": "https://tradingeconomics.com/api/pricing.aspx",
+      "access": "Public pages; commercial API",
+      "nse_use_or_limitation": "Useful macro discovery; chart access does not imply unlimited free historical data or redistribution rights.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://tradingeconomics.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 28,
+      "name": "Macrotrends",
+      "category": "market_data",
+      "checked_url": "https://www.macrotrends.net/",
+      "access": "Public pages indexed; direct fetch failed",
+      "nse_use_or_limitation": "Historical chart discovery. NSE coverage, adjustment quality and point-in-time fundamentals were not audited.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.macrotrends.net/",
+        "status": "fetch_failed"
+      }
+    },
+    {
+      "number": 29,
+      "name": "Stock Analysis",
+      "category": "market_data",
+      "checked_url": "https://stockanalysis.com/",
+      "access": "Public entry; full entitlements not audited",
+      "nse_use_or_limitation": "Company financial-data discovery. Confirm NSE coverage, restatements and download rights before research use.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://stockanalysis.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 30,
+      "name": "CompaniesMarketCap",
+      "category": "market_data",
+      "checked_url": "https://companiesmarketcap.com/",
+      "access": "Public ranking entry",
+      "nse_use_or_limitation": "Current rankings provide context; they cannot reconstruct historical index membership.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://companiesmarketcap.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 31,
+      "name": "Finviz",
+      "category": "screeners",
+      "checked_url": "https://finviz.com/",
+      "access": "Public screener; Elite paid",
+      "nse_use_or_limitation": "Predominantly US screening and charts; not the historical NSE 200 universe.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://finviz.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 32,
+      "name": "Portfolio Visualizer",
+      "category": "backtesting",
+      "checked_url": "https://www.portfoliovisualizer.com/pricing",
+      "access": "Free tier has asset/history limits; paid plans",
+      "nse_use_or_limitation": "Useful portfolio comparisons; not a substitute for NSE order timing and cost modeling.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://www.portfoliovisualizer.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 33,
+      "name": "TradingView",
+      "category": "screeners",
+      "checked_url": "https://www.tradingview.com/",
+      "access": "Public/basic tools; paid features",
+      "nse_use_or_limitation": "Charts and explicit signal prototypes. Community scripts need independent timing and repainting checks.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.tradingview.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 34,
+      "name": "Koyfin",
+      "category": "screeners",
+      "checked_url": "https://www.koyfin.com/pricing/",
+      "access": "Free and paid tiers",
+      "nse_use_or_limitation": "Visual market research; verify data coverage and export entitlements before pipeline use.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://www.koyfin.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 35,
+      "name": "AnnualReports",
+      "category": "primary_filings",
+      "checked_url": "https://www.annualreports.com/",
+      "access": "Public archive entry",
+      "nse_use_or_limitation": "Locate company reports, then establish the original publication date and accounting version.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://www.annualreports.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 36,
+      "name": "Investor.gov",
+      "category": "education",
+      "checked_url": "https://www.investor.gov/",
+      "access": "Public SEC education",
+      "nse_use_or_limitation": "Investor education and fraud awareness; not strategy performance evidence.",
+      "review_depth": "entry_metadata_only",
+      "initial_check": {
+        "url": "https://www.investor.gov/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 37,
+      "name": "Bogleheads wiki",
+      "category": "education",
+      "checked_url": "https://www.bogleheads.org/wiki/Main_Page",
+      "access": "Public wiki indexed; direct fetch blocked",
+      "nse_use_or_limitation": "Diversification, costs and passive benchmarks provide a useful comparison for active trading.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.bogleheads.org/wiki/Main_Page",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://www.bogleheads.org/wiki/Main_Page: (403) Forbidden"
+      }
+    },
+    {
+      "number": 38,
+      "name": "Investopedia",
+      "category": "education",
+      "checked_url": "https://www.investopedia.com/",
+      "access": "Public explanatory articles",
+      "nse_use_or_limitation": "Terminology and concepts; trace empirical strategy claims to original research.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.investopedia.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 39,
+      "name": "Corporate Finance Institute",
+      "category": "education",
+      "checked_url": "https://corporatefinanceinstitute.com/resources/",
+      "access": "Free resource guides; paid training",
+      "nse_use_or_limitation": "Accounting and valuation definitions; distinguish guides from paid credentials.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://corporatefinanceinstitute.com/resources/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 40,
+      "name": "CFA Institute",
+      "category": "factor_research",
+      "checked_url": "https://www.cfainstitute.org/insights",
+      "access": "Public research entry; full journal access not audited",
+      "nse_use_or_limitation": "Professional research and methodology; check availability and the actual paper behind each claim.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://www.cfainstitute.org/insights",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 41,
+      "name": "Morningstar",
+      "category": "market_data",
+      "checked_url": "https://www.morningstar.com/business/insights/research",
+      "access": "Public research plus paid Investor product",
+      "nse_use_or_limitation": "Fund and stock research; ratings alone are not point-in-time NSE swing signals.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.morningstar.com/",
+        "status": "fetch_failed"
+      }
+    },
+    {
+      "number": 42,
+      "name": "Simply Wall St",
+      "category": "screeners",
+      "checked_url": "https://simplywall.st/plans",
+      "access": "Limited free tier; paid plans",
+      "nse_use_or_limitation": "Visual fundamentals and screening; snapshot financials cannot be inserted into earlier backtest dates.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://simplywall.st/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 43,
+      "name": "Value Investors Club",
+      "category": "investment_theses",
+      "checked_url": "https://www.valueinvestorsclub.com/",
+      "access": "Registration gives delayed ideas; current access selective",
+      "nse_use_or_limitation": "Free registered access is delayed 45 days. Treat theses as research leads with publication timestamps.",
+      "review_depth": "entry_and_selected_source_pages",
+      "initial_check": {
+        "url": "https://www.valueinvestorsclub.com/",
+        "status": "minimal_or_header_only"
+      }
+    },
+    {
+      "number": 44,
+      "name": "ETF Database",
+      "category": "market_data",
+      "checked_url": "https://etfdb.com/tools/",
+      "access": "Public tools indexed; Pro paid; direct root blocked",
+      "nse_use_or_limitation": "ETF holdings and classification; US ETF coverage does not establish NSE stock-selection skill.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://etfdb.com/",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://etfdb.com/: (403) Forbidden"
+      }
+    },
+    {
+      "number": 45,
+      "name": "Curvo",
+      "category": "backtesting",
+      "checked_url": "https://curvo.eu/backtest/en",
+      "access": "Public Backtest tool; investing service separate",
+      "nse_use_or_limitation": "European fund portfolio backtests. Correct tool is /backtest/en; not an NSE execution engine.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://curvo.eu/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 46,
+      "name": "Of Dollars and Data",
+      "category": "behavior",
+      "checked_url": "https://ofdollarsanddata.com/",
+      "access": "Public blog",
+      "nse_use_or_limitation": "Data-based investing essays; inspect dataset, sample and portfolio assumptions behind each conclusion.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://ofdollarsanddata.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 47,
+      "name": "A Wealth of Common Sense",
+      "category": "behavior",
+      "checked_url": "https://awealthofcommonsense.com/",
+      "access": "Public blog",
+      "nse_use_or_limitation": "Market history and portfolio behavior; useful context rather than a ready-made NSE signal.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://awealthofcommonsense.com/",
+        "status": "page_text_returned"
+      }
+    },
+    {
+      "number": 48,
+      "name": "The Irrelevant Investor",
+      "category": "behavior",
+      "checked_url": "https://www.theirrelevantinvestor.com/",
+      "access": "Official blog indexed; initial URL rate-limited",
+      "nse_use_or_limitation": "Market and investor-behavior commentary; use the current www address.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://theirrelevantinvestor.com/",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://theirrelevantinvestor.com/: (429) Too Many Requests"
+      }
+    },
+    {
+      "number": 49,
+      "name": "Visual Capitalist",
+      "category": "visual_explanations",
+      "checked_url": "https://www.visualcapitalist.com/about/",
+      "access": "Public material indexed; VC+ paid; direct root blocked",
+      "nse_use_or_limitation": "Charts for discovery; obtain the original underlying data before building a strategy.",
+      "review_depth": "official_domain_search_results",
+      "initial_check": {
+        "url": "https://www.visualcapitalist.com/",
+        "status": "fetch_failed",
+        "error": "Failed to fetch https://www.visualcapitalist.com/: (403) Forbidden"
+      }
+    },
+    {
+      "number": 50,
+      "name": "Our Finite World (probable match)",
+      "category": "macro_commentary",
+      "checked_url": "https://ourfiniteworld.com/",
+      "access": "Public blog; identity inferred from incomplete user entry",
+      "nse_use_or_limitation": "Gail Tverberg's energy/economy commentary. User supplied no confirming note; not a holdings tracker.",
+      "review_depth": "entry_page_text",
+      "initial_check": {
+        "url": "https://ourfiniteworld.com/",
+        "status": "page_text_returned"
+      },
+      "identity_confirmed": false
+    }
+  ]
+}
