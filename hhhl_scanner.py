@@ -226,6 +226,7 @@ def build(as_of, cache_dir=ROOT/".cache/swing", universe_path=ROOT/"nifty200.csv
             failures[symbol] = str(exc)[:140]
     calendar, loaded, placeholder_rows_removed = normalize_sessions(loaded)
     market_frame, bad_market = read_prices(cache_dir/"NSEI.csv", as_of)
+    market_frame = market_frame.loc[market_frame.index.isin(calendar)]
     if len(market_frame) < 200:
         raise ValueError("Benchmark needs at least 200 observations.")
     m = market_frame.iloc[-1]
@@ -256,8 +257,8 @@ def build(as_of, cache_dir=ROOT/".cache/swing", universe_path=ROOT/"nifty200.csv
         "market": market, "rows": rows, "failures": failures,
         "data_audit": {
             "price_source": "Previously downloaded Yahoo adjusted daily OHLCV; dates and OHLC checked locally.",
-            "latest_recheck": "Yahoo recent-history requests returned incomplete 23 September stock candles and lagged index data. Earlier complete cached candles retained. NSE download attempts timed out.",
-            "universe_source": "Repository nifty200.csv, 200 unique EQ symbols; official live constituent-file recheck timed out.",
+            "latest_recheck": "Local history scan; fetch provenance is supplied by hhhl_refresh.py for automated runs.",
+            "universe_source": "Saved nifty200.csv; exactly 200 unique EQ symbols validated.",
             "universe_url": "https://www.niftyindices.com/IndexConstituent/ind_nifty200list.csv",
             "universe_sha256": hashlib.sha256(universe_path.read_bytes()).hexdigest(),
             "price_sha256": fingerprints,
@@ -299,7 +300,7 @@ def build(as_of, cache_dir=ROOT/".cache/swing", universe_path=ROOT/"nifty200.csv
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--as-of", default="2026-09-23")
+    parser.add_argument("--as-of", required=True, help="Completed NSE session, YYYY-MM-DD; use hhhl_refresh.py for automatic dates")
     args = parser.parse_args()
     datetime.strptime(args.as_of, "%Y-%m-%d")
     result = build(args.as_of)

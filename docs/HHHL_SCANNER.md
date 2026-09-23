@@ -1,3 +1,5 @@
+> Daily automation starts at 16:00 IST with catch-up runs. [Schedule, freshness checks and recovery](HHHL_AUTOMATION.md). Any dated results below describe the original snapshot; current results are on the scanner.
+
 # Nifty 200 HH/HL scanner
 
 Snapshot: **23 September 2026**. Strategy: confirmed HH/HL breakout, maximum 10 trading sessions. This page classifies every stock in the repository's 200-member universe; it does not simulate an account or place orders.

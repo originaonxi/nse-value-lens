@@ -1,11 +1,11 @@
-﻿name: Research mechanics tests
+ï»¿name: Research mechanics tests
 on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'public/hhhl.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
   pull_request:
-    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'public/hhhl.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
 permissions:
   contents: read
 jobs:

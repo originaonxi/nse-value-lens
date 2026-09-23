@@ -1,0 +1,113 @@
+name: HHHL daily refresh
+run-name: HHHL refresh ${{ inputs.test_label || github.event.schedule || 'manual' }}
+on:
+  schedule:
+    # UTC. Primary 16:00 IST; retries 16:25, 17:25, 19:25, 22:25 and next 08:25 IST.
+    # Every day also catches special weekend sessions; only completed candles are used.
+    - cron: '30 10 * * *'
+    - cron: '55 10,11,13,16 * * *'
+    - cron: '55 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_label:
+        description: Optional audit label (does not change data or skip any step)
+        type: string
+        required: false
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Test the refresh and scanner safety rules
+        run: python -m unittest discover -s tests -p 'test_hhhl*.py' -v
+      - name: Fetch completed prices and recalculate all 200 stocks
+        id: scan
+        continue-on-error: true
+        run: python hhhl_refresh.py
+      - name: Commit prices, scan and refresh status
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/hhhl_prices nifty200.csv screen_output/hhhl*.json docs/hhhl*.json public/data/hhhl*.json
+          if [ -f data/hhhl_calendar.json ]; then git add data/hhhl_calendar.json; fi
+          if ! git diff --cached --quiet; then
+            git commit -m "data: HHHL daily refresh run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3; do
+              git pull --rebase origin master
+              if git push origin HEAD:master; then break; fi
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 5
+            done
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hhhl-refresh-audit
+          path: |
+            docs/hhhl_refresh_status.json
+            docs/hhhl_scan.json
+          retention-days: 30
+
+  publish:
+    needs: refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publish GitHub Pages explicitly after the bot commit
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: [refresh, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify published prices, all filters and both websites
+        run: python tests/verify_hhhl_live.py --run-id "$GITHUB_RUN_ID" --timeout 360
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hhhl-end-to-end
+          path: artifacts/hhhl-live-*
+          retention-days: 90

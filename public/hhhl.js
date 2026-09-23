@@ -139,8 +139,10 @@
       ' Stock structure remains visible; this gate controls new entries.';
     $('notice').textContent='Snapshot for '+date(dataset.as_of)+'. '+(m.new_entries_allowed?'Buy labels are conditional next-session paper setups.':'No new BUY entries pass the market/data gate.')+
       ' Sell means an exit condition for existing long holdings. '+(dataset.universe_count-dataset.complete_count)+' stock(s) have incomplete session prices.';
+    const previousSector=$('sector').value;
     const sectors=[...new Set(dataset.rows.map(r=>r.sector))].sort();
     $('sector').innerHTML='<option value="ALL">All sectors</option>'+sectors.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+    if(sectors.includes(previousSector)) $('sector').value=previousSector;
     $('data-audit').innerHTML='<p>'+esc(dataset.data_audit.price_source)+'</p><p>'+esc(dataset.data_audit.latest_recheck)+'</p><p>'+esc(dataset.data_audit.universe_source)+'</p><ul>'+dataset.limitations.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
     document.querySelectorAll('.filters input,.filters select,.filters button').forEach(el=>el.disabled=false);
     $('download-json').href=(document.body.dataset.source || '')+'hhhl_scan.json';
@@ -161,13 +163,38 @@
   });
   $('stock-rows').addEventListener('click',event=>{const button=event.target.closest('button[data-symbol]');if(button) showDetail(button.dataset.symbol);});
   $('download-csv').addEventListener('click',exportCsv);
+  function loadRefreshStatus() {
+    const el=$('refresh-status');
+    fetch((document.body.dataset.source || '')+'hhhl_refresh_status.json',{cache:'no-store'}).then(async response=>{
+      if(!response.ok) throw new Error('Refresh status unavailable');
+      const status=await response.json();
+      if(!status.run_id || !status.attempted_at) throw new Error('Invalid refresh status');
+      const age=Date.now()-Date.parse(status.attempted_at), overdue=!Number.isFinite(age)||age>27*60*60*1000;
+      const fallback=response.headers.get('X-Swing-Source')==='local-fallback';
+      const matching=dataset && dataset.generated_at===status.snapshot_generated_at;
+      const label=overdue?'REFRESH OVERDUE':!matching?'PUBLICATION UPDATING':status.state.toUpperCase();
+      el.dataset.runId=status.run_id;
+      el.className='notice '+(status.state==='fresh'&&!overdue&&matching&&!fallback?'':'warning');
+      el.textContent=label+' | Automatic checks start at 4:00 pm IST, with later retries. Last attempt: '+
+        new Date(status.attempted_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST. Target session: '+
+        status.target_session+'. '+status.message+(fallback?' Cached fallback is being served.':'')+
+        (overdue?' The scheduled refresh may have stopped; check Actions.':'');
+      const link=document.createElement('a');
+      link.href='https://github.com/originaonxi/nse-value-lens/actions/workflows/hhhl_daily.yml';
+      link.textContent=' View refresh runs';el.appendChild(link);
+    }).catch(()=>{el.className='notice warning';el.textContent='Automatic refresh status unavailable. Check the scan date before using these levels.';});
+  }
+  function loadSnapshot() {
   fetch((document.body.dataset.source || '')+'hhhl_scan.json',{cache:'no-store'}).then(response=>{
     if(!response.ok) throw new Error('HTTP '+response.status);
     return response.json();
-  }).then(data=>{validate(data);dataset=data;renderSummary();}).catch(()=>{
+  }).then(data=>{validate(data);dataset=data;renderSummary();loadRefreshStatus();}).catch(()=>{
     dataset=null;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
     $('session-date').textContent='Unavailable';$('coverage').textContent='Data check failed';$('result-count').textContent='No verified rows to display.';
     $('stock-rows').innerHTML='';$('stock-detail').hidden=true;
     for(const s of ['ALL',...statuses]) $('count-'+s).textContent='--';
   });
+  }
+  loadSnapshot();
+  setInterval(()=>{if(document.visibilityState==='visible') loadSnapshot();},300000);
 })();
