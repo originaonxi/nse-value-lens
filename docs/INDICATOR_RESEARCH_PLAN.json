@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "created_at": "2026-09-23",
+  "scope": "Daily NSE cash long-only indicator research. Same-day trades use yesterday daily signals, not minute indicators. No orders or leverage.",
+  "families": [
+    {
+      "id": "st_7_2",
+      "name": "Supertrend 7 / 2 flip",
+      "family": "Supertrend",
+      "rule": "Bullish direction change, Wilder ATR 7 and multiplier 2; exit bearish."
+    },
+    {
+      "id": "st_10_3",
+      "name": "Supertrend 10 / 3 flip",
+      "family": "Supertrend",
+      "rule": "Bullish direction change, Wilder ATR 10 and multiplier 3; exit bearish."
+    },
+    {
+      "id": "st_14_3",
+      "name": "Supertrend 14 / 3 flip",
+      "family": "Supertrend",
+      "rule": "Bullish direction change, Wilder ATR 14 and multiplier 3; exit bearish."
+    },
+    {
+      "id": "st_state",
+      "name": "Supertrend 10 / 3 trend",
+      "family": "Supertrend",
+      "rule": "Bullish direction; allow re-entry after closing a trade, exit bearish."
+    },
+    {
+      "id": "hhhl",
+      "name": "Confirmed HH / HL breakout",
+      "family": "Structure",
+      "rule": "Strict 2-left/2-right pivots, two rising highs and lows; close crosses latest confirmed high; exit below latest confirmed low."
+    },
+    {
+      "id": "ichi_cloud",
+      "name": "Ichimoku cloud breakout",
+      "family": "Ichimoku",
+      "rule": "Close crosses above visible cloud, Tenkan > Kijun; 9/26/52, spans shifted +26; exit below cloud bottom."
+    },
+    {
+      "id": "ichi_tk",
+      "name": "Ichimoku TK cross",
+      "family": "Ichimoku",
+      "rule": "Tenkan crosses above Kijun while close above visible cloud; exit Tenkan below Kijun."
+    },
+    {
+      "id": "donchian20",
+      "name": "Donchian 20 breakout",
+      "family": "Donchian",
+      "rule": "Close above prior 20-session high; exit below prior 10-session low."
+    },
+    {
+      "id": "donchian55",
+      "name": "Donchian 55 breakout",
+      "family": "Donchian",
+      "rule": "Close above prior 55-session high; exit below prior 20-session low."
+    },
+    {
+      "id": "ema9_21",
+      "name": "EMA 9 / 21 cross",
+      "family": "EMA",
+      "rule": "Fast EMA crosses above slow; exit fast below slow."
+    },
+    {
+      "id": "ema20_50",
+      "name": "EMA 20 / 50 cross",
+      "family": "EMA",
+      "rule": "Fast EMA crosses above slow; exit fast below slow."
+    },
+    {
+      "id": "macd",
+      "name": "MACD 12 / 26 / 9 cross",
+      "family": "MACD",
+      "rule": "MACD crosses above signal; exit below signal."
+    },
+    {
+      "id": "adx",
+      "name": "ADX / directional movement",
+      "family": "ADX",
+      "rule": "Plus DI crosses above minus DI with Wilder ADX14 > 20; exit plus DI below minus DI."
+    },
+    {
+      "id": "rsi2",
+      "name": "RSI 2 pullback",
+      "family": "RSI",
+      "rule": "Wilder RSI2 < 10 with close above SMA200; exit RSI2 > 70."
+    },
+    {
+      "id": "rsi14",
+      "name": "RSI 14 reclaim 30",
+      "family": "RSI",
+      "rule": "Wilder RSI14 crosses back above 30; exit RSI14 > 60."
+    },
+    {
+      "id": "bollinger",
+      "name": "Bollinger lower-band reclaim",
+      "family": "Bollinger",
+      "rule": "Close crosses back above SMA20 minus 2 population standard deviations; exit at/above SMA20."
+    },
+    {
+      "id": "keltner",
+      "name": "Keltner upper breakout",
+      "family": "Keltner",
+      "rule": "Close crosses above EMA20 plus 2 Wilder ATR20; exit below EMA20."
+    },
+    {
+      "id": "stochastic",
+      "name": "Stochastic oversold cross",
+      "family": "Stochastic",
+      "rule": "Slow K(14,3) crosses D(3) while K < 30; exit K > 80."
+    }
+  ],
+  "holds": [
+    1,
+    5,
+    10,
+    20
+  ],
+  "regimes": [
+    "any",
+    "nifty_above_200"
+  ],
+  "configuration_count": 144,
+  "execution": "Prior completed close generates signal; next open eligible only within +/-1 prior ATR of signal close. Rank candidates by prior 20-session average turnover, ties symbol. Initial 2 prior ATR stop; indicator reversal exits next open; otherwise stop first and holding cap close. No profit target. Existing positions cannot release same-day closing proceeds for new entries; at most 5 positions and 2 per current industry. Flat restart per evaluation window; force liquidation at last close with costs.",
+  "capital_rs": 100000,
+  "risk_fraction": 0.005,
+  "allocation_fraction": 0.2,
+  "liquidity": "Prior close >= Rs50; prior 20-session average turnover >= Rs10cr; ATR/price 0.5%-6%. Current constituents, not historical membership.",
+  "costs": {
+    "delivery_fee_per_side": 0.0015,
+    "intraday_fee_per_side": 0.0005,
+    "slippage_per_side": 0.0005,
+    "stress_multiplier": 2,
+    "note": "Scenario costs; not actual broker tariffs or personal income tax."
+  },
+  "windows": {
+    "earlier": [
+      "2022-07-27",
+      "2024-09-09"
+    ],
+    "middle": [
+      "2024-09-10",
+      "2025-09-12"
+    ],
+    "recent": [
+      "2025-09-15",
+      "2026-09-23"
+    ]
+  },
+  "pre_recent_selection": "Choose recent candidate using earlier and middle base returns only, require both positive and >=30 closed middle trades. Rank minimum annualized return/max(drawdown,5) across those two periods; ties configuration id. Freeze before computing recent results. Choose middle candidate using earlier only, positive and >=30 trades. If no candidate qualifies stay cash. No pristine holdout: these market periods were inspected in earlier research.",
+  "exploratory_gate": "Each base window positive, recent and middle doubled-cost positive, >=30 closed recent trades, no held-bar gaps. This is a screen, not statistical validation. All 144 comparisons disclosed; multiple-testing and survivorship bias remain.",
+  "sources": [
+    "https://www.tradingview.com/support/solutions/43000634738-supertrend/",
+    "https://www.tradingview.com/support/solutions/43000589152-ichimoku-cloud/",
+    "https://www.tradingview.com/support/solutions/43000589195-pivot-points-high-low/"
+  ]
+}

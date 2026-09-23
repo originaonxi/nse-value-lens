@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const cache = new Map(), inflight = new Map();
 async function loadSwing(name) {
-  if (!['swing_desk','swing_evidence','expanded_research','cross_asset_research','futures_research','research_data_audit'].includes(name)) throw new Error('Unknown swing dataset');
+  if (!['swing_desk','swing_evidence','expanded_research','cross_asset_research','futures_research','research_data_audit','indicator_research'].includes(name)) throw new Error('Unknown swing dataset');
   const existing = cache.get(name);
   if (existing && existing.expires > Date.now()) return existing;
   if (inflight.has(name)) return inflight.get(name);

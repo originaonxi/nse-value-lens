@@ -1,0 +1,28 @@
+﻿name: Research mechanics tests
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+  pull_request:
+    paths: ['indicator_research.py', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+permissions:
+  contents: read
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: pip install -r requirements.txt
+      - run: npm ci
+      - run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - run: npm test
+      - run: node --check public/indicator-lab.js
