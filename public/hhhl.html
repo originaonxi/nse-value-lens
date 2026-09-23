@@ -1,0 +1,55 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nifty 200 HH/HL scanner | NSE Value Lens</title>
+<meta name="description" content="All 200 NSE stocks classified by confirmed higher highs and higher lows, with dated breakout, exit and watch zones.">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css">
+<script src="hhhl.js" defer></script>
+</head>
+<body data-source="data/">
+<div class="shell hhhl-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="index.html">Swing desk</a><a href="indicator-lab.html">Evidence</a><a href="HHHL_SCANNER.md">Rules</a></nav></header>
+<main>
+<div class="eyebrow"><span class="dot"></span> NIFTY 200 / CONFIRMED PRICE STRUCTURE</div>
+<section class="hero"><div><h1>Higher highs.<br><span>A clearer watchlist.</span></h1><p class="intro">Every constituent. Five research states.<br>Breakout levels, structure exits and the reason behind each classification.</p></div><div class="session"><span class="label">FIXED END-OF-DAY SNAPSHOT</span><strong id="session-date">Loading...</strong><span id="coverage">Checking all 200 stocks</span><span class="paper">PAPER RESEARCH / 10-SESSION LIMIT</span></div></section>
+<div id="notice" class="notice warning" role="status">Loading the dated HH/HL scan...</div>
+<section class="market-strip" aria-label="Market entry gate"><div><span class="label">NIFTY 50 CLOSE</span><strong id="nifty-close">--</strong></div><div><span class="label" id="average-label">200-SESSION AVERAGE</span><strong id="nifty-average">--</strong></div><div><span class="label">NEW ENTRY GATE</span><strong id="market-gate">--</strong></div><p id="market-note"></p></section>
+<section id="status-cards" class="status-cards" aria-label="Filter by research state">
+<button type="button" class="status-card all active" data-status="ALL" aria-pressed="true"><span>All stocks</span><strong id="count-ALL">--</strong><small>Complete universe</small></button>
+<button type="button" class="status-card buy" data-status="BUY" aria-pressed="false"><span>Buy</span><strong id="count-BUY">--</strong><small>Fresh eligible breakout</small></button>
+<button type="button" class="status-card sell" data-status="SELL" aria-pressed="false"><span>Sell</span><strong id="count-SELL">--</strong><small>Exit an existing long</small></button>
+<button type="button" class="status-card watch" data-status="WATCH" aria-pressed="false"><span>Watch</span><strong id="count-WATCH">--</strong><small>HH/HL, awaiting a break</small></button>
+<button type="button" class="status-card caution" data-status="CAUTION" aria-pressed="false"><span>Caution</span><strong id="count-CAUTION">--</strong><small>Blocked, late or incomplete</small></button>
+<button type="button" class="status-card avoid" data-status="AVOID" aria-pressed="false"><span>Avoid</span><strong id="count-AVOID">--</strong><small>No qualifying setup</small></button>
+</section>
+<section class="scan-section" aria-labelledby="universe-title">
+<div class="section-head"><div><div class="eyebrow">01 / ALL CONSTITUENTS</div><h2 id="universe-title">Filter the full Nifty 200</h2></div><div class="download-actions"><button id="download-csv" type="button" disabled>Download filtered CSV</button><a id="download-json" href="data/hhhl_scan.json">Full JSON</a></div></div>
+<div class="filters">
+<label>Stock or company<input id="search" type="search" placeholder="Search symbol or name" disabled></label>
+<label>Sector<select id="sector" disabled><option value="ALL">All sectors</option></select></label>
+<label>Structure<select id="structure" disabled><option value="ALL">All structures</option><option>HH / HL</option><option>LH / LL</option><option>MIXED</option><option>UNCONFIRMED</option><option>UNKNOWN</option></select></label>
+<label>Order<select id="sort" disabled><option value="status">Research state</option><option value="distance">Nearest breakout</option><option value="symbol">Symbol A-Z</option><option value="turnover">Highest turnover</option></select></label>
+<button id="reset" type="button" disabled>Reset</button>
+</div>
+<p class="muted" id="result-count" aria-live="polite">Loading rows...</p>
+<div class="table-wrap stock-table"><table><caption>All Nifty 200 stocks with HH/HL research states and dated reference levels</caption><thead><tr><th>Stock / sector</th><th>State</th><th>Close / date</th><th>Structure</th><th>Breakout above</th><th>Exit below</th><th>To breakout</th><th>ATR / price</th><th>Reason</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
+<p class="muted">Click a symbol to inspect its chart and zones. Prices are in rupees. Sell applies to existing long holdings; it does not open a short. Avoid means this setup is absent.</p>
+</section>
+<section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
+<div class="section-head"><div><div class="eyebrow">02 / STOCK &amp; ZONES</div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
+<p id="detail-reason" class="detail-reason"></p>
+<div class="detail-grid"><div class="chart-panel"><div id="stock-chart" aria-label="Recent daily candles and confirmed swing levels"></div><p class="muted">Daily candles. Dashed lines show the latest confirmed high and low. Pivots become usable two sessions after their original candle.</p></div><div id="zone-panel" class="zone-panel"></div></div>
+<details><summary>Confirmed pivots and data checks</summary><div id="pivot-detail"></div></details>
+</section>
+<section class="scan-section methods">
+<div><div class="eyebrow">03 / READ THE LABELS</div><h2>A state is a condition.<br>Execution is a separate step.</h2><p>The buy condition is a fresh closing cross above the last confirmed high, with two rising highs and lows. The Nifty filter and price, liquidity and volatility screens must pass.</p><p>A paper entry uses only the next session's open within one ATR of the signal close. The initial stop is two signal-day ATR below the actual entry. There is no fixed profit target in this rule.</p><a href="HHHL_SCANNER.md">Full classification rules and data notes</a></div>
+<div class="definition-list"><p><b class="buy-text">BUY</b>Fresh qualifying breakout. Existing positions and allocation limits still need checking.</p><p><b class="sell-text">SELL</b>Close below the confirmed swing low. An existing stop or the 10-session limit can require an earlier exit.</p><p><b class="watch-text">WATCH</b>Rising structure. The band below resistance is a reference zone; wait for a fresh closing breakout.</p><p><b class="caution-text">CAUTION</b>Entry is blocked, the breakout is no longer fresh, or data is incomplete.</p><p><b>AVOID</b>No qualifying structure or the price, turnover or volatility screen fails.</p></div>
+</section>
+<details class="data-details"><summary>Snapshot coverage, data sources and limitations</summary><div id="data-audit"></div></details>
+</main>
+<footer><span>NSE VALUE LENS / HH-HL SCANNER</span><p>Dated research. No automatic orders or assured returns.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>
+
