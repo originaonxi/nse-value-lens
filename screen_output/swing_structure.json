@@ -1,6 +1,6 @@
 {
  "as_of": "2026-09-24",
- "universe": "Nifty 200 (200 stocks)",
+ "universe": "Nifty 200 (199 stocks)",
  "method": "Dow HH/HL/LH/LL on 5-bar fractals + BOS/CHoCH labels + Wyckoff volume phase. Informational \u2014 not action-changing until calibrated.",
  "counts": {
   "REVERSAL_UP": 13,
@@ -8,13 +8,12 @@
   "UPTREND_BROKEN": 6,
   "DOWNTREND_BROKEN": 5,
   "UPTREND": 23,
-  "DOWNTREND": 90,
+  "DOWNTREND": 89,
   "MIXED": 48
  },
  "second_ll": [
   "MANKIND",
   "PAGEIND",
-  "ABB",
   "ABCAPITAL",
   "ASHOKLEY",
   "ASIANPAINT",
@@ -6613,102 +6612,6 @@
    ],
    "plain": "UPTREND \u2014 higher highs + higher lows. Last HL \u20b922.07 is trend support; dips toward it are buyable. Break below = first crack. Wyckoff: MARKUP \u2014 breakout highs on 20.5Cr vs pullback lows 23.5Cr. \u26a0\ufe0f Rallies thinning vs pullbacks \u2014 watch for distribution.",
    "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "ABB",
-   "name": "ABB India Ltd.",
-   "close": 7129.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 7480.0,
-    "date": "2026-09-09"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 6905.5,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 2,
-   "consec_lh": 2,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 309539,
-    "vol_at_last_low": 115646,
-    "note": "MARKDOWN \u2014 breakdown lows on 1.2L vs bounce highs 3.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 1.2L vs bounce highs 3.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-07-13",
-     "price": 6637.36,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-16",
-     "price": 7832.29,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-29",
-     "price": 7002.56,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-04",
-     "price": 7802.64,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-14",
-     "price": 7825.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-19",
-     "price": 7391.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 7699.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 7258.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 7480.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 6905.5,
-     "label": "LL"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b97480.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.2L vs bounce highs 3.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "at_second_ll": true,
    "at_second_hh": false
   },
   {
