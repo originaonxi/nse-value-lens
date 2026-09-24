@@ -36,6 +36,21 @@ test('HHHL refuses a truncated upstream universe and preserves the labelled fall
   assert.equal(result.payload.rows.length,200);
 });
 
+test('homepage prices refresh after one minute and bypass the upstream branch cache', async t => {
+  let now=Date.now(),calls=0;
+  t.mock.method(Date,'now',()=>now);
+  t.mock.method(globalThis,'fetch',async url=>{
+    assert.match(url,/swing_desk\.json\?refresh=\d+/);
+    calls++;
+    return {ok:true,json:async()=>({as_of:calls===1?'2026-09-23':'2026-09-24',candidates:[]})};
+  });
+  const {loadSwing}=fresh();
+  assert.equal((await loadSwing('swing_desk')).payload.as_of,'2026-09-23');
+  now+=61000;
+  assert.equal((await loadSwing('swing_desk')).payload.as_of,'2026-09-24');
+  assert.equal(calls,2);
+});
+
 test('market brief validates all 200 stocks and avoids stale branch caches', async t => {
   const sample=JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname,'../public/data/market_brief.json'),'utf8'));
   let requestURL;

@@ -14,7 +14,7 @@ async function loadSwing(name) {
     try {
       // Raw GitHub otherwise caches a mutable branch URL for five minutes,
       // longer than the scanners' one-minute cache and refresh verification.
-      const refresh = /^(hhhl|vcp|market)_/.test(name) ? '?refresh='+Date.now() : '';
+      const refresh = /^(hhhl|vcp|market|swing)_/.test(name) ? '?refresh='+Date.now() : '';
       const res = await fetch('https://raw.githubusercontent.com/originaonxi/nse-value-lens/master/docs/'+name+'.json'+refresh,
         {signal: AbortSignal.timeout(5000)});
       if (!res.ok) throw new Error('Upstream HTTP '+res.status);
@@ -27,7 +27,7 @@ async function loadSwing(name) {
       payload = existing?.payload || JSON.parse(await fs.readFile(path.join(__dirname,'..','public','data',name+'.json'),'utf8'));
       source = 'local-fallback';
     }
-    const result = {payload, source, expires:Date.now()+(source==='github'?(/^(hhhl|vcp|market)_/.test(name)?60000:300000):30000)};
+    const result = {payload, source, expires:Date.now()+(source==='github'?(/^(hhhl|vcp|market|swing)_/.test(name)?60000:300000):30000)};
     cache.set(name,result);
     return result;
   })();
