@@ -11,7 +11,10 @@ async function loadSwing(name) {
   const request = (async () => {
     let payload, source;
     try {
-      const res = await fetch('https://raw.githubusercontent.com/originaonxi/nse-value-lens/master/docs/'+name+'.json',
+      // Raw GitHub otherwise caches a mutable branch URL for five minutes,
+      // longer than the scanners' one-minute cache and refresh verification.
+      const refresh = /^(hhhl|vcp)_/.test(name) ? '?refresh='+Date.now() : '';
+      const res = await fetch('https://raw.githubusercontent.com/originaonxi/nse-value-lens/master/docs/'+name+'.json'+refresh,
         {signal: AbortSignal.timeout(5000)});
       if (!res.ok) throw new Error('Upstream HTTP '+res.status);
       payload = await res.json();

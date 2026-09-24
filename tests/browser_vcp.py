@@ -81,13 +81,15 @@ def main():
         source=page.locator('body').get_attribute('data-source') or ''
         data=page.request.get(urljoin(args.url,source+'vcp_scan.json')+'?verify='+str(time.time())).json()
         if args.run_id:
-            deadline=time.monotonic()+100
-            while data.get('refresh_run_id')!=args.run_id and time.monotonic()<deadline:
+            deadline=time.monotonic()+180
+            status_url=urljoin(args.url,source+'vcp_refresh_status.json')
+            status=page.request.get(status_url+'?verify='+str(time.time())).json()
+            while (data.get('refresh_run_id')!=args.run_id or status.get('snapshot_run_id')!=args.run_id or status.get('run_id')!=args.run_id) and time.monotonic()<deadline:
                 time.sleep(5)
                 data=page.request.get(urljoin(args.url,source+'vcp_scan.json')+'?verify='+str(time.time())).json()
+                status=page.request.get(status_url+'?verify='+str(time.time())).json()
             assert data['refresh_run_id']==args.run_id,(data.get('refresh_run_id'),args.run_id)
             page.reload(wait_until='networkidle')
-            status=page.request.get(urljoin(args.url,source+'vcp_refresh_status.json')+'?verify='+str(time.time())).json()
             assert status['run_id']==args.run_id and status['snapshot_run_id']==args.run_id
             assert status['state'] in ('fresh','partial')
         assert len(data['rows'])==len({r['symbol'] for r in data['rows']})==200

@@ -19,8 +19,11 @@ test('filters and CSV retain all qualifying setups beyond ten rows',()=>{
 test('displayed external text is escaped',()=>assert.equal(esc('<script>"&'), '&lt;script&gt;&quot;&amp;'));
 test('VCP snapshot and status can refresh on Railway without redeploying',async t=>{
   const data=snapshot();
-  t.mock.method(globalThis,'fetch',async url=>({ok:true,json:async()=>url.includes('vcp_refresh_status')?
-    {as_of:data.as_of,run_id:'test',state:'fresh',attempted_at:'2026-09-24T08:00:00Z'}:data}));
+  t.mock.method(globalThis,'fetch',async url=>{
+    assert.match(url,/\.json\?refresh=\d+$/,'mutable GitHub branch cache must be bypassed');
+    return {ok:true,json:async()=>url.includes('vcp_refresh_status')?
+      {as_of:data.as_of,run_id:'test',state:'fresh',attempted_at:'2026-09-24T08:00:00Z'}:data};
+  });
   delete require.cache[require.resolve('./swing-data')];
   const {loadSwing}=require('./swing-data');
   assert.equal((await loadSwing('vcp_scan')).source,'github');
