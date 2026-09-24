@@ -2,7 +2,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-for name in ("market-brief.html", "market-brief.css", "market-brief.js", "market-context.js", "index.html", "hhhl.html", "hhhl.js", "vcp.html", "vcp.js"):
+for name in ("market-brief.html", "market-brief.css", "market-brief.js", "market-context.js", "home-nav.css", "index.html", "hhhl.html", "hhhl.js", "vcp.html", "vcp.js"):
     text = (ROOT / "public" / name).read_text(encoding="utf-8")
     if name.endswith(".html"):
         text = text.replace('data-source="data/"', 'data-source=""')

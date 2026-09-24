@@ -51,6 +51,14 @@ def main():
             page.wait_for_function("document.querySelector('#market-context-stock') && !document.querySelector('#market-context-stock').hidden", timeout=30000)
             assert symbol in page.locator("#detail-title").inner_text()
             assert "context" in page.locator("#market-context-stock").inner_text().lower()
+        for width in (1440,390,320):
+            page.set_viewport_size({"width":width,"height":900})
+            page.goto(urljoin(args.url, "index.html"),wait_until="networkidle")
+            for target in ("hhhl.html","vcp.html","market-brief.html"):
+                assert page.locator(f'.home-tools a[href="{target}"]').is_visible()
+                assert page.locator(f'.home-primary-nav a[href="{target}"]').is_visible()
+            assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), "Homepage overflow"
+            if width in (1440,390):page.screenshot(path=str(artifacts / f"market-home-{width}.png"))
         assert not errors, errors
         print(json.dumps({"url":args.url,"judged":snapshot["judged_count"],"as_of":snapshot["as_of"],"state":status["state"],"run_id":status["run_id"],"browser_errors":errors}))
         browser.close()
