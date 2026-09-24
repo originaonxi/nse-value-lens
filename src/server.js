@@ -60,7 +60,7 @@ app.get(['/', '/index.html'], (_req, res) => {
 });
 
 // GitHub Actions refreshes research independently of deployments.
-app.get('/data/:name(swing_desk|swing_evidence|expanded_research|cross_asset_research|futures_research|research_data_audit|indicator_research|hhhl_scan|hhhl_refresh_status).json', async (req, res) => {
+app.get('/data/:name(swing_desk|swing_evidence|expanded_research|cross_asset_research|futures_research|research_data_audit|indicator_research|hhhl_scan|hhhl_refresh_status|vcp_scan|vcp_refresh_status).json', async (req, res) => {
   try {
     const { payload, source } = await require('./swing-data').loadSwing(req.params.name);
     res.setHeader('Cache-Control', 'no-store');

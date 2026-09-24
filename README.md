@@ -10,6 +10,9 @@ constituents introduce survivorship bias. No automatic orders are placed.
 
 - [Nifty 200 HH/HL scanner: all stocks, states and zones](https://originaonxi.github.io/nse-value-lens/hhhl.html)
 - [Top 10 HH/HL shortlist: ranking and strategy chart guide](docs/HHHL_SCANNER.md#top-10-current-setups-and-strategy-charts)
+- [Minervini-style VCP backtest: 72 variants, costs and trade evidence](research/vcp/REPORT.md)
+- [Live VCP scanner: all 200 stocks, weekly charts and every qualifying setup](https://nifty.up.railway.app/vcp.html)
+- [VCP scanner rules and daily automation](docs/VCP_SCANNER.md)
 - [Daily HH/HL automation: 4 pm IST, retries and freshness checks](docs/HHHL_AUTOMATION.md)
 - [10/10 real automation runs passed, including live chart verification](docs/HHHL_AUTOMATION_TEST_REPORT.md)
 - [Kasandra scanner: public record and accounting audit](docs/KASANDRA_REVIEW.md)

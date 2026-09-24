@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "frozen_before_results": true,
+  "as_of": "2026-09-23",
+  "data_start": "2014-01-01",
+  "periods": {
+    "development": ["2016-01-01", "2020-12-31"],
+    "validation": ["2021-01-01", "2023-12-31"],
+    "later": ["2024-01-01", "2026-09-23"],
+    "full": ["2016-01-01", "2026-09-23"]
+  },
+  "universe": "200 current constituents in nifty200.csv, snapshot on 2026-09-23; historical membership unavailable",
+  "weekly_screen": {
+    "price_floor": 30,
+    "within_high_fraction": 0.75,
+    "above_low_multiple": 2.0,
+    "daily_sma": [50, 200],
+    "sma200_rising": "13 consecutive weekly increases, evaluated on completed weekly closes",
+    "trend": "close > SMA50 > SMA200",
+    "new_high_frequency": "At least one fresh 252-session high in each of the last two 26-week blocks; no gap between those high weeks, including endpoints, exceeds 26 weeks",
+    "weekly_data": "Full exchange weeks ending Friday; incomplete last week excluded; missing stock sessions invalidate weekly candle",
+    "vcp": "Alternating confirmed weekly pivots, one bar on each side; outside bars reset sequence; same-type pivots retain most extreme",
+    "contractions": "Declining high-to-low percentage depths, rising lows, non-increasing high-to-low durations; final pullback mean volume below prior rally mean, final pullback below prior pullback mean, aggregate up-week volume above down-week volume",
+    "pattern_age": "First high 4-26 weeks ago; last low at most 8 weeks ago; final low unbroken and no previous close above final swing high",
+    "liquidity": "Prior 20-session average rupee turnover >= Rs 1 crore; assumed execution guard, not a supplied Minervini rule"
+  },
+  "variants": {
+    "pattern": ["three", "three_or_two_70", "three_or_two_smaller"],
+    "entry": ["intraday_pivot", "close_volume_next_open"],
+    "exit": ["atr_trail", "weekly_sma10", "target_3r"],
+    "market_filter": [false, true],
+    "pyramid": [false, true]
+  },
+  "entry_rules": {
+    "intraday_pivot": "Weekly-known final swing high * 1.001 buy-stop; gap entry at open, otherwise trigger. No same-day volume filter.",
+    "close_volume_next_open": "Fresh daily close above weekly-known final swing high, volume >= 1.5x prior 50-session average; enter next session open. Friday uses previous week's list.",
+    "both": "Entry <= 1.05x pivot, and >= pivot; one initial entry per pattern; signal lists refreshed only after weekly close; no entries on terminal evaluation date",
+    "market_filter": "Prior completed Nifty 200 close > its SMA200; unavailable benchmark blocks entries",
+    "stop": "Initial entry minus min(2 * prior Wilder ATR20, 10% of entry); actual fills include adverse slippage",
+    "adding": "At most one add on a NEW higher VCP pivot after a close at least 1R above original entry; add risk <= 0.25% equity, combined open stop risk <= 0.5% equity; never average down"
+  },
+  "exit_rules": {
+    "atr_trail": "Ratchet stop using highest completed close since entry minus 2*ATR20; only effective next session; never lower initial stop",
+    "weekly_sma10": "Keep initial stop; completed weekly close below 10-week SMA schedules exit next session open",
+    "target_3r": "Keep initial stop; limit sell at initial entry plus 3*initial stop distance",
+    "execution": "Gap below stop exits at worse open; same-bar stop and target resolves stop-first; entry-day ambiguous stop also stop-first; period end liquidates at close; no artificial holding-time cap"
+  },
+  "portfolio": {
+    "initial_cash": 100000,
+    "risk_fraction": 0.005,
+    "add_risk_fraction": 0.0025,
+    "max_stock_fraction": 0.2,
+    "max_positions": 5,
+    "max_industry_positions": 2,
+    "ranking": "Smaller final contraction, then higher prior 20-day turnover, then symbol; known before today's open",
+    "cash_interest": 0,
+    "leverage": false,
+    "same_day_exit_cash_reused": false,
+    "units": "Whole adjusted-price research units; not broker-reconciled historical share counts"
+  },
+  "costs": {
+    "fee_tax_per_side": 0.0015,
+    "slippage_per_side": 0.0005,
+    "fixed_exit_charge_rupees": 20,
+    "scenarios": [1, 2],
+    "note": "Conservative delivery scenario, not historical broker invoices; personal income tax excluded; stress doubles all costs and reruns portfolio"
+  },
+  "selection": "Rank using development and validation only. Prefer both profitable with >=20 closed trades in each; then maximize the smaller CAGR/max(drawdown,5%) across those periods; ties config ID. Freeze choice before calculating later period.",
+  "reporting": "Show all 72 variants, costs, annual and period returns, complete trade logs, drawdown, exposure, profit factor, R expectancy, selection versus hindsight-best, and block-bootstrap uncertainty. Never optimize on later data.",
+  "limits": [
+    "Current-member survivorship bias; no claim of point-in-time Nifty 200 profitability",
+    "Image uses earnings and sales; no dated fundamental filter is available, so this tests supplied price/volume rules only",
+    "Mechanical weekly VCP proxy, not an exact replay of discretionary Minervini trading",
+    "Yahoo adjusted prices approximate dividend reinvestment; actual broker quantities, dividends, circuit locks and auction execution not reconstructed",
+    "Later period is retrospective and has appeared in previous project research; not pristine unseen or prospective validation",
+    "4-8 weeks described as usual timing, not enforced as a hard cap; compare tighter time window as separately labelled sensitivity",
+    "No asserted 50% win rate, 413% return, or guaranteed profit"
+  ],
+  "sources": [
+    "User-supplied rules and Kenneth Cole Productions 1995 image",
+    "https://www.nseindia.com/static/invest/first-time-investor-sebi-turnover-fees-stt-other-levies",
+    "https://www.niftyindices.com/indices/equity/broad-based-indices/nifty-200",
+    "https://www.niftyindices.com/reports/historical-data"
+  ]
+}

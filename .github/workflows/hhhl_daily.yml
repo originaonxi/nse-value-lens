@@ -1,5 +1,5 @@
 name: HHHL daily refresh
-run-name: HHHL refresh ${{ inputs.test_label || github.event.schedule || 'manual' }}
+run-name: HHHL + VCP refresh ${{ inputs.test_label || github.event.schedule || 'manual' }}
 on:
   schedule:
     # UTC. Primary 16:00 IST; retries 16:25, 17:25, 19:25, 22:25 and next 08:25 IST.
@@ -37,20 +37,27 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Test the refresh and scanner safety rules
-        run: python -m unittest discover -s tests -p 'test_hhhl*.py' -v
+        run: |
+          python -m unittest discover -s tests -p 'test_hhhl*.py' -v
+          python -m unittest discover -s tests -p 'test_vcp*.py' -v
       - name: Fetch completed prices and recalculate all 200 stocks
         id: scan
         continue-on-error: true
         run: python hhhl_refresh.py
+      - name: Recalculate every VCP setup from the refreshed price history
+        id: vcp
+        continue-on-error: true
+        run: python vcp_scanner.py
       - name: Commit prices, scan and refresh status
         id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/hhhl_prices nifty200.csv screen_output/hhhl*.json docs/hhhl*.json public/data/hhhl*.json
+          git add screen_output/vcp*.json docs/vcp*.json public/data/vcp*.json
           if [ -f data/hhhl_calendar.json ]; then git add data/hhhl_calendar.json; fi
           if ! git diff --cached --quiet; then
-            git commit -m "data: HHHL daily refresh run ${GITHUB_RUN_ID}"
+            git commit -m "data: HHHL and VCP daily refresh run ${GITHUB_RUN_ID}"
             for attempt in 1 2 3; do
               git pull --rebase origin master
               if git push origin HEAD:master; then break; fi
@@ -66,6 +73,8 @@ jobs:
           path: |
             docs/hhhl_refresh_status.json
             docs/hhhl_scan.json
+            docs/vcp_refresh_status.json
+            docs/vcp_scan.json
           retention-days: 30
 
   publish:
@@ -109,6 +118,10 @@ jobs:
         run: |
           python tests/browser_hhhl_chart.py --url https://originaonxi.github.io/nse-value-lens/hhhl.html
           python tests/browser_hhhl_chart.py --url https://nifty.up.railway.app/hhhl.html
+      - name: Verify all 200 VCP rows, every mode and both live pages
+        run: |
+          python tests/browser_vcp.py --url https://originaonxi.github.io/nse-value-lens/vcp.html --run-id "$GITHUB_RUN_ID"
+          python tests/browser_vcp.py --url https://nifty.up.railway.app/vcp.html --run-id "$GITHUB_RUN_ID"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -117,4 +130,5 @@ jobs:
             artifacts/hhhl-live-*
             artifacts/hhhl-chart-*
             artifacts/hhhl-priority-*.png
+            artifacts/vcp-*
           retention-days: 90
