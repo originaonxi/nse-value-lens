@@ -1,5 +1,5 @@
 name: HHHL daily refresh
-run-name: HHHL + VCP refresh ${{ inputs.test_label || github.event.schedule || 'manual' }}
+run-name: HHHL + VCP + market brief ${{ inputs.test_label || github.event.schedule || 'manual' }}
 on:
   schedule:
     # UTC. Primary 16:00 IST; retries 16:25, 17:25, 19:25, 22:25 and next 08:25 IST.
@@ -13,6 +13,10 @@ on:
         description: Optional audit label (does not change data or skip any step)
         type: string
         required: false
+      refresh_brief:
+        description: Recollect evidence and rerun Jev for this slot (first archived assessment stays unchanged)
+        type: boolean
+        default: false
 permissions:
   contents: write
   pages: write
@@ -40,6 +44,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_hhhl*.py' -v
           python -m unittest discover -s tests -p 'test_vcp*.py' -v
+          python -m unittest discover -s tests -p 'test_market*.py' -v
       - name: Fetch completed prices and recalculate all 200 stocks
         id: scan
         continue-on-error: true
@@ -48,6 +53,18 @@ jobs:
         id: vcp
         continue-on-error: true
         run: python vcp_scanner.py
+      - name: Collect US and India evidence and assess all 200 stocks with Jev
+        id: market_brief
+        continue-on-error: true
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          FORCE_BRIEF: ${{ inputs.refresh_brief }}
+        run: |
+          if [ "$FORCE_BRIEF" = "true" ]; then
+            python market_brief.py --force
+          else
+            python market_brief.py
+          fi
       - name: Commit prices, scan and refresh status
         id: commit
         run: |
@@ -55,9 +72,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/hhhl_prices nifty200.csv screen_output/hhhl*.json docs/hhhl*.json public/data/hhhl*.json
           git add screen_output/vcp*.json docs/vcp*.json public/data/vcp*.json
+          git add screen_output/market_brief*.json docs/market_brief*.json public/data/market_brief*.json
+          if [ -d data/market_brief_history ]; then git add data/market_brief_history; fi
           if [ -f data/hhhl_calendar.json ]; then git add data/hhhl_calendar.json; fi
           if ! git diff --cached --quiet; then
-            git commit -m "data: HHHL and VCP daily refresh run ${GITHUB_RUN_ID}"
+            git commit -m "data: scanners and US India brief run ${GITHUB_RUN_ID}"
             for attempt in 1 2 3; do
               git pull --rebase origin master
               if git push origin HEAD:master; then break; fi
@@ -75,6 +94,8 @@ jobs:
             docs/hhhl_scan.json
             docs/vcp_refresh_status.json
             docs/vcp_scan.json
+            docs/market_brief.json
+            docs/market_brief_refresh_status.json
           retention-days: 30
 
   publish:
@@ -122,6 +143,10 @@ jobs:
         run: |
           python tests/browser_vcp.py --url https://originaonxi.github.io/nse-value-lens/vcp.html --run-id "$GITHUB_RUN_ID"
           python tests/browser_vcp.py --url https://nifty.up.railway.app/vcp.html --run-id "$GITHUB_RUN_ID"
+      - name: Verify Jev briefing, 200 assessments and both websites
+        run: |
+          python tests/browser_market_brief.py --url https://originaonxi.github.io/nse-value-lens/market-brief.html --run-id "$GITHUB_RUN_ID"
+          python tests/browser_market_brief.py --url https://nifty.up.railway.app/market-brief.html --run-id "$GITHUB_RUN_ID"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -131,4 +156,5 @@ jobs:
             artifacts/hhhl-chart-*
             artifacts/hhhl-priority-*.png
             artifacts/vcp-*
+            artifacts/market-*
           retention-days: 90

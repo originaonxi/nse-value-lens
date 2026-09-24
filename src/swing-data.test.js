@@ -35,3 +35,15 @@ test('HHHL refuses a truncated upstream universe and preserves the labelled fall
   assert.equal(result.source,'local-fallback');
   assert.equal(result.payload.rows.length,200);
 });
+
+test('market brief validates all 200 stocks and avoids stale branch caches', async t => {
+  const sample=JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname,'../public/data/market_brief.json'),'utf8'));
+  let requestURL;
+  t.mock.method(globalThis,'fetch',async url=>{requestURL=url;return {ok:true,json:async()=>sample};});
+  const current=await fresh().loadSwing('market_brief');
+  assert.equal(current.source,'github');assert.equal(current.payload.rows.length,200);
+  assert.match(requestURL,/market_brief\.json\?refresh=\d+/);
+  t.mock.method(globalThis,'fetch',async()=>({ok:true,json:async()=>({...sample,rows:sample.rows.slice(0,199)})}));
+  const fallback=await fresh().loadSwing('market_brief');
+  assert.equal(fallback.source,'local-fallback');assert.equal(fallback.payload.rows.length,200);
+});

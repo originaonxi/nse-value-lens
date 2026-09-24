@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', 'vcp_scanner.py', 'vcp_research.py', 'public/vcp.*', 'src/vcp.test.js', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'public/hhhl-chart.js', 'src/hhhl-chart.test.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', 'vcp_scanner.py', 'vcp_research.py', 'market_*.py', 'jev_client.py', 'public/market-*', 'public/vcp.*', 'src/vcp.test.js', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'public/hhhl-chart.js', 'src/hhhl-chart.test.js', 'tests/test_*.py', 'tests/market-brief.test.js', 'src/swing-data.js', '.github/workflows/research_tests.yml']
   pull_request:
-    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', 'vcp_scanner.py', 'vcp_research.py', 'public/vcp.*', 'src/vcp.test.js', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'public/hhhl-chart.js', 'src/hhhl-chart.test.js', 'tests/test_*.py', 'src/swing-data.js', '.github/workflows/research_tests.yml']
+    paths: ['research/**', 'indicator_research.py', 'hhhl_scanner.py', 'hhhl_refresh.py', 'vcp_scanner.py', 'vcp_research.py', 'market_*.py', 'jev_client.py', 'public/market-*', 'public/vcp.*', 'src/vcp.test.js', '.github/workflows/hhhl_daily.yml', 'public/hhhl.js', 'public/hhhl-chart.js', 'src/hhhl-chart.test.js', 'tests/test_*.py', 'tests/market-brief.test.js', 'src/swing-data.js', '.github/workflows/research_tests.yml']
 permissions:
   contents: read
 jobs:
@@ -28,3 +28,5 @@ jobs:
       - run: node --check public/indicator-lab.js
       - run: node --check public/hhhl.js
       - run: node --check public/vcp.js
+      - run: node --check public/market-brief.js
+      - run: node --check public/market-context.js

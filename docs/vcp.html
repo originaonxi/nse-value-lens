@@ -5,21 +5,25 @@
 <title>Nifty 200 VCP scanner | NSE Value Lens</title>
 <meta name="description" content="Minervini-style weekly volatility contraction setups across all Nifty 200 stocks. Dated rule checks, contraction charts and transparent backtest evidence.">
 <link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="vcp.css">
+<script src="market-context.js" defer></script>
 <script src="vcp.js" defer></script>
+<link rel="stylesheet" href="market-brief.css">
 </head>
 <body data-source="">
 <div class="shell">
-<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav aria-label="Main navigation"><a href="index.html">Swing desk</a><a href="hhhl.html">HH/HL</a><a href="#evidence">VCP evidence</a></nav></header>
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav aria-label="Main navigation"><a href="index.html">Swing desk</a><a href="hhhl.html">HH/HL</a><a href="#evidence">VCP evidence</a><a href="market-brief.html">US + India brief</a></nav></header>
 <main>
 <div class="eyebrow"><span class="dot"></span> NIFTY 200 / VOLATILITY CONTRACTION</div>
 <section class="hero"><div><h1>Find the tightening.<br><span>Wait for the break.</span></h1><p class="intro">Weekly structure. Daily entry references.<br>Every constituent checked against the same explicit rules.</p></div><div class="session"><span class="label">LATEST DAILY CLOSE</span><strong id="asof">Loading…</strong><span id="weekly-date">Checking completed weekly data</span><span class="paper">END-OF-DAY RESEARCH</span></div></section>
+<div id="market-context-strip" class="context-strip" role="status">Loading US and India market context…</div>
 <div id="notice" class="notice" role="status">Loading the dated VCP scan…</div>
 <div class="mode-panel"><div><span class="eyebrow">CHOOSE THE PATTERN RULE</span><p>Stock filters stay the same in every view.</p></div><label>Contraction definition<select id="mode" disabled><option value="three_or_two_70">3 contractions, or 2 with 70% tightening</option><option value="three">Strict · 3 contractions only</option><option value="three_or_two_smaller">Exploratory · 3, or 2 smaller contractions</option></select></label><p id="mode-note" class="muted"></p></div>
 <section class="stats" aria-label="VCP coverage"><div><span class="label">STOCKS CHECKED</span><strong id="universe-count">—</strong><small id="coverage">Checking price coverage</small></div><div><span class="label">AWAITING BREAKOUT</span><strong id="watch-count">—</strong><small>All active qualifying setups shown</small></div><div><span class="label">WEEKLY FILTERS PASSED</span><strong id="screen-count">—</strong><small>A stock screen alone is not a VCP</small></div><div><span class="label">INITIAL STOP</span><strong>2 × <i>ATR20</i></strong><small>Daily ATR · capped at 10% of entry</small></div></section>
 <section class="section" aria-labelledby="watch-title"><div class="section-head"><div><span class="eyebrow">01 / THE COMPLETE WATCHLIST</span><h2 id="watch-title">Qualified and still waiting</h2></div><span id="watch-total" class="tag"></span></div><p class="muted">No top-ten limit. These are rule matches, not profit forecasts. A previously touched trigger is shown in the full stock list, not repeated here as a fresh entry.</p><div id="setups" class="cards" aria-live="polite"></div></section>
 <section id="stock-detail" class="section" aria-labelledby="detail-title" hidden>
 <div class="section-head"><div><span class="eyebrow">02 / INSIDE THE STRUCTURE</span><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-state" class="tag"></span></div>
-<p id="detail-reason" class="detail-reason"></p><div id="entry-levels" class="entry-levels"></div>
+<p id="detail-reason" class="detail-reason"></p>
+<div id="market-context-stock" class="context-stock" hidden></div><div id="entry-levels" class="entry-levels"></div>
 <div class="chart-panel"><div class="section-head"><div><h3>Completed weekly candles &amp; volume</h3><p class="muted">Solid green: contraction swings · dotted amber: pivot · blue: 10-week SMA</p></div><label class="filter">Chart window<select id="chart-window"><option value="26">26 weeks</option><option value="52" selected>52 weeks</option><option value="78">78 weeks</option></select></label></div><div id="stock-chart"></div><p id="candle-readout" class="muted" aria-live="polite">Select a candle for its weekly OHLC and volume.</p></div>
 <div id="contractions" class="contractions"></div>
 <h3 class="checks-title">Does this stock pass the rules?</h3><p id="checks-date" class="muted"></p><div id="rule-checks" class="rule-checks"></div>

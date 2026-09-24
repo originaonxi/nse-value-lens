@@ -5,17 +5,20 @@
 <meta name="description" content="A focused NSE swing research desk: transparent rules, bounded trade plans, and honest historical evidence.">
 <title>NSE Value Lens · Swing desk</title>
 <link rel="stylesheet" href="swing.css">
+<script src="market-context.js" defer></script>
 <script src="swing.js" defer></script>
+<link rel="stylesheet" href="market-brief.css">
 </head>
 <body data-source="data/">
 <div class="shell">
-<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="#setups">Swing desk</a><a href="#history">History</a><a href="#evidence">Evidence</a><a href="research.html">Full research ↗</a></nav></header>
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="#setups">Swing desk</a><a href="#history">History</a><a href="#evidence">Evidence</a><a href="research.html">Full research ↗</a><a href="market-brief.html">US + India brief</a></nav></header>
 <main>
 <p class="muted"><a href="vcp.html"><strong>Minervini VCP scanner: all Nifty 200 stocks, weekly charts and backtest evidence</strong></a></p>
 <p class="muted"><a href="hhhl.html"><strong>HH/HL scanner: all 200 stocks, five states and price zones</strong></a></p>
 <p class="muted"><a href="indicator-lab.html"><strong>Top 100 indicator rules: Supertrend, HH/HL, Ichimoku and more</strong></a></p>
 <div class="eyebrow"><span class="dot"></span> DELIVERY SWING RESEARCH <span class="pill">NO LEVERAGE</span></div>
 <section class="hero"><div><h1>Fewer signals.<br><span>Clearer decisions.</span></h1><p class="intro">Liquid NSE stocks. A defined entry, an exit, and a reason.<br>Explore trades lasting up to 20 sessions, with the evidence in view.</p></div><div class="session"><span class="label">LATEST COMPLETE SESSION</span><strong id="asof">Loading…</strong><span id="coverage">Checking market data</span><span class="paper">PAPER RESEARCH · UNVALIDATED</span></div></section>
+<div id="market-context-strip" class="context-strip" role="status">Loading US and India market context…</div>
 <div id="notice" class="notice" role="status">Loading the latest research snapshot…</div>
 <p class="muted"><a href="strategy-lab.html"><strong>Expanded strategy lab: stocks, intraday, ETFs and futures: results and dated trades</strong></a></p>
 <section class="stats" aria-label="Market overview"><div><span class="label">MARKET FILTER</span><strong id="market">—</strong><small>Nifty close &gt; 50 DMA &gt; 200 DMA</small></div><div><span class="label">MATCHING SETUPS</span><strong id="count">—</strong><small>Rules passed, not buy recommendations</small></div><div><span class="label">PLANNED RISK / TRADE</span><strong>0.5% <i>max</i></strong><small>Gaps can exceed planned stop loss</small></div><div><span class="label">HOLDING LIMIT</span><strong>5–20 <i>sessions</i></strong><small>Exit sooner if stop or target is reached</small></div></section>

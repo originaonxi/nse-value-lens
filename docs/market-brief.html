@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>US + India market brief | NSE Value Lens</title>
+<meta name="description" content="Sourced US and India market context, Jev assessments for all Nifty 200 stocks, company catalysts and prospective evidence.">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="market-brief.css">
+<script src="market-brief.js" defer></script>
+</head>
+<body data-source="">
+<div class="shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav aria-label="Main navigation"><a href="index.html">Swing desk</a><a href="hhhl.html">HH/HL</a><a href="vcp.html">VCP scanner</a><a href="#forward">Forward evidence</a></nav></header>
+<main>
+<div class="eyebrow"><span class="dot"></span> US + INDIA / THE CONTEXT DESK</div>
+<section class="hero"><div><h1>Read the backdrop.<br><span>Then read the setup.</span></h1><p class="intro">Macro drivers, company catalysts and all 200 stocks.<br>Sourced evidence, assessed by Jev, alongside the price rules.</p></div><div class="session"><span class="label">INDIAN PRICE SESSION</span><strong id="brief-date">Loading…</strong><span id="brief-time">Checking publication time</span><span class="paper">PERIODIC RESEARCH / NOT LIVE QUOTES</span></div></section>
+<p class="notice" id="brief-notice" role="status">Loading the latest sourced briefing…</p>
+<div class="brief-overview" id="bias-cards"></div>
+<p class="muted">Fundamental context and price structure are separate. A supportive assessment does not qualify a trade. Model confidence describes its answer distribution, not your chance of making money.</p>
+<section class="section"><div class="section-head"><div><span class="eyebrow">01 / WHAT MOVED</span><h2>The cross-market picture</h2></div><span class="tag">Completed daily observations</span></div><div class="quote-grid" id="quote-grid"></div></section>
+<section class="section"><div class="section-head"><div><span class="eyebrow">02 / THE TRANSMISSION</span><h2>What matters, and why</h2></div></div><div class="table-wrap"><table><caption>Conditional macro effects on equities in India and the United States</caption><thead><tr><th>Driver / evidence</th><th>India</th><th>US</th><th>Why it matters</th></tr></thead><tbody id="driver-rows"></tbody></table></div><div id="scenarios" class="brief-overview scenario-grid"></div></section>
+<section class="section"><div class="section-head"><div><span class="eyebrow">03 / CATALYSTS &amp; PRIMARY SOURCES</span><h2>Read before the next session</h2></div></div><div class="news-columns"><div><h3>Upcoming reported events</h3><p class="muted">BLS releases and Nifty 200 board meetings. Coverage is partial; an empty calendar is not an all-clear.</p><div id="event-list"></div></div><div><h3>Central-bank releases &amp; speeches</h3><p class="muted">Source titles link to the original release. No claim of comprehensive news coverage.</p><div id="headline-list"></div></div></div></section>
+<section class="section" id="stocks"><div class="section-head"><div><span class="eyebrow">04 / EVERY CONSTITUENT</span><h2>Context meets the Nifty 200</h2></div><a id="brief-json" href="market_brief.json">Full dated snapshot ↗</a></div>
+<div class="brief-filters"><label>Stock, company or industry<input id="brief-search" type="search" placeholder="Search all 200 stocks" disabled></label><label>Jev context<select id="brief-context" disabled><option value="ALL">All assessments</option><option value="supportive">Supportive</option><option value="conflicting">Conflicting</option><option value="mixed">Mixed</option><option value="insufficient">Insufficient evidence</option></select></label><label>Technical state<select id="brief-setup" disabled><option value="ALL">All stocks</option><option value="HHHL">HH/HL eligible breakout</option><option value="WATCH">HH/HL watch</option><option value="VCP">VCP awaiting breakout</option><option value="EVENT">High / elevated event risk</option></select></label><button id="brief-reset" disabled>Reset</button></div>
+<p class="muted" id="brief-count" aria-live="polite"></p>
+<article id="brief-stock-detail" class="brief-stock-detail" hidden aria-live="polite"></article>
+<div class="table-wrap"><table><caption>Every Nifty 200 constituent, technical qualification and independent context assessment</caption><thead><tr><th>Stock / industry</th><th>HH/HL</th><th>VCP</th><th>Jev context</th><th>Event risk</th><th>Relevant driver</th></tr></thead><tbody id="brief-stock-rows"></tbody></table></div>
+</section>
+<section class="section" id="forward"><div class="section-head"><div><span class="eyebrow">05 / DOES THIS HELP?</span><h2>Let the next sessions answer.</h2></div><span class="tag">Prospective observation</span></div><p id="forward-note"></p><p class="muted" id="forward-method"></p><div class="table-wrap"><table><caption>Forward stock returns after estimated costs, not strategy or portfolio returns</caption><thead><tr><th>Cohort</th><th>Horizon</th><th>Baseline</th><th>Jev supportive</th><th>Baseline on matched dates</th><th>Supported observations / dates</th></tr></thead><tbody id="forward-rows"></tbody></table></div><p class="muted" id="forward-limit"></p></section>
+<details class="brief-method"><summary>Source coverage, missing information and audit trail</summary><div id="source-coverage"></div><ul id="brief-limitations"></ul><p class="muted" id="brief-audit"></p><p>Refreshes at 08:25 IST and after 16:00 IST, with the scanner's later retries. GitHub scheduling can be delayed. Each completed briefing slot is reused on retries. API credentials stay in GitHub Actions; the website receives only published results.</p><a href="MARKET_BRIEF.md">Method and adapted US / India prompt</a></details>
+</main><footer><span>NSE VALUE LENS / CONTEXT DESK</span><p>Dated evidence. No automated orders or assured returns.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code ↗</a></footer>
+</div></body></html>

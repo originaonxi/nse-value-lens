@@ -253,6 +253,7 @@
     const r = dataset.rows.find(row => row.symbol === symbol);
     if (!r) return;
     selected = symbol;
+    window.MarketContext?.showStock(symbol,dataset.as_of);
     $('stock-detail').hidden = false;
     $('detail-title').textContent = r.symbol + ' / ' + r.name;
     $('detail-subtitle').textContent = r.sector + ' \u00b7 prices through ' + date(r.data_date) + ' \u00b7 ' + r.structure;
@@ -367,7 +368,7 @@
   fetch((document.body.dataset.source || '')+'hhhl_scan.json',{cache:'no-store'}).then(response=>{
     if(!response.ok) throw new Error('HTTP '+response.status);
     return response.json();
-  }).then(data=>{validate(data);dataset=data;renderSummary();if(selected)showDetail(selected,{scroll:false});loadRefreshStatus();}).catch(()=>{
+  }).then(data=>{validate(data);dataset=data;renderSummary();const requested=new URLSearchParams(location.search).get('symbol');if(requested&&!selected)selected=requested;if(requested&&dataset.rows.some(r=>r.symbol===requested)&&!window.hhhlLinkedStockShown){selected=requested;window.hhhlLinkedStockShown=true;}if(selected)showDetail(selected,{scroll:false});loadRefreshStatus();}).catch(()=>{
     dataset=null;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
     $('session-date').textContent='Unavailable';$('coverage').textContent='Data check failed';$('result-count').textContent='No verified rows to display.';
     $('stock-rows').innerHTML='';$('stock-detail').hidden=true;

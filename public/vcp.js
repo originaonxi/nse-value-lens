@@ -31,6 +31,7 @@
   function showRow(symbol,scroll=false) {
     selected=data.rows.find(r=>r.symbol===symbol); if(!selected) return;
     const r=selected,s=r.modes[mode],p=s.pattern;
+    window.MarketContext?.showStock(symbol,data.as_of);
     $('stock-detail').hidden=false;
     $('detail-title').textContent=r.symbol;
     $('detail-subtitle').textContent=r.name+' · '+r.sector;
@@ -118,6 +119,7 @@
       for(const id of ['setups','stock-rows'])$(id).onclick=e=>{const b=e.target.closest('button[data-symbol]');if(b)showRow(b.dataset.symbol,true);};
       $('download').onclick=()=>{const url=URL.createObjectURL(new Blob([csv(visible,mode)],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`vcp-${mode}-${data.as_of}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
       render();
+      const requested=new URLSearchParams(location.search).get('symbol');if(requested)showRow(requested);
       try {
         const res=await fetch(source+'vcp_refresh_status.json?t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('Status unavailable');const status=await res.json();
         const same=status.snapshot_run_id===data.refresh_run_id && status.scan_as_of===data.as_of;
