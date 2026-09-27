@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commodities & forex | NSE Value Lens</title>
+<meta name="description" content="Daily commodity and forex candles with confirmed HH/HL structure, exact price levels and plain-language reasons.">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css?v=stock-reasons-1"><link rel="stylesheet" href="global-markets.css?v=1">
+<script src="hhhl-chart.js" defer></script><script src="global-markets.js?v=1" defer></script>
+</head><body data-source="">
+<div class="shell hhhl-shell global-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ GLOBAL</span></a><nav><a href="hhhl.html">Nifty 200 stocks</a><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="market-brief.html">US + India brief</a></nav></header>
+<main>
+<section class="chart-desk-heading"><h1>Commodities &amp; forex</h1><div class="chart-desk-session"><strong id="session-date">Loading prices…</strong><span id="coverage">15 commodities · 11 currency pairs</span></div></section>
+<section class="stock-picker-panel" aria-label="Choose a commodity or currency pair"><div class="stock-pickers global-pickers">
+<label class="stock-picker watch" for="commodity-picker"><span>Commodities<small id="commodity-count">15</small></span><select id="commodity-picker" data-group="commodity" disabled><option value="">Loading commodities…</option></select></label>
+<label class="stock-picker caution" for="forex-picker"><span>Forex<small id="forex-count">11</small></span><select id="forex-picker" data-group="forex" disabled><option value="">Loading currency pairs…</option></select></label>
+</div><p id="picker-help">Select an instrument to view its daily chart below. Prices use the units shown beside each chart.</p></section>
+<section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
+<div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
+<p class="selection-reason" aria-live="polite" aria-atomic="true"><strong id="selection-reason"></strong></p>
+<p id="data-warning" class="global-warning" role="status" hidden></p>
+<div class="detail-grid"><div class="chart-panel"><div class="chart-heading"><div><span class="label">DAILY PRICE STRUCTURE</span><strong id="chart-price"></strong></div><div class="chart-controls"><label>View <select id="chart-window"><option value="35">35 sessions</option><option value="70" selected>70 sessions</option><option value="140">140 sessions</option></select></label><label><input id="chart-swings" type="checkbox" checked> Structure</label><label><input id="chart-all-pivots" type="checkbox"> All swing labels</label><label><input id="chart-levels" type="checkbox" checked> Price zones</label><label><input id="chart-events" type="checkbox" checked> Closing signals</label><label id="volume-toggle"><input id="chart-volume" type="checkbox" checked> Volume</label></div></div><div id="candle-readout" class="candle-readout" aria-live="off"></div><div class="chart-legend"><span class="legend-rise">HH / HL &middot; rising</span><span class="legend-fall">LH / LL &middot; falling</span><span>H1/H2 + L1/L2 &middot; active rule pivots</span><span>Last 2 bars &middot; pivots pending</span></div><div id="stock-chart" aria-label="Daily candles, labelled confirmed swings and zigzag"></div><p id="chart-inspect" class="chart-inspect" aria-live="polite">Tap a swing label for its price, pivot date and confirmation date.</p><p class="muted">H1/H2 and L1/L2 mark the last two confirmed highs and lows. A turning point needs two later sessions to be confirmed. These are price-structure observations; the stock scanner's Nifty and liquidity checks do not apply here.</p></div></div>
+<details class="global-details"><summary>Price source, session times &amp; chart details</summary>
+<p id="instrument-note"></p><p id="instrument-session"></p><p id="instrument-audit"></p><p><a id="source-link" target="_blank" rel="noopener noreferrer">View provider history</a></p>
+<div id="pivot-detail"></div>
+</details>
+</section>
+<p id="refresh-status" class="muted" role="status">Checking daily refresh…</p>
+<details class="global-details"><summary>All instruments &amp; their price dates</summary><div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Latest close</th><th>Price date</th><th>Structure</th><th>State</th><th>Data</th></tr></thead><tbody id="instrument-rows"></tbody></table></div></details>
+<details class="global-details"><summary>Coverage &amp; daily updates</summary><p>15 widely followed commodity futures benchmarks and 11 major or commonly followed currency pairs. This is a selected watchlist, not a live ranking of global trading volume.</p><p>Commodity quotes are rolling futures, with units such as dollars per ounce or cents per bushel. Contract changes can affect chart patterns. Forex charts combine reported hourly prices into daily sessions ending at 17:00 New York time; USD/INR is an indicative global quote, not the RBI reference rate.</p><p>Only elapsed sessions are used. Incomplete or invalid records are excluded and flagged. When a download fails, the last saved chart stays visible with its original date and a Caution label. Forex trading volume is not supplied.</p><p>Automatic checks run Monday to Saturday at 04:35, 07:35 and 10:35 UTC. Holidays or provider delays can leave an older date visible. These price-structure labels are not a tested commodity or forex entry system.</p><p>Source: <a href="https://finance.yahoo.com/markets/commodities/" target="_blank" rel="noopener noreferrer">Yahoo Finance</a> through the open-source <a href="https://github.com/ranaroussi/yfinance" target="_blank" rel="noopener noreferrer">yfinance project</a>. <a href="https://github.com/originaonxi/nse-value-lens/actions/workflows/global_markets.yml" target="_blank" rel="noopener noreferrer">Daily refresh runs</a></p></details>
+</main><footer><span>NSE VALUE LENS / GLOBAL MARKETS</span><p>Dated price structure. No automatic orders.</p><a href="hhhl.html">Back to Nifty 200</a></footer>
+</div></body></html>
