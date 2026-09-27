@@ -11,6 +11,7 @@
   const range = values => Array.isArray(values) && values.every(numeric) ? money(values[0]) + ' - ' + money(values[1]) : '--';
   const stateBadge = state => '<span class="state ' + state + '">' + state + '</span>';
   let dataset = null, status = 'ALL', visible = [], selected = null;
+  let baseDataset=null, fnoDataset=null, universeMode='nifty200', fnoLoadError=false;
 
   function validate(data) {
     if (!data || !/^\d{4}-\d{2}-\d{2}$/.test(data.as_of || '') || data.universe_count !== 200 ||
@@ -39,7 +40,7 @@
       if (sorting === 'distance') return distance(a) - distance(b) || a.symbol.localeCompare(b.symbol);
       return order[a.status] - order[b.status] || Number(b.fresh_breakout) - Number(a.fresh_breakout) || distance(a) - distance(b) || a.symbol.localeCompare(b.symbol);
     });
-    $('result-count').textContent = visible.length + ' of 200 stocks shown \u00b7 ' + (status === 'ALL' ? 'all research states' : status) + ' \u00b7 select a symbol for its zones';
+    $('result-count').textContent = visible.length + ' of '+dataset.universe_count+' stocks shown \u00b7 ' + (status === 'ALL' ? 'all research states' : status) + ' \u00b7 select a symbol for its zones';
     $('stock-rows').innerHTML = visible.length ? visible.map(r =>
       '<tr data-symbol="' + esc(r.symbol) + '" class="' + (selected === r.symbol ? 'selected' : '') + '"><td><button class="stock-name" type="button" data-symbol="' + esc(r.symbol) + '">' + esc(r.symbol) + '</button><small>' + esc(r.sector) + '</small></td><td>' + stateBadge(r.status) +
       (r.fresh_breakout ? '<small>Fresh breakout</small>' : '') + '</td><td>' + money(r.close) + '<small>' + esc(r.data_date || 'No data') +
@@ -183,7 +184,8 @@
     $('stock-chart').innerHTML=chart(row);
     const bars=viewedRow(row).chart||[],previous=bars.at(-2)?.close,last=bars.at(-1)?.close;
     const change=previous?100*(last/previous-1):null;
-    $('chart-price').textContent=money(last)+(numeric(change)?'  '+(change>=0?'+':'')+fmt(change)+'%':'')+' / '+row.data_date;
+    $('chart-price').textContent=money(last)+(numeric(change)?'  '+(change>=0?'+':'')+fmt(change)+'%':'')+' / '+(row.data_date||'No price history');
+    $('candle-readout').textContent='';
     candleReadout(row,bars.length-1);
     $('chart-inspect').textContent='Active pivots: H1/H2 are the last two highs; L1/L2 are the last two lows. Tap a label or closing-signal triangle for its dates.';
   }
@@ -222,7 +224,8 @@
   function renderPriority() {
     let picks=dataset.priority_watchlist;
     if(!Array.isArray(picks)){
-      const pool=dataset.rows.filter(r=>r.complete_for_session&&r.structure==='HH / HL'&&numeric(r.zones.breakout_above)&&['BUY','WATCH','CAUTION'].includes(r.status));
+      const pool=dataset.rows.filter(r=>r.complete_for_session&&r.structure==='HH / HL'&&numeric(r.zones.breakout_above)&&['BUY','WATCH','CAUTION'].includes(r.status)&&
+        (r.entry_checks||[]).every(c=>['trigger','market'].includes(c.key)||c.state==='pass'));
       const tier=r=>r.status==='BUY'?0:r.fresh_breakout?1:r.status==='WATCH'?2:3;
       pool.sort((a,b)=>tier(a)-tier(b)||Math.abs(a.close-a.zones.breakout_above)/a.atr-Math.abs(b.close-b.zones.breakout_above)/b.atr||a.symbol.localeCompare(b.symbol));
       picks=pool.slice(0,10).map((r,i)=>({rank:i+1,symbol:r.symbol,status:r.status,distance_atr:Math.abs(r.close-r.zones.breakout_above)/r.atr,reason:r.reason}));
@@ -307,11 +310,14 @@
     const rows=visible.map(r=>[r.symbol,r.name,r.sector,r.status,r.as_of,r.data_date,r.close,r.structure,r.zones.breakout_above,r.zones.structure_exit_below,
       r.zones.watch_band?.[0],r.zones.watch_band?.[1],r.entry_plan?.opening_price_band?.[0],r.entry_plan?.opening_price_band?.[1],r.entry_allowed,r.atr,r.atr_pct,r.turnover_crore,r.reason]);
     const blob=new Blob(['\uFEFF'+[columns,...rows].map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
-    const url=URL.createObjectURL(blob), a=document.createElement('a');a.href=url;a.download='nifty200-hhhl-'+dataset.as_of+'-'+status.toLowerCase()+'.csv';
+    const url=URL.createObjectURL(blob), a=document.createElement('a');a.href=url;a.download=universeMode+'-hhhl-'+dataset.as_of+'-'+status.toLowerCase()+'.csv';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
 
   function renderSummary() {
+    document.querySelector('.chart-desk-heading h1').textContent=HHHLUniverse.modes[universeMode]+' / HH-HL scanner';
+    $('universe-title').textContent='Filter '+HHHLUniverse.modes[universeMode];
+    document.querySelector('.stock-table caption').textContent=HHHLUniverse.modes[universeMode]+' with HH/HL research states and dated reference levels';
     $('session-date').textContent=date(dataset.as_of);
     $('coverage').textContent=dataset.universe_count+' listed \u00b7 '+dataset.complete_count+' complete session candles';
     for(const s of ['ALL',...statuses]) $('count-'+s).textContent=s==='ALL'?dataset.universe_count:dataset.counts[s];
@@ -332,6 +338,7 @@
     if(sectors.includes(previousSector)) $('sector').value=previousSector;
     $('data-audit').innerHTML='<p>'+esc(dataset.data_audit.price_source)+'</p><p>'+esc(dataset.data_audit.latest_recheck)+'</p><p>'+esc(dataset.data_audit.universe_source)+'</p><ul>'+dataset.limitations.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
     document.querySelectorAll('.filters input,.filters select,.filters button').forEach(el=>el.disabled=false);
+    $('download-json').textContent='Full JSON';
     $('download-json').href=(document.body.dataset.source || '')+'hhhl_scan.json';
     filterRows();
     const picks=renderPriority();
@@ -346,6 +353,48 @@
     if(dataset&&select.value)showDetail(select.value,{scroll:false});
     else syncStockPickers(dataset?.rows.find(r=>r.symbol===selected));
   }));
+
+  function applyUniverse() {
+    if(!baseDataset)return;
+    dataset=HHHLUniverse.view(baseDataset,fnoDataset,universeMode,{loadError:fnoLoadError});
+    if(!dataset.rows.some(r=>r.symbol===selected))selected=null;
+    renderSummary();
+    if(selected)showDetail(selected,{scroll:false});
+  }
+
+  function updateUniverseOptions() {
+    const options=$('universe').options;
+    options[0].textContent='Nifty 200 (200)';
+    if(!fnoDataset){
+      options[1].disabled=options[2].disabled=true;
+      $('universe-note').textContent='F&O coverage is temporarily unavailable. The Nifty 200 list is available.';
+      $('universe-note').className='warning';return;
+    }
+    const members=fnoDataset.membership.members;
+    const total=new Set([...baseDataset.rows.map(r=>r.symbol),...members.map(m=>m.symbol)]).size;
+    options[1].textContent='All F&O stocks ('+members.length+')';options[2].textContent='All stocks ('+total+')';
+    options[1].disabled=options[2].disabled=false;
+    const old=Date.now()-Date.parse(fnoDataset.generated_at)>60*60*60*1000;
+    const delayed=fnoLoadError||old||fnoDataset.as_of!==baseDataset.as_of;
+    $('universe-note').textContent=delayed?'Extra-stock updates need checking; saved charts show Caution.':
+      !fnoDataset.membership.verified?'Using saved NSE F&O membership; its latest check failed.':
+      (total-200)+' additional F&O stocks. Charts show daily share prices.';
+    $('universe-note').className=delayed||!fnoDataset.membership.verified?'warning':'';
+  }
+
+  $('universe').addEventListener('change',()=>{
+    universeMode=$('universe').value;applyUniverse();
+    const url=new URL(location.href);url.searchParams.set('universe',universeMode);
+    if(selected)url.searchParams.set('symbol',selected);history.replaceState(null,'',url);
+  });
+
+  $('download-json').addEventListener('click',event=>{
+    if(universeMode==='nifty200'||!dataset)return;
+    event.preventDefault();
+    const url=URL.createObjectURL(new Blob([JSON.stringify(dataset)],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download=universeMode+'-hhhl-'+dataset.as_of+'.json';
+    document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
 
   document.querySelectorAll('.status-card').forEach(button=>button.addEventListener('click',()=>{
     if(!dataset) return;
@@ -391,11 +440,28 @@
     }).catch(()=>{el.className='notice warning';el.textContent='Automatic refresh status unavailable. Check the scan date before using these levels.';});
   }
   function loadSnapshot() {
-  fetch((document.body.dataset.source || '')+'hhhl_scan.json',{cache:'no-store'}).then(response=>{
+  const source=document.body.dataset.source || '';
+  const extra=fetch(source+'hhhl_fno.json',{cache:'no-store'}).then(response=>{
+    if(!response.ok)throw new Error('F&O snapshot unavailable');return response.json();
+  }).then(HHHLUniverse.validate).then(data=>({data})).catch(()=>({error:true}));
+  fetch(source+'hhhl_scan.json',{cache:'no-store'}).then(response=>{
     if(!response.ok) throw new Error('HTTP '+response.status);
     return response.json();
-  }).then(data=>{validate(data);dataset=data;renderSummary();const requested=new URLSearchParams(location.search).get('symbol');if(requested&&!selected)selected=requested;if(requested&&dataset.rows.some(r=>r.symbol===requested)&&!window.hhhlLinkedStockShown){selected=requested;window.hhhlLinkedStockShown=true;}if(selected)showDetail(selected,{scroll:false});loadRefreshStatus();}).catch(()=>{
-    dataset=null;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
+  }).then(async data=>{
+    validate(data);baseDataset=data;$('universe').disabled=false;
+    applyUniverse();loadRefreshStatus();
+    const result=await extra;
+    fnoLoadError=!!result.error;if(result.data)fnoDataset=result.data;
+    updateUniverseOptions();
+    const params=new URLSearchParams(location.search),requested=params.get('symbol'),requestedMode=params.get('universe');
+    if(!window.hhhlLinkedStockShown){
+      if(fnoDataset&&['fno','all'].includes(requestedMode))universeMode=requestedMode;
+      else if(fnoDataset&&requested&&!baseDataset.rows.some(r=>r.symbol===requested)&&fnoDataset.membership.members.some(m=>m.symbol===requested))universeMode='all';
+      if(requested)selected=requested;window.hhhlLinkedStockShown=true;
+    }
+    $('universe').value=universeMode;applyUniverse();
+  }).catch(()=>{
+    dataset=null;baseDataset=null;$('universe').disabled=true;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
     $('session-date').textContent='Unavailable';$('coverage').textContent='Data check failed';$('result-count').textContent='No verified rows to display.';
     $('stock-rows').innerHTML='';$('stock-detail').hidden=true;
     document.querySelectorAll('[data-pick-state]').forEach(select=>{select.disabled=true;select.innerHTML='<option value="">Snapshot unavailable</option>';select.closest('.stock-picker').classList.remove('selected');});

@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nifty 200 HH/HL scanner | NSE Value Lens</title>
-<meta name="description" content="All 200 NSE stocks classified by confirmed higher highs and higher lows, with dated breakout, exit and watch zones.">
+<title>Nifty 200 &amp; F&amp;O stock HH/HL scanner | NSE Value Lens</title>
+<meta name="description" content="Nifty 200 and NSE F&O stocks classified by confirmed higher highs and higher lows, with dated breakout, exit and watch zones.">
 <link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css?v=stock-reasons-1">
+<link rel="stylesheet" href="hhhl-universe.css?v=fno-1">
 <script src="market-context.js" defer></script>
 <script src="hhhl-chart.js" defer></script>
 <script src="hhhl-reason.js?v=stock-reasons-1" defer></script>
-<script src="hhhl.js?v=stock-reasons-1" defer></script>
+<script src="hhhl-universe.js?v=fno-1" defer></script>
+<script src="hhhl.js?v=fno-1" defer></script>
 <link rel="stylesheet" href="market-brief.css">
 </head>
 <body data-source="">
@@ -17,6 +19,7 @@
 <main>
 <section class="chart-desk-heading"><h1>Nifty 200 / HH-HL scanner</h1><div class="chart-desk-session"><strong id="session-date">Loading…</strong><span id="coverage">Checking all 200 stocks</span></div></section>
 <section class="stock-picker-panel" aria-label="Choose a stock by research state">
+<div class="universe-toolbar"><label for="universe">Stock list<select id="universe" aria-describedby="universe-note"><option value="nifty200">Nifty 200</option><option value="fno" disabled>All F&amp;O stocks</option><option value="all" disabled>All stocks</option></select></label><p id="universe-note" role="status">Checking F&amp;O coverage…</p></div>
 <div class="stock-pickers">
 <label class="stock-picker watch" for="pick-WATCH"><span>Watch<small id="pick-count-WATCH">—</small></span><select id="pick-WATCH" data-pick-state="WATCH" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
 <label class="stock-picker sell" for="pick-SELL"><span>Sell<small id="pick-count-SELL">—</small></span><select id="pick-SELL" data-pick-state="SELL" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
