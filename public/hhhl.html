@@ -4,10 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nifty 200 HH/HL scanner | NSE Value Lens</title>
 <meta name="description" content="All 200 NSE stocks classified by confirmed higher highs and higher lows, with dated breakout, exit and watch zones.">
-<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css?v=stock-reasons-1">
 <script src="market-context.js" defer></script>
 <script src="hhhl-chart.js" defer></script>
-<script src="hhhl.js" defer></script>
+<script src="hhhl-reason.js?v=stock-reasons-1" defer></script>
+<script src="hhhl.js?v=stock-reasons-1" defer></script>
 <link rel="stylesheet" href="market-brief.css">
 </head>
 <body data-source="data/">
@@ -26,6 +27,7 @@
 </section>
 <section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
 <div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
+<p class="selection-reason" aria-live="polite" aria-atomic="true"><strong id="selection-reason"></strong></p>
 <div class="detail-grid"><div class="chart-panel"><div class="chart-heading"><div><span class="label">DAILY PRICE STRUCTURE</span><strong id="chart-price"></strong></div><div class="chart-controls"><label>View <select id="chart-window"><option value="35">35 sessions</option><option value="70" selected>70 sessions</option><option value="140">140 sessions</option></select></label><label><input id="chart-swings" type="checkbox" checked> Structure</label><label><input id="chart-all-pivots" type="checkbox"> All swing labels</label><label><input id="chart-levels" type="checkbox" checked> Price zones</label><label><input id="chart-events" type="checkbox" checked> Closing signals</label><label><input id="chart-volume" type="checkbox" checked> Volume</label></div></div><div id="candle-readout" class="candle-readout" aria-live="off"></div><div class="chart-legend"><span class="legend-rise">HH / HL &middot; rising</span><span class="legend-fall">LH / LL &middot; falling</span><span>H1/H2 + L1/L2 &middot; active rule pivots</span><span>Last 2 bars &middot; pivots pending</span></div><div id="stock-chart" aria-label="Daily candles, labelled confirmed swings and zigzag"></div><p id="chart-inspect" class="chart-inspect" aria-live="polite">Tap a swing label for its price, pivot date and confirmation date.</p><p class="muted">The four highlighted pivots drive the current HH/HL rule. Price levels begin when confirmed. Closing-signal markers show structure events, not executed trades. Entry and stop references apply only to a fresh setup; actual fills still determine the stop. Volume is context, not an added entry rule. Tap or move across candles for OHLCV. New pivots require two later sessions.</p></div></div>
 <details class="stock-explanation"><summary>Stock details, price zones &amp; strategy checks</summary>
 <p id="detail-reason" class="detail-reason"></p>

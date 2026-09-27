@@ -275,6 +275,7 @@
     $('detail-subtitle').textContent = r.sector + ' \u00b7 prices through ' + date(r.data_date) + ' \u00b7 ' + r.structure;
     $('detail-badge').className = 'state ' + r.status;
     $('detail-badge').textContent = r.status;
+    $('selection-reason').textContent = 'WHY ' + r.status + ': ' + HHHLReason.explain(r,dataset.market);
     $('detail-reason').textContent = r.reason;
     renderStrategy(r);
     renderChart(r);
