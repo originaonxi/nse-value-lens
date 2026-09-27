@@ -48,10 +48,25 @@
       '</td><td>' + (numeric(r.atr_pct) ? fmt(r.atr_pct) + '%' : '--') + '</td><td class="reason-cell">' + esc(r.reason) + '</td></tr>'
     ).join('') : '<tr><td colspan="9" class="empty-row">No stocks match these filters.' + (status === 'BUY' && !dataset.market.new_entries_allowed ? ' New buys are blocked by the market/data gate.' : '') + '</td></tr>';
     $('download-csv').disabled = !visible.length;
-    if (selected && !visible.some(r => r.symbol === selected)) {
-      selected = null;
-      $('stock-detail').hidden = true;
+  }
+
+  function syncStockPickers(row) {
+    document.querySelectorAll('[data-pick-state]').forEach(select=>{
+      const active=row?.status===select.dataset.pickState;
+      select.value=active?row.symbol:'';
+      select.closest('.stock-picker').classList.toggle('selected',active);
+    });
+  }
+
+  function renderStockPickers() {
+    for(const state of statuses) {
+      const select=$('pick-'+state),rows=dataset.rows.filter(r=>r.status===state).sort((a,b)=>a.symbol.localeCompare(b.symbol));
+      $('pick-count-'+state).textContent=String(rows.length);
+      select.innerHTML='<option value="">'+(rows.length?'Choose a stock':'No '+state.toLowerCase()+' stocks today')+'</option>'+rows.map(r=>
+        '<option value="'+esc(r.symbol)+'">'+esc(r.symbol+' / '+r.name)+'</option>').join('');
+      select.disabled=!rows.length;
     }
+    syncStockPickers(dataset.rows.find(r=>r.symbol===selected));
   }
 
   function viewedRow(row) {return HHHLChart.windowRow(row,Number($('chart-window').value)||70);}
@@ -253,6 +268,7 @@
     const r = dataset.rows.find(row => row.symbol === symbol);
     if (!r) return;
     selected = symbol;
+    syncStockPickers(r);
     window.MarketContext?.showStock(symbol,dataset.as_of);
     $('stock-detail').hidden = false;
     $('detail-title').textContent = r.symbol + ' / ' + r.name;
@@ -318,8 +334,17 @@
     $('download-json').href=(document.body.dataset.source || '')+'hhhl_scan.json';
     filterRows();
     const picks=renderPriority();
-    if(!selected && picks.length && status==='ALL' && !$('search').value && $('sector').value==='ALL' && $('structure').value==='ALL')showDetail(picks[0].symbol,{scroll:false});
+    renderStockPickers();
+    if(!selected) {
+      const first=picks[0]?.symbol||dataset.rows.find(r=>r.status==='WATCH')?.symbol||dataset.rows[0]?.symbol;
+      if(first)showDetail(first,{scroll:false});
+    }
   }
+
+  document.querySelectorAll('[data-pick-state]').forEach(select=>select.addEventListener('change',()=>{
+    if(dataset&&select.value)showDetail(select.value,{scroll:false});
+    else syncStockPickers(dataset?.rows.find(r=>r.symbol===selected));
+  }));
 
   document.querySelectorAll('.status-card').forEach(button=>button.addEventListener('click',()=>{
     if(!dataset) return;
@@ -372,6 +397,8 @@
     dataset=null;$('notice').textContent='The HH/HL snapshot could not be loaded or did not contain 200 valid stock rows. No signals are displayed.';
     $('session-date').textContent='Unavailable';$('coverage').textContent='Data check failed';$('result-count').textContent='No verified rows to display.';
     $('stock-rows').innerHTML='';$('stock-detail').hidden=true;
+    document.querySelectorAll('[data-pick-state]').forEach(select=>{select.disabled=true;select.innerHTML='<option value="">Snapshot unavailable</option>';select.closest('.stock-picker').classList.remove('selected');});
+    for(const s of statuses)$('pick-count-'+s).textContent='—';
     for(const s of ['ALL',...statuses]) $('count-'+s).textContent='--';
   });
   }

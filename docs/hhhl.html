@@ -14,12 +14,42 @@
 <div class="shell hhhl-shell">
 <header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="indicator-lab.html">Evidence</a><a href="HHHL_SCANNER.md">Rules</a><a href="market-brief.html">US + India brief</a></nav></header>
 <main>
-<div class="eyebrow"><span class="dot"></span> NIFTY 200 / CONFIRMED PRICE STRUCTURE</div>
-<section class="hero"><div><h1>Higher highs.<br><span>A clearer watchlist.</span></h1><p class="intro">Every constituent. Five research states.<br>Breakout levels, structure exits and the reason behind each classification.</p></div><div class="session"><span class="label">DAILY END-OF-DAY SCAN</span><strong id="session-date">Loading...</strong><span id="coverage">Checking all 200 stocks</span><span class="paper">PAPER RESEARCH / 10-SESSION LIMIT</span></div></section>
+<section class="chart-desk-heading"><h1>Nifty 200 / HH-HL scanner</h1><div class="chart-desk-session"><strong id="session-date">Loading…</strong><span id="coverage">Checking all 200 stocks</span></div></section>
+<section class="stock-picker-panel" aria-label="Choose a stock by research state">
+<div class="stock-pickers">
+<label class="stock-picker watch" for="pick-WATCH"><span>Watch<small id="pick-count-WATCH">—</small></span><select id="pick-WATCH" data-pick-state="WATCH" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
+<label class="stock-picker sell" for="pick-SELL"><span>Sell<small id="pick-count-SELL">—</small></span><select id="pick-SELL" data-pick-state="SELL" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
+<label class="stock-picker buy" for="pick-BUY"><span>Buy<small id="pick-count-BUY">—</small></span><select id="pick-BUY" data-pick-state="BUY" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
+<label class="stock-picker caution" for="pick-CAUTION"><span>Caution<small id="pick-count-CAUTION">—</small></span><select id="pick-CAUTION" data-pick-state="CAUTION" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
+<label class="stock-picker avoid" for="pick-AVOID"><span>Avoid<small id="pick-count-AVOID">—</small></span><select id="pick-AVOID" data-pick-state="AVOID" aria-describedby="picker-help" disabled><option value="">Loading stocks…</option></select></label>
+</div><p id="picker-help">Choose a stock to view its chart below. You can also use the arrow keys in each dropdown.</p>
+</section>
+<section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
+<div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
+<div class="detail-grid"><div class="chart-panel"><div class="chart-heading"><div><span class="label">DAILY PRICE STRUCTURE</span><strong id="chart-price"></strong></div><div class="chart-controls"><label>View <select id="chart-window"><option value="35">35 sessions</option><option value="70" selected>70 sessions</option><option value="140">140 sessions</option></select></label><label><input id="chart-swings" type="checkbox" checked> Structure</label><label><input id="chart-all-pivots" type="checkbox"> All swing labels</label><label><input id="chart-levels" type="checkbox" checked> Price zones</label><label><input id="chart-events" type="checkbox" checked> Closing signals</label><label><input id="chart-volume" type="checkbox" checked> Volume</label></div></div><div id="candle-readout" class="candle-readout" aria-live="off"></div><div class="chart-legend"><span class="legend-rise">HH / HL &middot; rising</span><span class="legend-fall">LH / LL &middot; falling</span><span>H1/H2 + L1/L2 &middot; active rule pivots</span><span>Last 2 bars &middot; pivots pending</span></div><div id="stock-chart" aria-label="Daily candles, labelled confirmed swings and zigzag"></div><p id="chart-inspect" class="chart-inspect" aria-live="polite">Tap a swing label for its price, pivot date and confirmation date.</p><p class="muted">The four highlighted pivots drive the current HH/HL rule. Price levels begin when confirmed. Closing-signal markers show structure events, not executed trades. Entry and stop references apply only to a fresh setup; actual fills still determine the stop. Volume is context, not an added entry rule. Tap or move across candles for OHLCV. New pivots require two later sessions.</p></div></div>
+<details class="stock-explanation"><summary>Stock details, price zones &amp; strategy checks</summary>
+<p id="detail-reason" class="detail-reason"></p>
+<div id="market-context-stock" class="context-stock" hidden></div>
+<div id="strategy-story" class="strategy-story"></div>
+<div id="active-pivot-pairs" class="active-pivot-pairs"></div>
+<div id="zone-panel" class="zone-panel"></div>
+<div class="strategy-checks-heading"><h3>Does this stock pass the strategy?</h3><p id="checks-note" class="muted"></p></div><div id="strategy-checks" class="strategy-checks"></div>
+<details><summary>Confirmed pivots and data checks</summary><div id="pivot-detail"></div></details>
+</details>
+</section>
+<details class="market-overview"><summary>Market overview &amp; automatic refresh</summary>
 <div id="market-context-strip" class="context-strip" role="status">Loading US and India market context…</div>
 <div id="notice" class="notice warning" role="status">Loading the dated HH/HL scan...</div>
 <div id="refresh-status" class="notice" role="status">Checking automatic refresh status...</div>
 <section class="market-strip" aria-label="Market entry gate"><div><span class="label">NIFTY 50 CLOSE</span><strong id="nifty-close">--</strong></div><div><span class="label" id="average-label">200-SESSION AVERAGE</span><strong id="nifty-average">--</strong></div><div><span class="label">NEW ENTRY GATE</span><strong id="market-gate">--</strong></div><p id="market-note"></p></section>
+</details>
+<section class="priority-section" aria-labelledby="priority-title">
+<div class="section-head"><div><div class="eyebrow">START HERE / CURRENT RULE FIT</div><h2 id="priority-title">10 strongest HH/HL setups to review</h2></div><span id="priority-summary" class="muted"></span></div>
+<p id="priority-method" class="muted">Eligible breakouts first, then blocked fresh breakouts and waiting structures nearest their trigger. No forecast score.</p>
+<div id="priority-list" class="priority-list"></div>
+</section>
+<section class="scan-section" aria-labelledby="universe-title">
+<div class="section-head"><div><div class="eyebrow">01 / ALL CONSTITUENTS</div><h2 id="universe-title">Filter the full Nifty 200</h2></div><div class="download-actions"><button id="download-csv" type="button" disabled>Download filtered CSV</button><a id="download-json" href="hhhl_scan.json">Full JSON</a></div></div>
 <section id="status-cards" class="status-cards" aria-label="Filter by research state">
 <button type="button" class="status-card all active" data-status="ALL" aria-pressed="true"><span>All stocks</span><strong id="count-ALL">--</strong><small>Complete universe</small></button>
 <button type="button" class="status-card buy" data-status="BUY" aria-pressed="false"><span>Buy</span><strong id="count-BUY">--</strong><small>Fresh eligible breakout</small></button>
@@ -28,23 +58,6 @@
 <button type="button" class="status-card caution" data-status="CAUTION" aria-pressed="false"><span>Caution</span><strong id="count-CAUTION">--</strong><small>Blocked, late or incomplete</small></button>
 <button type="button" class="status-card avoid" data-status="AVOID" aria-pressed="false"><span>Avoid</span><strong id="count-AVOID">--</strong><small>No qualifying setup</small></button>
 </section>
-<section class="priority-section" aria-labelledby="priority-title">
-<div class="section-head"><div><div class="eyebrow">START HERE / CURRENT RULE FIT</div><h2 id="priority-title">10 strongest HH/HL setups to review</h2></div><span id="priority-summary" class="muted"></span></div>
-<p id="priority-method" class="muted">Eligible breakouts first, then blocked fresh breakouts and waiting structures nearest their trigger. No forecast score.</p>
-<div id="priority-list" class="priority-list"></div>
-</section>
-<section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
-<div class="section-head"><div><div class="eyebrow">02 / STOCK &amp; ZONES</div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
-<p id="detail-reason" class="detail-reason"></p>
-<div id="market-context-stock" class="context-stock" hidden></div>
-<div id="strategy-story" class="strategy-story"></div>
-<div id="active-pivot-pairs" class="active-pivot-pairs"></div>
-<div class="detail-grid"><div class="chart-panel"><div class="chart-heading"><div><span class="label">DAILY PRICE STRUCTURE</span><strong id="chart-price"></strong></div><div class="chart-controls"><label>View <select id="chart-window"><option value="35">35 sessions</option><option value="70" selected>70 sessions</option><option value="140">140 sessions</option></select></label><label><input id="chart-swings" type="checkbox" checked> Structure</label><label><input id="chart-all-pivots" type="checkbox"> All swing labels</label><label><input id="chart-levels" type="checkbox" checked> Price zones</label><label><input id="chart-events" type="checkbox" checked> Closing signals</label><label><input id="chart-volume" type="checkbox" checked> Volume</label></div></div><div id="candle-readout" class="candle-readout" aria-live="off"></div><div class="chart-legend"><span class="legend-rise">HH / HL &middot; rising</span><span class="legend-fall">LH / LL &middot; falling</span><span>H1/H2 + L1/L2 &middot; active rule pivots</span><span>Last 2 bars &middot; pivots pending</span></div><div id="stock-chart" aria-label="Daily candles, labelled confirmed swings and zigzag"></div><p id="chart-inspect" class="chart-inspect" aria-live="polite">Tap a swing label for its price, pivot date and confirmation date.</p><p class="muted">The four highlighted pivots drive the current HH/HL rule. Price levels begin when confirmed. Closing-signal markers show structure events, not executed trades. Entry and stop references apply only to a fresh setup; actual fills still determine the stop. Volume is context, not an added entry rule. Tap or move across candles for OHLCV. New pivots require two later sessions.</p></div><div id="zone-panel" class="zone-panel"></div></div>
-<div class="strategy-checks-heading"><h3>Does this stock pass the strategy?</h3><p id="checks-note" class="muted"></p></div><div id="strategy-checks" class="strategy-checks"></div>
-<details><summary>Confirmed pivots and data checks</summary><div id="pivot-detail"></div></details>
-</section>
-<section class="scan-section" aria-labelledby="universe-title">
-<div class="section-head"><div><div class="eyebrow">01 / ALL CONSTITUENTS</div><h2 id="universe-title">Filter the full Nifty 200</h2></div><div class="download-actions"><button id="download-csv" type="button" disabled>Download filtered CSV</button><a id="download-json" href="hhhl_scan.json">Full JSON</a></div></div>
 <div class="filters">
 <label>Stock or company<input id="search" type="search" placeholder="Search symbol or name" disabled></label>
 <label>Sector<select id="sector" disabled><option value="ALL">All sectors</option></select></label>
