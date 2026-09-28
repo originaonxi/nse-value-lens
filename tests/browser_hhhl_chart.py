@@ -20,6 +20,11 @@ with sync_playwright() as p:
         page.route("**/hhhl_scan.json",lambda route:route.fulfill(status=200,body=payload,content_type="application/json"))
     page.goto(args.url,wait_until="networkidle")
     page.wait_for_function("document.querySelector('#count-ALL').textContent==='200'")
+    # The compact layout keeps strategy checks in a closed details panel.
+    # Open it as a reader would before checking the visible explanation.
+    explanation=page.locator('details.stock-explanation')
+    if explanation.count() and explanation.get_attribute('open') is None:
+        explanation.locator('summary').first.click()
     data=json.loads(payload) if args.fixture else page.request.get(urljoin(args.url,(page.locator("body").get_attribute("data-source") or "")+"hhhl_scan.json")).json()
     picks=data["priority_watchlist"]
     assert page.locator(".priority-card").count()==len(picks)<=10
