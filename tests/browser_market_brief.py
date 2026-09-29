@@ -50,6 +50,11 @@ def main():
             page.goto(urljoin(args.url, name + ".html?symbol=" + symbol), wait_until="networkidle")
             page.wait_for_function("document.querySelector('#market-context-stock') && !document.querySelector('#market-context-stock').hidden", timeout=30000)
             assert symbol in page.locator("#detail-title").inner_text()
+            # The compact HHHL layout keeps the stock context in a details panel.
+            # Open that panel before asserting its visible text.
+            explanation = page.locator('details.stock-explanation')
+            if explanation.count() and explanation.get_attribute('open') is None:
+                explanation.locator('summary').first.click()
             assert "context" in page.locator("#market-context-stock").inner_text().lower()
         for width in (1440,390,320):
             page.set_viewport_size({"width":width,"height":900})
