@@ -1,17 +1,18 @@
 name: Daily S&R Refresh
 
 # Three staggered schedules guard against GitHub's unreliable cron scheduler.
-# Primary fires at 14:00 UTC (19:30 IST); backups at 15:00 and 16:00 UTC.
+# Primary fires at 13:30 UTC (19:00 IST = 7 pm IST); backups at 14:30 and 15:30 UTC.
 # A lightweight `guard` job reads docs/sr_levels.json — if as_of is already
 # today (IST), the expensive refresh-sr job is skipped entirely (idempotent).
 # NSE closes 15:30 IST = 10:00 UTC; Bhavcopy available ~12:30 UTC (~18:00 IST).
+# 7pm IST gives bhavcopy a full hour to settle before the primary run fires.
 # workflow_dispatch always runs regardless of the idempotency check.
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5'   # 14:00 UTC = 19:30 IST (primary)
-    - cron: '0 15 * * 1-5'   # 15:00 UTC = 20:30 IST (fallback 1)
-    - cron: '0 16 * * 1-5'   # 16:00 UTC = 21:30 IST (fallback 2)
+    - cron: '30 13 * * 1-5'   # 13:30 UTC = 19:00 IST — 7 pm IST (primary)
+    - cron: '30 14 * * 1-5'   # 14:30 UTC = 20:00 IST (fallback 1)
+    - cron: '30 15 * * 1-5'   # 15:30 UTC = 21:00 IST (fallback 2)
   workflow_dispatch:           # manual trigger any time
 
 permissions:
@@ -95,46 +96,35 @@ jobs:
 
       - name: Copy to docs/ for GitHub Pages
         run: |
-          cp screen_output/sr_levels.json docs/sr_levels.json
+          # Unconditional copy — every generated file goes to docs/.
+          # Conditional as_of checks caused partial panel updates (e.g. sam_picks
+          # stale while sr_levels was fresh). Existence check only.
           AS_OF=$(jq -r .as_of screen_output/sr_levels.json)
-          if [ -f screen_output/jev_rank.json ] && [ "$(jq -r .as_of screen_output/jev_rank.json)" = "$AS_OF" ]; then
-            cp screen_output/jev_rank.json docs/jev_rank.json
-            cp public/data/jev_rank.js docs/jev_rank.js
-          else
-            echo "JEV ranking stale or missing for $AS_OF — keeping previous docs/jev_rank.*"
-          fi
-          if [ -f screen_output/monthly_regimes.json ]; then
-            cp screen_output/monthly_regimes.json docs/monthly_regimes.json
-            cp public/data/monthly_regime.js docs/monthly_regime.js
-          else
-            echo "monthly_regimes.json missing — keeping previous docs/monthly_regime.*"
-          fi
-          if [ -f screen_output/momentum30_daily.json ] && [ "$(jq -r .as_of screen_output/momentum30_daily.json)" = "$AS_OF" ]; then
-            cp screen_output/momentum30_daily.json docs/momentum30_daily.json
-            echo "Momentum 30 Daily copied for $AS_OF"
-          else
-            echo "momentum30_daily.json missing or not fresh for $AS_OF — keeping previous docs/momentum30_daily.*"
-          fi
-          if [ -f screen_output/sam_picks.json ] && [ "$(jq -r .as_of screen_output/sam_picks.json)" = "$AS_OF" ]; then
-            cp screen_output/sam_picks.json docs/sam_picks.json
-            cp public/data/sam_picks.js docs/sam_picks.js
-            if [ "$(jq -r .stale screen_output/sam_picks.json)" = "true" ]; then
-              echo "SAM PICKS published but flagged STALE (JEV/regime layer behind) — UI banner will warn."
-            fi
-          else
-            echo "sam_picks.json missing or not fresh for $AS_OF — keeping previous docs/sam_picks.*"
-          fi
-          if [ -f screen_output/swing_structure.json ] && [ "$(jq -r .as_of screen_output/swing_structure.json)" = "$AS_OF" ]; then
-            cp screen_output/swing_structure.json docs/swing_structure.json
-            cp public/data/swing_structure.js docs/swing_structure.js
-            echo "Swing structure copied for $AS_OF"
-          else
-            echo "swing_structure.json missing or not fresh for $AS_OF — keeping previous docs/swing_structure.*"
-          fi
-          if [ -f screen_output/jev_calibration.json ]; then
-            cp screen_output/jev_calibration.json docs/jev_calibration.json
-            echo "JEV calibration copied"
-          fi
+          echo "Copying all outputs for as_of=$AS_OF"
+
+          cp screen_output/sr_levels.json docs/sr_levels.json && echo "sr_levels ✓"
+
+          [ -f screen_output/jev_rank.json ] && \
+            cp screen_output/jev_rank.json docs/jev_rank.json && \
+            cp public/data/jev_rank.js docs/jev_rank.js && echo "jev_rank ✓"
+
+          [ -f screen_output/monthly_regimes.json ] && \
+            cp screen_output/monthly_regimes.json docs/monthly_regimes.json && \
+            cp public/data/monthly_regime.js docs/monthly_regime.js && echo "monthly_regimes ✓"
+
+          [ -f screen_output/momentum30_daily.json ] && \
+            cp screen_output/momentum30_daily.json docs/momentum30_daily.json && echo "momentum30 ✓"
+
+          [ -f screen_output/sam_picks.json ] && \
+            cp screen_output/sam_picks.json docs/sam_picks.json && \
+            cp public/data/sam_picks.js docs/sam_picks.js && echo "sam_picks ✓"
+
+          [ -f screen_output/swing_structure.json ] && \
+            cp screen_output/swing_structure.json docs/swing_structure.json && \
+            cp public/data/swing_structure.js docs/swing_structure.js && echo "swing_structure ✓"
+
+          [ -f screen_output/jev_calibration.json ] && \
+            cp screen_output/jev_calibration.json docs/jev_calibration.json && echo "jev_calibration ✓"
 
       - name: Commit and push updated data
         run: |
