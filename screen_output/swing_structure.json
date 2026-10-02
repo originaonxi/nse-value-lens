@@ -5,14 +5,15 @@
  "counts": {
   "REVERSAL_UP": 5,
   "REVERSAL_DN": 27,
-  "UPTREND_BROKEN": 14,
+  "UPTREND_BROKEN": 13,
   "DOWNTREND_BROKEN": 3,
-  "UPTREND": 8,
-  "DOWNTREND": 117,
-  "MIXED": 26
+  "UPTREND": 9,
+  "DOWNTREND": 116,
+  "MIXED": 27
  },
  "second_ll": [
   "MANKIND",
+  "PAGEIND",
   "ABB",
   "ABCAPITAL",
   "ASHOKLEY",
@@ -59,6 +60,7 @@
   "GVT&D",
   "INDHOTEL",
   "ADANIPORTS",
+  "APARINDS",
   "COFORGE",
   "HDFCLIFE",
   "PHOENIXLTD",
@@ -73,7 +75,6 @@
   "IDEA",
   "ITC",
   "JUBLFOOD",
-  "KPITTECH",
   "LICHSGFIN",
   "LTM",
   "MRF",
@@ -109,9 +110,9 @@
   "HAVELLS",
   "HDFCAMC",
   "HINDALCO",
+  "HINDCOPPER",
   "HINDUNILVR",
   "HINDZINC",
-  "HUDCO",
   "HYUNDAI",
   "ICICIBANK",
   "INDUSINDBK",
@@ -129,6 +130,7 @@
   "MPHASIS",
   "MUTHOOTFIN",
   "NESTLEIND",
+  "NLCINDIA",
   "NMDC",
   "NTPC",
   "PERSISTENT",
@@ -142,7 +144,6 @@
   "SUNPHARMA",
   "SUZLON",
   "TATACONSUM",
-  "TATAELXSI",
   "TCS",
   "TIINDIA",
   "TMPV",
@@ -166,8 +167,8 @@
   "ITC",
   "JUBLFOOD",
   "KOTAKBANK",
-  "KPITTECH",
   "LICHSGFIN",
+  "LICI",
   "LTM",
   "MRF",
   "NATIONALUM",
@@ -187,7 +188,6 @@
   "BAJAJFINSV",
   "BANKINDIA",
   "BRITANNIA",
-  "COROMANDEL",
   "GRASIM",
   "MAXHEALTH",
   "NHPC",
@@ -208,7 +208,6 @@
   "IDEA",
   "INDUSTOWER",
   "ITC",
-  "KPITTECH",
   "LICHSGFIN",
   "MRF",
   "NATIONALUM",
@@ -2117,893 +2116,6 @@
    "at_second_hh": false
   },
   {
-   "symbol": "KPITTECH",
-   "name": "KPIT Technologies Ltd.",
-   "close": 492.0,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 2482.6,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 2306.3,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 2,
-   "reversal_trigger": {
-    "price": 2306.3,
-    "label": "HL",
-    "level": "break of HL \u20b92306.3"
-   },
-   "reversal_invalidate": {
-    "price": 2482.6,
-    "label": "LH",
-    "level": "above LH \u20b92482.6"
-   },
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 2482.6,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b92482.6 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 597118,
-    "vol_at_prior_hh": 807816,
-    "note": "DISTRIBUTION \u2014 vol at LH 6.0L vs prior HH 8.1L. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 6.0L vs prior HH 8.1L. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-06-17",
-     "price": 2098.91,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-23",
-     "price": 2232.68,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-02",
-     "price": 2140.67,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-14",
-     "price": 2323.79,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-22",
-     "price": 2163.85,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-03",
-     "price": 2159.85,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-19",
-     "price": 2220.29,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-28",
-     "price": 2535.08,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 2306.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 2482.6,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b92482.6 formed after higher highs. Confirm on close below \u20b92306.3; fails above \u20b92482.6. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b92482.6 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 6.0L vs prior HH 8.1L. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "GODREJCP",
-   "name": "Godrej Consumer Products Ltd.",
-   "close": 850.0,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 891.0,
-    "date": "2026-09-21"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 856.0,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 3,
-   "consec_hl": 1,
-   "reversal_trigger": {
-    "price": 856.0,
-    "label": "HL",
-    "level": "break of HL \u20b9856.0"
-   },
-   "reversal_invalidate": {
-    "price": 891.0,
-    "label": "LH",
-    "level": "above LH \u20b9891.0"
-   },
-   "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 856.0,
-    "desc": "BOS \u2705 closed below trigger \u20b9856.0 \u2014 reversal DOWN now CONFIRMED, not just a setup"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 891.0,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9891.0 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 975825,
-    "vol_at_prior_hh": 3208588,
-    "note": "DISTRIBUTION \u2014 vol at LH 9.8L vs prior HH 32.1L. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 9.8L vs prior HH 32.1L. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-06-19",
-     "price": 989.23,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 1000.97,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-06",
-     "price": 1111.86,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-21",
-     "price": 1032.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-03",
-     "price": 1093.96,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-12",
-     "price": 902.81,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-20",
-     "price": 948.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-08",
-     "price": 855.15,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 856.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-21",
-     "price": 891.0,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9891.0 formed after higher highs. Confirm on close below \u20b9856.0; fails above \u20b9891.0. BOS \u2705 closed below trigger \u20b9856.0 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 9.8L vs prior HH 32.1L. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "IDEA",
-   "name": "Vodafone Idea Ltd.",
-   "close": 12.95,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 14.55,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 13.93,
-    "date": "2026-09-02"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 1,
-   "reversal_trigger": {
-    "price": 13.93,
-    "label": "HL",
-    "level": "break of HL \u20b913.93"
-   },
-   "reversal_invalidate": {
-    "price": 14.55,
-    "label": "LH",
-    "level": "above LH \u20b914.55"
-   },
-   "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 13.93,
-    "desc": "BOS \u2705 closed below trigger \u20b913.93 \u2014 reversal DOWN now CONFIRMED, not just a setup"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 14.55,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b914.55 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 272140999,
-    "vol_at_prior_hh": 539161681,
-    "note": "DISTRIBUTION \u2014 vol at LH 27.2Cr vs prior HH 53.9Cr. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 27.2Cr vs prior HH 53.9Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 13.73,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-15",
-     "price": 15.34,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-29",
-     "price": 13.83,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-01",
-     "price": 14.85,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 12.76,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-07",
-     "price": 12.6,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 15.37,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 13.93,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 15.79,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 14.55,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b914.55 formed after higher highs. Confirm on close below \u20b913.93; fails above \u20b914.55. BOS \u2705 closed below trigger \u20b913.93 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 27.2Cr vs prior HH 53.9Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "INDUSTOWER",
-   "name": "Indus Towers Ltd.",
-   "close": 373.2,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 388.55,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 368.7,
-    "date": "2026-09-10"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 3,
-   "reversal_trigger": {
-    "price": 368.7,
-    "label": "HL",
-    "level": "break of HL \u20b9368.7"
-   },
-   "reversal_invalidate": {
-    "price": 388.55,
-    "label": "LH",
-    "level": "above LH \u20b9388.55"
-   },
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 388.55,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9388.55 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 4979379,
-    "vol_at_prior_hh": 16707001,
-    "note": "DISTRIBUTION \u2014 vol at LH 49.8L vs prior HH 1.7Cr. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 49.8L vs prior HH 1.7Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-07-16",
-     "price": 399.85,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-31",
-     "price": 357.93,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-03",
-     "price": 383.85,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-10",
-     "price": 363.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-14",
-     "price": 388.55,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-20",
-     "price": 367.35,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 389.4,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-10",
-     "price": 368.7,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-11",
-     "price": 390.85,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 388.55,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9388.55 formed after higher highs. Confirm on close below \u20b9368.7; fails above \u20b9388.55. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9388.55 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 49.8L vs prior HH 1.7Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "ITC",
-   "name": "ITC Ltd.",
-   "close": 262.75,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 271.05,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 257.7,
-    "date": "2026-09-11"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 5,
-   "consec_hl": 1,
-   "reversal_trigger": {
-    "price": 257.7,
-    "label": "HL",
-    "level": "break of HL \u20b9257.7"
-   },
-   "reversal_invalidate": {
-    "price": 271.05,
-    "label": "LH",
-    "level": "above LH \u20b9271.05"
-   },
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 271.05,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9271.05 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 13142058,
-    "vol_at_prior_hh": 20245091,
-    "note": "DISTRIBUTION \u2014 vol at LH 1.3Cr vs prior HH 2.0Cr. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 1.3Cr vs prior HH 2.0Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-06-04",
-     "price": 275.05,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-19",
-     "price": 294.55,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 285.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-14",
-     "price": 275.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-03",
-     "price": 292.55,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-20",
-     "price": 265.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 273.95,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 255.5,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-11",
-     "price": 257.7,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 271.05,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9271.05 formed after higher highs. Confirm on close below \u20b9257.7; fails above \u20b9271.05. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9271.05 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 1.3Cr vs prior HH 2.0Cr. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "JUBLFOOD",
-   "name": "Jubilant Foodworks Ltd.",
-   "close": 456.7,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 503.6,
-    "date": "2026-09-21"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 461.6,
-    "date": "2026-09-15"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 1,
-   "reversal_trigger": {
-    "price": 461.6,
-    "label": "HL",
-    "level": "break of HL \u20b9461.6"
-   },
-   "reversal_invalidate": {
-    "price": 503.6,
-    "label": "LH",
-    "level": "above LH \u20b9503.6"
-   },
-   "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 461.6,
-    "desc": "BOS \u2705 closed below trigger \u20b9461.6 \u2014 reversal DOWN now CONFIRMED, not just a setup"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 503.6,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9503.6 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "LOW",
-    "vol_at_lh": 2200207,
-    "vol_at_prior_hh": 2351201,
-    "note": "DISTRIBUTION \u2014 vol at LH 22.0L vs prior HH 23.5L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 22.0L vs prior HH 23.5L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
-   "sequence": [
-    {
-     "date": "2026-05-19",
-     "price": 476.64,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-12",
-     "price": 409.93,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-23",
-     "price": 437.46,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 412.48,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-07",
-     "price": 456.1,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 408.55,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-14",
-     "price": 521.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 527.85,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-15",
-     "price": 461.6,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-21",
-     "price": 503.6,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9503.6 formed after higher highs. Confirm on close below \u20b9461.6; fails above \u20b9503.6. BOS \u2705 closed below trigger \u20b9461.6 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 22.0L vs prior HH 23.5L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "KOTAKBANK",
-   "name": "Kotak Mahindra Bank Ltd.",
-   "close": 417.0,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 420.6,
-    "date": "2026-09-21"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 409.25,
-    "date": "2026-09-11"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 3,
-   "reversal_trigger": {
-    "price": 409.25,
-    "label": "HL",
-    "level": "break of HL \u20b9409.25"
-   },
-   "reversal_invalidate": {
-    "price": 420.6,
-    "label": "LH",
-    "level": "above LH \u20b9420.6"
-   },
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 420.6,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9420.6 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "LOW",
-    "vol_at_lh": 8470861,
-    "vol_at_prior_hh": 7669677,
-    "note": "DISTRIBUTION \u2014 vol at LH 84.7L vs prior HH 76.7L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 84.7L vs prior HH 76.7L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
-   "sequence": [
-    {
-     "date": "2026-06-15",
-     "price": 410.29,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-25",
-     "price": 413.09,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-09",
-     "price": 367.77,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-17",
-     "price": 391.8,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-05",
-     "price": 400.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-10",
-     "price": 386.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-19",
-     "price": 386.75,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-01",
-     "price": 429.1,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-11",
-     "price": 409.25,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-21",
-     "price": 420.6,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9420.6 formed after higher highs. Confirm on close below \u20b9409.25; fails above \u20b9420.6. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9420.6 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 84.7L vs prior HH 76.7L. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "LICHSGFIN",
-   "name": "LIC Housing Finance Ltd.",
-   "close": 530.2,
-   "structure": "REVERSAL_DN",
-   "raw_structure": "REVERSAL_DN",
-   "structure_label": "Bearish reversal SETUP (unconfirmed)",
-   "last_high": {
-    "label": "LH",
-    "price": 576.7,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 529.6,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 0,
-   "consec_lh": 1,
-   "consec_hl": 1,
-   "reversal_trigger": {
-    "price": 529.6,
-    "label": "HL",
-    "level": "break of HL \u20b9529.6"
-   },
-   "reversal_invalidate": {
-    "price": 576.7,
-    "label": "LH",
-    "level": "above LH \u20b9576.7"
-   },
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 576.7,
-    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9576.7 formed after higher highs (structure shifted bearish)"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION",
-    "conviction": "HIGH",
-    "vol_at_lh": 3008551,
-    "vol_at_prior_hh": 7126780,
-    "note": "DISTRIBUTION \u2014 vol at LH 30.1L vs prior HH 71.3L. \u2705 Buyers fading at lower high = real distribution."
-   },
-   "wyckoff_phase": "DISTRIBUTION",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 30.1L vs prior HH 71.3L. \u2705 Buyers fading at lower high = real distribution.",
-   "sequence": [
-    {
-     "date": "2026-06-15",
-     "price": 559.52,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-24",
-     "price": 527.9,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-01",
-     "price": 557.31,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-08",
-     "price": 517.61,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-15",
-     "price": 551.92,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-29",
-     "price": 545.94,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-24",
-     "price": 485.45,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-04",
-     "price": 579.4,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 529.6,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 576.7,
-     "label": "LH"
-    }
-   ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9576.7 formed after higher highs. Confirm on close below \u20b9529.6; fails above \u20b9576.7. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9576.7 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 30.1L vs prior HH 71.3L. \u2705 Buyers fading at lower high = real distribution.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "LICHSGFIN",
    "name": "LIC Housing Finance Ltd.",
    "close": 509.0,
@@ -3114,6 +2226,115 @@
     }
    ],
    "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9576.7 formed after higher highs. Confirm on close below \u20b9529.6; fails above \u20b9576.7. BOS \u2705 closed below trigger \u20b9529.6 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 30.1L vs prior HH 71.3L. \u2705 Buyers fading at lower high = real distribution.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
+   "symbol": "LICI",
+   "name": "Life Insurance Corporation of India",
+   "close": 391.85,
+   "structure": "REVERSAL_DN",
+   "raw_structure": "REVERSAL_DN",
+   "structure_label": "Bearish reversal SETUP (unconfirmed)",
+   "last_high": {
+    "label": "LH",
+    "price": 417.8,
+    "date": "2026-09-24"
+   },
+   "last_low": {
+    "label": "HL",
+    "price": 386.5,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 0,
+   "consec_lh": 1,
+   "consec_hl": 1,
+   "reversal_trigger": {
+    "price": 386.5,
+    "label": "HL",
+    "level": "break of HL \u20b9386.5"
+   },
+   "reversal_invalidate": {
+    "price": 417.8,
+    "label": "LH",
+    "level": "above LH \u20b9417.8"
+   },
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {
+    "fired": true,
+    "dir": "BEAR",
+    "level": 417.8,
+    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9417.8 formed after higher highs (structure shifted bearish)"
+   },
+   "choch_fired": true,
+   "choch_dir": "BEAR",
+   "wyckoff": {
+    "phase": "DISTRIBUTION",
+    "conviction": "LOW",
+    "vol_at_lh": 14741490,
+    "vol_at_prior_hh": 11707497,
+    "note": "DISTRIBUTION \u2014 vol at LH 1.5Cr vs prior HH 1.2Cr. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean."
+   },
+   "wyckoff_phase": "DISTRIBUTION",
+   "wyckoff_conviction": "LOW",
+   "wyckoff_note": "DISTRIBUTION \u2014 vol at LH 1.5Cr vs prior HH 1.2Cr. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
+   "sequence": [
+    {
+     "date": "2026-06-19",
+     "price": 439.89,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-08",
+     "price": 425.4,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-17",
+     "price": 447.6,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 416.6,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-03",
+     "price": 431.3,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-05",
+     "price": 385.9,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-12",
+     "price": 417.0,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-25",
+     "price": 428.15,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 386.5,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-24",
+     "price": 417.8,
+     "label": "LH"
+    }
+   ],
+   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9417.8 formed after higher highs. Confirm on close below \u20b9386.5; fails above \u20b9417.8. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9417.8 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 1.5Cr vs prior HH 1.2Cr. \u26a0\ufe0f Volume still high at LH = buyers fighting, setup less clean.",
    "at_second_ll": false,
    "at_second_hh": false
   },
@@ -5191,107 +4412,6 @@
    "at_second_hh": true
   },
   {
-   "symbol": "COROMANDEL",
-   "name": "Coromandel International Ltd.",
-   "close": 1763.6,
-   "structure": "UPTREND_BROKEN",
-   "raw_structure": "UPTREND",
-   "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
-   "last_high": {
-    "label": "HH",
-    "price": 2019.9,
-    "date": "2026-09-18"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 1910.0,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 1,
-   "consec_ll": 0,
-   "consec_lh": 0,
-   "consec_hl": 1,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 1910.0,
-    "desc": "CHoCH \u26a0\ufe0f closed below last HL \u20b91910.0 \u2014 uptrend character broken"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION?",
-    "conviction": "LOW",
-    "vol_at_last_high": 302340,
-    "vol_at_last_low": 88917,
-    "note": "Character change \u2014 closed \u20b91763.6 below last HL \u20b91910.0. Markup over; early distribution/markdown risk. Reclaim \u20b91910.0 repairs it; a fresh LH+LL confirms a downtrend."
-   },
-   "wyckoff_phase": "DISTRIBUTION?",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b91763.6 below last HL \u20b91910.0. Markup over; early distribution/markdown risk. Reclaim \u20b91910.0 repairs it; a fresh LH+LL confirms a downtrend.",
-   "sequence": [
-    {
-     "date": "2026-06-16",
-     "price": 2078.98,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-29",
-     "price": 1898.45,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-15",
-     "price": 2100.85,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 1955.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-04",
-     "price": 2129.9,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 1890.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 1890.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-07",
-     "price": 1980.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 1910.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-18",
-     "price": 2019.9,
-     "label": "HH"
-    }
-   ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b91763.6 below last HL \u20b91910.0. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91910.0 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91910.0 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b91763.6 below last HL \u20b91910.0. Markup over; early distribution/markdown risk. Reclaim \u20b91910.0 repairs it; a fresh LH+LL confirms a downtrend.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "GRASIM",
    "name": "Grasim Industries Ltd.",
    "close": 2962.0,
@@ -6974,6 +6094,102 @@
    "at_second_hh": false
   },
   {
+   "symbol": "MEESHO",
+   "name": "Meesho Ltd.",
+   "close": 218.69,
+   "structure": "UPTREND",
+   "raw_structure": "UPTREND",
+   "structure_label": "Uptrend (HH + HL)",
+   "last_high": {
+    "label": "HH",
+    "price": 244.74,
+    "date": "2026-09-22"
+   },
+   "last_low": {
+    "label": "HL",
+    "price": 206.75,
+    "date": "2026-09-17"
+   },
+   "consec_hh": 3,
+   "consec_ll": 0,
+   "consec_lh": 0,
+   "consec_hl": 4,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKUP",
+    "conviction": "HIGH",
+    "vol_at_last_high": 108359244,
+    "vol_at_last_low": 7638011,
+    "note": "MARKUP \u2014 breakout highs on 10.8Cr vs pullback lows 76.4L. Healthy: breakouts attract volume."
+   },
+   "wyckoff_phase": "MARKUP",
+   "wyckoff_conviction": "HIGH",
+   "wyckoff_note": "MARKUP \u2014 breakout highs on 10.8Cr vs pullback lows 76.4L. Healthy: breakouts attract volume.",
+   "sequence": [
+    {
+     "date": "2026-06-17",
+     "price": 163.38,
+     "label": "HL"
+    },
+    {
+     "date": "2026-06-30",
+     "price": 195.48,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-09",
+     "price": 195.92,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-30",
+     "price": 173.5,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-04",
+     "price": 195.9,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-24",
+     "price": 212.65,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-01",
+     "price": 201.51,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-11",
+     "price": 223.1,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-17",
+     "price": 206.75,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-22",
+     "price": 244.74,
+     "label": "HH"
+    }
+   ],
+   "plain": "UPTREND \u2014 higher highs + higher lows. Last HL \u20b9206.75 is trend support; dips toward it are buyable. Break below = first crack. Wyckoff: MARKUP \u2014 breakout highs on 10.8Cr vs pullback lows 76.4L. Healthy: breakouts attract volume. \u26a0\ufe0f 3 consecutive HH \u2014 extended uptrend, watch for first LH.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "PAYTM",
    "name": "One 97 Communications Ltd.",
    "close": 1656.0,
@@ -7093,14 +6309,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 6905.5,
-    "desc": "BOS \u2705 closed below last LL \u20b96905.5 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7571,102 +6782,6 @@
     }
    ],
    "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93142.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b92830.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 16.4L vs bounce highs 53.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "ALKEM",
-   "name": "Alkem Laboratories Ltd.",
-   "close": 5220.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 5466.5,
-    "date": "2026-09-18"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 5051.0,
-    "date": "2026-09-11"
-   },
-   "consec_hh": 0,
-   "consec_ll": 3,
-   "consec_lh": 1,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 320770,
-    "vol_at_last_low": 238760,
-    "note": "MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 3.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 3.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-06-03",
-     "price": 5153.28,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-10",
-     "price": 5460.23,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-07",
-     "price": 5724.75,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-14",
-     "price": 5505.65,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-16",
-     "price": 5725.25,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-22",
-     "price": 5493.17,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-30",
-     "price": 5871.99,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-14",
-     "price": 5175.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-11",
-     "price": 5051.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-18",
-     "price": 5466.5,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95466.5 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 3.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
@@ -9760,14 +8875,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 4844.0,
-    "desc": "BOS \u2705 closed below last LL \u20b94844.0 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -11030,107 +10140,6 @@
    "at_second_hh": false
   },
   {
-   "symbol": "HAVELLS",
-   "name": "Havells India Ltd.",
-   "close": 1016.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 1132.4,
-    "date": "2026-09-18"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 1081.1,
-    "date": "2026-09-15"
-   },
-   "consec_hh": 0,
-   "consec_ll": 1,
-   "consec_lh": 1,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1081.1,
-    "desc": "BOS \u2705 closed below last LL \u20b91081.1 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 745375,
-    "vol_at_last_low": 1017899,
-    "note": "MARKDOWN \u2014 breakdown lows on 10.2L vs bounce highs 7.5L. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 10.2L vs bounce highs 7.5L. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 1125.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-18",
-     "price": 1209.1,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 1140.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-08",
-     "price": 1234.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-17",
-     "price": 1141.2,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-04",
-     "price": 1301.5,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-13",
-     "price": 1254.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-17",
-     "price": 1315.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-15",
-     "price": 1081.1,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-18",
-     "price": 1132.4,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91132.4 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91081.1 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 10.2L vs bounce highs 7.5L. Real sellers driving down.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "HCLTECH",
    "name": "HCL Technologies Ltd.",
    "close": 1243.1,
@@ -11525,6 +10534,107 @@
    "at_second_hh": false
   },
   {
+   "symbol": "HINDCOPPER",
+   "name": "Hindustan Copper Ltd.",
+   "close": 462.15,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 521.7,
+    "date": "2026-09-22"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 477.5,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 1,
+   "consec_lh": 2,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 477.5,
+    "desc": "BOS \u2705 closed below last LL \u20b9477.5 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "HIGH",
+    "vol_at_last_high": 7778716,
+    "vol_at_last_low": 7244772,
+    "note": "MARKDOWN \u2014 breakdown lows on 72.4L vs bounce highs 77.8L. Real sellers driving down."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "HIGH",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 72.4L vs bounce highs 77.8L. Real sellers driving down.",
+   "sequence": [
+    {
+     "date": "2026-06-24",
+     "price": 483.32,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-03",
+     "price": 510.06,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-17",
+     "price": 474.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-22",
+     "price": 498.91,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-29",
+     "price": 467.23,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-14",
+     "price": 513.05,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-24",
+     "price": 584.53,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 542.94,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 477.5,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-22",
+     "price": 521.7,
+     "label": "LH"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9521.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9477.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 72.4L vs bounce highs 77.8L. Real sellers driving down.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "HINDPETRO",
    "name": "Hindustan Petroleum Corporation Ltd.",
    "close": 345.0,
@@ -11819,122 +10929,6 @@
     }
    ],
    "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9602.8 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9560.9 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 24.0L vs bounce highs 40.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "HUDCO",
-   "name": "Housing & Urban Development Corporation Ltd.",
-   "close": 161.54,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 179.2,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 167.05,
-    "date": "2026-09-17"
-   },
-   "consec_hh": 0,
-   "consec_ll": 3,
-   "consec_lh": 2,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 167.05,
-    "desc": "BOS \u2705 closed below last LL \u20b9167.05 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 2918388,
-    "vol_at_last_low": 2067656,
-    "note": "MARKDOWN \u2014 breakdown lows on 20.7L vs bounce highs 29.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 20.7L vs bounce highs 29.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-06-18",
-     "price": 214.91,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 1864.49,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-06",
-     "price": 1995.94,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-09",
-     "price": 1877.47,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-16",
-     "price": 2045.27,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 1909.27,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-13",
-     "price": 2273.9,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-19",
-     "price": 2160.1,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-27",
-     "price": 2281.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 2095.8,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-17",
-     "price": 2232.1,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-17",
-     "price": 167.05,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 179.2,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9179.2 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9167.05 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 20.7L vs bounce highs 29.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
@@ -12825,7 +11819,7 @@
   {
    "symbol": "IREDA",
    "name": "Indian Renewable Energy Development Agency Ltd.",
-   "close": 111.68,
+   "close": 111.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14904,6 +13898,107 @@
    "at_second_hh": false
   },
   {
+   "symbol": "NLCINDIA",
+   "name": "NLC India Ltd.",
+   "close": 253.2,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 269.8,
+    "date": "2026-09-22"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 254.06,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 1,
+   "consec_lh": 5,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 254.06,
+    "desc": "BOS \u2705 closed below last LL \u20b9254.06 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "HIGH",
+    "vol_at_last_high": 1009013,
+    "vol_at_last_low": 3109419,
+    "note": "MARKDOWN \u2014 breakdown lows on 31.1L vs bounce highs 10.1L. Real sellers driving down."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "HIGH",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 31.1L vs bounce highs 10.1L. Real sellers driving down.",
+   "sequence": [
+    {
+     "date": "2026-06-11",
+     "price": 304.81,
+     "label": "LL"
+    },
+    {
+     "date": "2026-06-22",
+     "price": 328.79,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-08",
+     "price": 292.43,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 279.64,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-07",
+     "price": 307.41,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-19",
+     "price": 263.05,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-31",
+     "price": 265.8,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 282.04,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 254.06,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-22",
+     "price": 269.8,
+     "label": "LH"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9269.8 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9254.06 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 31.1L vs bounce highs 10.1L. Real sellers driving down.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "NMDC",
    "name": "NMDC Ltd.",
    "close": 74.64,
@@ -15294,102 +14389,6 @@
     }
    ],
    "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91932.8 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 5.9L. Real sellers driving down.",
-   "at_second_ll": true,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "PAGEIND",
-   "name": "Page Industries Ltd.",
-   "close": 36385.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 36540.0,
-    "date": "2026-09-08"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 34000.0,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 2,
-   "consec_lh": 2,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 24215,
-    "vol_at_last_low": 33484,
-    "note": "MARKDOWN \u2014 breakdown lows on 33,484 vs bounce highs 24,215. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 33,484 vs bounce highs 24,215. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-05-13",
-     "price": 34394.15,
-     "label": "LL"
-    },
-    {
-     "date": "2026-05-22",
-     "price": 40109.99,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-02",
-     "price": 36384.12,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-01",
-     "price": 43614.21,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-10",
-     "price": 39034.49,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-21",
-     "price": 39268.2,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-30",
-     "price": 41361.64,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 35100.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-08",
-     "price": 36540.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 34000.0,
-     "label": "LL"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b936540.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 33,484 vs bounce highs 24,215. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
@@ -16485,102 +15484,6 @@
    "at_second_hh": false
   },
   {
-   "symbol": "SHREECEM",
-   "name": "Shree Cement Ltd.",
-   "close": 21900.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 23000.0,
-    "date": "2026-09-18"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 21665.0,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 1,
-   "consec_lh": 2,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 62133,
-    "vol_at_last_low": 21233,
-    "note": "MARKDOWN \u2014 breakdown lows on 21,233 vs bounce highs 62,133. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 21,233 vs bounce highs 62,133. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-05-27",
-     "price": 25533.63,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-09",
-     "price": 23229.62,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-25",
-     "price": 26266.73,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-03",
-     "price": 26900.08,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-21",
-     "price": 27285.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-31",
-     "price": 25500.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-05",
-     "price": 27550.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 25255.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 21665.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-18",
-     "price": 23000.0,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b923000.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 21,233 vs bounce highs 62,133. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "SHRIRAMFIN",
    "name": "Shriram Finance Ltd.",
    "close": 945.0,
@@ -17273,67 +16176,6 @@
    "at_second_hh": false
   },
   {
-   "symbol": "TATAELXSI",
-   "name": "Tata Elxsi Ltd.",
-   "close": 3092.8,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 3532.1,
-    "date": "2026-09-15"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 3353.9,
-    "date": "2026-07-24"
-   },
-   "consec_hh": 0,
-   "consec_ll": 3,
-   "consec_lh": 1,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 3353.9,
-    "desc": "BOS \u2705 closed below last LL \u20b93353.9 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 424602,
-    "vol_at_last_low": 1304975,
-    "note": "MARKDOWN \u2014 breakdown lows on 13.0L vs bounce highs 4.2L. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 13.0L vs bounce highs 4.2L. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-05-14",
-     "price": 3875.5,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-17",
-     "price": 1020.3,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93532.1 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b93353.9 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 13.0L vs bounce highs 4.2L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "TCS",
    "name": "Tata Consultancy Services Ltd.",
    "close": 2075.0,
@@ -17756,14 +16598,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 2723.9,
-    "desc": "BOS \u2705 closed below last LL \u20b92723.9 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -18329,6 +17166,97 @@
    "at_second_hh": false
   },
   {
+   "symbol": "VAML",
+   "name": "Vedanta Aluminium Metal Ltd.",
+   "close": 402.75,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 449.7,
+    "date": "2026-09-09"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 401.15,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 3,
+   "consec_lh": 2,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "LOW",
+    "vol_at_last_high": 6748411,
+    "vol_at_last_low": 5420442,
+    "note": "MARKDOWN \u2014 breakdown lows on 54.2L vs bounce highs 67.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "LOW",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 54.2L vs bounce highs 67.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "sequence": [
+    {
+     "date": "2026-07-16",
+     "price": 453.9,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-22",
+     "price": 415.91,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-06",
+     "price": 487.7,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-19",
+     "price": 435.1,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-20",
+     "price": 435.1,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-27",
+     "price": 467.6,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 428.3,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 449.7,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 401.15,
+     "label": "LL"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9449.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 54.2L vs bounce highs 67.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "VBL",
    "name": "Varun Beverages Ltd.",
    "close": 425.3,
@@ -18342,109 +17270,8 @@
    },
    "last_low": {
     "label": "LL",
-    "price": 1368.1,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 1,
-   "consec_lh": 1,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1368.1,
-    "desc": "BOS \u2705 closed below last LL \u20b91368.1 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 767514,
-    "vol_at_last_low": 235642,
-    "note": "MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 7.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 7.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-05-22",
-     "price": 1249.38,
-     "label": "HL"
-    },
-    {
-     "date": "2026-05-27",
-     "price": 1300.29,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-08",
-     "price": 1219.81,
-     "label": "LL"
-    },
-    {
-     "date": "2026-06-25",
-     "price": 1385.23,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-07",
-     "price": 1429.99,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-17",
-     "price": 1351.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-10",
-     "price": 1503.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-21",
-     "price": 1563.4,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 1368.1,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 1442.0,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91442.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91368.1 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 7.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "VAML",
-   "name": "Vedanta Aluminium Metal Ltd.",
-   "close": 412.9,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 449.7,
+    "price": 396.2,
     "date": "2026-09-09"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 401.15,
-    "date": "2026-09-16"
    },
    "consec_hh": 0,
    "consec_ll": 3,
@@ -19006,6 +17833,96 @@
     }
    ],
    "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b91824.0, last swing low \u20b91593.1. Wait for HH/HL or LH/LL sequence. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "at_second_ll": false,
+   "at_second_hh": true
+  },
+  {
+   "symbol": "APARINDS",
+   "name": "Apar Industries Ltd.",
+   "close": 17648.0,
+   "structure": "MIXED",
+   "raw_structure": "MIXED",
+   "structure_label": "No clean structure",
+   "last_high": {
+    "label": "HH",
+    "price": 19265.0,
+    "date": "2026-09-22"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 16015.0,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 2,
+   "consec_ll": 1,
+   "consec_lh": 0,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {},
+   "wyckoff_phase": null,
+   "wyckoff_conviction": null,
+   "wyckoff_note": null,
+   "sequence": [
+    {
+     "date": "2026-07-15",
+     "price": 14215.65,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 14634.19,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 13236.05,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-12",
+     "price": 18401.11,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-18",
+     "price": 16142.96,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-27",
+     "price": 18012.46,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 16442.91,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 18069.27,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 16015.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-22",
+     "price": 19265.0,
+     "label": "HH"
+    }
+   ],
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b919265.0, last swing low \u20b916015.0. Wait for HH/HL or LH/LL sequence.",
    "at_second_ll": false,
    "at_second_hh": true
   },
@@ -20090,6 +19007,96 @@
    "at_second_hh": false
   },
   {
+   "symbol": "MAHABANK",
+   "name": "Bank of Maharashtra",
+   "close": 80.5,
+   "structure": "MIXED",
+   "raw_structure": "MIXED",
+   "structure_label": "No clean structure",
+   "last_high": {
+    "label": "HH",
+    "price": 87.5,
+    "date": "2026-09-07"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 79.2,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 3,
+   "consec_ll": 1,
+   "consec_lh": 0,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {},
+   "wyckoff_phase": null,
+   "wyckoff_conviction": null,
+   "wyckoff_note": null,
+   "sequence": [
+    {
+     "date": "2026-06-18",
+     "price": 91.2,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-29",
+     "price": 94.5,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 78.02,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-27",
+     "price": 82.29,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-07",
+     "price": 77.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-13",
+     "price": 83.1,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-26",
+     "price": 87.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 81.31,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-07",
+     "price": 87.5,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 79.2,
+     "label": "LL"
+    }
+   ],
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b987.5, last swing low \u20b979.2. Wait for HH/HL or LH/LL sequence. \u26a0\ufe0f 3 consecutive HH \u2014 extended uptrend, watch for first LH.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "MAZDOCK",
    "name": "Mazagoan Dock Shipbuilders Ltd.",
    "close": 2064.0,
@@ -20363,96 +19370,6 @@
    "symbol": "POLICYBZR",
    "name": "PB Fintech Ltd.",
    "close": 980.0,
-   "structure": "MIXED",
-   "raw_structure": "MIXED",
-   "structure_label": "No clean structure",
-   "last_high": {
-    "label": "HH",
-    "price": 1904.9,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 1710.1,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 1,
-   "consec_ll": 1,
-   "consec_lh": 0,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {},
-   "wyckoff_phase": null,
-   "wyckoff_conviction": null,
-   "wyckoff_note": null,
-   "sequence": [
-    {
-     "date": "2026-07-02",
-     "price": 1705.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-03",
-     "price": 1545.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-16",
-     "price": 1622.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 1502.1,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-06",
-     "price": 1578.4,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 1875.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 1875.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-07",
-     "price": 1752.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 1710.1,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 1904.9,
-     "label": "HH"
-    }
-   ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b91904.9, last swing low \u20b91710.1. Wait for HH/HL or LH/LL sequence.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "POLICYBZR",
-   "name": "PB Fintech Ltd.",
-   "close": 1063.9,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -21076,96 +19993,6 @@
     }
    ],
    "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b94149.4, last swing low \u20b93682.4. Wait for HH/HL or LH/LL sequence. \u26a0\ufe0f 4 consecutive HH \u2014 extended uptrend, watch for first LH.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "TATAINVEST",
-   "name": "Tata Investment Corporation Ltd.",
-   "close": 615.05,
-   "structure": "MIXED",
-   "raw_structure": "MIXED",
-   "structure_label": "No clean structure",
-   "last_high": {
-    "label": "HH",
-    "price": 750.5,
-    "date": "2026-09-15"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 616.1,
-    "date": "2026-09-09"
-   },
-   "consec_hh": 1,
-   "consec_ll": 1,
-   "consec_lh": 0,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {},
-   "wyckoff_phase": null,
-   "wyckoff_conviction": null,
-   "wyckoff_note": null,
-   "sequence": [
-    {
-     "date": "2026-06-18",
-     "price": 704.9,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-08",
-     "price": 659.15,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-10",
-     "price": 699.3,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 621.15,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-29",
-     "price": 690.15,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-06",
-     "price": 666.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-12",
-     "price": 714.8,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-28",
-     "price": 656.4,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 616.1,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-15",
-     "price": 750.5,
-     "label": "HH"
-    }
-   ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b9750.5, last swing low \u20b9616.1. Wait for HH/HL or LH/LL sequence.",
    "at_second_ll": false,
    "at_second_hh": false
   },
