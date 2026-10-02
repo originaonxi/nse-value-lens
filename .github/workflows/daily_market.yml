@@ -1,0 +1,98 @@
+name: Daily NSE deals and market breadth
+on:
+  schedule:
+    # Every calendar day: 19:15, 21:15, 00:15 and 08:15 IST.
+    - cron: '45 13,15,18,2 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: [HHHL daily refresh]
+    types: [completed]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: daily-market-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      report_outcome: ${{ steps.collect.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'requests>=2.32,<3'
+      - name: Check date boundaries, disclosure failures and breadth accounting
+        run: python -m unittest discover -s tests -p 'test_daily_market.py' -v
+      - name: Download official reports and retain truthful status on failure
+        id: collect
+        continue-on-error: true
+        run: python daily_market.py --strict
+      - name: Publish daily reports and status independently of price jobs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/daily_market.json public/data/daily_market.json
+          if [ -d data/daily_market_history ]; then git add data/daily_market_history; fi
+          if [ -f data/daily_market_calendar.json ]; then git add data/daily_market_calendar.json; fi
+          if ! git diff --cached --quiet; then
+            git commit -m "data: NSE deals and market breadth run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3; do
+              git pull --rebase origin master
+              if git push origin HEAD:master; then break; fi
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 5
+            done
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily-nse-source-audit
+          path: |
+            docs/daily_market.json
+            .cache/daily-market/
+          retention-days: 30
+  publish:
+    needs: refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4
+  verify:
+    needs: [refresh, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Verify both published sites and fail visibly for missing daily reports
+        run: python scripts/verify_daily_market_live.py
+      - name: Surface source failures after status is published
+        if: needs.refresh.outputs.report_outcome != 'success'
+        run: exit 1

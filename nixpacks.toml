@@ -1,0 +1,8 @@
+# The web server is Node; scheduled NSE collection also needs Python + requests.
+providers = ["node", "python"]
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.12"
+
+[start]
+cmd = "npm start"

@@ -71,6 +71,14 @@ app.get('/data/:name(swing_desk|swing_evidence|expanded_research|cross_asset_res
   }
 });
 
+app.get('/data/daily_market.json', async (_req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  try {
+    const {payload,source}=await require('./daily-market-data').loadDailyMarket();
+    res.setHeader('X-Daily-Market-Source',source);res.json(payload);
+  } catch {res.status(503).json({error:'Daily NSE reports unavailable'});}
+});
+
 app.use(express.static(PUBLIC_DIR, {
   setHeaders(res, filePath) {
     if (filePath.endsWith('.html')) setNoCacheHtml(res);
@@ -321,6 +329,25 @@ cron.schedule('15 3 * * *', () => {
     else console.log('[cron] F&O ranking done:', out);
   });
 });
+
+// Independent daily backup. Local development never starts a refresh job.
+// Railway runs after the GitHub slots; the data route picks the newer checked copy.
+if(process.env.RAILWAY_ENVIRONMENT_ID || process.env.ENABLE_DAILY_MARKET_CRON==='1'){
+  let dailyMarketRunning=false;
+  const refreshDailyMarket=()=>{
+    if(dailyMarketRunning)return;
+    dailyMarketRunning=true;
+    execFile(process.platform==='win32'?'python':'python3',
+      [path.join(__dirname,'..','daily_market.py'),'--strict'],
+      {cwd:path.join(__dirname,'..'),timeout:900000},(error,stdout,stderr)=>{
+        dailyMarketRunning=false;
+        console[error?'error':'log']('[daily-market]',(stdout+'\n'+stderr).trim().slice(-2000));
+      });
+  };
+  cron.schedule('35 14,17,3 * * *',refreshDailyMarket,{timezone:'UTC'});
+  // Recover missed schedules when a sleeping/restarted service wakes.
+  setTimeout(refreshDailyMarket,30000).unref();
+}
 
 app.listen(port, () => {
   console.log(`NSE Value Lens running on http://localhost:${port}`);

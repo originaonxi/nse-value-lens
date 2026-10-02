@@ -30,6 +30,7 @@
       (status === 'ALL' || r.status === status) &&
       ($('sector').value === 'ALL' || r.sector === $('sector').value) &&
       ($('structure').value === 'ALL' || r.structure === $('structure').value) &&
+      (window.DailyDeals?.matches(r.symbol,$('daily-deal-filter').value) ?? ($('daily-deal-filter').value === 'ALL')) &&
       (!search || (r.symbol + ' ' + r.name).toLowerCase().includes(search))
     );
     const distance = r => numeric(r.distance_to_breakout_pct) ? Math.abs(r.distance_to_breakout_pct) : Infinity;
@@ -273,6 +274,7 @@
     selected = symbol;
     syncStockPickers(r);
     window.MarketContext?.showStock(symbol,dataset.as_of);
+    window.DailyDeals?.showStock(symbol);
     $('stock-detail').hidden = false;
     $('detail-title').textContent = r.symbol + ' / ' + r.name;
     $('detail-subtitle').textContent = r.sector + ' \u00b7 prices through ' + date(r.data_date) + ' \u00b7 ' + r.structure;
@@ -403,9 +405,11 @@
     filterRows();
   }));
   $('search').addEventListener('input',()=>dataset&&filterRows());
-  ['sector','structure','sort'].forEach(id=>$(id).addEventListener('change',()=>dataset&&filterRows()));
+  ['sector','structure','sort','daily-deal-filter'].forEach(id=>$(id).addEventListener('change',()=>dataset&&filterRows()));
+  document.addEventListener('daily-deals-ready',()=>{if(dataset)filterRows();});
   $('reset').addEventListener('click',()=>{
     $('search').value='';$('sector').value='ALL';$('structure').value='ALL';$('sort').value='status';
+    $('daily-deal-filter').value='ALL';
     document.querySelector('[data-status="ALL"]').click();
   });
   $('priority-list').addEventListener('click',event=>{const card=event.target.closest('button[data-symbol]');if(card)selectPriority(card.dataset.symbol);});

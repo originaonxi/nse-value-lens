@@ -10,12 +10,14 @@
 <script src="hhhl-chart.js" defer></script>
 <script src="hhhl-reason.js?v=stock-reasons-1" defer></script>
 <script src="hhhl-universe.js?v=fno-1" defer></script>
+<script src="daily-deals.js" defer></script>
 <script src="hhhl.js?v=fno-1" defer></script>
+<link rel="stylesheet" href="daily-deals.css">
 <link rel="stylesheet" href="market-brief.css">
 </head>
 <body data-source="data/">
 <div class="shell hhhl-shell">
-<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="indicator-lab.html">Evidence</a><a href="HHHL_SCANNER.md">Rules</a><a href="market-brief.html">US + India brief</a><a href="global-markets.html">Commodities &amp; forex</a></nav></header>
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="indicator-lab.html">Evidence</a><a href="HHHL_SCANNER.md">Rules</a><a href="market-brief.html">US + India brief</a><a href="global-markets.html">Commodities &amp; forex</a><a href="daily-market.html">Daily market &amp; deals</a></nav></header>
 <main>
 <section class="chart-desk-heading"><h1>Nifty 200 / HH-HL scanner</h1><div class="chart-desk-session"><strong id="session-date">Loading…</strong><span id="coverage">Checking all 200 stocks</span></div></section>
 <section class="stock-picker-panel" aria-label="Choose a stock by research state">
@@ -31,6 +33,7 @@
 <section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
 <div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
 <p class="selection-reason" aria-live="polite" aria-atomic="true"><strong id="selection-reason"></strong></p>
+<div id="daily-stock-deals" class="daily-stock-deals" hidden></div>
 <div class="detail-grid"><div class="chart-panel"><div class="chart-heading"><div><span class="label">DAILY PRICE STRUCTURE</span><strong id="chart-price"></strong></div><div class="chart-controls"><label>View <select id="chart-window"><option value="35">35 sessions</option><option value="70" selected>70 sessions</option><option value="140">140 sessions</option></select></label><label><input id="chart-swings" type="checkbox" checked> Structure</label><label><input id="chart-all-pivots" type="checkbox"> All swing labels</label><label><input id="chart-levels" type="checkbox" checked> Price zones</label><label><input id="chart-events" type="checkbox" checked> Closing signals</label><label><input id="chart-volume" type="checkbox" checked> Volume</label></div></div><div id="candle-readout" class="candle-readout" aria-live="off"></div><div class="chart-legend"><span class="legend-rise">HH / HL &middot; rising</span><span class="legend-fall">LH / LL &middot; falling</span><span>H1/H2 + L1/L2 &middot; active rule pivots</span><span>Last 2 bars &middot; pivots pending</span></div><div id="stock-chart" aria-label="Daily candles, labelled confirmed swings and zigzag"></div><p id="chart-inspect" class="chart-inspect" aria-live="polite">Tap a swing label for its price, pivot date and confirmation date.</p><p class="muted">The four highlighted pivots drive the current HH/HL rule. Price levels begin when confirmed. Closing-signal markers show structure events, not executed trades. Entry and stop references apply only to a fresh setup; actual fills still determine the stop. Volume is context, not an added entry rule. Tap or move across candles for OHLCV. New pivots require two later sessions.</p></div></div>
 <details class="stock-explanation"><summary>Stock details, price zones &amp; strategy checks</summary>
 <p id="detail-reason" class="detail-reason"></p>
@@ -67,10 +70,12 @@
 <label>Stock or company<input id="search" type="search" placeholder="Search symbol or name" disabled></label>
 <label>Sector<select id="sector" disabled><option value="ALL">All sectors</option></select></label>
 <label>Structure<select id="structure" disabled><option value="ALL">All structures</option><option>HH / HL</option><option>LH / LL</option><option>MIXED</option><option>UNCONFIRMED</option><option>UNKNOWN</option></select></label>
+<label>NSE disclosures<select id="daily-deal-filter"><option value="ALL">All stocks</option><option value="bulk">Bulk deal · latest session</option><option value="block">Block deal · latest session</option><option value="any">Bulk or block · latest session</option><option value="recent">Any deal · last 7 calendar days</option></select></label>
 <label>Order<select id="sort" disabled><option value="status">Research state</option><option value="distance">Nearest breakout</option><option value="symbol">Symbol A-Z</option><option value="turnover">Highest turnover</option></select></label>
 <button id="reset" type="button" disabled>Reset</button>
 </div>
 <p class="muted" id="result-count" aria-live="polite">Loading rows...</p>
+<p id="daily-deal-note" class="muted" role="status">Checking daily NSE disclosures…</p><a href="daily-market.html">Daily market breadth &amp; bulk/block deals →</a>
 <div class="table-wrap stock-table"><table><caption>All Nifty 200 stocks with HH/HL research states and dated reference levels</caption><thead><tr><th>Stock / sector</th><th>State</th><th>Close / date</th><th>Structure</th><th>Breakout above</th><th>Exit below</th><th>To breakout</th><th>ATR / price</th><th>Reason</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
 <p class="muted">Click a symbol to inspect its chart and zones. Prices are in rupees. Sell applies to existing long holdings; it does not open a short. Avoid means this setup is absent.</p>
 </section>
