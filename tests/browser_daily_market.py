@@ -1,12 +1,15 @@
 """Desktop/mobile and failure checks for daily NSE data and the stock filter."""
 import json
+import argparse
 from datetime import date, timedelta
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts/daily-market';OUT.mkdir(parents=True,exist_ok=True)
-URL='http://127.0.0.1:3232/'
+parser=argparse.ArgumentParser()
+parser.add_argument('--url',default='http://127.0.0.1:3232/')
+URL=parser.parse_args().url.rstrip('/')+'/'
 data=json.loads((ROOT/'docs/daily_market.json').read_text(encoding='utf-8'))
 
 with sync_playwright() as p:
