@@ -71,6 +71,14 @@ app.get('/data/:name(swing_desk|swing_evidence|expanded_research|cross_asset_res
   }
 });
 
+app.get('/data/:name(hhhl_fno|global_markets).json', async (req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  try {
+    const {payload,source}=await require('./current-market-data').loadCurrentMarket(req.params.name);
+    res.setHeader('X-Market-Source',source);res.json(payload);
+  } catch {res.status(503).json({error:'Market snapshot unavailable'});}
+});
+
 app.get('/data/daily_market.json', async (_req,res)=>{
   res.setHeader('Cache-Control','no-store');
   try {

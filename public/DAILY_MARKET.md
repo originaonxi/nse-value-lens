@@ -68,6 +68,9 @@ startup catch-up. There is a single in-process runner with a 15-minute timeout.
 Local development does not run this cron unless ENABLE_DAILY_MARKET_CRON=1.
 The Railway data route compares valid remote and local snapshots and serves the newer
 expected session/attempt. The Pages site uses the committed JSON directly.
+The existing F&O and global-market routes also retrieve the current validated GitHub
+snapshots, with a one-minute cache and a dated local fallback if GitHub is unavailable.
+Their existing refresh workflows continue to produce those datasets.
 
 No hosted scheduler can guarantee an exact firing time or data-provider availability.
 The site displays the last attempt and original report dates, flags refresh attempts
