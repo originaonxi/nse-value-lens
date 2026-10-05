@@ -1,19 +1,18 @@
 {
- "as_of": "2026-10-01",
+ "as_of": "2026-10-05",
  "universe": "Nifty 200 (200 stocks)",
  "method": "Dow HH/HL/LH/LL on 5-bar fractals + BOS/CHoCH labels + Wyckoff volume phase. Informational \u2014 not action-changing until calibrated.",
  "counts": {
   "REVERSAL_UP": 5,
   "REVERSAL_DN": 27,
-  "UPTREND_BROKEN": 13,
+  "UPTREND_BROKEN": 12,
   "DOWNTREND_BROKEN": 3,
-  "UPTREND": 9,
+  "UPTREND": 10,
   "DOWNTREND": 116,
   "MIXED": 27
  },
  "second_ll": [
   "MANKIND",
-  "PAGEIND",
   "ABB",
   "ABCAPITAL",
   "ASHOKLEY",
@@ -49,14 +48,15 @@
   "COLPAL",
   "HDFCLIFE",
   "MAZDOCK",
+  "PAGEIND",
   "SBILIFE",
   "TITAN"
  ],
  "second_hh": [
   "APOLLOHOSP",
-  "AUBANK",
   "BAJAJFINSV",
   "BRITANNIA",
+  "AUBANK",
   "GVT&D",
   "INDHOTEL",
   "ADANIPORTS",
@@ -67,13 +67,14 @@
   "TATASTEEL"
  ],
  "bos_fired": [
+  "LGEINDIA",
   "BAJAJHLDNG",
   "BHARTIARTL",
   "BSE",
   "CHOLAFIN",
+  "GLENMARK",
   "GODREJCP",
   "IDEA",
-  "ITC",
   "JUBLFOOD",
   "LICHSGFIN",
   "LTM",
@@ -82,40 +83,38 @@
   "OFSS",
   "ONGC",
   "TATACAP",
-  "TMCV",
   "UPL",
   "VOLTAS",
   "WIPRO",
   "ABB",
   "ABCAPITAL",
-  "ADANIENSOL",
-  "ADANIENT",
   "AMBUJACEM",
   "ASHOKLEY",
-  "ASTRAL",
+  "ASIANPAINT",
   "BAJFINANCE",
-  "BANKBARODA",
-  "BDL",
+  "BHARATFORG",
+  "BIOCON",
   "CANBK",
   "CIPLA",
   "COCHINSHIP",
   "CONCOR",
+  "CUMMINSIND",
+  "DMART",
   "EICHERMOT",
   "FEDERALBNK",
   "FORTIS",
+  "GAIL",
   "GODFRYPHLP",
   "GODREJPROP",
-  "GROWW",
-  "HAL",
   "HAVELLS",
   "HDFCAMC",
+  "HEROMOTOCO",
   "HINDALCO",
-  "HINDCOPPER",
   "HINDUNILVR",
-  "HINDZINC",
   "HYUNDAI",
   "ICICIBANK",
   "INDUSINDBK",
+  "INFY",
   "IOC",
   "JIOFIN",
   "JSWENERGY",
@@ -127,13 +126,10 @@
   "MARICO",
   "MARUTI",
   "MFSL",
-  "MPHASIS",
   "MUTHOOTFIN",
   "NESTLEIND",
   "NLCINDIA",
   "NMDC",
-  "NTPC",
-  "PERSISTENT",
   "PFC",
   "PIDILITIND",
   "POWERGRID",
@@ -149,11 +145,12 @@
   "TMPV",
   "TRENT",
   "UNIONBANK",
-  "UNITDSPR",
-  "VEDL",
+  "VAML",
+  "VMM",
   "WAAREEENER"
  ],
  "choch_fired": [
+  "ADANIPOWER",
   "LGEINDIA",
   "ADANIGREEN",
   "BAJAJHLDNG",
@@ -183,7 +180,6 @@
   "VOLTAS",
   "WIPRO",
   "APOLLOHOSP",
-  "AUBANK",
   "BAJAJ-AUTO",
   "BAJAJFINSV",
   "BANKINDIA",
@@ -197,7 +193,7 @@
   "YESBANK",
   "DRREDDY",
   "MANKIND",
-  "PAGEIND"
+  "VBL"
  ],
  "high_conviction_reversals": [
   "BOSCHLTD",
@@ -225,7 +221,7 @@
   {
    "symbol": "ADANIPOWER",
    "name": "Adani Power Ltd.",
-   "close": 196.21,
+   "close": 201.0,
    "structure": "REVERSAL_UP",
    "raw_structure": "REVERSAL_UP",
    "structure_label": "Bullish reversal SETUP (unconfirmed)",
@@ -258,12 +254,12 @@
    "bos_fired": false,
    "bos_dir": null,
    "choch": {
-    "fired": false,
+    "fired": true,
     "dir": "BULL",
     "level": 200.4,
-    "desc": "\u26d4 setup FAILED \u2014 closed below HL \u20b9200.4, reversal invalidated"
+    "desc": "CHoCH \u26a0\ufe0f already fired \u2014 HL \u20b9200.4 formed after lower lows (structure shifted bullish)"
    },
-   "choch_fired": false,
+   "choch_fired": true,
    "choch_dir": "BULL",
    "wyckoff": {
     "phase": "ACCUMULATION",
@@ -327,14 +323,14 @@
      "label": "HL"
     }
    ],
-   "plain": "BULLISH REVERSAL SETUP \u2014 HL \u20b9200.4 formed after lower lows. Confirm on close above \u20b9216.1; fails below \u20b9200.4. \u26d4 setup FAILED \u2014 closed below HL \u20b9200.4, reversal invalidated. Wyckoff: ACCUMULATION \u2014 vol at HL 1.2Cr vs prior LL 5.4Cr. \u26a0\ufe0f Volume thinning at HL = weak bounce, no conviction.",
+   "plain": "BULLISH REVERSAL SETUP \u2014 HL \u20b9200.4 formed after lower lows. Confirm on close above \u20b9216.1; fails below \u20b9200.4. CHoCH \u26a0\ufe0f already fired \u2014 HL \u20b9200.4 formed after lower lows (structure shifted bullish). Wyckoff: ACCUMULATION \u2014 vol at HL 1.2Cr vs prior LL 5.4Cr. \u26a0\ufe0f Volume thinning at HL = weak bounce, no conviction.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BOSCHLTD",
    "name": "Bosch Ltd.",
-   "close": 45480.0,
+   "close": 44960.0,
    "structure": "REVERSAL_UP",
    "raw_structure": "REVERSAL_UP",
    "structure_label": "Bullish reversal SETUP (unconfirmed)",
@@ -443,7 +439,7 @@
   {
    "symbol": "KALYANKJIL",
    "name": "Kalyan Jewellers India Ltd.",
-   "close": 528.5,
+   "close": 556.85,
    "structure": "REVERSAL_UP",
    "raw_structure": "REVERSAL_UP",
    "structure_label": "Bullish reversal SETUP (unconfirmed)",
@@ -552,7 +548,7 @@
   {
    "symbol": "LGEINDIA",
    "name": "LG Electronics India Ltd.",
-   "close": 1721.8,
+   "close": 1770.9,
    "structure": "REVERSAL_UP",
    "raw_structure": "REVERSAL_UP",
    "structure_label": "Bullish reversal SETUP (unconfirmed)",
@@ -581,9 +577,14 @@
     "level": "below HL \u20b91599.0"
    },
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "UP",
+    "level": 1727.1,
+    "desc": "BOS \u2705 closed above trigger \u20b91727.1 \u2014 reversal UP now CONFIRMED, not just a setup"
+   },
+   "bos_fired": true,
+   "bos_dir": "UP",
    "choch": {
     "fired": true,
     "dir": "BULL",
@@ -654,14 +655,14 @@
      "label": "HL"
     }
    ],
-   "plain": "BULLISH REVERSAL SETUP \u2014 HL \u20b91599.0 formed after lower lows. Confirm on close above \u20b91727.1; fails below \u20b91599.0. CHoCH \u26a0\ufe0f already fired \u2014 HL \u20b91599.0 formed after lower lows (structure shifted bullish). Wyckoff: ACCUMULATION \u2014 vol at HL 2.0L vs prior LL 3.8L. \u26a0\ufe0f Volume thinning at HL = weak bounce, no conviction.",
+   "plain": "BULLISH REVERSAL SETUP \u2014 HL \u20b91599.0 formed after lower lows. Confirm on close above \u20b91727.1; fails below \u20b91599.0. BOS \u2705 closed above trigger \u20b91727.1 \u2014 reversal UP now CONFIRMED, not just a setup. Wyckoff: ACCUMULATION \u2014 vol at HL 2.0L vs prior LL 3.8L. \u26a0\ufe0f Volume thinning at HL = weak bounce, no conviction.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "TATAPOWER",
    "name": "Tata Power Co. Ltd.",
-   "close": 350.15,
+   "close": 351.5,
    "structure": "REVERSAL_UP",
    "raw_structure": "REVERSAL_UP",
    "structure_label": "Bullish reversal SETUP (unconfirmed)",
@@ -770,7 +771,7 @@
   {
    "symbol": "ADANIGREEN",
    "name": "Adani Green Energy Ltd.",
-   "close": 1276.1,
+   "close": 1284.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -879,7 +880,7 @@
   {
    "symbol": "BAJAJHLDNG",
    "name": "Bajaj Holdings & Investment Ltd.",
-   "close": 10666.0,
+   "close": 10732.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -937,7 +938,7 @@
    "sequence": [
     {
      "date": "2026-06-23",
-     "price": 10797.48,
+     "price": 10797.49,
      "label": "HH"
     },
     {
@@ -993,7 +994,7 @@
   {
    "symbol": "BHARTIARTL",
    "name": "Bharti Airtel Ltd.",
-   "close": 1741.1,
+   "close": 1779.9,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1107,7 +1108,7 @@
   {
    "symbol": "BSE",
    "name": "BSE Ltd.",
-   "close": 3046.0,
+   "close": 3179.6,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1221,7 +1222,7 @@
   {
    "symbol": "CHOLAFIN",
    "name": "Cholamandalam Investment and Finance Company Ltd.",
-   "close": 1580.0,
+   "close": 1605.4,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1335,7 +1336,7 @@
   {
    "symbol": "GLENMARK",
    "name": "Glenmark Pharmaceuticals Ltd.",
-   "close": 2331.0,
+   "close": 2295.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1364,9 +1365,14 @@
     "level": "above LH \u20b92482.6"
    },
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 2306.3,
+    "desc": "BOS \u2705 closed below trigger \u20b92306.3 \u2014 reversal DOWN now CONFIRMED, not just a setup"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {
     "fired": true,
     "dir": "BEAR",
@@ -1437,14 +1443,14 @@
      "label": "LH"
     }
    ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b92482.6 formed after higher highs. Confirm on close below \u20b92306.3; fails above \u20b92482.6. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b92482.6 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 6.0L vs prior HH 8.1L. \u2705 Buyers fading at lower high = real distribution.",
+   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b92482.6 formed after higher highs. Confirm on close below \u20b92306.3; fails above \u20b92482.6. BOS \u2705 closed below trigger \u20b92306.3 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 6.0L vs prior HH 8.1L. \u2705 Buyers fading at lower high = real distribution.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "GODREJCP",
    "name": "Godrej Consumer Products Ltd.",
-   "close": 840.0,
+   "close": 837.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1558,7 +1564,7 @@
   {
    "symbol": "IDEA",
    "name": "Vodafone Idea Ltd.",
-   "close": 12.64,
+   "close": 12.74,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1672,7 +1678,7 @@
   {
    "symbol": "INDUSTOWER",
    "name": "Indus Towers Ltd.",
-   "close": 376.25,
+   "close": 380.2,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1781,7 +1787,7 @@
   {
    "symbol": "ITC",
    "name": "ITC Ltd.",
-   "close": 255.9,
+   "close": 268.9,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -1810,14 +1816,9 @@
     "level": "above LH \u20b9271.05"
    },
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 257.7,
-    "desc": "BOS \u2705 closed below trigger \u20b9257.7 \u2014 reversal DOWN now CONFIRMED, not just a setup"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {
     "fired": true,
     "dir": "BEAR",
@@ -1888,14 +1889,14 @@
      "label": "LH"
     }
    ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9271.05 formed after higher highs. Confirm on close below \u20b9257.7; fails above \u20b9271.05. BOS \u2705 closed below trigger \u20b9257.7 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 1.3Cr vs prior HH 2.0Cr. \u2705 Buyers fading at lower high = real distribution.",
+   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9271.05 formed after higher highs. Confirm on close below \u20b9257.7; fails above \u20b9271.05. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9271.05 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 1.3Cr vs prior HH 2.0Cr. \u2705 Buyers fading at lower high = real distribution.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "JUBLFOOD",
    "name": "Jubilant Foodworks Ltd.",
-   "close": 443.4,
+   "close": 445.7,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2009,7 +2010,7 @@
   {
    "symbol": "KOTAKBANK",
    "name": "Kotak Mahindra Bank Ltd.",
-   "close": 418.35,
+   "close": 416.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2118,7 +2119,7 @@
   {
    "symbol": "LICHSGFIN",
    "name": "LIC Housing Finance Ltd.",
-   "close": 509.0,
+   "close": 505.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2232,7 +2233,7 @@
   {
    "symbol": "LICI",
    "name": "Life Insurance Corporation of India",
-   "close": 391.85,
+   "close": 388.7,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2341,7 +2342,7 @@
   {
    "symbol": "LTM",
    "name": "LTM Ltd.",
-   "close": 4007.0,
+   "close": 4010.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2455,7 +2456,7 @@
   {
    "symbol": "MRF",
    "name": "MRF Ltd.",
-   "close": 123715.0,
+   "close": 123330.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2569,7 +2570,7 @@
   {
    "symbol": "NATIONALUM",
    "name": "National Aluminium Co. Ltd.",
-   "close": 334.9,
+   "close": 340.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2683,7 +2684,7 @@
   {
    "symbol": "NAUKRI",
    "name": "Info Edge (India) Ltd.",
-   "close": 1200.0,
+   "close": 1201.7,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2792,7 +2793,7 @@
   {
    "symbol": "OFSS",
    "name": "Oracle Financial Services Software Ltd.",
-   "close": 10420.0,
+   "close": 10470.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -2906,7 +2907,7 @@
   {
    "symbol": "ONGC",
    "name": "Oil & Natural Gas Corporation Ltd.",
-   "close": 222.37,
+   "close": 224.9,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3020,7 +3021,7 @@
   {
    "symbol": "SAIL",
    "name": "Steel Authority of India Ltd.",
-   "close": 174.5,
+   "close": 176.95,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3129,7 +3130,7 @@
   {
    "symbol": "SOLARINDS",
    "name": "Solar Industries India Ltd.",
-   "close": 19400.0,
+   "close": 19540.0,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3238,7 +3239,7 @@
   {
    "symbol": "TATACAP",
    "name": "Tata Capital Ltd.",
-   "close": 319.3,
+   "close": 317.6,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3352,7 +3353,7 @@
   {
    "symbol": "TMCV",
    "name": "Tata Motors Ltd.",
-   "close": 415.5,
+   "close": 426.8,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3381,14 +3382,9 @@
     "level": "above LH \u20b9456.05"
    },
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 416.0,
-    "desc": "BOS \u2705 closed below trigger \u20b9416.0 \u2014 reversal DOWN now CONFIRMED, not just a setup"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {
     "fired": true,
     "dir": "BEAR",
@@ -3459,14 +3455,14 @@
      "label": "LH"
     }
    ],
-   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9456.05 formed after higher highs. Confirm on close below \u20b9416.0; fails above \u20b9456.05. BOS \u2705 closed below trigger \u20b9416.0 \u2014 reversal DOWN now CONFIRMED, not just a setup. Wyckoff: DISTRIBUTION \u2014 vol at LH 48.1L vs prior HH 75.7L. \u2705 Buyers fading at lower high = real distribution.",
+   "plain": "BEARISH REVERSAL SETUP \u2014 LH \u20b9456.05 formed after higher highs. Confirm on close below \u20b9416.0; fails above \u20b9456.05. CHoCH \u26a0\ufe0f already fired \u2014 LH \u20b9456.05 formed after higher highs (structure shifted bearish). Wyckoff: DISTRIBUTION \u2014 vol at LH 48.1L vs prior HH 75.7L. \u2705 Buyers fading at lower high = real distribution.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "UPL",
    "name": "UPL Ltd.",
-   "close": 516.8,
+   "close": 502.5,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3580,7 +3576,7 @@
   {
    "symbol": "VOLTAS",
    "name": "Voltas Ltd.",
-   "close": 1053.2,
+   "close": 1061.3,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3694,7 +3690,7 @@
   {
    "symbol": "WIPRO",
    "name": "Wipro Ltd.",
-   "close": 159.35,
+   "close": 162.14,
    "structure": "REVERSAL_DN",
    "raw_structure": "REVERSAL_DN",
    "structure_label": "Bearish reversal SETUP (unconfirmed)",
@@ -3808,7 +3804,7 @@
   {
    "symbol": "APOLLOHOSP",
    "name": "Apollo Hospitals Enterprise Ltd.",
-   "close": 8133.5,
+   "close": 7985.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -3845,11 +3841,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 419571,
     "vol_at_last_low": 232987,
-    "note": "Character change \u2014 closed \u20b98133.5 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b97985.0 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b98133.5 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b97985.0 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-07-27",
@@ -3902,115 +3898,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b98133.5 below last HL \u20b98672.5. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b98672.5 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b98672.5 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b98133.5 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend.",
-   "at_second_ll": false,
-   "at_second_hh": true
-  },
-  {
-   "symbol": "AUBANK",
-   "name": "AU Small Finance Bank Ltd.",
-   "close": 987.0,
-   "structure": "UPTREND_BROKEN",
-   "raw_structure": "UPTREND",
-   "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
-   "last_high": {
-    "label": "HH",
-    "price": 1144.1,
-    "date": "2026-08-25"
-   },
-   "last_low": {
-    "label": "HL",
-    "price": 1015.1,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 2,
-   "consec_ll": 0,
-   "consec_lh": 0,
-   "consec_hl": 1,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {
-    "fired": true,
-    "dir": "BEAR",
-    "level": 1015.1,
-    "desc": "CHoCH \u26a0\ufe0f closed below last HL \u20b91015.1 \u2014 uptrend character broken"
-   },
-   "choch_fired": true,
-   "choch_dir": "BEAR",
-   "wyckoff": {
-    "phase": "DISTRIBUTION?",
-    "conviction": "LOW",
-    "vol_at_last_high": 5688015,
-    "vol_at_last_low": 1013402,
-    "note": "Character change \u2014 closed \u20b9987.0 below last HL \u20b91015.1. Markup over; early distribution/markdown risk. Reclaim \u20b91015.1 repairs it; a fresh LH+LL confirms a downtrend."
-   },
-   "wyckoff_phase": "DISTRIBUTION?",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9987.0 below last HL \u20b91015.1. Markup over; early distribution/markdown risk. Reclaim \u20b91015.1 repairs it; a fresh LH+LL confirms a downtrend.",
-   "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 946.33,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-15",
-     "price": 1054.98,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-25",
-     "price": 1078.15,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-29",
-     "price": 1014.56,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-06",
-     "price": 1089.34,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-23",
-     "price": 959.07,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-29",
-     "price": 1067.76,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-06",
-     "price": 1105.9,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-25",
-     "price": 1144.1,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 1015.1,
-     "label": "HL"
-    }
-   ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9987.0 below last HL \u20b91015.1. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91015.1 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91015.1 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9987.0 below last HL \u20b91015.1. Markup over; early distribution/markdown risk. Reclaim \u20b91015.1 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b97985.0 below last HL \u20b98672.5. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b98672.5 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b98672.5 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b97985.0 below last HL \u20b98672.5. Markup over; early distribution/markdown risk. Reclaim \u20b98672.5 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": true
   },
   {
    "symbol": "BAJAJ-AUTO",
    "name": "Bajaj Auto Ltd.",
-   "close": 10045.0,
+   "close": 10024.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4047,11 +3942,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 495029,
     "vol_at_last_low": 221294,
-    "note": "Character change \u2014 closed \u20b910045.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b910024.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b910045.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b910024.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-05-20",
@@ -4104,14 +3999,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b910045.0 below last HL \u20b911618.0. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b911618.0 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b911618.0 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b910045.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b910024.0 below last HL \u20b911618.0. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b911618.0 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b911618.0 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b910024.0 below last HL \u20b911618.0. Markup over; early distribution/markdown risk. Reclaim \u20b911618.0 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BAJAJFINSV",
    "name": "Bajaj Finserv Ltd.",
-   "close": 1732.6,
+   "close": 1751.4,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4148,11 +4043,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 2447845,
     "vol_at_last_low": 920207,
-    "note": "Character change \u2014 closed \u20b91732.6 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b91751.4 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b91732.6 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b91751.4 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-05-07",
@@ -4205,14 +4100,14 @@
      "label": "HL"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b91732.6 below last HL \u20b91985.0. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91985.0 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91985.0 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b91732.6 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b91751.4 below last HL \u20b91985.0. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91985.0 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91985.0 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b91751.4 below last HL \u20b91985.0. Markup over; early distribution/markdown risk. Reclaim \u20b91985.0 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": true
   },
   {
    "symbol": "BANKINDIA",
    "name": "Bank of India",
-   "close": 129.48,
+   "close": 133.5,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4249,11 +4144,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 10250692,
     "vol_at_last_low": 5030108,
-    "note": "Character change \u2014 closed \u20b9129.48 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b9133.5 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9129.48 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9133.5 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-05-29",
@@ -4306,14 +4201,14 @@
      "label": "HL"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9129.48 below last HL \u20b9136.85. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9136.85 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9136.85 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9129.48 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9133.5 below last HL \u20b9136.85. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9136.85 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9136.85 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9133.5 below last HL \u20b9136.85. Markup over; early distribution/markdown risk. Reclaim \u20b9136.85 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BRITANNIA",
    "name": "Britannia Industries Ltd.",
-   "close": 4778.0,
+   "close": 4770.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4350,11 +4245,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 215340,
     "vol_at_last_low": 342179,
-    "note": "Character change \u2014 closed \u20b94778.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b94770.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b94778.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b94770.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-05-07",
@@ -4407,14 +4302,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b94778.0 below last HL \u20b95363.5. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b95363.5 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b95363.5 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b94778.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b94770.0 below last HL \u20b95363.5. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b95363.5 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b95363.5 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b94770.0 below last HL \u20b95363.5. Markup over; early distribution/markdown risk. Reclaim \u20b95363.5 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": true
   },
   {
    "symbol": "GRASIM",
    "name": "Grasim Industries Ltd.",
-   "close": 2962.0,
+   "close": 2972.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4451,11 +4346,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 1019104,
     "vol_at_last_low": 1752045,
-    "note": "Character change \u2014 closed \u20b92962.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b92972.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b92962.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b92972.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-06-08",
@@ -4508,14 +4403,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b92962.0 below last HL \u20b93222.1. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b93222.1 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b93222.1 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b92962.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b92972.0 below last HL \u20b93222.1. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b93222.1 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b93222.1 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b92972.0 below last HL \u20b93222.1. Markup over; early distribution/markdown risk. Reclaim \u20b93222.1 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "MAXHEALTH",
    "name": "Max Healthcare Institute Ltd.",
-   "close": 940.95,
+   "close": 917.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4552,11 +4447,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 965254,
     "vol_at_last_low": 1117711,
-    "note": "Character change \u2014 closed \u20b9940.95 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b9917.0 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9940.95 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9917.0 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-07-06",
@@ -4609,14 +4504,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9940.95 below last HL \u20b91021.1. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91021.1 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91021.1 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9940.95 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9917.0 below last HL \u20b91021.1. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b91021.1 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b91021.1 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9917.0 below last HL \u20b91021.1. Markup over; early distribution/markdown risk. Reclaim \u20b91021.1 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "NHPC",
    "name": "NHPC Ltd.",
-   "close": 71.75,
+   "close": 72.0,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4653,11 +4548,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 17730521,
     "vol_at_last_low": 11626579,
-    "note": "Character change \u2014 closed \u20b971.75 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b972.0 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b971.75 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b972.0 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-07-08",
@@ -4710,14 +4605,14 @@
      "label": "HL"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b971.75 below last HL \u20b974.99. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b974.99 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b974.99 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b971.75 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b972.0 below last HL \u20b974.99. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b974.99 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b974.99 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b972.0 below last HL \u20b974.99. Markup over; early distribution/markdown risk. Reclaim \u20b974.99 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "OIL",
    "name": "Oil India Ltd.",
-   "close": 444.0,
+   "close": 446.5,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4754,11 +4649,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 4397946,
     "vol_at_last_low": 1006463,
-    "note": "Character change \u2014 closed \u20b9444.0 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b9446.5 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9444.0 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9446.5 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-06-15",
@@ -4811,14 +4706,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9444.0 below last HL \u20b9457.76. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9457.76 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9457.76 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9444.0 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9446.5 below last HL \u20b9457.76. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9457.76 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9457.76 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9446.5 below last HL \u20b9457.76. Markup over; early distribution/markdown risk. Reclaim \u20b9457.76 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "PNB",
    "name": "Punjab National Bank",
-   "close": 109.57,
+   "close": 112.35,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4855,11 +4750,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 15924714,
     "vol_at_last_low": 11479971,
-    "note": "Character change \u2014 closed \u20b9109.57 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b9112.35 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9109.57 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9112.35 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-06-18",
@@ -4912,14 +4807,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9109.57 below last HL \u20b9114.52. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9114.52 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9114.52 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9109.57 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9112.35 below last HL \u20b9114.52. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9114.52 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9114.52 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9112.35 below last HL \u20b9114.52. Markup over; early distribution/markdown risk. Reclaim \u20b9114.52 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "SWIGGY",
    "name": "Swiggy Ltd.",
-   "close": 238.0,
+   "close": 238.8,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -4956,11 +4851,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 18748823,
     "vol_at_last_low": 9369276,
-    "note": "Character change \u2014 closed \u20b9238.0 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b9238.8 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b9238.0 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9238.8 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-07-10",
@@ -5013,14 +4908,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9238.0 below last HL \u20b9269.45. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9269.45 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9269.45 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9238.0 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9238.8 below last HL \u20b9269.45. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b9269.45 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b9269.45 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b9238.8 below last HL \u20b9269.45. Markup over; early distribution/markdown risk. Reclaim \u20b9269.45 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "YESBANK",
    "name": "Yes Bank Ltd.",
-   "close": 20.75,
+   "close": 21.06,
    "structure": "UPTREND_BROKEN",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -5057,11 +4952,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 205410106,
     "vol_at_last_low": 234792571,
-    "note": "Character change \u2014 closed \u20b920.75 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend."
+    "note": "Character change \u2014 closed \u20b921.06 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend."
    },
    "wyckoff_phase": "DISTRIBUTION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b920.75 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b921.06 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend.",
    "sequence": [
     {
      "date": "2026-06-01",
@@ -5114,14 +5009,14 @@
      "label": "HH"
     }
    ],
-   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b920.75 below last HL \u20b922.07. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b922.07 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b922.07 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b920.75 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend.",
+   "plain": "UPTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b921.06 below last HL \u20b922.07. Character change, NOT a confirmed downtrend yet (pivots still HH/HL). Reclaim \u20b922.07 to repair; a fresh LH+LL confirms downtrend. CHoCH \u26a0\ufe0f closed below last HL \u20b922.07 \u2014 uptrend character broken. Wyckoff: Character change \u2014 closed \u20b921.06 below last HL \u20b922.07. Markup over; early distribution/markdown risk. Reclaim \u20b922.07 repairs it; a fresh LH+LL confirms a downtrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "DRREDDY",
    "name": "Dr. Reddy's Laboratories Ltd.",
-   "close": 1206.2,
+   "close": 1203.0,
    "structure": "DOWNTREND_BROKEN",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -5158,11 +5053,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 1993156,
     "vol_at_last_low": 2403285,
-    "note": "Character change \u2014 closed \u20b91206.2 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend."
+    "note": "Character change \u2014 closed \u20b91203.0 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend."
    },
    "wyckoff_phase": "ACCUMULATION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b91206.2 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b91203.0 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend.",
    "sequence": [
     {
      "date": "2026-05-27",
@@ -5215,14 +5110,14 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b91206.2 above last LH \u20b91197.2. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b91197.2 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b91197.2 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b91206.2 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend.",
+   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b91203.0 above last LH \u20b91197.2. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b91197.2 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b91197.2 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b91203.0 above last LH \u20b91197.2. Markdown paused; early accumulation possible. Lose \u20b91197.2 resumes down; a fresh HH+HL confirms an uptrend.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "MANKIND",
    "name": "Mankind Pharma Ltd.",
-   "close": 2535.0,
+   "close": 2479.0,
    "structure": "DOWNTREND_BROKEN",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
@@ -5259,11 +5154,11 @@
     "conviction": "LOW",
     "vol_at_last_high": 513001,
     "vol_at_last_low": 530698,
-    "note": "Character change \u2014 closed \u20b92535.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend."
+    "note": "Character change \u2014 closed \u20b92479.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend."
    },
    "wyckoff_phase": "ACCUMULATION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b92535.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b92479.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend.",
    "sequence": [
     {
      "date": "2026-06-16",
@@ -5316,30 +5211,30 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b92535.0 above last LH \u20b92423.9. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b92423.9 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b92423.9 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b92535.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend.",
+   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b92479.0 above last LH \u20b92423.9. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b92423.9 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b92423.9 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b92479.0 above last LH \u20b92423.9. Markdown paused; early accumulation possible. Lose \u20b92423.9 resumes down; a fresh HH+HL confirms an uptrend.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
-   "symbol": "PAGEIND",
-   "name": "Page Industries Ltd.",
-   "close": 36660.0,
+   "symbol": "VBL",
+   "name": "Varun Beverages Ltd.",
+   "close": 439.6,
    "structure": "DOWNTREND_BROKEN",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend broken \u2014 CHoCH \u26a0\ufe0f (unconfirmed)",
    "last_high": {
     "label": "LH",
-    "price": 36540.0,
-    "date": "2026-09-08"
+    "price": 438.6,
+    "date": "2026-09-23"
    },
    "last_low": {
     "label": "LL",
-    "price": 34000.0,
-    "date": "2026-09-16"
+    "price": 396.2,
+    "date": "2026-09-09"
    },
    "consec_hh": 0,
-   "consec_ll": 2,
-   "consec_lh": 2,
+   "consec_ll": 3,
+   "consec_lh": 4,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
@@ -5350,81 +5245,177 @@
    "choch": {
     "fired": true,
     "dir": "BULL",
-    "level": 36540.0,
-    "desc": "CHoCH \u26a0\ufe0f closed above last LH \u20b936540.0 \u2014 downtrend character broken"
+    "level": 438.6,
+    "desc": "CHoCH \u26a0\ufe0f closed above last LH \u20b9438.6 \u2014 downtrend character broken"
    },
    "choch_fired": true,
    "choch_dir": "BULL",
    "wyckoff": {
     "phase": "ACCUMULATION?",
     "conviction": "LOW",
-    "vol_at_last_high": 24215,
-    "vol_at_last_low": 33484,
-    "note": "Character change \u2014 closed \u20b936660.0 above last LH \u20b936540.0. Markdown paused; early accumulation possible. Lose \u20b936540.0 resumes down; a fresh HH+HL confirms an uptrend."
+    "vol_at_last_high": 4205329,
+    "vol_at_last_low": 11284331,
+    "note": "Character change \u2014 closed \u20b9439.6 above last LH \u20b9438.6. Markdown paused; early accumulation possible. Lose \u20b9438.6 resumes down; a fresh HH+HL confirms an uptrend."
    },
    "wyckoff_phase": "ACCUMULATION?",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "Character change \u2014 closed \u20b936660.0 above last LH \u20b936540.0. Markdown paused; early accumulation possible. Lose \u20b936540.0 resumes down; a fresh HH+HL confirms an uptrend.",
+   "wyckoff_note": "Character change \u2014 closed \u20b9439.6 above last LH \u20b9438.6. Markdown paused; early accumulation possible. Lose \u20b9438.6 resumes down; a fresh HH+HL confirms an uptrend.",
    "sequence": [
     {
-     "date": "2026-05-13",
-     "price": 34394.15,
-     "label": "LL"
-    },
-    {
-     "date": "2026-05-22",
-     "price": 40109.99,
+     "date": "2026-05-29",
+     "price": 543.8,
      "label": "HH"
     },
     {
-     "date": "2026-06-02",
-     "price": 36384.12,
+     "date": "2026-06-08",
+     "price": 510.93,
      "label": "HL"
+    },
+    {
+     "date": "2026-06-17",
+     "price": 555.18,
+     "label": "HH"
     },
     {
      "date": "2026-07-01",
-     "price": 43614.21,
-     "label": "HH"
+     "price": 523.22,
+     "label": "LH"
     },
     {
-     "date": "2026-07-10",
-     "price": 39034.49,
-     "label": "HL"
+     "date": "2026-07-28",
+     "price": 422.53,
+     "label": "LL"
     },
     {
-     "date": "2026-07-21",
-     "price": 39268.2,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-30",
-     "price": 41361.64,
+     "date": "2026-08-10",
+     "price": 450.5,
      "label": "LH"
     },
     {
      "date": "2026-08-26",
-     "price": 35100.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-08",
-     "price": 36540.0,
+     "price": 447.9,
      "label": "LH"
     },
     {
-     "date": "2026-09-16",
-     "price": 34000.0,
+     "date": "2026-08-31",
+     "price": 400.45,
      "label": "LL"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 396.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-23",
+     "price": 438.6,
+     "label": "LH"
     }
    ],
-   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b936660.0 above last LH \u20b936540.0. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b936540.0 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b936540.0 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b936660.0 above last LH \u20b936540.0. Markdown paused; early accumulation possible. Lose \u20b936540.0 resumes down; a fresh HH+HL confirms an uptrend.",
-   "at_second_ll": true,
+   "plain": "DOWNTREND BROKEN (CHoCH \u26a0\ufe0f) \u2014 closed \u20b9439.6 above last LH \u20b9438.6. Character change, NOT a confirmed uptrend yet (pivots still LH/LL). Lose \u20b9438.6 to resume down; a fresh HH+HL confirms uptrend. CHoCH \u26a0\ufe0f closed above last LH \u20b9438.6 \u2014 downtrend character broken. Wyckoff: Character change \u2014 closed \u20b9439.6 above last LH \u20b9438.6. Markdown paused; early accumulation possible. Lose \u20b9438.6 resumes down; a fresh HH+HL confirms an uptrend.",
+   "at_second_ll": false,
    "at_second_hh": false
+  },
+  {
+   "symbol": "AUBANK",
+   "name": "AU Small Finance Bank Ltd.",
+   "close": 1029.2,
+   "structure": "UPTREND",
+   "raw_structure": "UPTREND",
+   "structure_label": "Uptrend (HH + HL)",
+   "last_high": {
+    "label": "HH",
+    "price": 1144.1,
+    "date": "2026-08-25"
+   },
+   "last_low": {
+    "label": "HL",
+    "price": 1015.1,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 2,
+   "consec_ll": 0,
+   "consec_lh": 0,
+   "consec_hl": 1,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKUP",
+    "conviction": "HIGH",
+    "vol_at_last_high": 5688015,
+    "vol_at_last_low": 1013402,
+    "note": "MARKUP \u2014 breakout highs on 56.9L vs pullback lows 10.1L. Healthy: breakouts attract volume."
+   },
+   "wyckoff_phase": "MARKUP",
+   "wyckoff_conviction": "HIGH",
+   "wyckoff_note": "MARKUP \u2014 breakout highs on 56.9L vs pullback lows 10.1L. Healthy: breakouts attract volume.",
+   "sequence": [
+    {
+     "date": "2026-06-11",
+     "price": 946.33,
+     "label": "HL"
+    },
+    {
+     "date": "2026-06-15",
+     "price": 1054.98,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-25",
+     "price": 1078.15,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-29",
+     "price": 1014.56,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-06",
+     "price": 1089.34,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-23",
+     "price": 959.07,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-29",
+     "price": 1067.76,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-06",
+     "price": 1105.9,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-25",
+     "price": 1144.1,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 1015.1,
+     "label": "HL"
+    }
+   ],
+   "plain": "UPTREND \u2014 higher highs + higher lows. Last HL \u20b91015.1 is trend support; dips toward it are buyable. Break below = first crack. Wyckoff: MARKUP \u2014 breakout highs on 56.9L vs pullback lows 10.1L. Healthy: breakouts attract volume.",
+   "at_second_ll": false,
+   "at_second_hh": true
   },
   {
    "symbol": "AUROPHARMA",
    "name": "Aurobindo Pharma Ltd.",
-   "close": 1676.8,
+   "close": 1674.9,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -5520,7 +5511,7 @@
   {
    "symbol": "COALINDIA",
    "name": "Coal India Ltd.",
-   "close": 420.4,
+   "close": 425.1,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -5616,7 +5607,7 @@
   {
    "symbol": "DIVISLAB",
    "name": "Divi's Laboratories Ltd.",
-   "close": 9249.0,
+   "close": 9196.0,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -5712,7 +5703,7 @@
   {
    "symbol": "GVT&D",
    "name": "GE Vernova T&D India Ltd.",
-   "close": 4253.2,
+   "close": 4247.5,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -5808,7 +5799,7 @@
   {
    "symbol": "INDHOTEL",
    "name": "Indian Hotels Co. Ltd.",
-   "close": 718.0,
+   "close": 725.0,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -5904,7 +5895,7 @@
   {
    "symbol": "LAURUSLABS",
    "name": "Laurus Labs Ltd.",
-   "close": 1984.0,
+   "close": 1971.4,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -6000,7 +5991,7 @@
   {
    "symbol": "LENSKART",
    "name": "Lenskart Solutions Ltd.",
-   "close": 691.15,
+   "close": 692.75,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -6096,7 +6087,7 @@
   {
    "symbol": "MEESHO",
    "name": "Meesho Ltd.",
-   "close": 218.69,
+   "close": 226.5,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -6192,7 +6183,7 @@
   {
    "symbol": "PAYTM",
    "name": "One 97 Communications Ltd.",
-   "close": 1656.0,
+   "close": 1684.0,
    "structure": "UPTREND",
    "raw_structure": "UPTREND",
    "structure_label": "Uptrend (HH + HL)",
@@ -6288,7 +6279,7 @@
   {
    "symbol": "360ONE",
    "name": "360 ONE WAM Ltd.",
-   "close": 1040.0,
+   "close": 1050.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6384,7 +6375,7 @@
   {
    "symbol": "ABB",
    "name": "ABB India Ltd.",
-   "close": 6900.0,
+   "close": 6895.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6485,7 +6476,7 @@
   {
    "symbol": "ABCAPITAL",
    "name": "Aditya Birla Capital Ltd.",
-   "close": 375.05,
+   "close": 377.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6586,7 +6577,7 @@
   {
    "symbol": "ADANIENSOL",
    "name": "Adani Energy Solutions Ltd.",
-   "close": 1326.4,
+   "close": 1353.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6607,14 +6598,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1348.0,
-    "desc": "BOS \u2705 closed below last LL \u20b91348.0 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -6680,14 +6666,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91436.5 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91348.0 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 42.1L vs bounce highs 21.5L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91436.5 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 42.1L vs bounce highs 21.5L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "ADANIENT",
    "name": "Adani Enterprises Ltd.",
-   "close": 2816.8,
+   "close": 2864.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6708,14 +6694,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 2830.5,
-    "desc": "BOS \u2705 closed below last LL \u20b92830.5 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -6781,14 +6762,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93142.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b92830.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 16.4L vs bounce highs 53.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93142.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 16.4L vs bounce highs 53.2L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "AMBUJACEM",
    "name": "Ambuja Cements Ltd.",
-   "close": 362.25,
+   "close": 366.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6889,7 +6870,7 @@
   {
    "symbol": "APLAPOLLO",
    "name": "APL Apollo Tubes Ltd.",
-   "close": 2115.7,
+   "close": 2099.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -6985,7 +6966,7 @@
   {
    "symbol": "ASHOKLEY",
    "name": "Ashok Leyland Ltd.",
-   "close": 150.48,
+   "close": 152.6,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7086,7 +7067,7 @@
   {
    "symbol": "ASIANPAINT",
    "name": "Asian Paints Ltd.",
-   "close": 2407.0,
+   "close": 2366.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7107,9 +7088,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 2397.4,
+    "desc": "BOS \u2705 closed below last LL \u20b92397.4 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7175,14 +7161,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92475.1 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 5.9L vs bounce highs 4.1L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92475.1 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b92397.4 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 5.9L vs bounce highs 4.1L. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "ASTRAL",
    "name": "Astral Ltd.",
-   "close": 1344.0,
+   "close": 1362.1,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7203,14 +7189,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1355.0,
-    "desc": "BOS \u2705 closed below last LL \u20b91355.0 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7276,14 +7257,14 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91581.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91355.0 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 4.7L vs bounce highs 1.2Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91581.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 4.7L vs bounce highs 1.2Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "ATGL",
    "name": "Adani Total Gas Ltd.",
-   "close": 583.05,
+   "close": 583.25,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7379,7 +7360,7 @@
   {
    "symbol": "AXISBANK",
    "name": "Axis Bank Ltd.",
-   "close": 1217.1,
+   "close": 1222.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7475,7 +7456,7 @@
   {
    "symbol": "BAJFINANCE",
    "name": "Bajaj Finance Ltd.",
-   "close": 948.3,
+   "close": 970.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7576,7 +7557,7 @@
   {
    "symbol": "BANKBARODA",
    "name": "Bank of Baroda",
-   "close": 230.82,
+   "close": 232.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7597,14 +7578,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 231.92,
-    "desc": "BOS \u2705 closed below last LL \u20b9231.92 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7670,14 +7646,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9237.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9231.92 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 71.1L vs bounce highs 56.6L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9237.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 71.1L vs bounce highs 56.6L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BDL",
    "name": "Bharat Dynamics Ltd.",
-   "close": 1087.9,
+   "close": 1096.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7698,14 +7674,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1094.63,
-    "desc": "BOS \u2705 closed below last LL \u20b91094.63 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7771,14 +7742,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91196.2 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91094.63 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 17.1L vs bounce highs 7.4L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91196.2 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 17.1L vs bounce highs 7.4L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BEL",
    "name": "Bharat Electronics Ltd.",
-   "close": 383.1,
+   "close": 384.85,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7874,7 +7845,7 @@
   {
    "symbol": "BHARATFORG",
    "name": "Bharat Forge Ltd.",
-   "close": 1875.0,
+   "close": 1833.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -7895,9 +7866,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 1850.4,
+    "desc": "BOS \u2705 closed below last LL \u20b91850.4 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -7963,14 +7939,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92023.2 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.4L vs bounce highs 12.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92023.2 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91850.4 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.4L vs bounce highs 12.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "BHEL",
    "name": "Bharat Heavy Electricals Ltd.",
-   "close": 421.0,
+   "close": 429.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8066,7 +8042,7 @@
   {
    "symbol": "BIOCON",
    "name": "Biocon Ltd.",
-   "close": 370.7,
+   "close": 369.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8087,9 +8063,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 370.5,
+    "desc": "BOS \u2705 closed below last LL \u20b9370.5 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -8155,14 +8136,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9397.2 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 30.4L vs bounce highs 26.7L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9397.2 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9370.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 30.4L vs bounce highs 26.7L. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "BLUESTARCO",
    "name": "Blue Star Ltd.",
-   "close": 1459.6,
+   "close": 1510.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8258,7 +8239,7 @@
   {
    "symbol": "BPCL",
    "name": "Bharat Petroleum Corporation Ltd.",
-   "close": 300.6,
+   "close": 296.95,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8354,14 +8335,14 @@
   {
    "symbol": "CANBK",
    "name": "Canara Bank",
-   "close": 118.36,
+   "close": 118.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
    "last_high": {
     "label": "LH",
-    "price": 131.43,
-    "date": "2026-08-27"
+    "price": 126.7,
+    "date": "2026-09-25"
    },
    "last_low": {
     "label": "LL",
@@ -8370,7 +8351,7 @@
    },
    "consec_hh": 0,
    "consec_ll": 1,
-   "consec_lh": 1,
+   "consec_lh": 2,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
@@ -8389,19 +8370,14 @@
    "wyckoff": {
     "phase": "MARKDOWN",
     "conviction": "HIGH",
-    "vol_at_last_high": 10921428,
+    "vol_at_last_high": 8341932,
     "vol_at_last_low": 13945737,
-    "note": "MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 1.1Cr. Real sellers driving down."
+    "note": "MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 83.4L. Real sellers driving down."
    },
    "wyckoff_phase": "MARKDOWN",
    "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 1.1Cr. Real sellers driving down.",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 83.4L. Real sellers driving down.",
    "sequence": [
-    {
-     "date": "2026-06-18",
-     "price": 136.33,
-     "label": "HH"
-    },
     {
      "date": "2026-06-30",
      "price": 124.61,
@@ -8446,16 +8422,21 @@
      "date": "2026-09-16",
      "price": 121.81,
      "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 126.7,
+     "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9131.43 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9121.81 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 1.1Cr. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9126.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9121.81 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 83.4L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "CGPOWER",
    "name": "CG Power and Industrial Solutions Ltd.",
-   "close": 879.0,
+   "close": 882.3,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8551,14 +8532,14 @@
   {
    "symbol": "CIPLA",
    "name": "Cipla Ltd.",
-   "close": 1344.0,
+   "close": 1335.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
    "last_high": {
     "label": "LH",
-    "price": 1488.1,
-    "date": "2026-08-06"
+    "price": 1421.0,
+    "date": "2026-09-25"
    },
    "last_low": {
     "label": "LL",
@@ -8567,7 +8548,7 @@
    },
    "consec_hh": 0,
    "consec_ll": 1,
-   "consec_lh": 1,
+   "consec_lh": 2,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
@@ -8586,19 +8567,14 @@
    "wyckoff": {
     "phase": "MARKDOWN",
     "conviction": "LOW",
-    "vol_at_last_high": 1462279,
+    "vol_at_last_high": 1166527,
     "vol_at_last_low": 911572,
-    "note": "MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 14.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
+    "note": "MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 11.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
    },
    "wyckoff_phase": "MARKDOWN",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 14.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 11.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "sequence": [
-    {
-     "date": "2026-06-04",
-     "price": 1341.42,
-     "label": "HL"
-    },
     {
      "date": "2026-06-17",
      "price": 1341.1,
@@ -8643,16 +8619,21 @@
      "date": "2026-09-16",
      "price": 1344.3,
      "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 1421.0,
+     "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91488.1 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91344.3 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 14.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91421.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91344.3 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 9.1L vs bounce highs 11.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "COCHINSHIP",
    "name": "Cochin Shipyard Ltd.",
-   "close": 1287.0,
+   "close": 1283.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8753,7 +8734,7 @@
   {
    "symbol": "CONCOR",
    "name": "Container Corporation of India Ltd.",
-   "close": 442.0,
+   "close": 441.45,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8854,7 +8835,7 @@
   {
    "symbol": "CUMMINSIND",
    "name": "Cummins India Ltd.",
-   "close": 4860.0,
+   "close": 4832.3,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -8875,9 +8856,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 4844.0,
+    "desc": "BOS \u2705 closed below last LL \u20b94844.0 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -8943,14 +8929,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95135.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 4.0L vs bounce highs 2.8L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95135.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b94844.0 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 4.0L vs bounce highs 2.8L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "DABUR",
    "name": "Dabur India Ltd.",
-   "close": 374.25,
+   "close": 378.65,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9044,9 +9030,105 @@
    "at_second_hh": false
   },
   {
+   "symbol": "DLF",
+   "name": "DLF Ltd.",
+   "close": 673.0,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 683.6,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 611.5,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 1,
+   "consec_lh": 1,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "LOW",
+    "vol_at_last_high": 3573018,
+    "vol_at_last_low": 2223983,
+    "note": "MARKDOWN \u2014 breakdown lows on 22.2L vs bounce highs 35.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "LOW",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 22.2L vs bounce highs 35.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "sequence": [
+    {
+     "date": "2026-06-18",
+     "price": 636.01,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-30",
+     "price": 601.1,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-10",
+     "price": 683.42,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 622.78,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-29",
+     "price": 672.0,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-07",
+     "price": 635.05,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-31",
+     "price": 691.05,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 651.3,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 611.5,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 683.6,
+     "label": "LH"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9683.6 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 22.2L vs bounce highs 35.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "DMART",
    "name": "Avenue Supermarts Ltd.",
-   "close": 3813.0,
+   "close": 3567.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9067,9 +9149,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 3650.0,
+    "desc": "BOS \u2705 closed below last LL \u20b93650.0 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -9135,14 +9222,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93868.1 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 7.1L vs bounce highs 4.3L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93868.1 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b93650.0 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 7.1L vs bounce highs 4.3L. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "EICHERMOT",
    "name": "Eicher Motors Ltd.",
-   "close": 6920.0,
+   "close": 7021.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9243,7 +9330,7 @@
   {
    "symbol": "EXIDEIND",
    "name": "Exide Industries Ltd.",
-   "close": 409.45,
+   "close": 405.25,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9339,7 +9426,7 @@
   {
    "symbol": "FEDERALBNK",
    "name": "Federal Bank Ltd.",
-   "close": 318.2,
+   "close": 327.35,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9440,7 +9527,7 @@
   {
    "symbol": "FORTIS",
    "name": "Fortis Healthcare Ltd.",
-   "close": 785.0,
+   "close": 763.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9541,7 +9628,7 @@
   {
    "symbol": "GAIL",
    "name": "GAIL (India) Ltd.",
-   "close": 171.22,
+   "close": 167.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9562,9 +9649,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 168.72,
+    "desc": "BOS \u2705 closed below last LL \u20b9168.72 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -9630,14 +9722,14 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9177.3 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 39.5L vs bounce highs 99.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9177.3 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9168.72 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 39.5L vs bounce highs 99.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "GODFRYPHLP",
    "name": "Godfrey Phillips India Ltd.",
-   "close": 1849.7,
+   "close": 1876.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9738,7 +9830,7 @@
   {
    "symbol": "GODREJPROP",
    "name": "Godrej Properties Ltd.",
-   "close": 1595.8,
+   "close": 1599.9,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9839,7 +9931,7 @@
   {
    "symbol": "GROWW",
    "name": "Billionbrains Garage Ventures Ltd.",
-   "close": 180.11,
+   "close": 187.05,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9860,14 +9952,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 185.35,
-    "desc": "BOS \u2705 closed below last LL \u20b9185.35 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -9933,14 +10020,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9203.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9185.35 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.1Cr vs bounce highs 3.0Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9203.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.1Cr vs bounce highs 3.0Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "HAL",
    "name": "Hindustan Aeronautics Ltd.",
-   "close": 4601.0,
+   "close": 4680.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -9961,14 +10048,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 4615.8,
-    "desc": "BOS \u2705 closed below last LL \u20b94615.8 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -10034,14 +10116,14 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95097.4 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b94615.8 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.8L vs bounce highs 16.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95097.4 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.8L vs bounce highs 16.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "HAVELLS",
    "name": "Havells India Ltd.",
-   "close": 1040.0,
+   "close": 1046.7,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10142,7 +10224,7 @@
   {
    "symbol": "HCLTECH",
    "name": "HCL Technologies Ltd.",
-   "close": 1243.1,
+   "close": 1201.9,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10238,7 +10320,7 @@
   {
    "symbol": "HDFCAMC",
    "name": "HDFC Asset Management Company Ltd.",
-   "close": 2308.1,
+   "close": 2346.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10339,7 +10421,7 @@
   {
    "symbol": "HEROMOTOCO",
    "name": "Hero MotoCorp Ltd.",
-   "close": 5168.0,
+   "close": 5089.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10360,9 +10442,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 5166.0,
+    "desc": "BOS \u2705 closed below last LL \u20b95166.0 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -10428,14 +10515,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95448.5 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.7L vs bounce highs 3.0L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95448.5 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b95166.0 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.7L vs bounce highs 3.0L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "HINDALCO",
    "name": "Hindalco Industries Ltd.",
-   "close": 941.85,
+   "close": 938.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10536,7 +10623,7 @@
   {
    "symbol": "HINDCOPPER",
    "name": "Hindustan Copper Ltd.",
-   "close": 462.15,
+   "close": 478.65,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10557,14 +10644,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 477.5,
-    "desc": "BOS \u2705 closed below last LL \u20b9477.5 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -10630,14 +10712,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9521.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9477.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 72.4L vs bounce highs 77.8L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9521.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 72.4L vs bounce highs 77.8L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "HINDPETRO",
    "name": "Hindustan Petroleum Corporation Ltd.",
-   "close": 345.0,
+   "close": 342.35,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10733,7 +10815,7 @@
   {
    "symbol": "HINDUNILVR",
    "name": "Hindustan Unilever Ltd.",
-   "close": 1836.0,
+   "close": 1838.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10834,7 +10916,7 @@
   {
    "symbol": "HINDZINC",
    "name": "Hindustan Zinc Ltd.",
-   "close": 555.05,
+   "close": 560.95,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -10855,14 +10937,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 560.9,
-    "desc": "BOS \u2705 closed below last LL \u20b9560.9 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -10928,14 +11005,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9602.8 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9560.9 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 24.0L vs bounce highs 40.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9602.8 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 24.0L vs bounce highs 40.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "HYUNDAI",
    "name": "Hyundai Motor India Ltd.",
-   "close": 2024.0,
+   "close": 2000.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11036,7 +11113,7 @@
   {
    "symbol": "ICICIAMC",
    "name": "ICICI Prudential Asset Management Company Ltd.",
-   "close": 3084.4,
+   "close": 3061.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11132,7 +11209,7 @@
   {
    "symbol": "ICICIBANK",
    "name": "ICICI Bank Ltd.",
-   "close": 1310.6,
+   "close": 1332.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11233,7 +11310,7 @@
   {
    "symbol": "ICICIGI",
    "name": "ICICI Lombard General Insurance Company Ltd.",
-   "close": 1563.0,
+   "close": 1600.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11329,7 +11406,7 @@
   {
    "symbol": "INDIGO",
    "name": "InterGlobe Aviation Ltd.",
-   "close": 4929.9,
+   "close": 4935.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11425,7 +11502,7 @@
   {
    "symbol": "INDUSINDBK",
    "name": "IndusInd Bank Ltd.",
-   "close": 886.85,
+   "close": 886.6,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11526,7 +11603,7 @@
   {
    "symbol": "INFY",
    "name": "Infosys Ltd.",
-   "close": 1035.0,
+   "close": 1020.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11547,9 +11624,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 1026.5,
+    "desc": "BOS \u2705 closed below last LL \u20b91026.5 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -11615,14 +11697,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91097.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 1.5Cr. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91097.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91026.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.4Cr vs bounce highs 1.5Cr. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "IOC",
    "name": "Indian Oil Corporation Ltd.",
-   "close": 131.34,
+   "close": 130.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11723,7 +11805,7 @@
   {
    "symbol": "IRCTC",
    "name": "Indian Railway Catering And Tourism Corporation Ltd.",
-   "close": 454.1,
+   "close": 452.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11819,7 +11901,7 @@
   {
    "symbol": "IREDA",
    "name": "Indian Renewable Energy Development Agency Ltd.",
-   "close": 111.0,
+   "close": 109.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -11915,7 +11997,7 @@
   {
    "symbol": "JINDALSTEL",
    "name": "Jindal Steel Ltd.",
-   "close": 1100.5,
+   "close": 1097.3,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12011,7 +12093,7 @@
   {
    "symbol": "JIOFIN",
    "name": "Jio Financial Services Ltd.",
-   "close": 212.5,
+   "close": 212.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12112,7 +12194,7 @@
   {
    "symbol": "JSWENERGY",
    "name": "JSW Energy Ltd.",
-   "close": 485.0,
+   "close": 491.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12213,7 +12295,7 @@
   {
    "symbol": "JSWSTEEL",
    "name": "JSW Steel Ltd.",
-   "close": 1233.0,
+   "close": 1235.3,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12309,7 +12391,7 @@
   {
    "symbol": "KEI",
    "name": "KEI Industries Ltd.",
-   "close": 4502.0,
+   "close": 4638.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12405,7 +12487,7 @@
   {
    "symbol": "LODHA",
    "name": "Lodha Developers Ltd.",
-   "close": 1105.6,
+   "close": 1132.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12501,7 +12583,7 @@
   {
    "symbol": "LT",
    "name": "Larsen & Toubro Ltd.",
-   "close": 3693.4,
+   "close": 3750.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12602,7 +12684,7 @@
   {
    "symbol": "LTF",
    "name": "L&T Finance Ltd.",
-   "close": 264.35,
+   "close": 263.75,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12703,7 +12785,7 @@
   {
    "symbol": "LUPIN",
    "name": "Lupin Ltd.",
-   "close": 2031.2,
+   "close": 2011.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12804,7 +12886,7 @@
   {
    "symbol": "M&M",
    "name": "Mahindra & Mahindra Ltd.",
-   "close": 2860.0,
+   "close": 2857.6,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -12905,7 +12987,7 @@
   {
    "symbol": "M&MFIN",
    "name": "Mahindra & Mahindra Financial Services Ltd.",
-   "close": 319.75,
+   "close": 326.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13004,9 +13086,105 @@
    "at_second_hh": false
   },
   {
+   "symbol": "MAHABANK",
+   "name": "Bank of Maharashtra",
+   "close": 80.9,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 84.88,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 79.2,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 1,
+   "consec_lh": 1,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "HIGH",
+    "vol_at_last_high": 12167444,
+    "vol_at_last_low": 18702078,
+    "note": "MARKDOWN \u2014 breakdown lows on 1.9Cr vs bounce highs 1.2Cr. Real sellers driving down."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "HIGH",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 1.9Cr vs bounce highs 1.2Cr. Real sellers driving down.",
+   "sequence": [
+    {
+     "date": "2026-06-29",
+     "price": 94.5,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-24",
+     "price": 78.02,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-27",
+     "price": 82.29,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-07",
+     "price": 77.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-13",
+     "price": 83.1,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-26",
+     "price": 87.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 81.31,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-07",
+     "price": 87.5,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 79.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 84.88,
+     "label": "LH"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b984.88 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.9Cr vs bounce highs 1.2Cr. Real sellers driving down.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "MARICO",
    "name": "Marico Ltd.",
-   "close": 781.35,
+   "close": 790.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13107,7 +13285,7 @@
   {
    "symbol": "MARUTI",
    "name": "Maruti Suzuki India Ltd.",
-   "close": 11386.0,
+   "close": 11532.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13206,105 +13384,9 @@
    "at_second_hh": false
   },
   {
-   "symbol": "MCX",
-   "name": "Multi Commodity Exchange of India Ltd.",
-   "close": 3204.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 3398.0,
-    "date": "2026-09-09"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 3056.6,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 1,
-   "consec_lh": 1,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 2174879,
-    "vol_at_last_low": 1971522,
-    "note": "MARKDOWN \u2014 breakdown lows on 19.7L vs bounce highs 21.7L. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 19.7L vs bounce highs 21.7L. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-06-17",
-     "price": 2902.79,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-19",
-     "price": 2755.05,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-02",
-     "price": 3030.57,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-07",
-     "price": 2571.2,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-15",
-     "price": 2934.91,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-05",
-     "price": 2559.23,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 3400.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-04",
-     "price": 3165.6,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 3398.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 3056.6,
-     "label": "LL"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b93398.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 19.7L vs bounce highs 21.7L. Real sellers driving down.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "MFSL",
    "name": "Max Financial Services Ltd.",
-   "close": 1392.0,
+   "close": 1348.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13403,105 +13485,9 @@
    "at_second_hh": false
   },
   {
-   "symbol": "MOTHERSON",
-   "name": "Samvardhana Motherson International Ltd.",
-   "close": 157.03,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 165.58,
-    "date": "2026-09-11"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 156.4,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 0,
-   "consec_ll": 1,
-   "consec_lh": 2,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 13200183,
-    "vol_at_last_low": 8769455,
-    "note": "MARKDOWN \u2014 breakdown lows on 87.7L vs bounce highs 1.3Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 87.7L vs bounce highs 1.3Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-06-15",
-     "price": 149.64,
-     "label": "LH"
-    },
-    {
-     "date": "2026-06-23",
-     "price": 141.51,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-25",
-     "price": 154.98,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-07",
-     "price": 136.47,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-10",
-     "price": 172.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-19",
-     "price": 173.27,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 170.68,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 159.92,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-11",
-     "price": 165.58,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 156.4,
-     "label": "LL"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9165.58 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 87.7L vs bounce highs 1.3Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "MOTILALOFS",
    "name": "Motilal Oswal Financial Services Ltd.",
-   "close": 989.9,
+   "close": 1011.1,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13597,7 +13583,7 @@
   {
    "symbol": "MPHASIS",
    "name": "MphasiS Ltd.",
-   "close": 2250.2,
+   "close": 2297.1,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13618,14 +13604,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 2273.3,
-    "desc": "BOS \u2705 closed below last LL \u20b92273.3 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -13691,14 +13672,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92461.1 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b92273.3 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.8L vs bounce highs 11.8L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92461.1 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.8L vs bounce highs 11.8L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "MUTHOOTFIN",
    "name": "Muthoot Finance Ltd.",
-   "close": 2697.1,
+   "close": 2716.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13799,7 +13780,7 @@
   {
    "symbol": "NESTLEIND",
    "name": "Nestle India Ltd.",
-   "close": 1307.7,
+   "close": 1297.1,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -13900,7 +13881,7 @@
   {
    "symbol": "NLCINDIA",
    "name": "NLC India Ltd.",
-   "close": 253.2,
+   "close": 252.45,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14001,7 +13982,7 @@
   {
    "symbol": "NMDC",
    "name": "NMDC Ltd.",
-   "close": 74.64,
+   "close": 73.74,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14102,7 +14083,7 @@
   {
    "symbol": "NTPC",
    "name": "NTPC Ltd.",
-   "close": 315.1,
+   "close": 321.8,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14123,14 +14104,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 320.04,
-    "desc": "BOS \u2705 closed below last LL \u20b9320.04 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -14196,14 +14172,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9337.5 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9320.04 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.8Cr vs bounce highs 1.2Cr. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9337.5 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.8Cr vs bounce highs 1.2Cr. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "NYKAA",
    "name": "FSN E-Commerce Ventures Ltd.",
-   "close": 324.95,
+   "close": 339.55,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14299,14 +14275,14 @@
   {
    "symbol": "OBEROIRLTY",
    "name": "Oberoi Realty Ltd.",
-   "close": 1754.6,
+   "close": 1751.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
    "last_high": {
     "label": "LH",
-    "price": 1932.8,
-    "date": "2026-09-04"
+    "price": 1882.9,
+    "date": "2026-09-25"
    },
    "last_low": {
     "label": "LL",
@@ -14315,7 +14291,7 @@
    },
    "consec_hh": 0,
    "consec_ll": 2,
-   "consec_lh": 1,
+   "consec_lh": 2,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
@@ -14329,19 +14305,14 @@
    "wyckoff": {
     "phase": "MARKDOWN",
     "conviction": "HIGH",
-    "vol_at_last_high": 585940,
+    "vol_at_last_high": 638248,
     "vol_at_last_low": 599621,
-    "note": "MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 5.9L. Real sellers driving down."
+    "note": "MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 6.4L. Real sellers driving down."
    },
    "wyckoff_phase": "MARKDOWN",
    "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 5.9L. Real sellers driving down.",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 6.4L. Real sellers driving down.",
    "sequence": [
-    {
-     "date": "2026-05-18",
-     "price": 1569.3,
-     "label": "HL"
-    },
     {
      "date": "2026-05-29",
      "price": 1742.12,
@@ -14386,16 +14357,21 @@
      "date": "2026-09-16",
      "price": 1660.0,
      "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 1882.9,
+     "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91932.8 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 5.9L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91882.9 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 6.0L vs bounce highs 6.4L. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "PERSISTENT",
    "name": "Persistent Systems Ltd.",
-   "close": 5367.0,
+   "close": 5530.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14416,14 +14392,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 5370.5,
-    "desc": "BOS \u2705 closed below last LL \u20b95370.5 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -14489,14 +14460,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95759.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b95370.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 5.2L vs bounce highs 8.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b95759.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 5.2L vs bounce highs 8.1L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "PFC",
    "name": "Power Finance Corporation Ltd.",
-   "close": 318.0,
+   "close": 322.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14597,7 +14568,7 @@
   {
    "symbol": "PIDILITIND",
    "name": "Pidilite Industries Ltd.",
-   "close": 1464.0,
+   "close": 1487.7,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14698,7 +14669,7 @@
   {
    "symbol": "PIIND",
    "name": "PI Industries Ltd.",
-   "close": 2236.0,
+   "close": 2220.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14792,9 +14763,105 @@
    "at_second_hh": false
   },
   {
+   "symbol": "POLYCAB",
+   "name": "Polycab India Ltd.",
+   "close": 8080.0,
+   "structure": "DOWNTREND",
+   "raw_structure": "DOWNTREND",
+   "structure_label": "Downtrend (LH + LL)",
+   "last_high": {
+    "label": "LH",
+    "price": 8463.0,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 8072.0,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 0,
+   "consec_ll": 1,
+   "consec_lh": 1,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {
+    "phase": "MARKDOWN",
+    "conviction": "LOW",
+    "vol_at_last_high": 296612,
+    "vol_at_last_low": 246715,
+    "note": "MARKDOWN \u2014 breakdown lows on 2.5L vs bounce highs 3.0L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
+   },
+   "wyckoff_phase": "MARKDOWN",
+   "wyckoff_conviction": "LOW",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 2.5L vs bounce highs 3.0L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "sequence": [
+    {
+     "date": "2026-06-22",
+     "price": 10126.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-29",
+     "price": 9420.5,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-09",
+     "price": 9001.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-15",
+     "price": 9632.5,
+     "label": "LH"
+    },
+    {
+     "date": "2026-07-20",
+     "price": 8791.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-11",
+     "price": 9025.0,
+     "label": "HL"
+    },
+    {
+     "date": "2026-08-17",
+     "price": 9395.0,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-31",
+     "price": 9445.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 8072.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 8463.0,
+     "label": "LH"
+    }
+   ],
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b98463.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.5L vs bounce highs 3.0L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
    "symbol": "POWERGRID",
    "name": "Power Grid Corporation of India Ltd.",
-   "close": 254.55,
+   "close": 257.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14895,7 +14962,7 @@
   {
    "symbol": "POWERINDIA",
    "name": "Hitachi Energy India Ltd.",
-   "close": 31290.0,
+   "close": 31500.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -14991,7 +15058,7 @@
   {
    "symbol": "PRESTIGE",
    "name": "Prestige Estates Projects Ltd.",
-   "close": 1486.1,
+   "close": 1445.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15087,7 +15154,7 @@
   {
    "symbol": "RADICO",
    "name": "Radico Khaitan Ltd",
-   "close": 4237.0,
+   "close": 4289.1,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15188,7 +15255,7 @@
   {
    "symbol": "RELIANCE",
    "name": "Reliance Industries Ltd.",
-   "close": 1167.7,
+   "close": 1186.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15289,7 +15356,7 @@
   {
    "symbol": "RVNL",
    "name": "Rail Vikas Nigam Ltd.",
-   "close": 197.0,
+   "close": 196.95,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15385,7 +15452,7 @@
   {
    "symbol": "SBIN",
    "name": "State Bank of India",
-   "close": 954.1,
+   "close": 958.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15486,7 +15553,7 @@
   {
    "symbol": "SHRIRAMFIN",
    "name": "Shriram Finance Ltd.",
-   "close": 945.0,
+   "close": 971.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15587,7 +15654,7 @@
   {
    "symbol": "SRF",
    "name": "SRF Ltd.",
-   "close": 2486.2,
+   "close": 2460.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15683,7 +15750,7 @@
   {
    "symbol": "SUNPHARMA",
    "name": "Sun Pharmaceutical Industries Ltd.",
-   "close": 1801.0,
+   "close": 1779.7,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15784,7 +15851,7 @@
   {
    "symbol": "SUPREMEIND",
    "name": "Supreme Industries Ltd.",
-   "close": 3380.0,
+   "close": 3398.9,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15880,7 +15947,7 @@
   {
    "symbol": "SUZLON",
    "name": "Suzlon Energy Ltd.",
-   "close": 38.91,
+   "close": 38.92,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -15981,7 +16048,7 @@
   {
    "symbol": "TATACOMM",
    "name": "Tata Communications Ltd.",
-   "close": 1683.0,
+   "close": 1677.2,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16077,7 +16144,7 @@
   {
    "symbol": "TATACONSUM",
    "name": "Tata Consumer Products Ltd.",
-   "close": 957.0,
+   "close": 953.75,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16178,7 +16245,7 @@
   {
    "symbol": "TCS",
    "name": "Tata Consultancy Services Ltd.",
-   "close": 2075.0,
+   "close": 2114.4,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16279,7 +16346,7 @@
   {
    "symbol": "TECHM",
    "name": "Tech Mahindra Ltd.",
-   "close": 1533.0,
+   "close": 1535.9,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16375,7 +16442,7 @@
   {
    "symbol": "TIINDIA",
    "name": "Tube Investments of India Ltd.",
-   "close": 2340.0,
+   "close": 2320.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16476,7 +16543,7 @@
   {
    "symbol": "TMPV",
    "name": "Tata Motors Passenger Vehicles Ltd.",
-   "close": 279.4,
+   "close": 288.65,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16577,7 +16644,7 @@
   {
    "symbol": "TORNTPHARM",
    "name": "Torrent Pharmaceuticals Ltd.",
-   "close": 4767.3,
+   "close": 4772.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16774,7 +16841,7 @@
   {
    "symbol": "TVSMOTOR",
    "name": "TVS Motor Company Ltd.",
-   "close": 4021.0,
+   "close": 4031.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16870,7 +16937,7 @@
   {
    "symbol": "ULTRACEMCO",
    "name": "UltraTech Cement Ltd.",
-   "close": 10710.0,
+   "close": 10850.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -16966,14 +17033,14 @@
   {
    "symbol": "UNIONBANK",
    "name": "Union Bank of India",
-   "close": 167.59,
+   "close": 167.97,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
    "last_high": {
     "label": "LH",
-    "price": 190.75,
-    "date": "2026-09-03"
+    "price": 180.72,
+    "date": "2026-09-25"
    },
    "last_low": {
     "label": "LL",
@@ -16982,7 +17049,7 @@
    },
    "consec_hh": 0,
    "consec_ll": 1,
-   "consec_lh": 1,
+   "consec_lh": 2,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
@@ -17001,19 +17068,14 @@
    "wyckoff": {
     "phase": "MARKDOWN",
     "conviction": "LOW",
-    "vol_at_last_high": 13672026,
+    "vol_at_last_high": 6466107,
     "vol_at_last_low": 4444675,
-    "note": "MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 1.4Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
+    "note": "MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 64.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
    },
    "wyckoff_phase": "MARKDOWN",
    "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 1.4Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 64.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 158.25,
-     "label": "HL"
-    },
     {
      "date": "2026-06-18",
      "price": 172.51,
@@ -17058,16 +17120,21 @@
      "date": "2026-09-15",
      "price": 174.74,
      "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 180.72,
+     "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9190.75 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9174.74 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 1.4Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9180.72 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9174.74 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 44.4L vs bounce highs 64.7L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "UNITDSPR",
    "name": "United Spirits Ltd.",
-   "close": 1335.1,
+   "close": 1369.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17088,14 +17155,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 1368.1,
-    "desc": "BOS \u2705 closed below last LL \u20b91368.1 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -17161,14 +17223,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91442.0 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b91368.1 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 2.2L. Real sellers driving down.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b91442.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.4L vs bounce highs 2.2L. Real sellers driving down.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "VAML",
    "name": "Vedanta Aluminium Metal Ltd.",
-   "close": 402.75,
+   "close": 396.6,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17189,9 +17251,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 401.15,
+    "desc": "BOS \u2705 closed below last LL \u20b9401.15 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -17252,110 +17319,14 @@
      "label": "LL"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9449.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 54.2L vs bounce highs 67.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "VBL",
-   "name": "Varun Beverages Ltd.",
-   "close": 425.3,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 438.6,
-    "date": "2026-09-23"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 396.2,
-    "date": "2026-09-09"
-   },
-   "consec_hh": 0,
-   "consec_ll": 3,
-   "consec_lh": 4,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "3 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 4205329,
-    "vol_at_last_low": 11284331,
-    "note": "MARKDOWN \u2014 breakdown lows on 1.1Cr vs bounce highs 42.1L. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 1.1Cr vs bounce highs 42.1L. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-05-29",
-     "price": 543.8,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-08",
-     "price": 510.93,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-17",
-     "price": 555.18,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-01",
-     "price": 523.22,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-28",
-     "price": 422.53,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-10",
-     "price": 450.5,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 447.9,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 400.45,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 396.2,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-23",
-     "price": 438.6,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9438.6 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 1.1Cr vs bounce highs 42.1L. Real sellers driving down. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9449.7 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9401.15 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 54.2L vs bounce highs 67.5L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 3 consecutive LL \u2014 extended downtrend, watch for first HL.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "VEDL",
    "name": "Vedanta Ltd.",
-   "close": 252.05,
+   "close": 255.05,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17376,14 +17347,9 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {
-    "fired": true,
-    "dir": "DOWN",
-    "level": 252.5,
-    "desc": "BOS \u2705 closed below last LL \u20b9252.5 \u2014 downtrend confirmed continuing"
-   },
-   "bos_fired": true,
-   "bos_dir": "DOWN",
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -17449,14 +17415,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9271.35 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b9252.5 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 57.9L vs bounce highs 1.2Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9271.35 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 57.9L vs bounce highs 1.2Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": false,
    "at_second_hh": false
   },
   {
    "symbol": "VMM",
    "name": "Vishal Mega Mart Ltd.",
-   "close": 99.5,
+   "close": 98.25,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17477,9 +17443,14 @@
    "reversal_trigger": null,
    "reversal_invalidate": null,
    "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
+   "bos": {
+    "fired": true,
+    "dir": "DOWN",
+    "level": 98.9,
+    "desc": "BOS \u2705 closed below last LL \u20b998.9 \u2014 downtrend confirmed continuing"
+   },
+   "bos_fired": true,
+   "bos_dir": "DOWN",
    "choch": {},
    "choch_fired": false,
    "choch_dir": null,
@@ -17545,14 +17516,14 @@
      "label": "LH"
     }
    ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9108.23 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 95.3L vs bounce highs 1.8Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
+   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9108.23 is ceiling; rallies into it get sold. Close above = first turn signal. BOS \u2705 closed below last LL \u20b998.9 \u2014 downtrend confirmed continuing. Wyckoff: MARKDOWN \u2014 breakdown lows on 95.3L vs bounce highs 1.8Cr. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
    "at_second_ll": true,
    "at_second_hh": false
   },
   {
    "symbol": "WAAREEENER",
    "name": "Waaree Energies Ltd.",
-   "close": 2340.0,
+   "close": 2346.5,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17653,7 +17624,7 @@
   {
    "symbol": "ZYDUSLIFE",
    "name": "Zydus Lifesciences Ltd.",
-   "close": 1145.7,
+   "close": 1139.0,
    "structure": "DOWNTREND",
    "raw_structure": "DOWNTREND",
    "structure_label": "Downtrend (LH + LL)",
@@ -17749,7 +17720,7 @@
   {
    "symbol": "ADANIPORTS",
    "name": "Adani Ports and Special Economic Zone Ltd.",
-   "close": 1737.8,
+   "close": 1774.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -17839,7 +17810,7 @@
   {
    "symbol": "APARINDS",
    "name": "Apar Industries Ltd.",
-   "close": 17648.0,
+   "close": 18102.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -17929,7 +17900,7 @@
   {
    "symbol": "COFORGE",
    "name": "Coforge Ltd.",
-   "close": 1826.0,
+   "close": 1852.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18019,7 +17990,7 @@
   {
    "symbol": "COLPAL",
    "name": "Colgate Palmolive (India) Ltd.",
-   "close": 1735.0,
+   "close": 1775.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18109,7 +18080,7 @@
   {
    "symbol": "DIXON",
    "name": "Dixon Technologies (India) Ltd.",
-   "close": 12700.0,
+   "close": 12748.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18197,99 +18168,9 @@
    "at_second_hh": false
   },
   {
-   "symbol": "DLF",
-   "name": "DLF Ltd.",
-   "close": 658.4,
-   "structure": "MIXED",
-   "raw_structure": "MIXED",
-   "structure_label": "No clean structure",
-   "last_high": {
-    "label": "HH",
-    "price": 691.05,
-    "date": "2026-08-31"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 611.5,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 1,
-   "consec_ll": 1,
-   "consec_lh": 0,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {},
-   "wyckoff_phase": null,
-   "wyckoff_conviction": null,
-   "wyckoff_note": null,
-   "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 548.61,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-18",
-     "price": 636.01,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-30",
-     "price": 601.1,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-10",
-     "price": 683.42,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 622.78,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-29",
-     "price": 672.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-07",
-     "price": 635.05,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 691.05,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 651.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 611.5,
-     "label": "LL"
-    }
-   ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b9691.05, last swing low \u20b9611.5. Wait for HH/HL or LH/LL sequence.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "ENRIN",
    "name": "Siemens Energy India Ltd.",
-   "close": 3334.0,
+   "close": 3316.4,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18379,7 +18260,7 @@
   {
    "symbol": "ETERNAL",
    "name": "Eternal Ltd.",
-   "close": 313.9,
+   "close": 320.8,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18469,7 +18350,7 @@
   {
    "symbol": "GMRAIRPORT",
    "name": "GMR Airports Ltd.",
-   "close": 93.16,
+   "close": 92.79,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18559,7 +18440,7 @@
   {
    "symbol": "HDFCBANK",
    "name": "HDFC Bank Ltd.",
-   "close": 721.2,
+   "close": 704.8,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18649,7 +18530,7 @@
   {
    "symbol": "HDFCLIFE",
    "name": "HDFC Life Insurance Company Ltd.",
-   "close": 534.2,
+   "close": 531.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18739,7 +18620,7 @@
   {
    "symbol": "IDFCFIRSTB",
    "name": "IDFC First Bank Ltd.",
-   "close": 80.39,
+   "close": 82.22,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18829,7 +18710,7 @@
   {
    "symbol": "INDIANB",
    "name": "Indian Bank",
-   "close": 793.15,
+   "close": 810.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -18919,7 +18800,7 @@
   {
    "symbol": "IRFC",
    "name": "Indian Railway Finance Corporation Ltd.",
-   "close": 77.06,
+   "close": 76.5,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19007,99 +18888,9 @@
    "at_second_hh": false
   },
   {
-   "symbol": "MAHABANK",
-   "name": "Bank of Maharashtra",
-   "close": 80.5,
-   "structure": "MIXED",
-   "raw_structure": "MIXED",
-   "structure_label": "No clean structure",
-   "last_high": {
-    "label": "HH",
-    "price": 87.5,
-    "date": "2026-09-07"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 79.2,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 3,
-   "consec_ll": 1,
-   "consec_lh": 0,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {},
-   "wyckoff_phase": null,
-   "wyckoff_conviction": null,
-   "wyckoff_note": null,
-   "sequence": [
-    {
-     "date": "2026-06-18",
-     "price": 91.2,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-29",
-     "price": 94.5,
-     "label": "HH"
-    },
-    {
-     "date": "2026-07-24",
-     "price": 78.02,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-27",
-     "price": 82.29,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-07",
-     "price": 77.2,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-13",
-     "price": 83.1,
-     "label": "HH"
-    },
-    {
-     "date": "2026-08-26",
-     "price": 87.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 81.31,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-07",
-     "price": 87.5,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 79.2,
-     "label": "LL"
-    }
-   ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b987.5, last swing low \u20b979.2. Wait for HH/HL or LH/LL sequence. \u26a0\ufe0f 3 consecutive HH \u2014 extended uptrend, watch for first LH.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "MAZDOCK",
    "name": "Mazagoan Dock Shipbuilders Ltd.",
-   "close": 2064.0,
+   "close": 2074.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19187,9 +18978,279 @@
    "at_second_hh": false
   },
   {
+   "symbol": "MCX",
+   "name": "Multi Commodity Exchange of India Ltd.",
+   "close": 3181.7,
+   "structure": "MIXED",
+   "raw_structure": "MIXED",
+   "structure_label": "No clean structure",
+   "last_high": {
+    "label": "HH",
+    "price": 3481.4,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 3056.6,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 1,
+   "consec_ll": 1,
+   "consec_lh": 0,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {},
+   "wyckoff_phase": null,
+   "wyckoff_conviction": null,
+   "wyckoff_note": null,
+   "sequence": [
+    {
+     "date": "2026-06-19",
+     "price": 2755.05,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-02",
+     "price": 3030.57,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-07",
+     "price": 2571.2,
+     "label": "LL"
+    },
+    {
+     "date": "2026-07-15",
+     "price": 2934.91,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-05",
+     "price": 2559.23,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-31",
+     "price": 3400.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-09-04",
+     "price": 3165.6,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-09",
+     "price": 3398.0,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 3056.6,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 3481.4,
+     "label": "HH"
+    }
+   ],
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b93481.4, last swing low \u20b93056.6. Wait for HH/HL or LH/LL sequence.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
+   "symbol": "MOTHERSON",
+   "name": "Samvardhana Motherson International Ltd.",
+   "close": 156.5,
+   "structure": "MIXED",
+   "raw_structure": "MIXED",
+   "structure_label": "No clean structure",
+   "last_high": {
+    "label": "HH",
+    "price": 166.22,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 156.4,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 1,
+   "consec_ll": 1,
+   "consec_lh": 0,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {},
+   "wyckoff_phase": null,
+   "wyckoff_conviction": null,
+   "wyckoff_note": null,
+   "sequence": [
+    {
+     "date": "2026-06-23",
+     "price": 141.51,
+     "label": "HL"
+    },
+    {
+     "date": "2026-06-25",
+     "price": 154.98,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-07",
+     "price": 136.47,
+     "label": "LL"
+    },
+    {
+     "date": "2026-08-10",
+     "price": 172.0,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-19",
+     "price": 173.27,
+     "label": "HH"
+    },
+    {
+     "date": "2026-08-31",
+     "price": 170.68,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-02",
+     "price": 159.92,
+     "label": "HL"
+    },
+    {
+     "date": "2026-09-11",
+     "price": 165.58,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 156.4,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 166.22,
+     "label": "HH"
+    }
+   ],
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b9166.22, last swing low \u20b9156.4. Wait for HH/HL or LH/LL sequence.",
+   "at_second_ll": false,
+   "at_second_hh": false
+  },
+  {
+   "symbol": "PAGEIND",
+   "name": "Page Industries Ltd.",
+   "close": 37465.0,
+   "structure": "MIXED",
+   "raw_structure": "MIXED",
+   "structure_label": "No clean structure",
+   "last_high": {
+    "label": "HH",
+    "price": 37845.0,
+    "date": "2026-09-25"
+   },
+   "last_low": {
+    "label": "LL",
+    "price": 34000.0,
+    "date": "2026-09-16"
+   },
+   "consec_hh": 1,
+   "consec_ll": 2,
+   "consec_lh": 0,
+   "consec_hl": 0,
+   "reversal_trigger": null,
+   "reversal_invalidate": null,
+   "extended_warning": null,
+   "bos": {},
+   "bos_fired": false,
+   "bos_dir": null,
+   "choch": {},
+   "choch_fired": false,
+   "choch_dir": null,
+   "wyckoff": {},
+   "wyckoff_phase": null,
+   "wyckoff_conviction": null,
+   "wyckoff_note": null,
+   "sequence": [
+    {
+     "date": "2026-05-22",
+     "price": 40109.99,
+     "label": "HH"
+    },
+    {
+     "date": "2026-06-02",
+     "price": 36384.12,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-01",
+     "price": 43614.21,
+     "label": "HH"
+    },
+    {
+     "date": "2026-07-10",
+     "price": 39034.49,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-21",
+     "price": 39268.2,
+     "label": "HL"
+    },
+    {
+     "date": "2026-07-30",
+     "price": 41361.64,
+     "label": "LH"
+    },
+    {
+     "date": "2026-08-26",
+     "price": 35100.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-08",
+     "price": 36540.0,
+     "label": "LH"
+    },
+    {
+     "date": "2026-09-16",
+     "price": 34000.0,
+     "label": "LL"
+    },
+    {
+     "date": "2026-09-25",
+     "price": 37845.0,
+     "label": "HH"
+    }
+   ],
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b937845.0, last swing low \u20b934000.0. Wait for HH/HL or LH/LL sequence.",
+   "at_second_ll": true,
+   "at_second_hh": false
+  },
+  {
    "symbol": "PATANJALI",
    "name": "Patanjali Foods Ltd.",
-   "close": 355.15,
+   "close": 355.7,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19279,7 +19340,7 @@
   {
    "symbol": "PHOENIXLTD",
    "name": "Phoenix Mills Ltd.",
-   "close": 1930.0,
+   "close": 1935.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19369,7 +19430,7 @@
   {
    "symbol": "POLICYBZR",
    "name": "PB Fintech Ltd.",
-   "close": 980.0,
+   "close": 976.2,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19457,99 +19518,9 @@
    "at_second_hh": false
   },
   {
-   "symbol": "POLYCAB",
-   "name": "Polycab India Ltd.",
-   "close": 7990.0,
-   "structure": "MIXED",
-   "raw_structure": "MIXED",
-   "structure_label": "No clean structure",
-   "last_high": {
-    "label": "HH",
-    "price": 9445.0,
-    "date": "2026-08-31"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 8072.0,
-    "date": "2026-09-16"
-   },
-   "consec_hh": 1,
-   "consec_ll": 1,
-   "consec_lh": 0,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {},
-   "wyckoff_phase": null,
-   "wyckoff_conviction": null,
-   "wyckoff_note": null,
-   "sequence": [
-    {
-     "date": "2026-06-11",
-     "price": 9308.33,
-     "label": "HL"
-    },
-    {
-     "date": "2026-06-22",
-     "price": 10126.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-06-29",
-     "price": 9420.5,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-09",
-     "price": 9001.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-07-15",
-     "price": 9632.5,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-20",
-     "price": 8791.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-08-11",
-     "price": 9025.0,
-     "label": "HL"
-    },
-    {
-     "date": "2026-08-17",
-     "price": 9395.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-08-31",
-     "price": 9445.0,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 8072.0,
-     "label": "LL"
-    }
-   ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b99445.0, last swing low \u20b98072.0. Wait for HH/HL or LH/LL sequence.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "PREMIERENE",
    "name": "Premier Energies Ltd.",
-   "close": 878.05,
+   "close": 891.95,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19639,7 +19610,7 @@
   {
    "symbol": "RECLTD",
    "name": "REC Ltd.",
-   "close": 287.75,
+   "close": 295.65,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19729,7 +19700,7 @@
   {
    "symbol": "SBICARD",
    "name": "SBI Cards and Payment Services Ltd.",
-   "close": 563.2,
+   "close": 566.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19819,7 +19790,7 @@
   {
    "symbol": "SBILIFE",
    "name": "SBI Life Insurance Company Ltd.",
-   "close": 1721.6,
+   "close": 1709.5,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19909,7 +19880,7 @@
   {
    "symbol": "SIEMENS",
    "name": "Siemens Ltd.",
-   "close": 3804.0,
+   "close": 3701.1,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -19999,7 +19970,7 @@
   {
    "symbol": "TATASTEEL",
    "name": "Tata Steel Ltd.",
-   "close": 178.0,
+   "close": 178.14,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
@@ -20089,7 +20060,7 @@
   {
    "symbol": "TITAN",
    "name": "Titan Company Ltd.",
-   "close": 4515.7,
+   "close": 4580.0,
    "structure": "MIXED",
    "raw_structure": "MIXED",
    "structure_label": "No clean structure",
