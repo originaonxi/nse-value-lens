@@ -9,7 +9,6 @@ from playwright.sync_api import sync_playwright
 
 SITES = [
     ("pages", "https://originaonxi.github.io/nse-value-lens/", ""),
-    ("railway", "https://nifty.up.railway.app/", "data/"),
 ]
 
 

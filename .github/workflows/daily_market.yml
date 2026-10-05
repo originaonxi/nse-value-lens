@@ -91,7 +91,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Verify both published sites and fail visibly for missing daily reports
+      - name: Verify GitHub Pages and fail visibly for missing daily reports
         run: python scripts/verify_daily_market_live.py
       - name: Surface source failures after status is published
         if: needs.refresh.outputs.report_outcome != 'success'

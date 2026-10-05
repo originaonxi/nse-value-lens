@@ -7,8 +7,7 @@ import requests
 
 root = Path(__file__).resolve().parents[1]
 expected = json.loads((root/'docs/daily_market.json').read_text(encoding='utf-8'))
-urls = ['https://originaonxi.github.io/nse-value-lens/daily_market.json',
-        'https://nifty.up.railway.app/data/daily_market.json']
+urls = ['https://originaonxi.github.io/nse-value-lens/daily_market.json']
 for url in urls:
     error = None
     for attempt in range(12):

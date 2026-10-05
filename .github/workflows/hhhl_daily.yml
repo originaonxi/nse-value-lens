@@ -133,20 +133,14 @@ jobs:
           python-version: '3.12'
       - run: pip install requests playwright
       - run: python -m playwright install --with-deps chromium
-      - name: Verify published prices, all filters and both websites
+      - name: Verify published prices and all filters on GitHub Pages
         run: python tests/verify_hhhl_live.py --run-id "$GITHUB_RUN_ID" --timeout 360
-      - name: Verify top-ten shortlist and strategy charts on both sites
-        run: |
-          python tests/browser_hhhl_chart.py --url https://originaonxi.github.io/nse-value-lens/hhhl.html
-          python tests/browser_hhhl_chart.py --url https://nifty.up.railway.app/hhhl.html
-      - name: Verify all 200 VCP rows, every mode and both live pages
-        run: |
-          python tests/browser_vcp.py --url https://originaonxi.github.io/nse-value-lens/vcp.html --run-id "$GITHUB_RUN_ID"
-          python tests/browser_vcp.py --url https://nifty.up.railway.app/vcp.html --run-id "$GITHUB_RUN_ID"
-      - name: Verify Jev briefing, 200 assessments and both websites
-        run: |
-          python tests/browser_market_brief.py --url https://originaonxi.github.io/nse-value-lens/market-brief.html --run-id "$GITHUB_RUN_ID"
-          python tests/browser_market_brief.py --url https://nifty.up.railway.app/market-brief.html --run-id "$GITHUB_RUN_ID"
+      - name: Verify top-ten shortlist and strategy charts on GitHub Pages
+        run: python tests/browser_hhhl_chart.py --url https://originaonxi.github.io/nse-value-lens/hhhl.html
+      - name: Verify all 200 VCP rows and every mode on GitHub Pages
+        run: python tests/browser_vcp.py --url https://originaonxi.github.io/nse-value-lens/vcp.html --run-id "$GITHUB_RUN_ID"
+      - name: Verify Jev briefing and 200 assessments on GitHub Pages
+        run: python tests/browser_market_brief.py --url https://originaonxi.github.io/nse-value-lens/market-brief.html --run-id "$GITHUB_RUN_ID"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

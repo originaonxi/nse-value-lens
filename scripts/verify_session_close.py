@@ -16,8 +16,7 @@ import requests
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-SITES = {"railway": ("https://nifty.up.railway.app/", "data/"),
-         "pages": ("https://originaonxi.github.io/nse-value-lens/", "")}
+SITES = {"pages": ("https://originaonxi.github.io/nse-value-lens/", "")}
 DATASETS = ("hhhl_scan", "hhhl_refresh_status", "vcp_scan", "vcp_refresh_status", "market_brief",
             "market_brief_refresh_status", "swing_desk", "swing_evidence", "expanded_research",
             "indicator_research", "futures_research", "cross_asset_research")
