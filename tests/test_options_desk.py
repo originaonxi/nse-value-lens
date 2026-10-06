@@ -141,5 +141,90 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(out, {"a": None, "b": [1.5, 2, None]})
 
 
+def tipsheet_bundles(score=35.2):
+    stat = lambda latest: {"as_of": "2026-09-30", "latest": latest, "value_ago": {"1m": latest * 0.9, "1y": latest * 1.1},
+                           "history": {"start": "2009-04-29", "percentile_full_history": 61.0}}
+    bands = [["Fear", 25.0, 45.0, 63, 1305, 62, 2.16, -4.8, 8.5, 57.2, -5.2, 0, 0, 0, 0, 0, 0, False, False],
+             ["Neutral", 45.0, 55.0, 63, 702, 57, 2.38, -4.3, 8.1, 57.3, -3.6, 0, 0, 0, 0, 0, 0, True, False],
+             ["All sessions", None, None, 63, 4819, 77, 3.71, -2.9, 9.5, 64.7, -3.8, None, None, None, None, None, None, None, None]]
+    cols = ["band", "lo", "hi", "horizon", "sessions", "independent", "median_pct", "p25_pct", "p75_pct", "hit_rate_pct",
+            "median_worst_pct", "median_lo90_pct", "median_hi90_pct", "hit_lo90_pct", "hit_hi90_pct",
+            "diff_vs_all_lo90_pp", "diff_vs_all_hi90_pp", "inside_noise", "too_few"]
+    return {
+        # tipsheet nests the score fields under meta; the parser must find them there.
+        "fg_now": {"as_of": "2026-10-06", "meta": {"score": score, "rank": 29.0, "week_ago": 31.9, "month_ago": 58.5, "year_ago": 48.2},
+                   "columns": ["key", "label", "raw", "pctile", "contribution", "from"],
+                   "rows": [["momentum", "Momentum", -2.9, 22.8, -4.5, "2001-11-05"]]},
+        "fg_next": {"columns": cols, "rows": bands},
+        "fg_tests": {"tests": {"FG-H1": {"result": "fail"}, "FG-H4a": {"result": "pass"}}},
+        "pcr_index_options": stat(0.98), "options_premium_to_cash": stat(0.45),
+        "options_share_of_premium_pct": stat(30.7), "index_opt_premium_adt": stat(44858.0),
+        "daily": {"dates": ["2026-09-30", "2026-10-01"], "series": {"pcr_index_options": [1.0, 1.01], "pcr_stock_options": [0.57, 0.63],
+                                                                  "options_premium_to_cash": [0.36, float("nan")]}},
+        "events": {"as_of": "2026-10-06", "columns": ["d", "kind", "symbol", "name", "detail", "rank", "sme"], "rows": [
+            ["2026-10-07", "rbi", None, "RBI policy decision", "Decision day", None, False],
+            ["2026-10-08", "results", "TCS", "Tata Consultancy Services", "Results, dividend", 10.0, False],
+            ["2026-10-08", "results", "TINYSME", "Not an F&O stock", "Results", None, True],
+            ["2026-10-20", "results", "INFY", "Infosys", "Results", 5.0, False],      # outside the window
+            ["2026-10-09", "agm", "INFY", "Infosys", "AGM", 5.0, False]]},
+    }
+
+
+class TipsheetTests(unittest.TestCase):
+    def test_parses_score_band_froth_and_window_events(self):
+        ctx, per = od.parse_tipsheet("2026-10-06T18:05:19Z", tipsheet_bundles(), ("2026-10-07", "2026-10-13"), ["TCS", "INFY", "NIFTY"])
+        fg = ctx["fear_greed"]
+        self.assertEqual((fg["score"], fg["band"], fg["week_ago"]), (35.2, "Fear", 31.9))
+        self.assertEqual(fg["next_63"]["band_median_pct"], 2.16)
+        self.assertEqual(fg["next_63"]["all_median_pct"], 3.71)
+        self.assertEqual((fg["tests_passed"], fg["tests_total"]), (1, 2))
+        self.assertEqual([f["latest"] for f in ctx["froth"]], [0.98, 0.45, 30.7, 44858.0])
+        self.assertEqual(ctx["daily_pcr"]["premium_to_cash"], [0.36, None])     # NaN never reaches the page
+        self.assertEqual([e["kind"] for e in ctx["events"]["market"]], ["rbi"])
+        self.assertEqual(set(per), {"TCS", "INFY"})                             # non-F&O and out-of-window events dropped
+        self.assertEqual([e["kind"] for e in per["INFY"]], ["agm"])
+        self.assertEqual(ctx["events"]["results_in_window"], 1)
+
+    def test_score_outside_bands_gives_no_band(self):
+        ctx, _ = od.parse_tipsheet(None, tipsheet_bundles(score=90.0), ("2026-10-07", "2026-10-13"), [])
+        self.assertIsNone(ctx["fear_greed"]["band"])
+        self.assertIsNone(ctx["fear_greed"]["next_63"]["band_median_pct"])
+
+    def test_unreachable_tipsheet_fails_safe(self):
+        def boom():
+            raise od.TipsheetError("URLError: offline")
+        original = od.fetch_tipsheet
+        od.fetch_tipsheet = boom
+        try:
+            ctx, per = od.tipsheet_context(("2026-10-07", "2026-10-13"), ["TCS"], log=lambda *_: None)
+        finally:
+            od.fetch_tipsheet = original
+        self.assertEqual(ctx["state"], "failed")
+        self.assertEqual(per, {})
+
+    def test_refresh_context_rewrites_only_when_tipsheet_changes(self):
+        import tempfile
+        from pathlib import Path
+        current = {"as_of": "2026-10-06", "rows": [{"symbol": "TCS", "events": []}],
+                   "context": {"state": "ok", "updated_at": "2026-10-06T18:05:19Z"}}
+        bundles = tipsheet_bundles()
+        original_fetch, original_out = od.fetch_tipsheet, od.OUT
+        with tempfile.TemporaryDirectory() as tmp:
+            od.OUT = Path(tmp) / "options_desk.json"
+            try:
+                od.fetch_tipsheet = lambda: ("2026-10-06T18:05:19Z", bundles)
+                same = od.refresh_context(dict(current), log=lambda *_: None)
+                self.assertFalse(od.OUT.exists())                               # unchanged: nothing written
+                self.assertEqual(same["rows"][0]["events"], [])
+                od.fetch_tipsheet = lambda: ("2026-10-07T18:05:00Z", bundles)
+                new = od.refresh_context(dict(current), log=lambda *_: None)
+                self.assertTrue(od.OUT.exists())
+                self.assertEqual(new["context"]["updated_at"], "2026-10-07T18:05:00Z")
+                self.assertTrue(new["context"]["refreshed_after_jev"])
+            finally:
+                od.fetch_tipsheet, od.OUT = original_fetch, original_out
+
+
+
 if __name__ == "__main__":
     unittest.main()

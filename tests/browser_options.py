@@ -90,6 +90,28 @@ def verify(page, data):
     # 8. #rule-rows rule count is at least the number of rules
     assert page.locator('#rule-rows tr.rule-row').count() >= len(data['rules'])
 
+    # 9. tipsheet market context: cards render, score matches data, events are clickable, no NaN.
+    ctx = data.get('context') or {}
+    if ctx.get('state') == 'ok':
+        fg = ctx['fear_greed']
+        if fg.get('score') is not None:
+            assert page.locator('#fg-score').inner_text().strip() == str(round(fg['score'])), page.locator('#fg-score').inner_text()
+        expect(page.locator('#context-froth tr[data-froth]')).to_have_count(len(ctx.get('froth') or []))
+        market = (ctx.get('events') or {}).get('market') or []
+        if market:
+            expect(page.locator('#market-events li')).to_have_count(len(market))
+        with_events = [r for r in rows if r.get('events')]
+        assert page.locator('#event-stock-count').inner_text().strip() == str(len(with_events))
+        if with_events:
+            sym = with_events[0]['symbol']
+            page.locator(f'#context-events button[data-symbol="{sym}"]').click()
+            expect(page.locator('#detail-title')).to_have_text(sym)
+            expect(page.locator('#stock-events')).to_be_visible()
+            assert page.locator('#stock-events li').count() == len(with_events[0]['events'])
+        assert 'NaN' not in page.locator('#market-context').inner_html()
+    else:
+        assert page.locator('#context-fg').inner_text().strip(), 'missing-context message should be visible'
+
 
 def main():
     parser = argparse.ArgumentParser()

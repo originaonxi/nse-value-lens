@@ -27,10 +27,20 @@
 <div class="section-head"><div><div class="eyebrow">01 / INDEX CONTEXT</div><h2>Index option backdrop</h2></div></div>
 <div id="market-cards" class="market-cards"></div>
 </section>
+<section id="market-context" class="scan-section context-section" aria-labelledby="context-title">
+<div class="section-head"><div><div class="eyebrow">01B / MARKET CONTEXT</div><h2 id="context-title">Mood, option froth &amp; the event calendar</h2></div><p id="context-source" class="muted">—</p></div>
+<div class="context-grid">
+<article id="context-fg" class="context-card fg-card"></article>
+<article id="context-froth" class="context-card froth-card"></article>
+<article id="context-events" class="context-card events-card"></article>
+</div>
+<p id="context-note" class="muted context-note"></p>
+</section>
 <section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
 <div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
 <p class="selection-reason" aria-live="polite" aria-atomic="true"><strong id="detail-reason"></strong></p>
 <div id="signal-cards" class="signal-cards"></div>
+<div id="stock-events" class="stock-events" hidden></div>
 <div id="jev-review" class="jev-review"></div>
 <div class="detail-grid option-detail-grid">
 <div class="chart-panel"><div class="chart-heading"><div><span class="label">OPEN INTEREST BY STRIKE</span><strong id="oi-heading">—</strong></div><div class="chart-controls"><label>View <select id="oi-mode"><option value="oi">Open interest</option><option value="chg">OI change</option></select></label></div></div><div id="oi-chart" class="svg-chart"></div><p class="chart-legend"><span class="legend-ce">Call OI</span><span class="legend-pe">Put OI</span><span class="legend-spot">Spot</span> · Walls and max pain marked. OI is positioning, not a price forecast.</p></div>

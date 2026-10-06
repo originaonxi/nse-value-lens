@@ -2,7 +2,9 @@ name: Options desk refresh
 run-name: Options desk ${{ github.event.schedule || 'manual' }}
 on:
   schedule:
-    # UTC. NSE publishes the F&O bhavcopy in the evening; retries 19:15, 21:15, 23:45 IST and 08:15 IST next morning.
+    # UTC. NSE publishes the F&O bhavcopy in the evening; runs at 19:15, 21:15 and 00:15 IST, plus 08:15 IST next morning.
+    # The first run after a new bhavcopy rebuilds signals, backtest and the Jev review. Later runs that session only
+    # re-read tipsheet.markets (it publishes around 23:35 IST) and commit just when tipsheet's data actually changed.
     - cron: '45 13,15,18 * * 1-5'
     - cron: '45 2 * * 2-6'
   workflow_dispatch:
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     outputs:
       commit: ${{ steps.commit.outputs.sha }}
       changed: ${{ steps.commit.outputs.changed }}

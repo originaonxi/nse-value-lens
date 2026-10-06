@@ -638,12 +638,146 @@ def today_rows(f, sig_today, rule_info, raw_today, as_of, plan_exit):
     return rows
 
 
+# ---------------------------------------------------------------- tipsheet.markets context
+TIPSHEET = "https://tipsheet.markets"
+TIPSHEET_BUNDLES = {
+    "fg_now": "barometers/mood/fg_now",
+    "fg_next": "barometers/mood/fg_next",
+    "fg_tests": "barometers/mood/tests",
+    "pcr_index_options": "derivatives/stats/pcr_index_options",
+    "options_premium_to_cash": "derivatives/stats/options_premium_to_cash",
+    "options_share_of_premium_pct": "derivatives/stats/options_share_of_premium_pct",
+    "index_opt_premium_adt": "derivatives/stats/index_opt_premium_adt",
+    "daily": "derivatives/daily_2y",
+    "events": "events/calendar",
+}
+FROTH = [("pcr_index_options", "Index-option put/call ratio (NSE, by volume)", "x", 2),
+         ("options_premium_to_cash", "Option premium / cash turnover", "x", 2),
+         ("options_share_of_premium_pct", "Options share of F&O premium turnover", "%", 1),
+         ("index_opt_premium_adt", "Index-option premium per session", "Rs cr", 0)]
+STOCK_EVENTS = {"results": "Results", "board": "Board meeting", "dividend": "Dividend ex-date",
+                "action": "Corporate action", "agm": "AGM"}
+MARKET_EVENTS = {"rbi", "macro", "market"}
+
+
+class TipsheetError(RuntimeError):
+    pass
+
+
+def fetch_tipsheet(timeout=30):
+    """Download the manifest and the bundles we use. Raises TipsheetError on any failure."""
+    def get(url):
+        req = urllib.request.Request(url, headers={"User-Agent": "nse-value-lens options desk (+github.com/originaonxi/nse-value-lens)"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    try:
+        manifest = get(TIPSHEET + "/data/v1/manifest.json")
+        files = manifest["files"]
+        bundles = {key: get(f"{TIPSHEET}/data/v1/{files[path]}") for key, path in TIPSHEET_BUNDLES.items()}
+    except Exception as exc:  # network, HTTP, JSON or a renamed bundle
+        raise TipsheetError(f"{type(exc).__name__}: {exc}") from None
+    return manifest.get("updated_at"), bundles
+
+
+def _table(bundle):
+    cols = bundle.get("columns") or []
+    return [dict(zip(cols, r)) if isinstance(r, list) else r for r in bundle.get("rows") or []]
+
+
+def fg_band(score, bands):
+    for b in bands:
+        lo, hi = b.get("lo"), b.get("hi")
+        if lo is not None and hi is not None and lo <= score < hi:
+            return b
+    top = [b for b in bands if b.get("hi") == 100.0]
+    return top[0] if top and score >= 100 else None
+
+
+def parse_tipsheet(updated_at, bundles, window, symbols):
+    """Turn tipsheet bundles into the page context plus per-symbol events in the hold window.
+
+    window = (first_session, last_session) of a trade entered at the next open.
+    """
+    start, end = window
+    fg = bundles["fg_now"]
+    fgm = {**fg, **(fg.get("meta") or {})}  # tipsheet nests the score fields under meta
+    score = _num(fgm.get("score"), 1)
+    nxt = [r for r in _table(bundles["fg_next"]) if r.get("horizon") in (63, "63")]
+    bands = [r for r in nxt if r.get("lo") is not None]
+    band = fg_band(score, bands) if score is not None else None
+    everyone = next((r for r in nxt if r.get("band") == "All sessions"), {})
+    tests = (bundles["fg_tests"].get("tests") or {}).values()
+    fear_greed = dict(
+        as_of=fgm.get("as_of"), score=score, rank=_num(fgm.get("rank"), 1), week_ago=_num(fgm.get("week_ago"), 1),
+        month_ago=_num(fgm.get("month_ago"), 1), year_ago=_num(fgm.get("year_ago"), 1), band=band["band"] if band else None,
+        components=[dict(key=c.get("key"), label=c.get("label"), percentile=_num(c.get("pctile"), 0)) for c in _table(fg)],
+        next_63=dict(band_median_pct=_num(band.get("median_pct")) if band else None,
+                     band_hit_rate_pct=_num(band.get("hit_rate_pct"), 0) if band else None,
+                     band_inside_noise=bool(band.get("inside_noise")) if band else None,
+                     all_median_pct=_num(everyone.get("median_pct")), all_hit_rate_pct=_num(everyone.get("hit_rate_pct"), 0)),
+        tests_passed=sum(1 for t in tests if t.get("result") == "pass"), tests_total=len(list((bundles["fg_tests"].get("tests") or {}).values())),
+        url=TIPSHEET + "/fear-and-greed/")
+    froth = []
+    for key, label, unit, digits in FROTH:
+        b = bundles[key]
+        ago, hist = b.get("value_ago") or {}, b.get("history") or {}
+        froth.append(dict(key=key, label=label, unit=unit, as_of=b.get("as_of"), latest=_num(b.get("latest"), digits),
+                          month_ago=_num(ago.get("1m"), digits), year_ago=_num(ago.get("1y"), digits),
+                          percentile=_num(hist.get("percentile_full_history"), 0), since=hist.get("start")))
+    daily = bundles["daily"]
+    series, dates = daily.get("series") or {}, (daily.get("dates") or [])[-20:]
+    tail = lambda k, d=2: [_num(v, d) for v in (series.get(k) or [])[-20:]]
+    daily_pcr = dict(dates=dates, index=tail("pcr_index_options"), stock=tail("pcr_stock_options"),
+                     premium_to_cash=tail("options_premium_to_cash"))
+    events = _table(bundles["events"])
+    wanted = set(symbols)
+    per_symbol, market = {}, []
+    for e in events:
+        day, kind = e.get("d"), e.get("kind")
+        if not day or not (start <= day <= end):
+            continue
+        if kind in STOCK_EVENTS and e.get("symbol") in wanted:
+            per_symbol.setdefault(e["symbol"], []).append(dict(date=day, kind=kind, label=STOCK_EVENTS[kind], detail=e.get("detail")))
+        elif kind in MARKET_EVENTS:
+            market.append(dict(date=day, kind=kind, label=e.get("name"), detail=e.get("detail")))
+    for lst in per_symbol.values():
+        lst.sort(key=lambda x: (x["date"], x["kind"]))
+    market.sort(key=lambda x: (x["date"], x["kind"]))
+    context = dict(
+        state="ok", source="tipsheet.markets", url=TIPSHEET, updated_at=updated_at,
+        checked_at=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        citation=f'tipsheet, "Fear and greed index, India", "Futures and options activity" and "Events calendar", data to {fg.get("as_of")}, {TIPSHEET}',
+        fear_greed=fear_greed, froth=froth, daily_pcr=daily_pcr,
+        events=dict(window=[start, end], market=market, symbols_with_events=len(per_symbol),
+                    results_in_window=sum(any(x["kind"] == "results" for x in v) for v in per_symbol.values()),
+                    as_of=bundles["events"].get("as_of"), url=TIPSHEET + "/events/"),
+        note=("Context only. tipsheet's own pre-registered tests find its fear and greed index does not reliably forecast returns, "
+              "and none of these inputs is used by the option rules or their backtest."))
+    return context, per_symbol
+
+
+def tipsheet_context(window, symbols, log=print):
+    try:
+        updated_at, bundles = fetch_tipsheet()
+        return parse_tipsheet(updated_at, bundles, window, symbols)
+    except (TipsheetError, KeyError, TypeError, ValueError, AttributeError) as exc:
+        log(f"tipsheet context unavailable: {exc}")
+        return dict(state="failed", source="tipsheet.markets", url=TIPSHEET, updated_at=None,
+                    checked_at=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                    message=f"tipsheet.markets could not be read this run ({str(exc)[:160]})"), {}
+
+
+def apply_events(rows, per_symbol):
+    for r in rows:
+        r["events"] = per_symbol.get(r["symbol"], [])
+
+
 # ---------------------------------------------------------------- Jev
 SUPPORT = {"supportive": "The supplied positioning and the rule's own history support this option action for the next 5 sessions",
            "conflicting": "The supplied facts argue against this option action",
            "mixed": "Material supplied facts point both ways",
            "insufficient": "The supplied facts are too thin to judge"}
-RISK = {"high": "Supplied facts show a large specific risk to this position (e.g. very rich IV for a buyer, spot at or through a sold strike, very short time to expiry)",
+RISK = {"high": "Supplied facts show a large specific risk to this position (e.g. very rich IV for a buyer, spot at or through a sold strike, very short time to expiry, company results inside the holding window)",
         "elevated": "Supplied facts show a meaningful specific risk",
         "ordinary": "No unusual position-specific risk in the supplied facts",
         "unknown": "Key facts are missing"}
@@ -655,7 +789,7 @@ def _choice(text, criteria):
         "events, levels or forecasts. Model confidence is not a probability of profit. " + text)}
 
 
-def jev_review(rows, rule_info, log=print):
+def jev_review(rows, rule_info, market_events=None, log=print):
     try:
         from jev_client import Client, JevError, MODEL
     except ImportError:
@@ -668,7 +802,8 @@ def jev_review(rows, rule_info, log=print):
     try:
         for start in range(0, len(todo), 5):
             batch = todo[start:start + 5]
-            state, questions = {"session": batch[0].get("as_of"), "underlyings": []}, {}
+            state, questions = {"session": batch[0].get("as_of"), "market_events_in_hold_window": market_events or [],
+                                "underlyings": []}, {}
             for i, r in enumerate(batch):
                 s = next(x for x in r["signals"] if x["rule"] == r["primary_rule"])
                 info = rule_info[s["rule"]]
@@ -680,10 +815,11 @@ def jev_review(rows, rule_info, log=print):
                     spot=r["spot"], return_1d_pct=r["ret1_pct"], return_5d_pct=r["ret5_pct"], move_in_sigma=r["z5"],
                     futures_oi_change_5d_pct=r["fut_oi5_pct"], buildup=r["buildup"], put_call_oi_ratio=r["pcr"],
                     put_call_ratio_change_5d=r["pcr_chg5"], atm_iv_pct=r["atm_iv"], iv_percentile_1y=r["iv_pct"],
-                    call_wall=r["call_wall"], put_wall=r["put_wall"], max_pain=r["max_pain"], days_to_expiry=r["days_to_expiry"]))
+                    call_wall=r["call_wall"], put_wall=r["put_wall"], max_pain=r["max_pain"], days_to_expiry=r["days_to_expiry"],
+                    company_events_in_hold_window=r.get("events") or []))
                 prefix = f"For underlying {r['symbol']} in state.underlyings[{i}]: "
                 questions[f"s{i}"] = _choice(prefix + "Assess whether the supplied options/futures positioning and the rule's own historical results support the proposed option action over the next 5 sessions. A rule that is not VALIDATED or has a non-positive historical mean should weigh against support.", SUPPORT)
-                questions[f"r{i}"] = _choice(prefix + "Assess position-specific risk from supplied facts only.", RISK)
+                questions[f"r{i}"] = _choice(prefix + "Assess position-specific risk from supplied facts only, including any supplied company or market events dated inside the 5-session holding window. An empty event list means none was found in the supplied calendar, not that none exists.", RISK)
             answers = client.ask(state, questions)
             for i, r in enumerate(batch):
                 s, k = answers[f"s{i}"], answers[f"r{i}"]
@@ -760,8 +896,7 @@ def build(offline=False, use_jev=True, force_archive=False, end=None, if_new=Fal
         except ValueError:
             current = {}
         if current.get("as_of") == as_of and current.get("model_version") == VERSION and current.get("jev", {}).get("state") == "ok":
-            log(f"options desk already built for {as_of}; nothing to do")
-            return current
+            return refresh_context(current, offline=offline, log=log)
     f = derive(load_features(sessions, log=log), sessions)
     sig = non_overlapping(signals(f), sessions)
     trades = simulate(sig, contract_prices(sig, sessions), sessions)
@@ -771,9 +906,17 @@ def build(offline=False, use_jev=True, force_archive=False, end=None, if_new=Fal
     nxt = next_sessions(as_of, HOLD, skip)
     raw_today = read_raw(as_of)
     rows = today_rows(f, sig[sig.date == as_of] if not sig.empty else sig, rule_info, raw_today, as_of, nxt[-1])
+    if offline:
+        context, per_symbol = dict(state="skipped", source="tipsheet.markets", url=TIPSHEET, updated_at=None,
+                                   message="Offline build; tipsheet.markets not read"), {}
+    else:
+        context, per_symbol = tipsheet_context((nxt[0], nxt[-1]), [r["symbol"] for r in rows], log=log)
+    apply_events(rows, per_symbol)
     for r in rows:
         r["as_of"] = as_of
-    jev = jev_review(rows, rule_info, log=log) if use_jev else dict(state="skipped", model="", assessed=0, message="Jev disabled for this run")
+    market_events = (context.get("events") or {}).get("market") or []
+    jev = (jev_review(rows, rule_info, market_events, log=log) if use_jev
+           else dict(state="skipped", model="", assessed=0, message="Jev disabled for this run"))
     for r in rows:
         r.pop("as_of", None)
     archived = archive(as_of, rows, jev, force=force_archive)
@@ -815,7 +958,7 @@ def build(offline=False, use_jev=True, force_archive=False, end=None, if_new=Fal
         rules=rules, market=market,
         counts={b: sum(r["bucket"] == b for r in rows) for b in BUCKETS},
         universe_count=len(rows), rows=rows,
-        paper=dict(open=open_paper, forward_log=fw), jev=jev,
+        paper=dict(open=open_paper, forward_log=fw), jev=jev, context=context,
         limitations=[
             "End-of-day data only: no intraday prices, bid-ask spreads, order book or who initiated a trade.",
             "Backtests use official open and close prices; real fills on illiquid stock options can be much worse than the modelled slippage.",
@@ -825,10 +968,42 @@ def build(offline=False, use_jev=True, force_archive=False, end=None, if_new=Fal
             "Paper research. Not investment advice. No orders are placed."],
     )
     data = clean(data)
-    OUT.write_text(json.dumps(data, separators=(",", ":"), allow_nan=False, ensure_ascii=False), encoding="utf-8")
+    write_desk(data)
     log(f"options desk {as_of}: {len(rows)} underlyings; buckets {data['counts']}; "
-        f"rules {[(r['id'], r['status']) for r in rules]}; jev {jev['state']}")
+        f"rules {[(r['id'], r['status']) for r in rules]}; jev {jev['state']}; tipsheet {context['state']}")
     return data
+
+
+def write_desk(data):
+    temp = OUT.with_suffix(".json.tmp")
+    temp.write_text(json.dumps(data, separators=(",", ":"), allow_nan=False, ensure_ascii=False), encoding="utf-8")
+    temp.replace(OUT)
+
+
+def refresh_context(current, offline=False, log=print):
+    """Session already built: re-read only tipsheet.markets and rewrite the desk if tipsheet published newer data.
+
+    Writes nothing when tipsheet is unchanged, so the daily workflow makes no empty commits.
+    """
+    if offline:
+        log(f"options desk already built for {current['as_of']}; offline, tipsheet not checked")
+        return current
+    window = next_sessions(current["as_of"], HOLD, holidays())
+    context, per_symbol = tipsheet_context((window[0], window[-1]), [r["symbol"] for r in current["rows"]], log=log)
+    old = current.get("context") or {}
+    if context["state"] != "ok":
+        log(f"options desk already built for {current['as_of']}; tipsheet unavailable, keeping the previous context")
+        return current
+    if old.get("state") == "ok" and old.get("updated_at") == context["updated_at"]:
+        log(f"options desk already built for {current['as_of']}; tipsheet unchanged ({context['updated_at']})")
+        return current
+    context["refreshed_after_jev"] = True
+    current["context"] = context
+    apply_events(current["rows"], per_symbol)
+    current = clean(current)
+    write_desk(current)
+    log(f"options desk {current['as_of']}: tipsheet context refreshed to {context['updated_at']}")
+    return current
 
 
 def main():

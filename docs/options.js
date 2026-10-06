@@ -97,6 +97,75 @@
 
   const trendClass = v => numeric(v) ? (v > 0 ? 'positive' : v < 0 ? 'negative' : '') : '';
 
+  // ---- tipsheet.markets context: fear & greed, option froth, event calendar ----
+  const EVENT_LABEL = {rbi: 'RBI', macro: 'Data', market: 'Market', results: 'Results', board: 'Board', dividend: 'Ex-dividend', action: 'Corp. action', agm: 'AGM'};
+  const ordinal = v => numeric(v) ? Math.round(v) + (['th', 'st', 'nd', 'rd'][(Math.round(v) % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][Math.round(v) % 100] || 'th') : '--';
+  const unitFmt = (v, unit) => !numeric(v) ? '--' : unit === '%' ? fmt(v, 1) + '%' : unit === 'Rs cr' ? '\u20b9' + intFmt(v) + ' cr' : fmt(v, 2) + '\u00d7';
+  const eventItem = e => '<li><time>' + date(e.date) + '</time><span class="event-kind ' + esc(e.kind) + '">' + esc(EVENT_LABEL[e.kind] || e.kind) + '</span>' +
+    '<span>' + esc(e.label || '') + (e.detail ? ' <small>' + esc(e.detail) + '</small>' : '') + '</span></li>';
+
+  function renderContext() {
+    const c = dataset.context;
+    const section = $('market-context');
+    if (!c || c.state !== 'ok') {
+      $('context-source').textContent = c && c.message ? c.message : 'Market context not available in this snapshot.';
+      ['context-fg', 'context-froth', 'context-events'].forEach(id => { $(id).innerHTML = ''; });
+      $('context-fg').innerHTML = '<p class="muted">tipsheet.markets context was not loaded for this snapshot. Signals and backtests do not depend on it.</p>';
+      $('context-note').textContent = '';
+      section.classList.add('context-missing');
+      return;
+    }
+    section.classList.remove('context-missing');
+    const fg = c.fear_greed || {}, n = fg.next_63 || {};
+    const band = String(fg.band || '').toLowerCase().replace(/\s+/g, '-');
+    $('context-fg').innerHTML =
+      '<div class="context-head"><span class="label">FEAR &amp; GREED, INDIA</span><a href="' + esc(fg.url || c.url) + '" target="_blank" rel="noopener">tipsheet</a></div>' +
+      '<div class="fg-score"><strong id="fg-score">' + (numeric(fg.score) ? fmt(fg.score, 0) : '--') + '</strong><span class="fg-band ' + esc(band) + '">' + esc(fg.band || '--') + '</span></div>' +
+      '<div class="fg-meter" aria-hidden="true"><span style="left:' + (numeric(fg.score) ? Math.max(0, Math.min(100, fg.score)) : 50) + '%"></span></div>' +
+      '<p class="muted">Week ago ' + (numeric(fg.week_ago) ? fmt(fg.week_ago, 0) : '--') + ' \u00b7 month ago ' + (numeric(fg.month_ago) ? fmt(fg.month_ago, 0) : '--') + ' \u00b7 year ago ' + (numeric(fg.year_ago) ? fmt(fg.year_ago, 0) : '--') + '</p>' +
+      '<ul class="fg-parts">' + (fg.components || []).map(p => '<li><span>' + esc(p.label) + '</span><b>' + ordinal(p.percentile) + '</b></li>').join('') + '</ul>' +
+      '<p class="fg-next">After a <b>' + esc(fg.band || '--') + '</b> reading the Nifty 500 returned a median <b>' + pct(n.band_median_pct) + '</b> over 63 sessions (up ' + pctPlain(n.band_hit_rate_pct, 0) + ' of the time), against ' + pct(n.all_median_pct) + ' for all sessions.</p>' +
+      '<p class="fg-tests">tipsheet\u2019s own pre-registered tests: <b>' + (numeric(fg.tests_passed) ? fg.tests_passed : '--') + ' of ' + (numeric(fg.tests_total) ? fg.tests_total : '--') + ' pass</b>. Treat it as mood, not a forecast.</p>';
+    const froth = c.froth || [];
+    $('context-froth').innerHTML =
+      '<div class="context-head"><span class="label">OPTION FROTH (NSE, MONTHLY)</span><a href="' + esc(c.url) + '/activity/derivatives/" target="_blank" rel="noopener">tipsheet</a></div>' +
+      '<table class="froth-table"><thead><tr><th>Measure</th><th>Latest</th><th>Month ago</th><th>Year ago</th><th>Percentile</th></tr></thead><tbody>' +
+      froth.map(f => '<tr data-froth="' + esc(f.key) + '"><td>' + esc(f.label) + '<small>' + date(f.as_of) + '</small></td><td><b>' + unitFmt(f.latest, f.unit) + '</b></td><td>' + unitFmt(f.month_ago, f.unit) + '</td><td>' + unitFmt(f.year_ago, f.unit) + '</td><td>' + ordinal(f.percentile) + '</td></tr>').join('') +
+      '</tbody></table>' + dailyPcrHtml(c.daily_pcr) +
+      '<p class="muted">NSE\u2019s put/call ratio here is by traded volume. The desk\u2019s own PCR above is by open interest from the F&amp;O bhavcopy, so the two differ.</p>';
+    const ev = c.events || {}, market = ev.market || [];
+    const withEvents = dataset.rows.filter(r => Array.isArray(r.events) && r.events.length);
+    $('context-events').innerHTML =
+      '<div class="context-head"><span class="label">EVENTS IN THE HOLDING WINDOW</span><a href="' + esc(ev.url || c.url) + '" target="_blank" rel="noopener">tipsheet</a></div>' +
+      '<p class="muted">A signal today would be held ' + (Array.isArray(ev.window) ? date(ev.window[0]) + ' \u2013 ' + date(ev.window[1]) : '--') + '.</p>' +
+      '<h3>Market-wide</h3>' + (market.length ? '<ul class="event-list" id="market-events">' + market.map(eventItem).join('') + '</ul>' : '<p class="muted">No market-wide events in the calendar for this window.</p>') +
+      '<h3>F&amp;O underlyings with company events <small id="event-stock-count">' + withEvents.length + '</small></h3>' +
+      (withEvents.length ? '<ul class="event-stocks">' + withEvents.map(r => '<li><button class="stock-name" type="button" data-symbol="' + esc(r.symbol) + '">' + esc(r.symbol) + '</button>' +
+        r.events.map(e => '<span class="event-kind ' + esc(e.kind) + '">' + esc(EVENT_LABEL[e.kind] || e.kind) + ' ' + date(e.date) + '</span>').join('') + '</li>').join('') + '</ul>'
+        : '<p class="muted">No F&amp;O company events found in this window.</p>') +
+      '<p class="muted">Results and corporate actions can gap a stock overnight; an option held through them carries that risk. Dates are as announced and can move.</p>';
+    $('context-source').textContent = 'From tipsheet.markets \u00b7 data updated ' + (c.updated_at ? new Date(c.updated_at).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) + ' IST' : '--') + ' \u00b7 checked ' + (c.checked_at ? new Date(c.checked_at).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) + ' IST' : '--');
+    $('context-note').textContent = (c.note || '') + ' Source: ' + (c.citation || 'tipsheet.markets') + '.';
+  }
+
+  function dailyPcrHtml(d) {
+    if (!d || !Array.isArray(d.dates) || !d.dates.length) return '';
+    const last = d.dates.length - 1;
+    return '<p class="froth-daily">Last session in the daily series (' + date(d.dates[last]) + '): index-option PCR <b>' + (numeric(d.index[last]) ? fmt(d.index[last], 2) : '--') +
+      '</b>, stock-option PCR <b>' + (numeric(d.stock[last]) ? fmt(d.stock[last], 2) : '--') + '</b>, option premium / cash <b>' + (numeric(d.premium_to_cash[last]) ? fmt(d.premium_to_cash[last], 2) + '\u00d7' : '--') + '</b>.</p>';
+  }
+
+  function renderStockEvents(row) {
+    const host = $('stock-events');
+    const ev = Array.isArray(row.events) ? row.events : [];
+    if (!ev.length) { host.hidden = true; host.innerHTML = ''; return; }
+    host.hidden = false;
+    const results = ev.some(e => e.kind === 'results');
+    host.className = 'stock-events' + (results ? ' has-results' : '');
+    host.innerHTML = '<strong>' + (results ? 'Results inside the holding window' : 'Company events inside the holding window') + '</strong><ul class="event-list">' + ev.map(eventItem).join('') + '</ul>' +
+      '<p class="muted">From the tipsheet.markets events calendar. Not used by the backtested rules; shown so the event risk is visible.</p>';
+  }
+
   // ---- Detail panel ----
   function renderDetail() {
     const row = dataset.rows.find(r => r.symbol === selected);
@@ -110,6 +179,7 @@
     badge.className = 'state option-badge ' + (BUCKET_CLASS[row.bucket] || '');
     $('detail-reason').textContent = row.reason || '';
     renderSignals(row);
+    renderStockEvents(row);
     renderJev(row);
     renderOiChart(row);
     renderHistoryChart(row);
@@ -417,6 +487,10 @@
       const btn = e.target.closest('button[data-symbol]');
       if (btn) select(btn.dataset.symbol);
     });
+    $('context-events').addEventListener('click', e => {
+      const btn = e.target.closest('button[data-symbol]');
+      if (btn) select(btn.dataset.symbol);
+    });
     $('oi-mode').addEventListener('change', () => {
       oiMode = $('oi-mode').value;
       const row = dataset.rows.find(r => r.symbol === selected);
@@ -441,6 +515,7 @@
     $('option-rows').innerHTML = '';
     $('rule-rows').innerHTML = '';
     $('market-cards').innerHTML = '';
+    ['context-fg', 'context-froth', 'context-events'].forEach(id => { $(id).innerHTML = ''; });
     $('paper-rows').innerHTML = '';
     $('stock-detail').hidden = true;
     document.querySelectorAll('[data-pick-bucket]').forEach(sel => { sel.disabled = true; sel.innerHTML = '<option value="">Snapshot unavailable</option>'; sel.closest('.stock-picker').classList.remove('selected'); });
@@ -459,6 +534,7 @@
         renderHeader();
         renderPickers();
         renderMarket();
+        renderContext();
         renderRuleTable();
         renderPaper();
         renderCalibration();
