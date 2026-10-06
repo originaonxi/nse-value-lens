@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NSE F&amp;O options desk | NSE Value Lens</title>
+<meta name="description" content="Every NSE F&O underlying sorted by the fixed, backtested option trade that triggers today - buy call, buy put, sell options or buy straddle - with its historical evidence and a Jev review. Paper research only.">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="options.css?v=options-1">
+<script src="options.js?v=options-1" defer></script>
+</head>
+<body data-source="">
+<div class="shell hhhl-shell options-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="hhhl.html">HH/HL</a><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="options.html">Options desk</a><a href="market-brief.html">US + India brief</a><a href="daily-market.html">Daily market &amp; deals</a></nav></header>
+<main>
+<section class="chart-desk-heading"><h1>Options desk / NSE F&amp;O</h1><div class="chart-desk-session"><strong id="session-date">Loading…</strong><span id="coverage">Checking F&amp;O coverage</span><span id="next-session" class="next-session">—</span></div></section>
+<p id="notice" class="notice" role="status">Loading the options snapshot…</p>
+<section class="stock-picker-panel" aria-label="Choose an underlying by option signal">
+<div class="stock-pickers option-pickers">
+<label class="stock-picker buy-call" for="pick-BUY_CALL"><span>Buy call<small id="pick-count-BUY_CALL">—</small></span><select id="pick-BUY_CALL" data-pick-bucket="BUY_CALL" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+<label class="stock-picker buy-put" for="pick-BUY_PUT"><span>Buy put<small id="pick-count-BUY_PUT">—</small></span><select id="pick-BUY_PUT" data-pick-bucket="BUY_PUT" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+<label class="stock-picker sell" for="pick-SELL"><span>Sell options<small id="pick-count-SELL">—</small></span><select id="pick-SELL" data-pick-bucket="SELL" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+<label class="stock-picker volatility" for="pick-VOLATILITY"><span>Volatility<small id="pick-count-VOLATILITY">—</small></span><select id="pick-VOLATILITY" data-pick-bucket="VOLATILITY" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+<label class="stock-picker unproven" for="pick-UNPROVEN"><span>Unproven<small id="pick-count-UNPROVEN">—</small></span><select id="pick-UNPROVEN" data-pick-bucket="UNPROVEN" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+<label class="stock-picker no-signal" for="pick-NO_SIGNAL"><span>No signal<small id="pick-count-NO_SIGNAL">—</small></span><select id="pick-NO_SIGNAL" data-pick-bucket="NO_SIGNAL" aria-describedby="picker-help" disabled><option value="">Loading…</option></select></label>
+</div><p id="picker-help">Only the first four buckets are trades, and only from VALIDATED rules. Unproven means a rule fired but has no proven edge. No signal means nothing fired. Choose an underlying to open its detail below.</p>
+</section>
+<section class="scan-section market-cards-section" aria-label="Index option context">
+<div class="section-head"><div><div class="eyebrow">01 / INDEX CONTEXT</div><h2>Index option backdrop</h2></div></div>
+<div id="market-cards" class="market-cards"></div>
+</section>
+<section id="stock-detail" class="scan-section" aria-labelledby="detail-title" hidden>
+<div class="section-head"><div><h2 id="detail-title" tabindex="-1"></h2><p id="detail-subtitle" class="muted"></p></div><span id="detail-badge" class="state"></span></div>
+<p class="selection-reason" aria-live="polite" aria-atomic="true"><strong id="detail-reason"></strong></p>
+<div id="signal-cards" class="signal-cards"></div>
+<div id="jev-review" class="jev-review"></div>
+<div class="detail-grid option-detail-grid">
+<div class="chart-panel"><div class="chart-heading"><div><span class="label">OPEN INTEREST BY STRIKE</span><strong id="oi-heading">—</strong></div><div class="chart-controls"><label>View <select id="oi-mode"><option value="oi">Open interest</option><option value="chg">OI change</option></select></label></div></div><div id="oi-chart" class="svg-chart"></div><p class="chart-legend"><span class="legend-ce">Call OI</span><span class="legend-pe">Put OI</span><span class="legend-spot">Spot</span> · Walls and max pain marked. OI is positioning, not a price forecast.</p></div>
+<div class="chart-panel"><div class="chart-heading"><div><span class="label">RECENT HISTORY</span><strong>Spot · PCR · IV</strong></div></div><div id="history-chart" class="svg-chart"></div></div>
+</div>
+</section>
+<section class="scan-section" aria-label="All underlyings">
+<div class="section-head"><div><div class="eyebrow">02 / THE FULL UNIVERSE</div><h2>Every F&amp;O underlying</h2></div><p id="result-count" class="muted">—</p></div>
+<div class="filters option-filters">
+<label>Bucket<select id="bucket"><option value="ALL">All buckets</option><option value="BUY_CALL">Buy call</option><option value="BUY_PUT">Buy put</option><option value="SELL">Sell options</option><option value="VOLATILITY">Volatility</option><option value="UNPROVEN">Unproven</option><option value="NO_SIGNAL">No signal</option></select></label>
+<label>Type<select id="kind"><option value="ALL">Index &amp; stock</option><option value="index">Index</option><option value="stock">Stock</option></select></label>
+<label>Sort<select id="sort"><option value="bucket">By bucket</option><option value="symbol">By symbol</option><option value="turnover">By turnover</option><option value="iv">By IV percentile</option><option value="pcr">By PCR</option></select></label>
+<label class="search-label">Search<input id="search" type="search" placeholder="Symbol" autocomplete="off"></label>
+<button id="reset" type="button">Reset</button>
+<button id="download" type="button">Download CSV</button>
+</div>
+<div class="table-wrap stock-table"><table><caption>Every NSE F&amp;O underlying with its option bucket, context and the rule that fired</caption><thead><tr><th>Underlying</th><th>Bucket / action</th><th>Spot</th><th>5d %</th><th>Build-up</th><th>PCR (5d)</th><th>ATM IV (pct)</th><th>Expiry</th><th>Turnover</th><th>Reason</th></tr></thead><tbody id="option-rows"></tbody></table></div>
+<p class="muted">Click a symbol to inspect its signals, evidence and option chain. Everything is paper research. Sell trades need margin and carry large tail risk; buying options loses money on average when there is no edge.</p>
+</section>
+<section class="scan-section" aria-label="Strategy evidence">
+<div class="section-head"><div><div class="eyebrow">03 / THE RULES</div><h2>Strategy evidence</h2></div></div>
+<div class="table-wrap"><table><caption>Every backtested rule with its out-of-sample statistics and both-half stability</caption><thead><tr><th>Rule</th><th>Status</th><th>Action</th><th>Trades</th><th>Win %</th><th>Mean %</th><th>t-stat</th><th>First half</th><th>Second half</th><th>Baseline</th></tr></thead><tbody id="rule-rows"></tbody></table></div>
+<p class="muted">A rule becomes a trade bucket only when its status is VALIDATED. Baseline rules are included to show that mechanical option buying loses money on average.</p>
+</section>
+<section class="scan-section" aria-label="Paper trades">
+<div class="section-head"><div><div class="eyebrow">04 / PAPER TRADES</div><h2>Open paper trades &amp; forward log</h2></div><p id="forward-log" class="muted">—</p></div>
+<div class="table-wrap"><table><caption>Open paper trades carried from the latest signals, marked to the last close</caption><thead><tr><th>Rule</th><th>Underlying</th><th>Action</th><th>Signal date</th><th>Entry date</th><th>Legs</th><th>Mark return</th></tr></thead><tbody id="paper-rows"></tbody></table></div>
+</section>
+<section class="scan-section" aria-label="Jev calibration">
+<div class="section-head"><div><div class="eyebrow">05 / JEV CALIBRATION</div><h2>How the Jev review has scored</h2></div></div>
+<div id="jev-calibration" class="jev-calibration"></div>
+<p id="jev-calibration-note" class="muted"></p>
+</section>
+<section class="scan-section methods">
+<div><div class="eyebrow">06 / HOW TO READ THIS</div><h2>A signal is a fixed rule.<br>Trading it is a separate decision.</h2><p id="method-entry"></p><p id="method-exit"></p><p id="method-cost"></p><p id="method-margin"></p><p id="method-validation"></p><p id="method-nolook"></p></div>
+<div class="definition-list"><p><b class="buy-call-text">BUY CALL</b>A validated bullish rule fired. Buying a call risks the whole premium.</p><p><b class="buy-put-text">BUY PUT</b>A validated bearish rule fired. Buying a put risks the whole premium.</p><p><b class="sell-text">SELL OPTIONS</b>A validated premium-selling rule fired. Selling needs margin and carries large, open-ended tail risk.</p><p><b class="volatility-text">VOLATILITY</b>A validated long-straddle rule fired, betting on a large move either way.</p><p><b class="unproven-text">UNPROVEN</b>A rule fired but is not validated, so it is shown only as information, not a trade.</p><p><b>NO SIGNAL</b>No rule fired for this underlying today.</p></div>
+</section>
+<details class="data-details"><summary>Data sources, coverage and limitations</summary><div id="data-audit"></div></details>
+</main>
+<footer><span>NSE VALUE LENS / OPTIONS DESK</span><p>Paper research. Not investment advice. No automatic orders or assured returns.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>

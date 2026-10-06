@@ -1,0 +1,120 @@
+name: Options desk refresh
+run-name: Options desk ${{ github.event.schedule || 'manual' }}
+on:
+  schedule:
+    # UTC. NSE publishes the F&O bhavcopy in the evening; retries 19:15, 21:15, 23:45 IST and 08:15 IST next morning.
+    - cron: '45 13,15,18 * * 1-5'
+    - cron: '45 2 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if this session is already built with a Jev review
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: options-desk-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Restore cached NSE F&O bhavcopies and per-session features
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/fo_bhavcopy
+            .cache/options_days
+          key: options-desk-${{ github.run_id }}
+          restore-keys: options-desk-
+      - name: Test the options desk rules, pricing and no-look-ahead guards
+        run: python -m unittest discover -s tests -p 'test_options_desk.py' -v
+      - name: Download new bhavcopies, backtest every rule and build today's desk
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$FORCE" = "true" ]; then python options_desk.py; else python options_desk.py --if-new; fi
+      - name: Save the bhavcopy cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .cache/fo_bhavcopy
+            .cache/options_days
+          key: options-desk-${{ github.run_id }}
+      - name: Commit the desk and the dated forward log
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/options_desk.json
+          if [ -d data/options_history ]; then git add data/options_history; fi
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: options desk run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3; do
+              git pull --rebase origin master
+              if git push origin HEAD:master; then break; fi
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 5
+            done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publish GitHub Pages after the bot commit
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: [refresh, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify the published options desk in a real browser
+        run: python tests/browser_options.py --url https://originaonxi.github.io/nse-value-lens/options.html

@@ -1,0 +1,348 @@
+{
+  "fixture": true,
+  "version": 1,
+  "as_of": "2026-10-03",
+  "generated_at": "2026-10-04T02:15:00Z",
+  "next_session": "2026-10-06",
+  "source": {
+    "name": "NSE F&O bhavcopy (synthetic fixture)",
+    "url_pattern": "https://archives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{YYYYMMDD}_F_0000.csv.zip",
+    "sessions": 252,
+    "first_session": "2025-09-29",
+    "last_session": "2026-10-03",
+    "missing_sessions": ["2026-03-21"]
+  },
+  "method": {
+    "hold_sessions": 5,
+    "entry": "Enter at the next session's open after the signal close. No same-day entry.",
+    "exit": "Exit at the close of the fifth session after entry, or on expiry if that comes first.",
+    "cost_model": "Round-trip cost of two ticks plus brokerage and STT is deducted from every leg.",
+    "margin_model": "Short-option returns are measured on SPAN+exposure margin, not on premium collected.",
+    "validation": "A rule is VALIDATED only when it has >=30 trades, a positive mean after costs and |t|>=2 in both halves.",
+    "no_lookahead": "Every signal uses only data available at its signal close; strikes and legs are fixed on the signal date."
+  },
+  "rules": [
+    {
+      "id": "call_long_buildup",
+      "label": "Long build-up momentum call",
+      "action": "BUY CALL",
+      "kind": "buy",
+      "baseline": false,
+      "condition": "Futures up over 5 sessions with rising futures OI and PCR falling: buy the ATM call.",
+      "status": "VALIDATED",
+      "stats": {
+        "trades": 64, "win_rate": 57.8, "mean_return_pct": 11.4, "median_return_pct": 6.2,
+        "t_stat": 2.41, "worst_return_pct": -62.0, "best_return_pct": 184.0,
+        "avg_pnl_per_lot": 4200, "return_basis": "premium",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 31, "mean_return_pct": 9.8, "win_rate": 54.8},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 33, "mean_return_pct": 12.9, "win_rate": 60.6}
+      },
+      "recent_trades": [
+        {"symbol": "NIFTY", "signal_date": "2026-09-19", "entry_date": "2026-09-22", "exit_date": "2026-09-29",
+         "legs": [{"name": "NIFTY 25000 CE", "side": "BUY", "entry": 182.0, "exit": 240.5}], "return_pct": 32.1, "pnl_per_lot": 4387},
+        {"symbol": "RELIANCE", "signal_date": "2026-09-05", "entry_date": "2026-09-08", "exit_date": "2026-09-15",
+         "legs": [{"name": "RELIANCE 1500 CE", "side": "BUY", "entry": 41.5, "exit": 28.0}], "return_pct": -32.5, "pnl_per_lot": -6750}
+      ]
+    },
+    {
+      "id": "put_short_buildup",
+      "label": "Short build-up momentum put",
+      "action": "BUY PUT",
+      "kind": "buy",
+      "baseline": false,
+      "condition": "Futures down over 5 sessions with rising futures OI and PCR rising: buy the ATM put.",
+      "status": "VALIDATED",
+      "stats": {
+        "trades": 51, "win_rate": 52.9, "mean_return_pct": 8.7, "median_return_pct": 3.1,
+        "t_stat": 2.08, "worst_return_pct": -58.0, "best_return_pct": 150.0,
+        "avg_pnl_per_lot": 3100, "return_basis": "premium",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 26, "mean_return_pct": 7.2, "win_rate": 50.0},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 25, "mean_return_pct": 10.3, "win_rate": 56.0}
+      },
+      "recent_trades": [
+        {"symbol": "RELIANCE", "signal_date": "2026-09-26", "entry_date": "2026-09-29", "exit_date": "2026-10-06",
+         "legs": [{"name": "RELIANCE 1480 PE", "side": "BUY", "entry": 33.0, "exit": 48.5}], "return_pct": 47.0, "pnl_per_lot": 7750}
+      ]
+    },
+    {
+      "id": "short_straddle_high_iv",
+      "label": "High-IV mean-reversion short straddle",
+      "action": "SELL STRADDLE",
+      "kind": "sell",
+      "baseline": false,
+      "condition": "ATM IV in the top decile and PCR near neutral: sell the ATM straddle and hold to expiry or 5 sessions.",
+      "status": "VALIDATED",
+      "stats": {
+        "trades": 42, "win_rate": 69.0, "mean_return_pct": 3.4, "median_return_pct": 2.9,
+        "t_stat": 2.77, "worst_return_pct": -14.5, "best_return_pct": 7.8,
+        "avg_pnl_per_lot": 5600, "return_basis": "margin",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 20, "mean_return_pct": 3.0, "win_rate": 65.0},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 22, "mean_return_pct": 3.8, "win_rate": 72.7}
+      },
+      "recent_trades": [
+        {"symbol": "BANKNIFTY", "signal_date": "2026-09-22", "entry_date": "2026-09-23", "exit_date": "2026-09-30",
+         "legs": [
+           {"name": "BANKNIFTY 54000 CE", "side": "SELL", "entry": 410.0, "exit": 180.0},
+           {"name": "BANKNIFTY 54000 PE", "side": "SELL", "entry": 395.0, "exit": 150.0}
+         ], "return_pct": 4.9, "pnl_per_lot": 8250}
+      ]
+    },
+    {
+      "id": "long_straddle_low_iv",
+      "label": "Low-IV pre-event long straddle",
+      "action": "BUY STRADDLE",
+      "kind": "buy",
+      "baseline": false,
+      "condition": "ATM IV in the bottom quartile with a known event inside the hold: buy the ATM straddle.",
+      "status": "VALIDATED",
+      "stats": {
+        "trades": 37, "win_rate": 48.6, "mean_return_pct": 14.2, "median_return_pct": -4.0,
+        "t_stat": 2.15, "worst_return_pct": -55.0, "best_return_pct": 210.0,
+        "avg_pnl_per_lot": 3900, "return_basis": "premium",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 18, "mean_return_pct": 11.0, "win_rate": 44.4},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 19, "mean_return_pct": 17.2, "win_rate": 52.6}
+      },
+      "recent_trades": [
+        {"symbol": "TCS", "signal_date": "2026-09-30", "entry_date": "2026-10-01", "exit_date": "2026-10-08",
+         "legs": [
+           {"name": "TCS 3100 CE", "side": "BUY", "entry": 62.0, "exit": 95.0},
+           {"name": "TCS 3100 PE", "side": "BUY", "entry": 58.0, "exit": 40.0}
+         ], "return_pct": 12.5, "pnl_per_lot": 2250}
+      ]
+    },
+    {
+      "id": "naive_weekly_call",
+      "label": "Naive weekly ATM call buying (baseline)",
+      "action": "BUY CALL",
+      "kind": "buy",
+      "baseline": true,
+      "condition": "Buy the ATM call every week regardless of context. Shown only as a baseline.",
+      "status": "NO_EDGE",
+      "stats": {
+        "trades": 210, "win_rate": 31.4, "mean_return_pct": -8.9, "median_return_pct": -28.0,
+        "t_stat": -1.92, "worst_return_pct": -100.0, "best_return_pct": 320.0,
+        "avg_pnl_per_lot": -2600, "return_basis": "premium",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 105, "mean_return_pct": -10.1, "win_rate": 29.5},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 105, "mean_return_pct": -7.7, "win_rate": 33.3}
+      },
+      "recent_trades": [
+        {"symbol": "INFY", "signal_date": "2026-09-26", "entry_date": "2026-09-29", "exit_date": "2026-10-06",
+         "legs": [{"name": "INFY 1550 CE", "side": "BUY", "entry": 29.0, "exit": 11.0}], "return_pct": -62.1, "pnl_per_lot": -7200}
+      ]
+    },
+    {
+      "id": "weak_pcr_reversal",
+      "label": "PCR extreme reversal (under review)",
+      "action": "BUY CALL",
+      "kind": "buy",
+      "baseline": false,
+      "condition": "PCR below 0.6 then turning up: buy the ATM call. Edge not yet stable across halves.",
+      "status": "WEAK",
+      "stats": {
+        "trades": 28, "win_rate": 50.0, "mean_return_pct": 4.1, "median_return_pct": 1.0,
+        "t_stat": 1.12, "worst_return_pct": -48.0, "best_return_pct": 120.0,
+        "avg_pnl_per_lot": 900, "return_basis": "premium",
+        "first_half": {"from": "2025-09-29", "to": "2026-03-31", "trades": 15, "mean_return_pct": 7.8, "win_rate": 53.3},
+        "second_half": {"from": "2026-04-01", "to": "2026-10-03", "trades": 13, "mean_return_pct": -0.2, "win_rate": 46.2}
+      },
+      "recent_trades": []
+    }
+  ],
+  "market": [
+    {"symbol": "NIFTY", "spot": 24980.5, "ret5_pct": 2.1, "fut_oi5_pct": 6.4, "buildup": "Long build-up",
+     "pcr": 0.86, "pcr_chg5": -0.12, "atm_iv": 11.8, "iv_pct": 42.0, "call_wall": 25200, "put_wall": 24800,
+     "max_pain": 24900, "expiry": "2026-10-09"},
+    {"symbol": "BANKNIFTY", "spot": 54120.0, "ret5_pct": 0.3, "fut_oi5_pct": 1.1, "buildup": "Rollover window",
+     "pcr": 0.98, "pcr_chg5": 0.02, "atm_iv": 15.6, "iv_pct": 88.0, "call_wall": 54500, "put_wall": 53500,
+     "max_pain": 54000, "expiry": "2026-10-09"}
+  ],
+  "counts": {"BUY_CALL": 1, "BUY_PUT": 1, "SELL": 1, "VOLATILITY": 1, "UNPROVEN": 1, "NO_SIGNAL": 1},
+  "universe_count": 6,
+  "rows": [
+    {
+      "symbol": "NIFTY", "kind": "index",
+      "spot": 24980.5, "ret1_pct": 0.6, "ret5_pct": 2.1, "fut_oi5_pct": 6.4, "buildup": "Long build-up",
+      "pcr": 0.86, "pcr_chg5": -0.12, "atm_iv": 11.8, "iv_pct": 42.0, "expiry": "2026-10-09", "days_to_expiry": 6,
+      "call_wall": 25200, "put_wall": 24800, "max_pain": 24900, "turnover_cr": 182400.0,
+      "bucket": "BUY_CALL", "action": "BUY CALL", "primary_rule": "call_long_buildup",
+      "signals": [
+        {"rule": "call_long_buildup", "action": "BUY CALL", "status": "VALIDATED",
+         "legs": [{"name": "NIFTY 25000 CE", "option_type": "CE", "strike": 25000, "expiry": "2026-10-09", "side": "BUY", "ref_close": 168.5, "lot": 75}],
+         "plan": {"entry": "Buy at the 2026-10-06 open", "exit_after_sessions": 5, "exit_by": "2026-10-13"}}
+      ],
+      "jev": {"support": "supportive", "support_confidence": 0.72, "risk": "ordinary", "risk_confidence": 0.65},
+      "reason": "Five-day futures up with rising OI and falling PCR; the validated long build-up call rule fired.",
+      "oi_profile": {
+        "expiry": "2026-10-09",
+        "strikes": [24600, 24700, 24800, 24900, 25000, 25100, 25200, 25300],
+        "ce_oi": [12000, 15000, 22000, 31000, 48000, 52000, 71000, 40000],
+        "pe_oi": [55000, 62000, 81000, 47000, 33000, 21000, 16000, 9000],
+        "ce_oi_chg": [-500, 1200, 3400, 5600, 9800, 7200, 12000, 4100],
+        "pe_oi_chg": [2200, 3100, 8700, 1200, -2400, -3600, -1800, -900]
+      },
+      "history": {
+        "dates": ["2026-09-24", "2026-09-25", "2026-09-26", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [24510.0, 24620.0, 24705.0, 24790.0, 24840.0, 24910.0, 24980.5],
+        "pcr": [1.02, 0.99, 0.95, 0.92, 0.90, 0.88, 0.86],
+        "iv": [12.9, 12.6, 12.4, 12.2, 12.1, 11.9, 11.8]
+      }
+    },
+    {
+      "symbol": "BANKNIFTY", "kind": "index",
+      "spot": 54120.0, "ret1_pct": -0.1, "ret5_pct": 0.3, "fut_oi5_pct": 1.1, "buildup": "Rollover window",
+      "pcr": 0.98, "pcr_chg5": 0.02, "atm_iv": 15.6, "iv_pct": 88.0, "expiry": "2026-10-09", "days_to_expiry": 6,
+      "call_wall": 54500, "put_wall": 53500, "max_pain": 54000, "turnover_cr": 221800.0,
+      "bucket": "SELL", "action": "SELL STRADDLE", "primary_rule": "short_straddle_high_iv",
+      "signals": [
+        {"rule": "short_straddle_high_iv", "action": "SELL STRADDLE", "status": "VALIDATED",
+         "legs": [
+           {"name": "BANKNIFTY 54000 CE", "option_type": "CE", "strike": 54000, "expiry": "2026-10-09", "side": "SELL", "ref_close": 405.0, "lot": 35},
+           {"name": "BANKNIFTY 54000 PE", "option_type": "PE", "strike": 54000, "expiry": "2026-10-09", "side": "SELL", "ref_close": 388.0, "lot": 35}
+         ],
+         "plan": {"entry": "Sell at the 2026-10-06 open", "exit_after_sessions": 5, "exit_by": "2026-10-13"}}
+      ],
+      "jev": {"support": "mixed", "support_confidence": 0.51, "risk": "elevated", "risk_confidence": 0.74},
+      "reason": "ATM IV in the 88th percentile with neutral PCR; the validated high-IV short straddle rule fired. Sold options carry large tail risk and need margin.",
+      "oi_profile": {
+        "expiry": "2026-10-09",
+        "strikes": [53500, 53750, 54000, 54250, 54500],
+        "ce_oi": [41000, 33000, 58000, 62000, 90000],
+        "pe_oi": [88000, 60000, 55000, 29000, 18000],
+        "ce_oi_chg": [1200, 2400, 5600, 6100, 11000],
+        "pe_oi_chg": [9000, 4200, 1100, -2200, -3400]
+      },
+      "history": {
+        "dates": ["2026-09-24", "2026-09-25", "2026-09-26", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [53980.0, 54050.0, 53990.0, 54110.0, 54080.0, 54150.0, 54120.0],
+        "pcr": [0.94, 0.95, 0.96, 0.97, 0.98, 0.98, 0.98],
+        "iv": [13.1, 13.6, 14.2, 14.9, 15.1, 15.4, 15.6]
+      }
+    },
+    {
+      "symbol": "RELIANCE", "kind": "stock",
+      "spot": 1472.3, "ret1_pct": -0.9, "ret5_pct": -3.8, "fut_oi5_pct": 7.9, "buildup": "Short build-up",
+      "pcr": 1.34, "pcr_chg5": 0.28, "atm_iv": 24.1, "iv_pct": 61.0, "expiry": "2026-10-28", "days_to_expiry": 25,
+      "call_wall": 1540, "put_wall": 1440, "max_pain": 1480, "turnover_cr": 9820.0,
+      "bucket": "BUY_PUT", "action": "BUY PUT", "primary_rule": "put_short_buildup",
+      "signals": [
+        {"rule": "put_short_buildup", "action": "BUY PUT", "status": "VALIDATED",
+         "legs": [{"name": "RELIANCE 1480 PE", "option_type": "PE", "strike": 1480, "expiry": "2026-10-28", "side": "BUY", "ref_close": 34.5, "lot": 250}],
+         "plan": {"entry": "Buy at the 2026-10-06 open", "exit_after_sessions": 5, "exit_by": "2026-10-13"}}
+      ],
+      "jev": {"support": "supportive", "support_confidence": 0.68, "risk": "ordinary", "risk_confidence": 0.6},
+      "reason": "Five-day futures down with rising OI and rising PCR; the validated short build-up put rule fired.",
+      "oi_profile": {
+        "expiry": "2026-10-28",
+        "strikes": [1420, 1440, 1460, 1480, 1500, 1520, 1540],
+        "ce_oi": [8000, 11000, 14000, 19000, 26000, 31000, 42000],
+        "pe_oi": [38000, 46000, 29000, 22000, 15000, 9000, 6000],
+        "ce_oi_chg": [300, 900, 1400, 2600, 3800, 4200, 6100],
+        "pe_oi_chg": [5200, 6100, 2200, 1100, -800, -1200, -600]
+      },
+      "history": {
+        "dates": ["2026-09-24", "2026-09-25", "2026-09-26", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [1531.0, 1518.0, 1502.0, 1495.0, 1488.0, 1479.0, 1472.3],
+        "pcr": [1.06, 1.12, 1.18, 1.24, 1.28, 1.31, 1.34],
+        "iv": [21.0, 21.8, 22.4, 23.0, 23.5, 23.8, 24.1]
+      }
+    },
+    {
+      "symbol": "TCS", "kind": "stock",
+      "spot": 3098.0, "ret1_pct": 0.2, "ret5_pct": 0.4, "fut_oi5_pct": -1.2, "buildup": "n/a",
+      "pcr": 0.91, "pcr_chg5": -0.03, "atm_iv": 16.2, "iv_pct": 9.0, "expiry": "2026-10-28", "days_to_expiry": 25,
+      "call_wall": 3200, "put_wall": 3000, "max_pain": 3100, "turnover_cr": 6410.0,
+      "bucket": "VOLATILITY", "action": "BUY STRADDLE", "primary_rule": "long_straddle_low_iv",
+      "signals": [
+        {"rule": "long_straddle_low_iv", "action": "BUY STRADDLE", "status": "VALIDATED",
+         "legs": [
+           {"name": "TCS 3100 CE", "option_type": "CE", "strike": 3100, "expiry": "2026-10-28", "side": "BUY", "ref_close": 61.0, "lot": 175},
+           {"name": "TCS 3100 PE", "option_type": "PE", "strike": 3100, "expiry": "2026-10-28", "side": "BUY", "ref_close": 57.5, "lot": 175}
+         ],
+         "plan": {"entry": "Buy at the 2026-10-06 open", "exit_after_sessions": 5, "exit_by": "2026-10-13"}}
+      ],
+      "jev": {"support": "insufficient", "support_confidence": 0.3, "risk": "unknown", "risk_confidence": 0.3},
+      "reason": "ATM IV in the 9th percentile ahead of results; the validated low-IV long straddle rule fired.",
+      "oi_profile": {
+        "expiry": "2026-10-28",
+        "strikes": [3000, 3050, 3100, 3150, 3200],
+        "ce_oi": [9000, 12000, 21000, 24000, 33000],
+        "pe_oi": [31000, 22000, 19000, 11000, 7000],
+        "ce_oi_chg": [-200, 400, 900, 1300, 2100],
+        "pe_oi_chg": [1800, 900, 300, -400, -600]
+      },
+      "history": {
+        "dates": ["2026-09-24", "2026-09-25", "2026-09-26", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [3082.0, 3090.0, 3085.0, 3094.0, 3088.0, 3096.0, 3098.0],
+        "pcr": [0.95, 0.94, 0.93, 0.92, 0.92, 0.91, 0.91],
+        "iv": [18.0, 17.6, 17.1, 16.8, 16.5, 16.3, 16.2]
+      }
+    },
+    {
+      "symbol": "INFY", "kind": "stock",
+      "spot": 1544.0, "ret1_pct": -1.4, "ret5_pct": -2.0, "fut_oi5_pct": 0.5, "buildup": "Long unwinding",
+      "pcr": 0.74, "pcr_chg5": -0.05, "atm_iv": 22.0, "iv_pct": 38.0, "expiry": "2026-10-28", "days_to_expiry": 25,
+      "call_wall": 1600, "put_wall": 1500, "max_pain": 1550, "turnover_cr": 4120.0,
+      "bucket": "UNPROVEN", "action": null, "primary_rule": "naive_weekly_call",
+      "signals": [
+        {"rule": "naive_weekly_call", "action": "BUY CALL", "status": "NO_EDGE",
+         "legs": [{"name": "INFY 1550 CE", "option_type": "CE", "strike": 1550, "expiry": "2026-10-28", "side": "BUY", "ref_close": 27.0, "lot": 400}],
+         "plan": {"entry": "Would buy at the 2026-10-06 open (not a trade)", "exit_after_sessions": 5, "exit_by": "2026-10-13"}}
+      ],
+      "jev": null,
+      "reason": "Only the naive baseline call fired. That rule loses money on average, so this is information, not a trade.",
+      "oi_profile": null,
+      "history": {
+        "dates": ["2026-09-24", "2026-09-25", "2026-09-26", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [1575.0, 1568.0, 1560.0, 1555.0, 1550.0, 1547.0, 1544.0],
+        "pcr": [0.79, 0.78, 0.77, 0.76, 0.75, 0.75, 0.74],
+        "iv": [23.1, 22.8, 22.6, 22.4, 22.2, 22.1, 22.0]
+      }
+    },
+    {
+      "symbol": "HDFCBANK", "kind": "stock",
+      "spot": 1680.0, "ret1_pct": null, "ret5_pct": null, "fut_oi5_pct": null, "buildup": "n/a",
+      "pcr": null, "pcr_chg5": null, "atm_iv": null, "iv_pct": null, "expiry": "2026-10-28", "days_to_expiry": 25,
+      "call_wall": null, "put_wall": null, "max_pain": null, "turnover_cr": null,
+      "bucket": "NO_SIGNAL", "action": null, "primary_rule": null,
+      "signals": [],
+      "jev": null,
+      "reason": "No rule fired and the options chain was too thin for reliable PCR, IV or wall estimates.",
+      "oi_profile": null,
+      "history": {
+        "dates": ["2026-09-29", "2026-09-30", "2026-10-01", "2026-10-03"],
+        "spot": [1672.0, null, 1678.0, 1680.0],
+        "pcr": [null, null, null, null],
+        "iv": [null, null, null, null]
+      }
+    }
+  ],
+  "paper": {
+    "open": [
+      {"rule": "call_long_buildup", "symbol": "NIFTY", "action": "BUY CALL", "signal_date": "2026-10-03", "entry_date": "2026-10-06",
+       "legs": [{"name": "NIFTY 25000 CE", "side": "BUY", "entry": 168.5, "mark": 181.0}], "mark_return_pct": 7.4},
+      {"rule": "short_straddle_high_iv", "symbol": "BANKNIFTY", "action": "SELL STRADDLE", "signal_date": "2026-10-03", "entry_date": "2026-10-06",
+       "legs": [
+         {"name": "BANKNIFTY 54000 CE", "side": "SELL", "entry": 405.0, "mark": 398.0},
+         {"name": "BANKNIFTY 54000 PE", "side": "SELL", "entry": 388.0, "mark": 382.0}
+       ], "mark_return_pct": 0.9}
+    ],
+    "forward_log": {"since": "2026-06-01", "signals": 148, "matured": 121, "mean_return_pct": 4.6, "win_rate": 55.4}
+  },
+  "jev": {
+    "state": "ok", "model": "jev-typed-fixture", "assessed": 4,
+    "message": "Four actionable underlyings assessed. Jev opinions are typed reviews, not forecasts.",
+    "calibration": {
+      "matured": 121,
+      "supportive": {"n": 54, "mean_return_pct": 9.1, "win_rate": 61.1},
+      "conflicting": {"n": 27, "mean_return_pct": -3.2, "win_rate": 40.7},
+      "mixed": {"n": 23, "mean_return_pct": 2.4, "win_rate": 52.2},
+      "insufficient": {"n": 17, "mean_return_pct": 1.0, "win_rate": 47.1}
+    }
+  },
+  "limitations": [
+    "This is a synthetic fixture for UI testing only. It is not market data and must never be published as research.",
+    "Returns are historical, after modelled costs, and do not include slippage on illiquid strikes.",
+    "Short-option returns are on margin and understate the tail risk of a gap move.",
+    "Only VALIDATED rules produce buy or sell buckets; everything else is shown as information."
+  ]
+}

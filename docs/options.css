@@ -1,0 +1,190 @@
+/* Options desk - option-specific styling layered on swing.css / hhhl look. */
+.options-shell{max-width:1440px}
+.options-shell h1{font-size:54px}
+.options-shell button{font:inherit;cursor:pointer}
+.options-shell>header{height:56px}
+.options-shell>main{padding-top:8px}
+.options-shell .chart-desk-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:4px 0 10px}
+.options-shell .chart-desk-heading h1{font-size:22px;letter-spacing:-.7px;margin:0}
+.chart-desk-session{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.chart-desk-session strong{font-size:14px}
+.chart-desk-session span{font-size:10px;color:var(--muted)}
+.chart-desk-session .next-session{color:var(--green);font-weight:600}
+
+/* bucket colour tokens */
+.stock-picker.buy-call{--state:#246c4e}
+.stock-picker.buy-put{--state:#ad4037}
+.stock-picker.sell{--state:#785b20}
+.stock-picker.volatility{--state:#3066a0}
+.stock-picker.unproven{--state:#6a4d8c}
+.stock-picker.no-signal{--state:#667264}
+.option-pickers{grid-template-columns:repeat(6,minmax(0,1fr))}
+
+/* index market cards */
+.market-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.market-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:18px 20px}
+.market-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.market-card-head strong{font:700 20px Manrope,sans-serif}
+.market-card-head span{font:600 16px Manrope,sans-serif;color:var(--muted)}
+.market-card dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px;margin:0}
+.market-card dl>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.market-card dt{font-size:9px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+.market-card dd{margin:0;font:600 14px Manrope,sans-serif}
+.market-card dd small{font-weight:400;font-size:10px;color:var(--muted)}
+
+/* detail panel */
+#stock-detail{padding-top:10px}
+#stock-detail>.section-head{margin-bottom:8px;gap:12px;align-items:center}
+#stock-detail>.section-head h2{font-size:20px;letter-spacing:-.5px;margin:0}
+#detail-subtitle{font-size:10px;margin:3px 0 0}
+.option-badge{border-radius:5px;padding:5px 11px;font-size:11px;font-weight:700;color:#fff}
+.option-badge.buy-call{background:#246c4e}
+.option-badge.buy-put{background:#ad4037}
+.option-badge.sell{background:#785b20}
+.option-badge.volatility{background:#3066a0}
+.option-badge.unproven{background:#6a4d8c}
+.option-badge.no-signal{background:#667264}
+
+.signal-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
+.signal-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px 18px}
+.signal-card.empty{display:flex;align-items:center;justify-content:center;min-height:80px}
+.signal-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.signal-card-head strong{font:700 16px Manrope,sans-serif}
+.signal-rule{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.legs{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:7px}
+.legs li{font-size:12px;line-height:1.4}
+.legs strong{font-weight:600}
+.leg-meta{color:var(--muted);font-size:11px;display:block;margin-top:2px}
+.side{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.side-buy{background:#eaf4e9;color:#246c4e}
+.side-sell{background:#f6efe0;color:#785b20}
+.signal-plan{font-size:11px;color:var(--ink);background:#f0f5ef;border-radius:5px;padding:8px 10px;margin:0 0 12px}
+
+.signal-evidence{border-top:1px solid var(--line);padding-top:10px}
+.evidence-head{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.evidence-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 10px;margin:8px 0}
+.evidence-grid>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.evidence-grid dt{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.evidence-grid dd{margin:0;font:600 13px Manrope,sans-serif}
+.evidence-halves{font-size:11px;color:var(--muted);margin:6px 0 0;line-height:1.6}
+
+.rule-status{font-size:9px;font-weight:700;letter-spacing:.5px;padding:3px 7px;border-radius:4px;background:#eef0ea;color:var(--muted)}
+.rule-status.VALIDATED{background:#eaf4e9;color:#246c4e}
+.rule-status.WEAK{background:#fff5df;color:#95621c}
+.rule-status.NO_EDGE{background:#fbeceb;color:#a34331}
+.rule-status.INSUFFICIENT{background:#eef0ea;color:#667264}
+
+/* jev */
+.jev-review{margin:4px 0 16px}
+.jev-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:14px 18px}
+.jev-card.none{background:#f6f7f3}
+.jev-head{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.jev-card p{margin:3px 0;font-size:13px}
+.jev-supportive{color:#246c4e}
+.jev-conflicting{color:#a34331}
+.jev-mixed{color:#785b20}
+.jev-insufficient{color:#667264}
+.jev-risk-high{color:#a34331}
+.jev-risk-elevated{color:#95621c}
+.jev-risk-ordinary{color:#246c4e}
+.jev-risk-unknown{color:#667264}
+
+/* svg charts */
+.option-detail-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.svg-chart{overflow-x:auto;max-width:100%}
+.svg-chart svg{width:100%;height:auto;display:block}
+#oi-chart svg{min-width:720px}
+.bar-ce{fill:#2f7e5c}
+.bar-pe{fill:#b5564b}
+.axis-base{stroke:#cdd6cc;stroke-width:1}
+.axis-x{fill:#68776e;font-size:11px;text-anchor:middle}
+.axis-y{fill:#68776e;font-size:10px;text-anchor:end}
+.line-spot{stroke:#182c24;stroke-width:1.5;stroke-dasharray:4 3}
+.line-callwall{stroke:#2f7e5c;stroke-width:1.2;stroke-dasharray:2 3}
+.line-putwall{stroke:#b5564b;stroke-width:1.2;stroke-dasharray:2 3}
+.line-maxpain{stroke:#8a6d2f;stroke-width:1.2;stroke-dasharray:1 3}
+.marker-label{font-size:9px;text-anchor:middle}
+.line-spot-t{fill:#182c24}
+.line-callwall-t{fill:#2f7e5c}
+.line-putwall-t{fill:#b5564b}
+.line-maxpain-t{fill:#8a6d2f}
+.chart-legend .legend-ce:before,.chart-legend .legend-pe:before,.chart-legend .legend-spot:before{content:"";display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;vertical-align:middle}
+.chart-legend .legend-ce:before{background:#2f7e5c}
+.chart-legend .legend-pe:before{background:#b5564b}
+.chart-legend .legend-spot:before{background:#182c24;border-radius:0;height:2px;width:12px}
+
+#history-chart{display:flex;flex-direction:column;gap:12px}
+.mini{border:1px solid #eef1ea;border-radius:6px;padding:8px 10px;background:#fbfcf9}
+.mini-title{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.mini-path{fill:none;stroke:#2f7e5c;stroke-width:1.6}
+.mini-dot{fill:#182c24}
+
+/* universe table */
+.option-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto auto;gap:12px;align-items:end;margin-top:18px}
+.option-filters label{font-size:11px;display:flex;flex-direction:column;gap:6px}
+.option-filters select,.option-filters input{width:100%}
+.option-filters button{border:1px solid var(--line);background:#fff;border-radius:5px;padding:10px 14px;font-size:12px}
+.option-filters button:hover{border-color:var(--green)}
+.option-filters button:disabled{opacity:.5;cursor:not-allowed}
+.bucket-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;color:#fff;display:inline-block}
+.bucket-tag.buy-call{background:#246c4e}
+.bucket-tag.buy-put{background:#ad4037}
+.bucket-tag.sell{background:#785b20}
+.bucket-tag.volatility{background:#3066a0}
+.bucket-tag.unproven{background:#6a4d8c}
+.bucket-tag.no-signal{background:#667264}
+#option-rows td small,#rule-rows td small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.stock-name{background:none;border:0;color:var(--green);font-weight:600;padding:0;text-align:left;cursor:pointer}
+.stock-name:hover{text-decoration:underline}
+.reason-cell{white-space:normal;max-width:320px;color:var(--muted);font-size:11px}
+.empty-row{text-align:center;color:var(--muted);padding:26px}
+tr.selected td{background:#f1f6ef}
+
+/* rule evidence table */
+.rule-detail td{background:#f7f9f5}
+.recent-trades{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;white-space:normal}
+.recent-trades li{font-size:11px;line-height:1.5}
+
+/* paper + calibration */
+.jev-calibration{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.calib-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px;display:flex;flex-direction:column;gap:4px}
+.calib-label{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.calib-card strong{font:700 24px Manrope,sans-serif}
+.calib-card small{font-size:11px;color:var(--muted)}
+.calib-card.jev-supportive{border-top:3px solid #246c4e}
+.calib-card.jev-conflicting{border-top:3px solid #a34331}
+.calib-card.jev-mixed{border-top:3px solid #785b20}
+.calib-card.jev-insufficient{border-top:3px solid #667264}
+
+/* definition list colour words */
+.buy-call-text{color:#246c4e}
+.buy-put-text{color:#ad4037}
+.sell-text{color:#785b20}
+.volatility-text{color:#3066a0}
+.unproven-text{color:#6a4d8c}
+.definition-list{display:grid;gap:10px}
+.definition-list p{margin:0;font-size:12px;color:var(--muted)}
+.definition-list b{display:inline-block;min-width:92px;font-size:11px;letter-spacing:.5px}
+.methods{display:grid;grid-template-columns:1.3fr 1fr;gap:60px}
+.methods p{font-size:12px;color:var(--muted);margin:8px 0 0}
+
+@media(max-width:1100px){
+  .option-pickers{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .option-detail-grid{grid-template-columns:1fr}
+  .option-filters{grid-template-columns:1fr 1fr}
+  .option-filters .search-label{grid-column:1/-1}
+  .methods{grid-template-columns:1fr;gap:24px}
+  .jev-calibration{grid-template-columns:1fr 1fr}
+  .evidence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .options-shell h1,.options-shell .chart-desk-heading h1{font-size:18px}
+  .options-shell>header{height:auto;min-height:64px;flex-wrap:wrap;gap:12px;padding:12px 0}
+  .options-shell nav{flex-wrap:wrap;gap:8px 14px}
+  .option-pickers{grid-template-columns:1fr 1fr}
+  .market-cards{grid-template-columns:1fr}
+  .market-card dl{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .signal-cards{grid-template-columns:1fr}
+  .jev-calibration{grid-template-columns:1fr 1fr}
+  #oi-chart svg{min-width:560px}
+}
