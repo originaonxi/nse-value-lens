@@ -463,8 +463,10 @@ def volume_poc(df, periods=90, n_bins=50):
     va_vol = vol_bins[poc_idx]
     vhi, vlo = poc_idx, poc_idx
     while va_vol < 0.70 * total and (vhi < n_bins - 1 or vlo > 0):
-        up = vol_bins[vhi + 1] if vhi < n_bins - 1 else 0.0
-        dn = vol_bins[vlo - 1] if vlo > 0 else 0.0
+        # An exhausted side must never be chosen; otherwise a zero-volume bin on
+        # the other side makes up == dn == 0 and vhi runs past the top forever.
+        up = vol_bins[vhi + 1] if vhi < n_bins - 1 else -1.0
+        dn = vol_bins[vlo - 1] if vlo > 0 else -1.0
         if up >= dn:
             vhi += 1; va_vol += up
         else:
