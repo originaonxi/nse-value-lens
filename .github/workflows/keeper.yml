@@ -1,0 +1,56 @@
+name: Data keeper
+run-name: Data keeper ${{ github.event.schedule || format('hop {0}{1}{2}', inputs.hop || '0', inputs.dry_run && ' dry-run' || '', inputs.pretend_stale && format(' test {0}', inputs.pretend_stale) || '') }}
+# GitHub starts `schedule:` runs on this repo hours late or not at all, but `workflow_dispatch`
+# runs start within seconds. The keeper is one long job that watches the site and NSE and
+# dispatches whichever refresh is behind (see scripts/keeper.py). Any one of these start times,
+# however late it fires, is enough to begin the day; an unfinished keeper hands over to a new run.
+on:
+  schedule:
+    - cron: '7 2,6,8,9,10,12,15,18 * * *'   # 07:37 ... 23:37 IST
+  workflow_dispatch:
+    inputs:
+      hop:
+        description: Hand-over counter (set automatically)
+        default: '0'
+      dry_run:
+        description: Decide and report only; dispatch nothing
+        type: boolean
+        default: false
+      once:
+        description: Single check, then exit
+        type: boolean
+        default: false
+      pretend_stale:
+        description: TEST ONLY - comma list of pages/workflows to treat as behind
+        default: ''
+      max_minutes:
+        description: Job length before handing over (default 300)
+        default: ''
+      now:
+        description: TEST ONLY with dry_run - simulated time, ISO 8601 with offset
+        default: ''
+permissions:
+  actions: write
+  contents: read
+concurrency:
+  # One live keeper at a time; dry-run and single-check tests run beside it.
+  group: keeper-${{ (inputs.dry_run || inputs.once) && github.run_id || 'main' }}
+  cancel-in-progress: false
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the keeper's calendar and decision rules
+        run: python3 -m unittest tests.test_keeper -v
+      - name: Keep every page on the latest NSE session
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KEEPER_HOP: ${{ inputs.hop || '0' }}
+          KEEPER_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          KEEPER_ONCE: ${{ inputs.once && 'true' || 'false' }}
+          KEEPER_PRETEND_STALE: ${{ inputs.pretend_stale }}
+          KEEPER_MAX_MINUTES: ${{ inputs.max_minutes || '300' }}
+          KEEPER_NOW: ${{ inputs.now }}
+        run: python3 scripts/keeper.py
