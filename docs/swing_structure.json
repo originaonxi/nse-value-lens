@@ -82,7 +82,6 @@
   "GVT&D",
   "INDHOTEL",
   "PHOENIXLTD",
-  "RECLTD",
   "TATASTEEL"
  ],
  "bos_fired": [
@@ -19332,13 +19331,13 @@
     "price": 286.2,
     "date": "2026-10-01"
    },
-   "consec_hh": 2,
+   "consec_hh": 3,
    "consec_ll": 2,
    "consec_lh": 0,
    "consec_hl": 0,
    "reversal_trigger": null,
    "reversal_invalidate": null,
-   "extended_warning": null,
+   "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
    "bos": {},
    "bos_fired": false,
    "bos_dir": null,
@@ -19351,11 +19350,6 @@
    "wyckoff_note": null,
    "sequence": [
     {
-     "date": "2026-03-30",
-     "price": 299.26,
-     "label": "LL"
-    },
-    {
      "date": "2026-04-21",
      "price": 381.34,
      "label": "HH"
@@ -19366,6 +19360,11 @@
      "label": "HL"
     },
     {
+     "date": "2026-05-25",
+     "price": 339.56,
+     "label": "LH"
+    },
+    {
      "date": "2026-06-02",
      "price": 315.94,
      "label": "LL"
@@ -19373,7 +19372,7 @@
     {
      "date": "2026-06-23",
      "price": 365.45,
-     "label": "LH"
+     "label": "HH"
     },
     {
      "date": "2026-07-03",
@@ -19401,9 +19400,9 @@
      "label": "LL"
     }
    ],
-   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b9375.01, last swing low \u20b9286.2. Wait for HH/HL or LH/LL sequence.",
+   "plain": "NO CLEAN STRUCTURE \u2014 last swing high \u20b9375.01, last swing low \u20b9286.2. Wait for HH/HL or LH/LL sequence. \u26a0\ufe0f 3 consecutive HH \u2014 extended uptrend, watch for first LH.",
    "at_second_ll": true,
-   "at_second_hh": true
+   "at_second_hh": false
   },
   {
    "symbol": "SBICARD",
