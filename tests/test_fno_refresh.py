@@ -119,5 +119,30 @@ class FnoDataTests(unittest.TestCase):
             self.assertEqual(stock.read_text(),'unchanged')
             self.assertEqual(json.loads((root/'public/data/hhhl_fno.json').read_text()),{'rows':[]})
 
+    def official_row(self,raw,day,close,previous=None):
+        prior=raw.loc[raw.index<day].Close.iloc[-1] if previous is None else previous
+        return pd.DataFrame([{'PREV_CLOSE':prior,'OPEN_PRICE':close-1,'HIGH_PRICE':close+2,'LOW_PRICE':close-2,
+                              'CLOSE_PRICE':close,'TTL_TRD_QNTY':5e5}],index=['SAMPLE'])
+
+    def test_vendor_skipped_session_is_filled_from_matching_official_close(self):
+        full=prices();missing=full.index[-2];raw=full.drop(missing)
+        official={missing:self.official_row(full,missing,float(full.Close.loc[missing]))}
+        with tempfile.TemporaryDirectory() as folder, patch.object(fno.yf,'Ticker') as ticker:
+            ticker.return_value.history.return_value=raw
+            base={'as_of':'2026-09-25','market':{'data_ready':True,'reference_filter_passed':True}}
+            row=fno.fetch_stock({'Symbol':'SAMPLE','Company Name':'Sample','Industry':'Example'},
+                                base,full.index,Path(folder),NOW,official)
+            saved=pd.read_csv(Path(folder)/'SAMPLE.NS.csv',index_col=0,parse_dates=True)
+        self.assertEqual(row['official_fills'],[str(missing.date())])
+        self.assertIn(missing,saved.index)
+        self.assertNotIn('Missing recent session',' '.join(row['data_warnings']))
+
+    def test_official_close_on_a_different_price_scale_is_not_spliced(self):
+        full=prices();missing=full.index[-2];raw=full.drop(missing)
+        official={missing:self.official_row(full,missing,50.0,previous=999.0)}
+        frame,filled=fno.fill_official(raw,'SAMPLE',full.index,official)
+        self.assertEqual(filled,[])
+        self.assertNotIn(missing,frame.index)
+
 
 if __name__=='__main__':unittest.main()

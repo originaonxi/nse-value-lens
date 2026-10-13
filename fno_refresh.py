@@ -22,6 +22,7 @@ from hhhl_scanner import OHLCV, normalize_sessions, read_prices, scan_stock
 ROOT = Path(__file__).resolve().parent
 SOURCE = 'https://nsearchives.nseindia.com/content/fo/fo_mktlots.csv'
 SECTORS = 'https://www.niftyindices.com/IndexConstituent/ind_nifty500list.csv'
+BHAV = 'https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{:%d%m%Y}.csv'
 
 
 def parse_membership(text, today):
@@ -89,7 +90,46 @@ def caution(row, reason):
     return result
 
 
-def fetch_stock(meta, base, calendar, prices, now):
+def official_closes(days):
+    """Official NSE equity closing rows for recent sessions; unavailable files are skipped."""
+    found = {}
+    for day in days:
+        try:
+            data = pd.read_csv(StringIO(get_text(BHAV.format(day))), skipinitialspace=True)
+            data.columns = data.columns.str.strip()
+            data = data.loc[data.SERIES.astype(str).str.strip().eq('EQ')].copy()
+            data['SYMBOL'] = data.SYMBOL.astype(str).str.strip()
+            dates = pd.to_datetime(data.DATE1.astype(str).str.strip(), format='%d-%b-%Y')
+            if len(data) and dates.eq(day).all() and not data.SYMBOL.duplicated().any():
+                found[day] = data.set_index('SYMBOL')
+        except Exception:
+            pass
+    return found
+
+
+def fill_official(frame, symbol, calendar, official):
+    """Insert a session the vendor skipped, only when NSE's previous close matches the saved price scale."""
+    filled = []
+    for day in sorted(official):
+        if day in frame.index or day not in calendar or symbol not in official[day].index:
+            continue
+        row = official[day].loc[symbol]
+        prior = frame.loc[frame.index < day]
+        previous = float(row.PREV_CLOSE)
+        if prior.empty or previous <= 0 or abs(float(prior.Close.iloc[-1])/previous-1) > .0001:
+            continue
+        bar = pd.DataFrame([{'Open': float(row.OPEN_PRICE), 'High': float(row.HIGH_PRICE),
+                             'Low': float(row.LOW_PRICE), 'Close': float(row.CLOSE_PRICE),
+                             'Volume': float(row.TTL_TRD_QNTY)}], index=[day])
+        prices = bar[OHLCV[:4]].iloc[0]
+        if bar.Volume.iloc[0] <= 0 or (prices <= 0).any() or prices.High < prices.max() or prices.Low > prices.min():
+            continue
+        frame = pd.concat([frame, bar]).sort_index()
+        filled.append(str(day.date()))
+    return frame, filled
+
+
+def fetch_stock(meta, base, calendar, prices, now, official=None):
     path = prices/(meta['Symbol']+'.NS.csv')
     old, invalid = read_prices(path, base['as_of']) if path.exists() else (pd.DataFrame(columns=OHLCV), [])
     error = None
@@ -107,6 +147,7 @@ def fetch_stock(meta, base, calendar, prices, now):
                  & (frame.Low <= frame[OHLCV[:4]].min(axis=1)) & (frame.Volume > 0))
         invalid = [str(day.date()) for day in frame.index[~valid & (frame.Volume > 0)]]
         frame = frame.loc[valid & frame.index.isin(calendar)]
+        frame, filled = fill_official(frame, meta['Symbol'], calendar, official or {})
         if len(frame) < 20 or (len(old) and (len(frame) < min(len(old), 210) or frame.index[-1] < old.index[-1])):
             raise ValueError('Incomplete or regressed adjusted history')
         prices.mkdir(parents=True, exist_ok=True)
@@ -115,9 +156,13 @@ def fetch_stock(meta, base, calendar, prices, now):
         temporary.replace(path)
     except Exception as exc:
         frame = old.loc[old.index.isin(calendar) & (old.Volume > 0)]
+        frame, filled = fill_official(frame, meta['Symbol'], calendar, official or {})
         error = type(exc).__name__+': '+str(exc)[:160]
     row = scan_stock(meta, frame, invalid, base['as_of'], base['market'], calendar)
-    row['data_source'] = 'Yahoo adjusted daily stock OHLCV. F&O membership comes from NSE; these are underlying share prices, not futures or options premiums.'
+    row['data_source'] = ('Yahoo adjusted daily stock OHLCV; sessions Yahoo skipped are filled from the official NSE '
+                          'closing file when its previous close matches. F&O membership comes from NSE; these are '
+                          'underlying share prices, not futures or options premiums.')
+    row['official_fills'] = filled
     row['retrieved_at'] = now.isoformat() if error is None else None
     if error:
         row = caution(row, 'The latest price download failed; any visible candles are the last saved prices.')
@@ -167,11 +212,12 @@ def refresh(root=ROOT, now=None):
     except Exception:
         pass
     calendar = stock_calendar(root, base)
+    official = official_closes(list(calendar[-5:]))
     def work(member):
         meta = metadata.get(member['symbol'], {})
         return fetch_stock({'Symbol': member['symbol'], 'Company Name': meta.get('Company Name', member['name']),
                             'Industry': meta.get('Industry', 'Sector unavailable')},
-                           base, calendar, root/'data/fno_prices', now)
+                           base, calendar, root/'data/fno_prices', now, official)
     with ThreadPoolExecutor(max_workers=4) as pool:
         rows = list(pool.map(work, extras))
     payload = {'version': 1, 'as_of': base['as_of'], 'generated_at': now.isoformat(),
