@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nifty 50 option chain | NSE Value Lens</title>
+<meta name="description" content="Nifty 50 option chain from NSE's official end-of-day files: delta, gamma, theta, vega and implied volatility per strike, sigma bands, FII/DII/Pro/Client positioning, HH/HL swing structure, backtested setups and a Jev review of the index and all 50 constituents. Paper research only.">
+<link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="options.css?v=options-1"><link rel="stylesheet" href="nifty-chain.css?v=nifty-1">
+<script src="nifty-chain.js?v=nifty-1" defer></script>
+</head>
+<body data-source="">
+<div class="shell hhhl-shell options-shell nifty-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="hhhl.html">HH/HL</a><a href="vcp.html">VCP scanner</a><a href="index.html">Swing desk</a><a href="options.html">Options desk</a><a href="nifty-chain.html" aria-current="page">Nifty chain</a><a href="market-brief.html">US + India brief</a><a href="daily-market.html">Daily market &amp; deals</a></nav></header>
+<main>
+<section class="chart-desk-heading"><h1>Nifty 50 option chain / Greeks, sigma &amp; setups</h1><div class="chart-desk-session"><strong id="session-date">Loading…</strong><span id="coverage">Checking official files</span><span id="next-session" class="next-session">—</span></div></section>
+<p id="notice" class="notice" role="status">Loading the Nifty option chain…</p>
+
+<section class="scan-section" aria-labelledby="index-title">
+<div class="section-head"><div><div class="eyebrow">01 / NIFTY 50 TODAY</div><h2 id="index-title">Index, volatility &amp; positioning</h2></div><p id="index-source" class="muted">—</p></div>
+<div id="index-cards" class="nc-cards"></div>
+</section>
+
+<section class="scan-section" aria-labelledby="verdict-title">
+<div class="section-head"><div><div class="eyebrow">02 / THE CALL</div><h2 id="verdict-title">Best setup today &amp; Jev's read</h2></div></div>
+<div class="nc-verdict"><article id="best-setup" class="nc-panel"></article><article id="jev-index" class="nc-panel"></article></div>
+</section>
+
+<section class="scan-section" aria-labelledby="chain-title">
+<div class="section-head"><div><div class="eyebrow">03 / OPTION CHAIN</div><h2 id="chain-title">Delta, gamma, theta, vega &amp; IV per strike</h2></div>
+<div class="filters nc-filters"><label>Expiry<select id="expiry"></select></label><label>Strikes<select id="width"><option value="10">±10</option><option value="20" selected>±20</option></select></label></div></div>
+<div id="sigma-card" class="nc-sigma"></div>
+<div class="table-wrap nc-chain"><table><caption>Calls on the left, puts on the right. OI and volume are in lots. Greeks per 1 unit of the index; theta per calendar day; vega per 1 IV point.</caption>
+<thead><tr><th>OI</th><th>OI chg</th><th>Vol</th><th>IV</th><th>Delta</th><th>Gamma</th><th>Theta</th><th>Vega</th><th>Call LTP</th><th class="nc-strike">Strike</th><th>Put LTP</th><th>Vega</th><th>Theta</th><th>Gamma</th><th>Delta</th><th>IV</th><th>Vol</th><th>OI chg</th><th>OI</th></tr></thead>
+<tbody id="chain-rows"></tbody></table></div>
+<div class="detail-grid option-detail-grid">
+<div class="chart-panel"><div class="chart-heading"><div><span class="label">OPEN INTEREST BY STRIKE</span><strong id="oi-heading">—</strong></div><div class="chart-controls"><label>View <select id="oi-mode"><option value="oi">Open interest</option><option value="chg">OI change</option></select></label></div></div><div id="oi-chart" class="svg-chart"></div><p class="chart-legend"><span class="legend-ce">Call OI</span><span class="legend-pe">Put OI</span><span class="legend-spot">Spot</span> · Shaded band = 1 sigma expected move to this expiry.</p></div>
+<div class="chart-panel"><div class="chart-heading"><div><span class="label">VOLATILITY</span><strong>ATM IV · realised vol · India VIX</strong></div></div><div id="vol-chart" class="svg-chart"></div></div>
+</div>
+</section>
+
+<section class="scan-section" aria-labelledby="hhhl-title">
+<div class="section-head"><div><div class="eyebrow">04 / HH / HL STRUCTURE</div><h2 id="hhhl-title">Nifty swing structure</h2></div><p id="hhhl-state" class="muted">—</p></div>
+<div id="hhhl-chart" class="svg-chart nc-wide-chart"></div>
+<p class="muted">Confirmed swing pivots only (a pivot counts two sessions after it forms), the same rule the HH/HL page uses. HH = higher high, HL = higher low, LH = lower high, LL = lower low. Line = 20-session average.</p>
+</section>
+
+<section class="scan-section" aria-labelledby="part-title">
+<div class="section-head"><div><div class="eyebrow">05 / WHO IS POSITIONED HOW</div><h2 id="part-title">FII, DII, Pro &amp; Client index derivatives</h2></div><p class="muted">NSE participant-wise open interest, contracts</p></div>
+<div class="table-wrap"><table><caption>Index futures and index options open interest by participant, with net positions and the 5-session change</caption><thead><tr><th>Participant</th><th>Fut long</th><th>Fut short</th><th>Long share</th><th>Net futures</th><th>Net calls</th><th>Net puts</th><th>Net change (5d)</th><th>Read</th></tr></thead><tbody id="participant-rows"></tbody></table></div>
+<div id="part-chart" class="svg-chart nc-wide-chart"></div>
+</section>
+
+<section class="scan-section" aria-labelledby="setups-title">
+<div class="section-head"><div><div class="eyebrow">06 / SETUPS FIRING TODAY</div><h2 id="setups-title">Legs, position Greeks &amp; payoff</h2></div></div>
+<div id="setup-cards" class="nc-setups"></div>
+</section>
+
+<section class="scan-section" aria-labelledby="rules-title">
+<div class="section-head"><div><div class="eyebrow">07 / EVIDENCE</div><h2 id="rules-title">Every setup, backtested on official Nifty contract prices</h2></div><p id="rules-note" class="muted">—</p></div>
+<div class="table-wrap"><table><caption>Rules fixed before testing; entry next open, exit after 5 sessions, all costs included</caption><thead><tr><th>Setup</th><th>Status</th><th>Structure</th><th>Today</th><th>Trades</th><th>Win %</th><th>Mean %</th><th>Median %</th><th>t-stat</th><th>Worst %</th><th>First half</th><th>Second half</th><th>Basis</th></tr></thead><tbody id="rule-rows"></tbody></table></div>
+</section>
+
+<section class="scan-section" aria-labelledby="const-title">
+<div class="section-head"><div><div class="eyebrow">08 / ALL 50 CONSTITUENTS</div><h2 id="const-title">Nifty 50 stocks: HH/HL, option Greeks &amp; Jev</h2></div><p id="const-count" class="muted">—</p></div>
+<div id="breadth" class="nc-breadth"></div>
+<div class="filters option-filters">
+<label>HH/HL<select id="const-status"><option value="ALL">All</option><option value="BUY">BUY</option><option value="WATCH">WATCH</option><option value="SELL">SELL</option><option value="CAUTION">CAUTION</option><option value="AVOID">AVOID</option></select></label>
+<label>Jev stance<select id="const-stance"><option value="ALL">All</option><option value="bullish">Bullish</option><option value="bearish">Bearish</option><option value="neutral">Neutral</option><option value="insufficient">Insufficient</option></select></label>
+<label>Sort<select id="const-sort"><option value="symbol">Symbol</option><option value="ret5">5d %</option><option value="iv">ATM IV</option><option value="move">Expected move</option><option value="jev">Jev confidence</option></select></label>
+<label class="search-label">Search<input id="const-search" type="search" placeholder="Symbol or sector" autocomplete="off"></label>
+<button id="const-download" type="button">Download CSV</button>
+</div>
+<div class="table-wrap stock-table"><table><caption>Each Nifty 50 stock with its HH/HL status, futures build-up, ATM option Greeks from the official bhavcopy and Jev's review</caption><thead><tr><th>Stock</th><th>HH/HL</th><th>Structure</th><th>Spot</th><th>5d %</th><th>Build-up</th><th>PCR</th><th>ATM IV</th><th>Call Δ</th><th>Put Δ</th><th>Theta/day</th><th>5d move ±</th><th>Desk</th><th>Jev stance</th><th>Jev play</th><th>Jev risk</th></tr></thead><tbody id="constituent-rows"></tbody></table></div>
+</section>
+
+<section class="scan-section" aria-labelledby="inst-title">
+<div class="section-head"><div><div class="eyebrow">09 / HOW BIG MONEY TRADES NIFTY OPTIONS</div><h2 id="inst-title">Institutions, retail and the rules of the game</h2></div><p id="research-meta" class="muted">—</p></div>
+<div id="institution-list" class="nc-research-cards"></div>
+<h3 class="nc-sub">Documented institutional option strategies</h3>
+<div class="table-wrap"><table><caption>Named strategies professional desks use on index options; "Tested here" links to a backtested setup above</caption><thead><tr><th>Strategy</th><th>View</th><th>Who uses it</th><th>Legs</th><th>Why it can work</th><th>Main risk</th><th>Retail fit</th><th>Tested here</th><th>Source</th></tr></thead><tbody id="strategy-rows"></tbody></table></div>
+<h3 class="nc-sub">Evidence on index-option returns</h3>
+<ul id="evidence-list" class="nc-list"></ul>
+<h3 class="nc-sub">Open-source tools for Nifty options</h3>
+<div class="table-wrap"><table><caption>GitHub repositories for Greeks, NSE data and option backtests</caption><thead><tr><th>Repository</th><th>What</th><th>License</th><th>Last activity</th></tr></thead><tbody id="github-rows"></tbody></table></div>
+<h3 class="nc-sub">Caveats</h3>
+<ul id="caveat-list" class="nc-list"></ul>
+</section>
+
+<section class="scan-section" aria-labelledby="cal-title">
+<div class="section-head"><div><div class="eyebrow">10 / JEV CALIBRATION</div><h2 id="cal-title">How Jev's index calls have scored</h2></div></div>
+<div id="jev-calibration" class="jev-calibration"></div>
+</section>
+
+<section class="scan-section methods">
+<div><div class="eyebrow">11 / HOW TO READ THIS</div><h2>Greeks describe risk.<br>Setups are fixed rules.</h2><p id="method-greeks"></p><p id="method-sigma"></p><p id="method-entry"></p><p id="method-cost"></p><p id="method-validation"></p><p id="method-nolook"></p></div>
+<div class="definition-list"><p><b>DELTA</b>How much the option moves for a 1-point index move; roughly the model chance of finishing in the money.</p><p><b>GAMMA</b>How fast delta changes. Highest at the money and near expiry.</p><p><b>THETA</b>Premium lost per calendar day if nothing else changes. Buyers pay it, sellers collect it.</p><p><b>VEGA</b>Premium change for a 1-point change in implied volatility.</p><p><b>SIGMA</b>One standard deviation of the expected move implied by option prices; about two days in three should close inside it.</p><p><b>PCR</b>Put open interest divided by call open interest.</p></div>
+</section>
+<details class="data-details"><summary>Data sources, coverage and limitations</summary><div id="data-audit"></div></details>
+</main>
+<footer><span>NSE VALUE LENS / NIFTY CHAIN</span><p>Paper research. Not investment advice. No automatic orders or assured returns.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>

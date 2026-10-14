@@ -1,0 +1,140 @@
+name: Nifty chain refresh
+run-name: Nifty chain ${{ github.event.schedule || github.event.workflow_run.name || 'manual' }}
+on:
+  # Runs right after the options desk or the HH/HL refresh finishes (both kept on time by the data keeper),
+  # so the Nifty page always uses the same session's official files. The schedules are a fallback.
+  workflow_run:
+    workflows: ['Options desk refresh', 'HHHL daily refresh']
+    types: [completed]
+  schedule:
+    # UTC: 20:15 and 23:45 IST, plus 08:45 IST next morning.
+    - cron: '45 14,18 * * 1-5'
+    - cron: '15 3 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if this session is already built with a Jev review
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: nifty-chain-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    # A failed or cancelled upstream refresh must not trigger a build that mixes today's chain with yesterday's inputs.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Restore the options desk's bhavcopy cache (read-only; never saved from here)
+        uses: actions/cache/restore@v4
+        with:
+          # Same path list as options_daily.yml: a cache entry only matches an identical path set.
+          path: |
+            .cache/fo_bhavcopy
+            .cache/options_days
+          key: options-desk-${{ github.run_id }}
+          restore-keys: options-desk-
+      - name: Restore Nifty chain caches
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/nifty_days
+            .cache/participant_oi
+            .cache/index_close
+            .cache/nifty50_list.csv
+          key: nifty-chain-${{ github.run_id }}
+          restore-keys: nifty-chain-
+      - name: Test Greeks, official-file parsers, swing structure and no-look-ahead guards
+        run: python -m unittest tests.test_nifty_chain -v
+      - name: Build the Nifty chain from official NSE files, backtest the setups and run Jev
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$FORCE" = "true" ]; then python nifty_chain.py --force-archive; else python nifty_chain.py --if-new; fi
+      - name: Save Nifty chain caches
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .cache/nifty_days
+            .cache/participant_oi
+            .cache/index_close
+            .cache/nifty50_list.csv
+          key: nifty-chain-${{ github.run_id }}
+      - name: Commit the Nifty chain and its dated Jev log
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/nifty_chain.json
+          if [ -d data/nifty_chain_history ]; then git add data/nifty_chain_history; fi
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: nifty chain run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3 4 5; do
+              git pull --rebase origin master
+              if git push origin HEAD:master; then break; fi
+              if [ "$attempt" = 5 ]; then exit 1; fi
+              sleep $((attempt * 5))
+            done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publish GitHub Pages after the bot commit
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: [refresh, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify the published Nifty chain page in a real browser
+        run: python tests/browser_nifty_chain.py --url https://originaonxi.github.io/nse-value-lens/nifty-chain.html
