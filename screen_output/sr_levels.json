@@ -17149,7 +17149,7 @@
       "action": "Wait \u2014 buy only if ceiling breaks with high volume",
       "floor": 286.2,
       "ceiling": 310.07,
-      "next_target": 338.9,
+      "next_target": 335.96,
       "next_floor": null,
       "above_vwap": true,
       "vwap20": 301.76,
@@ -17167,7 +17167,7 @@
         313.08,
         319.4,
         324.04,
-        340.29,
+        341.02,
         351.44
       ],
       "supports": [
@@ -17194,8 +17194,8 @@
         375.01,
         366.48,
         365.45,
-        339.56,
-        381.34
+        381.34,
+        357.36
       ],
       "swing_lows": [
         286.2,
@@ -17773,12 +17773,19 @@
             "strength": 0.8
           },
           {
-            "price": 358.14,
+            "price": 357.84,
             "sources": [
+              "swing",
               "vp"
             ],
-            "n_sources": 1,
+            "n_sources": 2,
             "components": [
+              {
+                "source": "swing",
+                "label": "Swing high #5",
+                "price": 357.36,
+                "weight": 1.0
+              },
               {
                 "source": "vp",
                 "label": "Volume Profile POC",
@@ -17788,32 +17795,19 @@
             ],
             "vp_density": 1.0,
             "touches": 18,
-            "rejection_atr": 0.4,
+            "rejection_atr": 0.49,
             "has_avwap": false,
             "has_round": false,
-            "strength": 0.69
+            "strength": 0.7
           },
           {
-            "price": 338.9,
+            "price": 340.64,
             "sources": [
-              "avwap",
               "kmeans",
               "swing"
             ],
-            "n_sources": 3,
+            "n_sources": 2,
             "components": [
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP high_52w",
-                "price": 335.96,
-                "weight": 1.4
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #4",
-                "price": 339.56,
-                "weight": 1.0
-              },
               {
                 "source": "swing",
                 "label": "Swing low #3",
@@ -17827,12 +17821,12 @@
                 "weight": 1.0
               }
             ],
-            "vp_density": 0.54,
-            "touches": 17,
-            "rejection_atr": 0.39,
-            "has_avwap": true,
+            "vp_density": 0.75,
+            "touches": 20,
+            "rejection_atr": 0.46,
+            "has_avwap": false,
             "has_round": false,
-            "strength": 0.65
+            "strength": 0.6
           }
         ]
       },
@@ -17866,7 +17860,7 @@
       "swing_structure": {
         "structure": "MIXED",
         "raw_structure": "MIXED",
-        "consec_hh": 3,
+        "consec_hh": 2,
         "consec_lh": 0,
         "consec_hl": 0,
         "consec_ll": 2,
@@ -17882,8 +17876,13 @@
         },
         "reversal_trigger": null,
         "reversal_invalidate": null,
-        "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
+        "extended_warning": null,
         "sequence": [
+          {
+            "date": "2026-03-30",
+            "price": 299.26,
+            "label": "LL"
+          },
           {
             "date": "2026-04-21",
             "price": 381.34,
@@ -17895,11 +17894,6 @@
             "label": "HL"
           },
           {
-            "date": "2026-05-25",
-            "price": 339.56,
-            "label": "LH"
-          },
-          {
             "date": "2026-06-02",
             "price": 315.94,
             "label": "LL"
@@ -17907,7 +17901,7 @@
           {
             "date": "2026-06-23",
             "price": 365.45,
-            "label": "HH"
+            "label": "LH"
           },
           {
             "date": "2026-07-03",
@@ -49803,7 +49797,7 @@
         36031.67,
         35270.66,
         34146.67,
-        29525.27
+        29525.28
       ],
       "pivot": {
         "PP": 36440.0,
@@ -49818,7 +49812,7 @@
       "d20_high": 38465.0,
       "d20_low": 34000.0,
       "hi52w": 43614.21,
-      "lo52w": 29525.27,
+      "lo52w": 29525.28,
       "swing_highs": [
         38465.0,
         37845.0,
@@ -50250,7 +50244,7 @@
             "strength": 0.3
           },
           {
-            "price": 29525.27,
+            "price": 29525.28,
             "sources": [
               "52w"
             ],
@@ -50259,7 +50253,7 @@
               {
                 "source": "52w",
                 "label": "52-week low",
-                "price": 29525.27,
+                "price": 29525.28,
                 "weight": 1.3
               }
             ],
@@ -114627,6 +114621,842 @@
       "as_of": "2026-10-15"
     },
     {
+      "symbol": "MOTHERSON",
+      "name": "Samvardhana Motherson International Ltd.",
+      "close": 160.66,
+      "atr14": 4.53,
+      "signal": "NEAR_RESISTANCE",
+      "score": 3,
+      "vol_ratio": 0.76,
+      "bo_strength_atr": 0.0,
+      "plain_signal": "Approaching ceiling \u20b9167 \u2014 decision point soon",
+      "action": "Caution \u2014 reduce position or wait for breakout",
+      "floor": 158.08,
+      "ceiling": 167.04,
+      "next_target": 167.11,
+      "next_floor": 149.3,
+      "above_vwap": true,
+      "vwap20": 160.19,
+      "floor_strength": 0.54,
+      "ceiling_strength": 0.42,
+      "reclaim_support": false,
+      "failed_breakout": false,
+      "breakout_confirmed": false,
+      "breakout_buffer_atr": 0.25,
+      "nearest_resistance": 167.04,
+      "nearest_support": 158.08,
+      "dist_resistance_atr": 1.41,
+      "dist_support_atr": 0.57,
+      "resistances": [
+        167.11
+      ],
+      "supports": [
+        158.03,
+        152.85,
+        149.3,
+        142.37,
+        137.13
+      ],
+      "pivot": {
+        "PP": 160.65,
+        "R1": 162.61,
+        "R2": 164.55,
+        "S1": 158.71,
+        "S2": 156.75
+      },
+      "poc": 143.46,
+      "vah": 162.97,
+      "val": 140.89,
+      "d20_high": 166.22,
+      "d20_low": 151.37,
+      "hi52w": 173.27,
+      "lo52w": 100.59,
+      "swing_highs": [
+        166.22,
+        165.58,
+        170.68,
+        173.27,
+        172.0
+      ],
+      "swing_lows": [
+        156.4,
+        159.92,
+        136.47,
+        141.51,
+        137.79
+      ],
+      "kmeans_levels": [
+        141.04,
+        144.95,
+        149.3,
+        156.22,
+        162.85,
+        169.05
+      ],
+      "avwap": {
+        "swing_low": 160.12,
+        "swing_high": 159.02,
+        "low_52w": 133.0,
+        "high_52w": 162.54
+      },
+      "round_levels": [
+        155.0,
+        160,
+        165.0
+      ],
+      "confluence": {
+        "floor": {
+          "price": 158.08,
+          "sources": [
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vwap"
+          ],
+          "n_sources": 6,
+          "components": [
+            {
+              "source": "pivot",
+              "label": "Pivot S3",
+              "price": 152.85,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 155",
+              "price": 155.0,
+              "weight": 0.6
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #4",
+              "price": 156.22,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #1",
+              "price": 156.4,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S2",
+              "price": 156.75,
+              "weight": 0.8
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S1",
+              "price": 158.71,
+              "weight": 0.8
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_high",
+              "price": 159.02,
+              "weight": 1.4
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #2",
+              "price": 159.92,
+              "weight": 1.0
+            },
+            {
+              "source": "round",
+              "label": "Round number 160",
+              "price": 160,
+              "weight": 0.6
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_low",
+              "price": 160.12,
+              "weight": 1.4
+            },
+            {
+              "source": "vwap",
+              "label": "20-day VWAP",
+              "price": 160.19,
+              "weight": 1.4
+            }
+          ],
+          "vp_density": 0.27,
+          "touches": 5,
+          "rejection_atr": 0.29,
+          "has_avwap": true,
+          "has_round": false,
+          "strength": 0.54
+        },
+        "ceiling": {
+          "price": 167.04,
+          "sources": [
+            "52w",
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vp"
+          ],
+          "n_sources": 7,
+          "components": [
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP high_52w",
+              "price": 162.54,
+              "weight": 1.4
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R1",
+              "price": 162.61,
+              "weight": 0.8
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #5",
+              "price": 162.85,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAH",
+              "price": 162.97,
+              "weight": 1.6
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R2",
+              "price": 164.55,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 165",
+              "price": 165.0,
+              "weight": 0.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #2",
+              "price": 165.58,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #1",
+              "price": 166.22,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R3",
+              "price": 168.45,
+              "weight": 0.8
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #6",
+              "price": 169.05,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #3",
+              "price": 170.68,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #5",
+              "price": 172.0,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #4",
+              "price": 173.27,
+              "weight": 1.0
+            },
+            {
+              "source": "52w",
+              "label": "52-week high",
+              "price": 173.27,
+              "weight": 1.3
+            }
+          ],
+          "vp_density": 0.33,
+          "touches": 5,
+          "rejection_atr": 0.35,
+          "has_avwap": false,
+          "has_round": false,
+          "strength": 0.42
+        },
+        "strongest_support": {
+          "price": 158.08,
+          "sources": [
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vwap"
+          ],
+          "n_sources": 6,
+          "components": [
+            {
+              "source": "pivot",
+              "label": "Pivot S3",
+              "price": 152.85,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 155",
+              "price": 155.0,
+              "weight": 0.6
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #4",
+              "price": 156.22,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #1",
+              "price": 156.4,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S2",
+              "price": 156.75,
+              "weight": 0.8
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S1",
+              "price": 158.71,
+              "weight": 0.8
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_high",
+              "price": 159.02,
+              "weight": 1.4
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #2",
+              "price": 159.92,
+              "weight": 1.0
+            },
+            {
+              "source": "round",
+              "label": "Round number 160",
+              "price": 160,
+              "weight": 0.6
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_low",
+              "price": 160.12,
+              "weight": 1.4
+            },
+            {
+              "source": "vwap",
+              "label": "20-day VWAP",
+              "price": 160.19,
+              "weight": 1.4
+            }
+          ],
+          "vp_density": 0.27,
+          "touches": 5,
+          "rejection_atr": 0.29,
+          "has_avwap": true,
+          "has_round": false,
+          "strength": 0.54
+        },
+        "strongest_resistance": {
+          "price": 167.04,
+          "sources": [
+            "52w",
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vp"
+          ],
+          "n_sources": 7,
+          "components": [
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP high_52w",
+              "price": 162.54,
+              "weight": 1.4
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R1",
+              "price": 162.61,
+              "weight": 0.8
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #5",
+              "price": 162.85,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAH",
+              "price": 162.97,
+              "weight": 1.6
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R2",
+              "price": 164.55,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 165",
+              "price": 165.0,
+              "weight": 0.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #2",
+              "price": 165.58,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #1",
+              "price": 166.22,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R3",
+              "price": 168.45,
+              "weight": 0.8
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #6",
+              "price": 169.05,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #3",
+              "price": 170.68,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #5",
+              "price": 172.0,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #4",
+              "price": 173.27,
+              "weight": 1.0
+            },
+            {
+              "source": "52w",
+              "label": "52-week high",
+              "price": 173.27,
+              "weight": 1.3
+            }
+          ],
+          "vp_density": 0.33,
+          "touches": 5,
+          "rejection_atr": 0.35,
+          "has_avwap": false,
+          "has_round": false,
+          "strength": 0.42
+        },
+        "top_supports": [
+          {
+            "price": 158.08,
+            "sources": [
+              "avwap",
+              "kmeans",
+              "pivot",
+              "round",
+              "swing",
+              "vwap"
+            ],
+            "n_sources": 6,
+            "components": [
+              {
+                "source": "pivot",
+                "label": "Pivot S3",
+                "price": 152.85,
+                "weight": 0.8
+              },
+              {
+                "source": "round",
+                "label": "Round number 155",
+                "price": 155.0,
+                "weight": 0.6
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #4",
+                "price": 156.22,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #1",
+                "price": 156.4,
+                "weight": 1.0
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot S2",
+                "price": 156.75,
+                "weight": 0.8
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot S1",
+                "price": 158.71,
+                "weight": 0.8
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP swing_high",
+                "price": 159.02,
+                "weight": 1.4
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #2",
+                "price": 159.92,
+                "weight": 1.0
+              },
+              {
+                "source": "round",
+                "label": "Round number 160",
+                "price": 160,
+                "weight": 0.6
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP swing_low",
+                "price": 160.12,
+                "weight": 1.4
+              },
+              {
+                "source": "vwap",
+                "label": "20-day VWAP",
+                "price": 160.19,
+                "weight": 1.4
+              }
+            ],
+            "vp_density": 0.27,
+            "touches": 5,
+            "rejection_atr": 0.29,
+            "has_avwap": true,
+            "has_round": false,
+            "strength": 0.54
+          },
+          {
+            "price": 149.3,
+            "sources": [
+              "kmeans"
+            ],
+            "n_sources": 1,
+            "components": [
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #3",
+                "price": 149.3,
+                "weight": 1.0
+              }
+            ],
+            "vp_density": 0.43,
+            "touches": 6,
+            "rejection_atr": 0.58,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.48
+          },
+          {
+            "price": 142.33,
+            "sources": [
+              "kmeans",
+              "swing",
+              "vp"
+            ],
+            "n_sources": 3,
+            "components": [
+              {
+                "source": "vp",
+                "label": "Volume Profile VAL",
+                "price": 140.89,
+                "weight": 1.6
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #1",
+                "price": 141.04,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #4",
+                "price": 141.51,
+                "weight": 1.0
+              },
+              {
+                "source": "vp",
+                "label": "Volume Profile POC",
+                "price": 143.46,
+                "weight": 1.6
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #2",
+                "price": 144.95,
+                "weight": 1.0
+              }
+            ],
+            "vp_density": 0.5,
+            "touches": 7,
+            "rejection_atr": 0.3,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.48
+          }
+        ],
+        "top_resistances": [
+          {
+            "price": 167.04,
+            "sources": [
+              "52w",
+              "avwap",
+              "kmeans",
+              "pivot",
+              "round",
+              "swing",
+              "vp"
+            ],
+            "n_sources": 7,
+            "components": [
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP high_52w",
+                "price": 162.54,
+                "weight": 1.4
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R1",
+                "price": 162.61,
+                "weight": 0.8
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #5",
+                "price": 162.85,
+                "weight": 1.0
+              },
+              {
+                "source": "vp",
+                "label": "Volume Profile VAH",
+                "price": 162.97,
+                "weight": 1.6
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R2",
+                "price": 164.55,
+                "weight": 0.8
+              },
+              {
+                "source": "round",
+                "label": "Round number 165",
+                "price": 165.0,
+                "weight": 0.6
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #2",
+                "price": 165.58,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #1",
+                "price": 166.22,
+                "weight": 1.0
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R3",
+                "price": 168.45,
+                "weight": 0.8
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #6",
+                "price": 169.05,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #3",
+                "price": 170.68,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #5",
+                "price": 172.0,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #4",
+                "price": 173.27,
+                "weight": 1.0
+              },
+              {
+                "source": "52w",
+                "label": "52-week high",
+                "price": 173.27,
+                "weight": 1.3
+              }
+            ],
+            "vp_density": 0.33,
+            "touches": 5,
+            "rejection_atr": 0.35,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.42
+          }
+        ]
+      },
+      "rsi14": 51.1,
+      "ema10": 158.82,
+      "ema20": 159.64,
+      "ema50": 158.96,
+      "ema_trend": "MIXED",
+      "above_ema50": true,
+      "bb_upper": 166.83,
+      "bb_mid": 160.11,
+      "bb_lower": 153.38,
+      "bb_pct_b": 0.541,
+      "bb_bandwidth": 0.084,
+      "supertrend": 166.95,
+      "supertrend_dir": -1,
+      "ichimoku": {
+        "tenkan": 157.03,
+        "kijun": 158.79,
+        "senkou_a": 163.05,
+        "senkou_b": 154.87,
+        "cloud_top": 163.05,
+        "cloud_bottom": 154.87,
+        "above_cloud": false,
+        "below_cloud": false,
+        "in_cloud": true,
+        "bullish_cloud": true,
+        "chikou_above": false,
+        "tenkan_above_kijun": false
+      },
+      "swing_structure": {
+        "structure": "MIXED",
+        "raw_structure": "MIXED",
+        "consec_hh": 1,
+        "consec_lh": 0,
+        "consec_hl": 0,
+        "consec_ll": 1,
+        "last_high": {
+          "label": "HH",
+          "price": 166.22,
+          "date": "2026-09-25"
+        },
+        "last_low": {
+          "label": "LL",
+          "price": 156.4,
+          "date": "2026-09-16"
+        },
+        "reversal_trigger": null,
+        "reversal_invalidate": null,
+        "extended_warning": null,
+        "sequence": [
+          {
+            "date": "2026-06-23",
+            "price": 141.51,
+            "label": "HL"
+          },
+          {
+            "date": "2026-06-25",
+            "price": 154.98,
+            "label": "HH"
+          },
+          {
+            "date": "2026-07-07",
+            "price": 136.47,
+            "label": "LL"
+          },
+          {
+            "date": "2026-08-10",
+            "price": 172.0,
+            "label": "HH"
+          },
+          {
+            "date": "2026-08-19",
+            "price": 173.27,
+            "label": "HH"
+          },
+          {
+            "date": "2026-08-31",
+            "price": 170.68,
+            "label": "LH"
+          },
+          {
+            "date": "2026-09-02",
+            "price": 159.92,
+            "label": "HL"
+          },
+          {
+            "date": "2026-09-11",
+            "price": 165.58,
+            "label": "LH"
+          },
+          {
+            "date": "2026-09-16",
+            "price": 156.4,
+            "label": "LL"
+          },
+          {
+            "date": "2026-09-25",
+            "price": 166.22,
+            "label": "HH"
+          }
+        ],
+        "bos": null,
+        "choch": null,
+        "wyckoff": null
+      },
+      "as_of": "2026-10-15"
+    },
+    {
       "symbol": "SIEMENS",
       "name": "Siemens Ltd.",
       "close": 3668.0,
@@ -115589,842 +116419,6 @@
             "date": "2026-09-16",
             "price": 3682.4,
             "label": "LL"
-          }
-        ],
-        "bos": null,
-        "choch": null,
-        "wyckoff": null
-      },
-      "as_of": "2026-10-15"
-    },
-    {
-      "symbol": "MOTHERSON",
-      "name": "Samvardhana Motherson International Ltd.",
-      "close": 160.66,
-      "atr14": 4.53,
-      "signal": "NEAR_RESISTANCE",
-      "score": 3,
-      "vol_ratio": 0.76,
-      "bo_strength_atr": 0.0,
-      "plain_signal": "Approaching ceiling \u20b9167 \u2014 decision point soon",
-      "action": "Caution \u2014 reduce position or wait for breakout",
-      "floor": 158.08,
-      "ceiling": 167.04,
-      "next_target": 167.11,
-      "next_floor": 149.3,
-      "above_vwap": true,
-      "vwap20": 160.19,
-      "floor_strength": 0.54,
-      "ceiling_strength": 0.42,
-      "reclaim_support": false,
-      "failed_breakout": false,
-      "breakout_confirmed": false,
-      "breakout_buffer_atr": 0.25,
-      "nearest_resistance": 167.04,
-      "nearest_support": 158.08,
-      "dist_resistance_atr": 1.41,
-      "dist_support_atr": 0.57,
-      "resistances": [
-        167.11
-      ],
-      "supports": [
-        158.03,
-        152.85,
-        149.3,
-        142.37,
-        137.13
-      ],
-      "pivot": {
-        "PP": 160.65,
-        "R1": 162.61,
-        "R2": 164.55,
-        "S1": 158.71,
-        "S2": 156.75
-      },
-      "poc": 143.46,
-      "vah": 162.97,
-      "val": 140.89,
-      "d20_high": 166.22,
-      "d20_low": 151.37,
-      "hi52w": 173.27,
-      "lo52w": 100.59,
-      "swing_highs": [
-        166.22,
-        165.58,
-        170.68,
-        173.27,
-        172.0
-      ],
-      "swing_lows": [
-        156.4,
-        159.92,
-        136.47,
-        141.51,
-        137.79
-      ],
-      "kmeans_levels": [
-        141.04,
-        144.95,
-        149.3,
-        156.22,
-        162.85,
-        169.05
-      ],
-      "avwap": {
-        "swing_low": 160.12,
-        "swing_high": 159.02,
-        "low_52w": 133.0,
-        "high_52w": 162.54
-      },
-      "round_levels": [
-        155.0,
-        160,
-        165.0
-      ],
-      "confluence": {
-        "floor": {
-          "price": 158.08,
-          "sources": [
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vwap"
-          ],
-          "n_sources": 6,
-          "components": [
-            {
-              "source": "pivot",
-              "label": "Pivot S3",
-              "price": 152.85,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 155",
-              "price": 155.0,
-              "weight": 0.6
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #4",
-              "price": 156.22,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #1",
-              "price": 156.4,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S2",
-              "price": 156.75,
-              "weight": 0.8
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S1",
-              "price": 158.71,
-              "weight": 0.8
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_high",
-              "price": 159.02,
-              "weight": 1.4
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #2",
-              "price": 159.92,
-              "weight": 1.0
-            },
-            {
-              "source": "round",
-              "label": "Round number 160",
-              "price": 160,
-              "weight": 0.6
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_low",
-              "price": 160.12,
-              "weight": 1.4
-            },
-            {
-              "source": "vwap",
-              "label": "20-day VWAP",
-              "price": 160.19,
-              "weight": 1.4
-            }
-          ],
-          "vp_density": 0.27,
-          "touches": 5,
-          "rejection_atr": 0.29,
-          "has_avwap": true,
-          "has_round": false,
-          "strength": 0.54
-        },
-        "ceiling": {
-          "price": 167.04,
-          "sources": [
-            "52w",
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vp"
-          ],
-          "n_sources": 7,
-          "components": [
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP high_52w",
-              "price": 162.54,
-              "weight": 1.4
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R1",
-              "price": 162.61,
-              "weight": 0.8
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #5",
-              "price": 162.85,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAH",
-              "price": 162.97,
-              "weight": 1.6
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R2",
-              "price": 164.55,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 165",
-              "price": 165.0,
-              "weight": 0.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #2",
-              "price": 165.58,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #1",
-              "price": 166.22,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R3",
-              "price": 168.45,
-              "weight": 0.8
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #6",
-              "price": 169.05,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #3",
-              "price": 170.68,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #5",
-              "price": 172.0,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #4",
-              "price": 173.27,
-              "weight": 1.0
-            },
-            {
-              "source": "52w",
-              "label": "52-week high",
-              "price": 173.27,
-              "weight": 1.3
-            }
-          ],
-          "vp_density": 0.33,
-          "touches": 5,
-          "rejection_atr": 0.35,
-          "has_avwap": false,
-          "has_round": false,
-          "strength": 0.42
-        },
-        "strongest_support": {
-          "price": 158.08,
-          "sources": [
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vwap"
-          ],
-          "n_sources": 6,
-          "components": [
-            {
-              "source": "pivot",
-              "label": "Pivot S3",
-              "price": 152.85,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 155",
-              "price": 155.0,
-              "weight": 0.6
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #4",
-              "price": 156.22,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #1",
-              "price": 156.4,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S2",
-              "price": 156.75,
-              "weight": 0.8
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S1",
-              "price": 158.71,
-              "weight": 0.8
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_high",
-              "price": 159.02,
-              "weight": 1.4
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #2",
-              "price": 159.92,
-              "weight": 1.0
-            },
-            {
-              "source": "round",
-              "label": "Round number 160",
-              "price": 160,
-              "weight": 0.6
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_low",
-              "price": 160.12,
-              "weight": 1.4
-            },
-            {
-              "source": "vwap",
-              "label": "20-day VWAP",
-              "price": 160.19,
-              "weight": 1.4
-            }
-          ],
-          "vp_density": 0.27,
-          "touches": 5,
-          "rejection_atr": 0.29,
-          "has_avwap": true,
-          "has_round": false,
-          "strength": 0.54
-        },
-        "strongest_resistance": {
-          "price": 167.04,
-          "sources": [
-            "52w",
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vp"
-          ],
-          "n_sources": 7,
-          "components": [
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP high_52w",
-              "price": 162.54,
-              "weight": 1.4
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R1",
-              "price": 162.61,
-              "weight": 0.8
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #5",
-              "price": 162.85,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAH",
-              "price": 162.97,
-              "weight": 1.6
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R2",
-              "price": 164.55,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 165",
-              "price": 165.0,
-              "weight": 0.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #2",
-              "price": 165.58,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #1",
-              "price": 166.22,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R3",
-              "price": 168.45,
-              "weight": 0.8
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #6",
-              "price": 169.05,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #3",
-              "price": 170.68,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #5",
-              "price": 172.0,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #4",
-              "price": 173.27,
-              "weight": 1.0
-            },
-            {
-              "source": "52w",
-              "label": "52-week high",
-              "price": 173.27,
-              "weight": 1.3
-            }
-          ],
-          "vp_density": 0.33,
-          "touches": 5,
-          "rejection_atr": 0.35,
-          "has_avwap": false,
-          "has_round": false,
-          "strength": 0.42
-        },
-        "top_supports": [
-          {
-            "price": 158.08,
-            "sources": [
-              "avwap",
-              "kmeans",
-              "pivot",
-              "round",
-              "swing",
-              "vwap"
-            ],
-            "n_sources": 6,
-            "components": [
-              {
-                "source": "pivot",
-                "label": "Pivot S3",
-                "price": 152.85,
-                "weight": 0.8
-              },
-              {
-                "source": "round",
-                "label": "Round number 155",
-                "price": 155.0,
-                "weight": 0.6
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #4",
-                "price": 156.22,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #1",
-                "price": 156.4,
-                "weight": 1.0
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot S2",
-                "price": 156.75,
-                "weight": 0.8
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot S1",
-                "price": 158.71,
-                "weight": 0.8
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP swing_high",
-                "price": 159.02,
-                "weight": 1.4
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #2",
-                "price": 159.92,
-                "weight": 1.0
-              },
-              {
-                "source": "round",
-                "label": "Round number 160",
-                "price": 160,
-                "weight": 0.6
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP swing_low",
-                "price": 160.12,
-                "weight": 1.4
-              },
-              {
-                "source": "vwap",
-                "label": "20-day VWAP",
-                "price": 160.19,
-                "weight": 1.4
-              }
-            ],
-            "vp_density": 0.27,
-            "touches": 5,
-            "rejection_atr": 0.29,
-            "has_avwap": true,
-            "has_round": false,
-            "strength": 0.54
-          },
-          {
-            "price": 149.3,
-            "sources": [
-              "kmeans"
-            ],
-            "n_sources": 1,
-            "components": [
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #3",
-                "price": 149.3,
-                "weight": 1.0
-              }
-            ],
-            "vp_density": 0.43,
-            "touches": 6,
-            "rejection_atr": 0.58,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.48
-          },
-          {
-            "price": 142.33,
-            "sources": [
-              "kmeans",
-              "swing",
-              "vp"
-            ],
-            "n_sources": 3,
-            "components": [
-              {
-                "source": "vp",
-                "label": "Volume Profile VAL",
-                "price": 140.89,
-                "weight": 1.6
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #1",
-                "price": 141.04,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #4",
-                "price": 141.51,
-                "weight": 1.0
-              },
-              {
-                "source": "vp",
-                "label": "Volume Profile POC",
-                "price": 143.46,
-                "weight": 1.6
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #2",
-                "price": 144.95,
-                "weight": 1.0
-              }
-            ],
-            "vp_density": 0.5,
-            "touches": 7,
-            "rejection_atr": 0.3,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.48
-          }
-        ],
-        "top_resistances": [
-          {
-            "price": 167.04,
-            "sources": [
-              "52w",
-              "avwap",
-              "kmeans",
-              "pivot",
-              "round",
-              "swing",
-              "vp"
-            ],
-            "n_sources": 7,
-            "components": [
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP high_52w",
-                "price": 162.54,
-                "weight": 1.4
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R1",
-                "price": 162.61,
-                "weight": 0.8
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #5",
-                "price": 162.85,
-                "weight": 1.0
-              },
-              {
-                "source": "vp",
-                "label": "Volume Profile VAH",
-                "price": 162.97,
-                "weight": 1.6
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R2",
-                "price": 164.55,
-                "weight": 0.8
-              },
-              {
-                "source": "round",
-                "label": "Round number 165",
-                "price": 165.0,
-                "weight": 0.6
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #2",
-                "price": 165.58,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #1",
-                "price": 166.22,
-                "weight": 1.0
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R3",
-                "price": 168.45,
-                "weight": 0.8
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #6",
-                "price": 169.05,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #3",
-                "price": 170.68,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #5",
-                "price": 172.0,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #4",
-                "price": 173.27,
-                "weight": 1.0
-              },
-              {
-                "source": "52w",
-                "label": "52-week high",
-                "price": 173.27,
-                "weight": 1.3
-              }
-            ],
-            "vp_density": 0.33,
-            "touches": 5,
-            "rejection_atr": 0.35,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.42
-          }
-        ]
-      },
-      "rsi14": 51.1,
-      "ema10": 158.82,
-      "ema20": 159.64,
-      "ema50": 158.96,
-      "ema_trend": "MIXED",
-      "above_ema50": true,
-      "bb_upper": 166.83,
-      "bb_mid": 160.11,
-      "bb_lower": 153.38,
-      "bb_pct_b": 0.541,
-      "bb_bandwidth": 0.084,
-      "supertrend": 166.95,
-      "supertrend_dir": -1,
-      "ichimoku": {
-        "tenkan": 157.03,
-        "kijun": 158.79,
-        "senkou_a": 163.05,
-        "senkou_b": 154.87,
-        "cloud_top": 163.05,
-        "cloud_bottom": 154.87,
-        "above_cloud": false,
-        "below_cloud": false,
-        "in_cloud": true,
-        "bullish_cloud": true,
-        "chikou_above": false,
-        "tenkan_above_kijun": false
-      },
-      "swing_structure": {
-        "structure": "MIXED",
-        "raw_structure": "MIXED",
-        "consec_hh": 1,
-        "consec_lh": 0,
-        "consec_hl": 0,
-        "consec_ll": 1,
-        "last_high": {
-          "label": "HH",
-          "price": 166.22,
-          "date": "2026-09-25"
-        },
-        "last_low": {
-          "label": "LL",
-          "price": 156.4,
-          "date": "2026-09-16"
-        },
-        "reversal_trigger": null,
-        "reversal_invalidate": null,
-        "extended_warning": null,
-        "sequence": [
-          {
-            "date": "2026-06-23",
-            "price": 141.51,
-            "label": "HL"
-          },
-          {
-            "date": "2026-06-25",
-            "price": 154.98,
-            "label": "HH"
-          },
-          {
-            "date": "2026-07-07",
-            "price": 136.47,
-            "label": "LL"
-          },
-          {
-            "date": "2026-08-10",
-            "price": 172.0,
-            "label": "HH"
-          },
-          {
-            "date": "2026-08-19",
-            "price": 173.27,
-            "label": "HH"
-          },
-          {
-            "date": "2026-08-31",
-            "price": 170.68,
-            "label": "LH"
-          },
-          {
-            "date": "2026-09-02",
-            "price": 159.92,
-            "label": "HL"
-          },
-          {
-            "date": "2026-09-11",
-            "price": 165.58,
-            "label": "LH"
-          },
-          {
-            "date": "2026-09-16",
-            "price": 156.4,
-            "label": "LL"
-          },
-          {
-            "date": "2026-09-25",
-            "price": 166.22,
-            "label": "HH"
           }
         ],
         "bos": null,
@@ -139293,918 +139287,6 @@
       "as_of": "2026-10-15"
     },
     {
-      "symbol": "JSWSTEEL",
-      "name": "JSW Steel Ltd.",
-      "close": 1200.4,
-      "atr14": 28.39,
-      "signal": "NEAR_SUPPORT",
-      "score": 3,
-      "vol_ratio": 0.95,
-      "bo_strength_atr": 0.0,
-      "plain_signal": "Approaching floor \u20b91176 \u2014 watch for a bounce Floor is solid (3 methods agree).",
-      "action": "Watch \u2014 good entry if floor holds with volume",
-      "floor": 1176.03,
-      "ceiling": 1246.71,
-      "next_target": 1331.21,
-      "next_floor": 1152.53,
-      "above_vwap": false,
-      "vwap20": 1232.64,
-      "floor_strength": 0.51,
-      "ceiling_strength": 0.68,
-      "reclaim_support": false,
-      "failed_breakout": false,
-      "breakout_confirmed": false,
-      "breakout_buffer_atr": 0.25,
-      "nearest_resistance": 1246.71,
-      "nearest_support": 1176.03,
-      "dist_resistance_atr": 1.63,
-      "dist_support_atr": 0.86,
-      "resistances": [
-        1230.45,
-        1284.52,
-        1329.31,
-        1351.0
-      ],
-      "supports": [
-        1174.88,
-        1152.53,
-        1112.23,
-        1067.07
-      ],
-      "pivot": {
-        "PP": 1192.83,
-        "R1": 1216.77,
-        "R2": 1233.13,
-        "S1": 1176.47,
-        "S2": 1152.53
-      },
-      "poc": 1271.87,
-      "vah": 1300.82,
-      "val": 1219.76,
-      "d20_high": 1304.0,
-      "d20_low": 1158.0,
-      "hi52w": 1351.0,
-      "lo52w": 1067.07,
-      "swing_highs": [
-        1304.0,
-        1335.0,
-        1351.0,
-        1335.0,
-        1279.3
-      ],
-      "swing_lows": [
-        1227.0,
-        1250.4,
-        1218.0,
-        1203.79,
-        1245.35
-      ],
-      "kmeans_levels": [
-        1173.3,
-        1222.62,
-        1247.1,
-        1268.93,
-        1293.3,
-        1323.62
-      ],
-      "avwap": {
-        "swing_low": 1233.13,
-        "swing_high": 1225.46,
-        "low_52w": 1230.69,
-        "high_52w": 1260.02
-      },
-      "round_levels": [
-        1180.0,
-        1200,
-        1220.0
-      ],
-      "confluence": {
-        "floor": {
-          "price": 1176.03,
-          "sources": [
-            "kmeans",
-            "pivot",
-            "round"
-          ],
-          "n_sources": 3,
-          "components": [
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #1",
-              "price": 1173.3,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S1",
-              "price": 1176.47,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 1180",
-              "price": 1180.0,
-              "weight": 0.6
-            }
-          ],
-          "vp_density": 0.19,
-          "touches": 15,
-          "rejection_atr": 0.34,
-          "has_avwap": false,
-          "has_round": true,
-          "strength": 0.51
-        },
-        "ceiling": {
-          "price": 1246.71,
-          "sources": [
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vp",
-            "vwap"
-          ],
-          "n_sources": 7,
-          "components": [
-            {
-              "source": "round",
-              "label": "Round number 1200",
-              "price": 1200,
-              "weight": 0.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #4",
-              "price": 1203.79,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R1",
-              "price": 1216.77,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #3",
-              "price": 1218.0,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAL",
-              "price": 1219.76,
-              "weight": 1.6
-            },
-            {
-              "source": "round",
-              "label": "Round number 1220",
-              "price": 1220.0,
-              "weight": 0.6
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #2",
-              "price": 1222.62,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_high",
-              "price": 1225.46,
-              "weight": 1.4
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #1",
-              "price": 1227.0,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP low_52w",
-              "price": 1230.69,
-              "weight": 1.4
-            },
-            {
-              "source": "vwap",
-              "label": "20-day VWAP",
-              "price": 1232.64,
-              "weight": 1.4
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_low",
-              "price": 1233.13,
-              "weight": 1.4
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R2",
-              "price": 1233.13,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #5",
-              "price": 1245.35,
-              "weight": 1.0
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #3",
-              "price": 1247.1,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #2",
-              "price": 1250.4,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP high_52w",
-              "price": 1260.02,
-              "weight": 1.4
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #4",
-              "price": 1268.93,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile POC",
-              "price": 1271.87,
-              "weight": 1.6
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R3",
-              "price": 1273.43,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #5",
-              "price": 1279.3,
-              "weight": 1.0
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #5",
-              "price": 1293.3,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAH",
-              "price": 1300.82,
-              "weight": 1.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #1",
-              "price": 1304.0,
-              "weight": 1.0
-            }
-          ],
-          "vp_density": 0.57,
-          "touches": 18,
-          "rejection_atr": 0.52,
-          "has_avwap": true,
-          "has_round": false,
-          "strength": 0.68
-        },
-        "strongest_support": {
-          "price": 1176.03,
-          "sources": [
-            "kmeans",
-            "pivot",
-            "round"
-          ],
-          "n_sources": 3,
-          "components": [
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #1",
-              "price": 1173.3,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot S1",
-              "price": 1176.47,
-              "weight": 0.8
-            },
-            {
-              "source": "round",
-              "label": "Round number 1180",
-              "price": 1180.0,
-              "weight": 0.6
-            }
-          ],
-          "vp_density": 0.19,
-          "touches": 15,
-          "rejection_atr": 0.34,
-          "has_avwap": false,
-          "has_round": true,
-          "strength": 0.51
-        },
-        "strongest_resistance": {
-          "price": 1246.71,
-          "sources": [
-            "avwap",
-            "kmeans",
-            "pivot",
-            "round",
-            "swing",
-            "vp",
-            "vwap"
-          ],
-          "n_sources": 7,
-          "components": [
-            {
-              "source": "round",
-              "label": "Round number 1200",
-              "price": 1200,
-              "weight": 0.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #4",
-              "price": 1203.79,
-              "weight": 1.0
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R1",
-              "price": 1216.77,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #3",
-              "price": 1218.0,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAL",
-              "price": 1219.76,
-              "weight": 1.6
-            },
-            {
-              "source": "round",
-              "label": "Round number 1220",
-              "price": 1220.0,
-              "weight": 0.6
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #2",
-              "price": 1222.62,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_high",
-              "price": 1225.46,
-              "weight": 1.4
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #1",
-              "price": 1227.0,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP low_52w",
-              "price": 1230.69,
-              "weight": 1.4
-            },
-            {
-              "source": "vwap",
-              "label": "20-day VWAP",
-              "price": 1232.64,
-              "weight": 1.4
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP swing_low",
-              "price": 1233.13,
-              "weight": 1.4
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R2",
-              "price": 1233.13,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #5",
-              "price": 1245.35,
-              "weight": 1.0
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #3",
-              "price": 1247.1,
-              "weight": 1.0
-            },
-            {
-              "source": "swing",
-              "label": "Swing low #2",
-              "price": 1250.4,
-              "weight": 1.0
-            },
-            {
-              "source": "avwap",
-              "label": "Anchored VWAP high_52w",
-              "price": 1260.02,
-              "weight": 1.4
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #4",
-              "price": 1268.93,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile POC",
-              "price": 1271.87,
-              "weight": 1.6
-            },
-            {
-              "source": "pivot",
-              "label": "Pivot R3",
-              "price": 1273.43,
-              "weight": 0.8
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #5",
-              "price": 1279.3,
-              "weight": 1.0
-            },
-            {
-              "source": "kmeans",
-              "label": "K-means centroid #5",
-              "price": 1293.3,
-              "weight": 1.0
-            },
-            {
-              "source": "vp",
-              "label": "Volume Profile VAH",
-              "price": 1300.82,
-              "weight": 1.6
-            },
-            {
-              "source": "swing",
-              "label": "Swing high #1",
-              "price": 1304.0,
-              "weight": 1.0
-            }
-          ],
-          "vp_density": 0.57,
-          "touches": 18,
-          "rejection_atr": 0.52,
-          "has_avwap": true,
-          "has_round": false,
-          "strength": 0.68
-        },
-        "top_supports": [
-          {
-            "price": 1176.03,
-            "sources": [
-              "kmeans",
-              "pivot",
-              "round"
-            ],
-            "n_sources": 3,
-            "components": [
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #1",
-                "price": 1173.3,
-                "weight": 1.0
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot S1",
-                "price": 1176.47,
-                "weight": 0.8
-              },
-              {
-                "source": "round",
-                "label": "Round number 1180",
-                "price": 1180.0,
-                "weight": 0.6
-              }
-            ],
-            "vp_density": 0.19,
-            "touches": 15,
-            "rejection_atr": 0.34,
-            "has_avwap": false,
-            "has_round": true,
-            "strength": 0.51
-          },
-          {
-            "price": 1112.23,
-            "sources": [
-              "pivot"
-            ],
-            "n_sources": 1,
-            "components": [
-              {
-                "source": "pivot",
-                "label": "Pivot S3",
-                "price": 1112.23,
-                "weight": 0.8
-              }
-            ],
-            "vp_density": 0.0,
-            "touches": 7,
-            "rejection_atr": 0.49,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.3
-          },
-          {
-            "price": 1152.53,
-            "sources": [
-              "pivot"
-            ],
-            "n_sources": 1,
-            "components": [
-              {
-                "source": "pivot",
-                "label": "Pivot S2",
-                "price": 1152.53,
-                "weight": 0.8
-              }
-            ],
-            "vp_density": 0.0,
-            "touches": 14,
-            "rejection_atr": 0.4,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.29
-          }
-        ],
-        "top_resistances": [
-          {
-            "price": 1246.71,
-            "sources": [
-              "avwap",
-              "kmeans",
-              "pivot",
-              "round",
-              "swing",
-              "vp",
-              "vwap"
-            ],
-            "n_sources": 7,
-            "components": [
-              {
-                "source": "round",
-                "label": "Round number 1200",
-                "price": 1200,
-                "weight": 0.6
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #4",
-                "price": 1203.79,
-                "weight": 1.0
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R1",
-                "price": 1216.77,
-                "weight": 0.8
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #3",
-                "price": 1218.0,
-                "weight": 1.0
-              },
-              {
-                "source": "vp",
-                "label": "Volume Profile VAL",
-                "price": 1219.76,
-                "weight": 1.6
-              },
-              {
-                "source": "round",
-                "label": "Round number 1220",
-                "price": 1220.0,
-                "weight": 0.6
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #2",
-                "price": 1222.62,
-                "weight": 1.0
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP swing_high",
-                "price": 1225.46,
-                "weight": 1.4
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #1",
-                "price": 1227.0,
-                "weight": 1.0
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP low_52w",
-                "price": 1230.69,
-                "weight": 1.4
-              },
-              {
-                "source": "vwap",
-                "label": "20-day VWAP",
-                "price": 1232.64,
-                "weight": 1.4
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP swing_low",
-                "price": 1233.13,
-                "weight": 1.4
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R2",
-                "price": 1233.13,
-                "weight": 0.8
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #5",
-                "price": 1245.35,
-                "weight": 1.0
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #3",
-                "price": 1247.1,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing low #2",
-                "price": 1250.4,
-                "weight": 1.0
-              },
-              {
-                "source": "avwap",
-                "label": "Anchored VWAP high_52w",
-                "price": 1260.02,
-                "weight": 1.4
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #4",
-                "price": 1268.93,
-                "weight": 1.0
-              },
-              {
-                "source": "vp",
-                "label": "Volume Profile POC",
-                "price": 1271.87,
-                "weight": 1.6
-              },
-              {
-                "source": "pivot",
-                "label": "Pivot R3",
-                "price": 1273.43,
-                "weight": 0.8
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #5",
-                "price": 1279.3,
-                "weight": 1.0
-              },
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #5",
-                "price": 1293.3,
-                "weight": 1.0
-              },
-              {
-                "source": "vp",
-                "label": "Volume Profile VAH",
-                "price": 1300.82,
-                "weight": 1.6
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #1",
-                "price": 1304.0,
-                "weight": 1.0
-              }
-            ],
-            "vp_density": 0.57,
-            "touches": 18,
-            "rejection_atr": 0.52,
-            "has_avwap": true,
-            "has_round": false,
-            "strength": 0.68
-          },
-          {
-            "price": 1331.21,
-            "sources": [
-              "kmeans",
-              "swing"
-            ],
-            "n_sources": 2,
-            "components": [
-              {
-                "source": "kmeans",
-                "label": "K-means centroid #6",
-                "price": 1323.62,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #2",
-                "price": 1335.0,
-                "weight": 1.0
-              },
-              {
-                "source": "swing",
-                "label": "Swing high #4",
-                "price": 1335.0,
-                "weight": 1.0
-              }
-            ],
-            "vp_density": 0.2,
-            "touches": 4,
-            "rejection_atr": 0.51,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.38
-          },
-          {
-            "price": 1351.0,
-            "sources": [
-              "52w",
-              "swing"
-            ],
-            "n_sources": 2,
-            "components": [
-              {
-                "source": "swing",
-                "label": "Swing high #3",
-                "price": 1351.0,
-                "weight": 1.0
-              },
-              {
-                "source": "52w",
-                "label": "52-week high",
-                "price": 1351.0,
-                "weight": 1.3
-              }
-            ],
-            "vp_density": 0.0,
-            "touches": 1,
-            "rejection_atr": 0.48,
-            "has_avwap": false,
-            "has_round": false,
-            "strength": 0.11
-          }
-        ]
-      },
-      "rsi14": 40.9,
-      "ema10": 1202.76,
-      "ema20": 1226.31,
-      "ema50": 1252.96,
-      "ema_trend": "DOWN",
-      "above_ema50": false,
-      "bb_upper": 1319.5,
-      "bb_mid": 1236.49,
-      "bb_lower": 1153.48,
-      "bb_pct_b": 0.283,
-      "bb_bandwidth": 0.134,
-      "supertrend": 1254.65,
-      "supertrend_dir": -1,
-      "ichimoku": {
-        "tenkan": 1209.75,
-        "kijun": 1236.5,
-        "senkou_a": 1311.85,
-        "senkou_b": 1277.39,
-        "cloud_top": 1311.85,
-        "cloud_bottom": 1277.39,
-        "above_cloud": false,
-        "below_cloud": true,
-        "in_cloud": false,
-        "bullish_cloud": true,
-        "chikou_above": false,
-        "tenkan_above_kijun": false
-      },
-      "swing_structure": {
-        "structure": "DOWNTREND",
-        "raw_structure": "DOWNTREND",
-        "consec_hh": 0,
-        "consec_lh": 2,
-        "consec_hl": 0,
-        "consec_ll": 1,
-        "last_high": {
-          "label": "LH",
-          "price": 1304.0,
-          "date": "2026-09-23"
-        },
-        "last_low": {
-          "label": "LL",
-          "price": 1227.0,
-          "date": "2026-09-16"
-        },
-        "reversal_trigger": null,
-        "reversal_invalidate": null,
-        "extended_warning": null,
-        "sequence": [
-          {
-            "date": "2026-07-01",
-            "price": 1203.79,
-            "label": "LL"
-          },
-          {
-            "date": "2026-07-10",
-            "price": 1259.0,
-            "label": "LH"
-          },
-          {
-            "date": "2026-07-17",
-            "price": 1218.0,
-            "label": "HL"
-          },
-          {
-            "date": "2026-07-22",
-            "price": 1279.3,
-            "label": "HH"
-          },
-          {
-            "date": "2026-08-06",
-            "price": 1335.0,
-            "label": "HH"
-          },
-          {
-            "date": "2026-08-17",
-            "price": 1250.4,
-            "label": "HL"
-          },
-          {
-            "date": "2026-08-27",
-            "price": 1351.0,
-            "label": "HH"
-          },
-          {
-            "date": "2026-09-07",
-            "price": 1335.0,
-            "label": "LH"
-          },
-          {
-            "date": "2026-09-16",
-            "price": 1227.0,
-            "label": "LL"
-          },
-          {
-            "date": "2026-09-23",
-            "price": 1304.0,
-            "label": "LH"
-          }
-        ],
-        "bos": {
-          "fired": true,
-          "dir": "DOWN",
-          "level": 1227.0,
-          "desc": "BOS \u2705 closed below last LL \u20b91227.0 \u2014 downtrend confirmed continuing"
-        },
-        "choch": null,
-        "wyckoff": {
-          "phase": "MARKDOWN",
-          "conviction": "HIGH",
-          "vol_at_last_high": 1356042,
-          "vol_at_last_low": 1803781,
-          "note": "MARKDOWN \u2014 breakdown lows on 18.0L vs bounce highs 13.6L. Real sellers driving down."
-        }
-      },
-      "as_of": "2026-10-15"
-    },
-    {
       "symbol": "INDIGO",
       "name": "InterGlobe Aviation Ltd.",
       "close": 4778.3,
@@ -141174,6 +140256,918 @@
           "vol_at_last_high": 1618923,
           "vol_at_last_low": 547789,
           "note": "Character change \u2014 closed \u20b94778.3 below last HL \u20b94845.0. Markup over; early distribution/markdown risk. Reclaim \u20b94845.0 repairs it; a fresh LH+LL confirms a downtrend."
+        }
+      },
+      "as_of": "2026-10-15"
+    },
+    {
+      "symbol": "JSWSTEEL",
+      "name": "JSW Steel Ltd.",
+      "close": 1200.4,
+      "atr14": 28.39,
+      "signal": "NEAR_SUPPORT",
+      "score": 3,
+      "vol_ratio": 0.95,
+      "bo_strength_atr": 0.0,
+      "plain_signal": "Approaching floor \u20b91176 \u2014 watch for a bounce Floor is solid (3 methods agree).",
+      "action": "Watch \u2014 good entry if floor holds with volume",
+      "floor": 1176.03,
+      "ceiling": 1246.71,
+      "next_target": 1331.21,
+      "next_floor": 1152.53,
+      "above_vwap": false,
+      "vwap20": 1232.64,
+      "floor_strength": 0.51,
+      "ceiling_strength": 0.68,
+      "reclaim_support": false,
+      "failed_breakout": false,
+      "breakout_confirmed": false,
+      "breakout_buffer_atr": 0.25,
+      "nearest_resistance": 1246.71,
+      "nearest_support": 1176.03,
+      "dist_resistance_atr": 1.63,
+      "dist_support_atr": 0.86,
+      "resistances": [
+        1230.45,
+        1284.52,
+        1329.31,
+        1351.0
+      ],
+      "supports": [
+        1174.88,
+        1152.53,
+        1112.23,
+        1067.07
+      ],
+      "pivot": {
+        "PP": 1192.83,
+        "R1": 1216.77,
+        "R2": 1233.13,
+        "S1": 1176.47,
+        "S2": 1152.53
+      },
+      "poc": 1271.87,
+      "vah": 1300.82,
+      "val": 1219.76,
+      "d20_high": 1304.0,
+      "d20_low": 1158.0,
+      "hi52w": 1351.0,
+      "lo52w": 1067.07,
+      "swing_highs": [
+        1304.0,
+        1335.0,
+        1351.0,
+        1335.0,
+        1279.3
+      ],
+      "swing_lows": [
+        1227.0,
+        1250.4,
+        1218.0,
+        1203.79,
+        1245.35
+      ],
+      "kmeans_levels": [
+        1173.3,
+        1222.62,
+        1247.1,
+        1268.93,
+        1293.3,
+        1323.62
+      ],
+      "avwap": {
+        "swing_low": 1233.13,
+        "swing_high": 1225.46,
+        "low_52w": 1230.69,
+        "high_52w": 1260.02
+      },
+      "round_levels": [
+        1180.0,
+        1200,
+        1220.0
+      ],
+      "confluence": {
+        "floor": {
+          "price": 1176.03,
+          "sources": [
+            "kmeans",
+            "pivot",
+            "round"
+          ],
+          "n_sources": 3,
+          "components": [
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #1",
+              "price": 1173.3,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S1",
+              "price": 1176.47,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 1180",
+              "price": 1180.0,
+              "weight": 0.6
+            }
+          ],
+          "vp_density": 0.19,
+          "touches": 15,
+          "rejection_atr": 0.34,
+          "has_avwap": false,
+          "has_round": true,
+          "strength": 0.51
+        },
+        "ceiling": {
+          "price": 1246.71,
+          "sources": [
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vp",
+            "vwap"
+          ],
+          "n_sources": 7,
+          "components": [
+            {
+              "source": "round",
+              "label": "Round number 1200",
+              "price": 1200,
+              "weight": 0.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #4",
+              "price": 1203.79,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R1",
+              "price": 1216.77,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #3",
+              "price": 1218.0,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAL",
+              "price": 1219.76,
+              "weight": 1.6
+            },
+            {
+              "source": "round",
+              "label": "Round number 1220",
+              "price": 1220.0,
+              "weight": 0.6
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #2",
+              "price": 1222.62,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_high",
+              "price": 1225.46,
+              "weight": 1.4
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #1",
+              "price": 1227.0,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP low_52w",
+              "price": 1230.69,
+              "weight": 1.4
+            },
+            {
+              "source": "vwap",
+              "label": "20-day VWAP",
+              "price": 1232.64,
+              "weight": 1.4
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_low",
+              "price": 1233.13,
+              "weight": 1.4
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R2",
+              "price": 1233.13,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #5",
+              "price": 1245.35,
+              "weight": 1.0
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #3",
+              "price": 1247.1,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #2",
+              "price": 1250.4,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP high_52w",
+              "price": 1260.02,
+              "weight": 1.4
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #4",
+              "price": 1268.93,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile POC",
+              "price": 1271.87,
+              "weight": 1.6
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R3",
+              "price": 1273.43,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #5",
+              "price": 1279.3,
+              "weight": 1.0
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #5",
+              "price": 1293.3,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAH",
+              "price": 1300.82,
+              "weight": 1.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #1",
+              "price": 1304.0,
+              "weight": 1.0
+            }
+          ],
+          "vp_density": 0.57,
+          "touches": 18,
+          "rejection_atr": 0.52,
+          "has_avwap": true,
+          "has_round": false,
+          "strength": 0.68
+        },
+        "strongest_support": {
+          "price": 1176.03,
+          "sources": [
+            "kmeans",
+            "pivot",
+            "round"
+          ],
+          "n_sources": 3,
+          "components": [
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #1",
+              "price": 1173.3,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot S1",
+              "price": 1176.47,
+              "weight": 0.8
+            },
+            {
+              "source": "round",
+              "label": "Round number 1180",
+              "price": 1180.0,
+              "weight": 0.6
+            }
+          ],
+          "vp_density": 0.19,
+          "touches": 15,
+          "rejection_atr": 0.34,
+          "has_avwap": false,
+          "has_round": true,
+          "strength": 0.51
+        },
+        "strongest_resistance": {
+          "price": 1246.71,
+          "sources": [
+            "avwap",
+            "kmeans",
+            "pivot",
+            "round",
+            "swing",
+            "vp",
+            "vwap"
+          ],
+          "n_sources": 7,
+          "components": [
+            {
+              "source": "round",
+              "label": "Round number 1200",
+              "price": 1200,
+              "weight": 0.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #4",
+              "price": 1203.79,
+              "weight": 1.0
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R1",
+              "price": 1216.77,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #3",
+              "price": 1218.0,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAL",
+              "price": 1219.76,
+              "weight": 1.6
+            },
+            {
+              "source": "round",
+              "label": "Round number 1220",
+              "price": 1220.0,
+              "weight": 0.6
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #2",
+              "price": 1222.62,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_high",
+              "price": 1225.46,
+              "weight": 1.4
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #1",
+              "price": 1227.0,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP low_52w",
+              "price": 1230.69,
+              "weight": 1.4
+            },
+            {
+              "source": "vwap",
+              "label": "20-day VWAP",
+              "price": 1232.64,
+              "weight": 1.4
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP swing_low",
+              "price": 1233.13,
+              "weight": 1.4
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R2",
+              "price": 1233.13,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #5",
+              "price": 1245.35,
+              "weight": 1.0
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #3",
+              "price": 1247.1,
+              "weight": 1.0
+            },
+            {
+              "source": "swing",
+              "label": "Swing low #2",
+              "price": 1250.4,
+              "weight": 1.0
+            },
+            {
+              "source": "avwap",
+              "label": "Anchored VWAP high_52w",
+              "price": 1260.02,
+              "weight": 1.4
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #4",
+              "price": 1268.93,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile POC",
+              "price": 1271.87,
+              "weight": 1.6
+            },
+            {
+              "source": "pivot",
+              "label": "Pivot R3",
+              "price": 1273.43,
+              "weight": 0.8
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #5",
+              "price": 1279.3,
+              "weight": 1.0
+            },
+            {
+              "source": "kmeans",
+              "label": "K-means centroid #5",
+              "price": 1293.3,
+              "weight": 1.0
+            },
+            {
+              "source": "vp",
+              "label": "Volume Profile VAH",
+              "price": 1300.82,
+              "weight": 1.6
+            },
+            {
+              "source": "swing",
+              "label": "Swing high #1",
+              "price": 1304.0,
+              "weight": 1.0
+            }
+          ],
+          "vp_density": 0.57,
+          "touches": 18,
+          "rejection_atr": 0.52,
+          "has_avwap": true,
+          "has_round": false,
+          "strength": 0.68
+        },
+        "top_supports": [
+          {
+            "price": 1176.03,
+            "sources": [
+              "kmeans",
+              "pivot",
+              "round"
+            ],
+            "n_sources": 3,
+            "components": [
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #1",
+                "price": 1173.3,
+                "weight": 1.0
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot S1",
+                "price": 1176.47,
+                "weight": 0.8
+              },
+              {
+                "source": "round",
+                "label": "Round number 1180",
+                "price": 1180.0,
+                "weight": 0.6
+              }
+            ],
+            "vp_density": 0.19,
+            "touches": 15,
+            "rejection_atr": 0.34,
+            "has_avwap": false,
+            "has_round": true,
+            "strength": 0.51
+          },
+          {
+            "price": 1112.23,
+            "sources": [
+              "pivot"
+            ],
+            "n_sources": 1,
+            "components": [
+              {
+                "source": "pivot",
+                "label": "Pivot S3",
+                "price": 1112.23,
+                "weight": 0.8
+              }
+            ],
+            "vp_density": 0.0,
+            "touches": 7,
+            "rejection_atr": 0.49,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.3
+          },
+          {
+            "price": 1152.53,
+            "sources": [
+              "pivot"
+            ],
+            "n_sources": 1,
+            "components": [
+              {
+                "source": "pivot",
+                "label": "Pivot S2",
+                "price": 1152.53,
+                "weight": 0.8
+              }
+            ],
+            "vp_density": 0.0,
+            "touches": 14,
+            "rejection_atr": 0.4,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.29
+          }
+        ],
+        "top_resistances": [
+          {
+            "price": 1246.71,
+            "sources": [
+              "avwap",
+              "kmeans",
+              "pivot",
+              "round",
+              "swing",
+              "vp",
+              "vwap"
+            ],
+            "n_sources": 7,
+            "components": [
+              {
+                "source": "round",
+                "label": "Round number 1200",
+                "price": 1200,
+                "weight": 0.6
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #4",
+                "price": 1203.79,
+                "weight": 1.0
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R1",
+                "price": 1216.77,
+                "weight": 0.8
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #3",
+                "price": 1218.0,
+                "weight": 1.0
+              },
+              {
+                "source": "vp",
+                "label": "Volume Profile VAL",
+                "price": 1219.76,
+                "weight": 1.6
+              },
+              {
+                "source": "round",
+                "label": "Round number 1220",
+                "price": 1220.0,
+                "weight": 0.6
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #2",
+                "price": 1222.62,
+                "weight": 1.0
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP swing_high",
+                "price": 1225.46,
+                "weight": 1.4
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #1",
+                "price": 1227.0,
+                "weight": 1.0
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP low_52w",
+                "price": 1230.69,
+                "weight": 1.4
+              },
+              {
+                "source": "vwap",
+                "label": "20-day VWAP",
+                "price": 1232.64,
+                "weight": 1.4
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP swing_low",
+                "price": 1233.13,
+                "weight": 1.4
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R2",
+                "price": 1233.13,
+                "weight": 0.8
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #5",
+                "price": 1245.35,
+                "weight": 1.0
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #3",
+                "price": 1247.1,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing low #2",
+                "price": 1250.4,
+                "weight": 1.0
+              },
+              {
+                "source": "avwap",
+                "label": "Anchored VWAP high_52w",
+                "price": 1260.02,
+                "weight": 1.4
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #4",
+                "price": 1268.93,
+                "weight": 1.0
+              },
+              {
+                "source": "vp",
+                "label": "Volume Profile POC",
+                "price": 1271.87,
+                "weight": 1.6
+              },
+              {
+                "source": "pivot",
+                "label": "Pivot R3",
+                "price": 1273.43,
+                "weight": 0.8
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #5",
+                "price": 1279.3,
+                "weight": 1.0
+              },
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #5",
+                "price": 1293.3,
+                "weight": 1.0
+              },
+              {
+                "source": "vp",
+                "label": "Volume Profile VAH",
+                "price": 1300.82,
+                "weight": 1.6
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #1",
+                "price": 1304.0,
+                "weight": 1.0
+              }
+            ],
+            "vp_density": 0.57,
+            "touches": 18,
+            "rejection_atr": 0.52,
+            "has_avwap": true,
+            "has_round": false,
+            "strength": 0.68
+          },
+          {
+            "price": 1331.21,
+            "sources": [
+              "kmeans",
+              "swing"
+            ],
+            "n_sources": 2,
+            "components": [
+              {
+                "source": "kmeans",
+                "label": "K-means centroid #6",
+                "price": 1323.62,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #2",
+                "price": 1335.0,
+                "weight": 1.0
+              },
+              {
+                "source": "swing",
+                "label": "Swing high #4",
+                "price": 1335.0,
+                "weight": 1.0
+              }
+            ],
+            "vp_density": 0.2,
+            "touches": 4,
+            "rejection_atr": 0.51,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.38
+          },
+          {
+            "price": 1351.0,
+            "sources": [
+              "52w",
+              "swing"
+            ],
+            "n_sources": 2,
+            "components": [
+              {
+                "source": "swing",
+                "label": "Swing high #3",
+                "price": 1351.0,
+                "weight": 1.0
+              },
+              {
+                "source": "52w",
+                "label": "52-week high",
+                "price": 1351.0,
+                "weight": 1.3
+              }
+            ],
+            "vp_density": 0.0,
+            "touches": 1,
+            "rejection_atr": 0.48,
+            "has_avwap": false,
+            "has_round": false,
+            "strength": 0.11
+          }
+        ]
+      },
+      "rsi14": 40.9,
+      "ema10": 1202.76,
+      "ema20": 1226.31,
+      "ema50": 1252.96,
+      "ema_trend": "DOWN",
+      "above_ema50": false,
+      "bb_upper": 1319.5,
+      "bb_mid": 1236.49,
+      "bb_lower": 1153.48,
+      "bb_pct_b": 0.283,
+      "bb_bandwidth": 0.134,
+      "supertrend": 1254.65,
+      "supertrend_dir": -1,
+      "ichimoku": {
+        "tenkan": 1209.75,
+        "kijun": 1236.5,
+        "senkou_a": 1311.85,
+        "senkou_b": 1277.39,
+        "cloud_top": 1311.85,
+        "cloud_bottom": 1277.39,
+        "above_cloud": false,
+        "below_cloud": true,
+        "in_cloud": false,
+        "bullish_cloud": true,
+        "chikou_above": false,
+        "tenkan_above_kijun": false
+      },
+      "swing_structure": {
+        "structure": "DOWNTREND",
+        "raw_structure": "DOWNTREND",
+        "consec_hh": 0,
+        "consec_lh": 2,
+        "consec_hl": 0,
+        "consec_ll": 1,
+        "last_high": {
+          "label": "LH",
+          "price": 1304.0,
+          "date": "2026-09-23"
+        },
+        "last_low": {
+          "label": "LL",
+          "price": 1227.0,
+          "date": "2026-09-16"
+        },
+        "reversal_trigger": null,
+        "reversal_invalidate": null,
+        "extended_warning": null,
+        "sequence": [
+          {
+            "date": "2026-07-01",
+            "price": 1203.79,
+            "label": "LL"
+          },
+          {
+            "date": "2026-07-10",
+            "price": 1259.0,
+            "label": "LH"
+          },
+          {
+            "date": "2026-07-17",
+            "price": 1218.0,
+            "label": "HL"
+          },
+          {
+            "date": "2026-07-22",
+            "price": 1279.3,
+            "label": "HH"
+          },
+          {
+            "date": "2026-08-06",
+            "price": 1335.0,
+            "label": "HH"
+          },
+          {
+            "date": "2026-08-17",
+            "price": 1250.4,
+            "label": "HL"
+          },
+          {
+            "date": "2026-08-27",
+            "price": 1351.0,
+            "label": "HH"
+          },
+          {
+            "date": "2026-09-07",
+            "price": 1335.0,
+            "label": "LH"
+          },
+          {
+            "date": "2026-09-16",
+            "price": 1227.0,
+            "label": "LL"
+          },
+          {
+            "date": "2026-09-23",
+            "price": 1304.0,
+            "label": "LH"
+          }
+        ],
+        "bos": {
+          "fired": true,
+          "dir": "DOWN",
+          "level": 1227.0,
+          "desc": "BOS \u2705 closed below last LL \u20b91227.0 \u2014 downtrend confirmed continuing"
+        },
+        "choch": null,
+        "wyckoff": {
+          "phase": "MARKDOWN",
+          "conviction": "HIGH",
+          "vol_at_last_high": 1356042,
+          "vol_at_last_low": 1803781,
+          "note": "MARKDOWN \u2014 breakdown lows on 18.0L vs bounce highs 13.6L. Real sellers driving down."
         }
       },
       "as_of": "2026-10-15"
