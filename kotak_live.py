@@ -265,6 +265,107 @@ def _setup_legs_from_chain(chain_path=None):
     return legs, d.get("as_of")
 
 
+
+def reprice_live_maths(chain_path=None):
+    """Recompute every setup + comparison candidate from LIVE option prices using the SAME audited
+    math as nifty_chain.py (Black-Scholes, lognormal exit distribution, P(profit), return-on-risk).
+    Live LTP is substituted as each leg's entry price. Returns a dict to merge into nifty_live.json.
+    Browser only displays these — no math runs in the browser."""
+    import importlib
+    nc = importlib.import_module("nifty_chain")
+    chain_path = chain_path or (ROOT / "docs" / "nifty_chain.json")
+    d = json.loads(pathlib.Path(chain_path).read_text(encoding="utf-8"))
+    idx = d.get("index", {})
+    sigma = (idx.get("atm_iv") or 0) / 100.0 or None
+    sess = login()
+    rows = _scrip_master_rows()
+    # live spot
+    spot = None
+    try:
+        spot = (nifty_live(sess=sess).get("nifty50") or {}).get("ltp")
+    except Exception:
+        pass
+    spot = spot or idx.get("close")
+    out = {"spot": spot, "setups": [], "comparison": {"candidates": []}}
+
+    def live_legs(legs, trade_exp):
+        """Attach live_ltp to each leg; return (legs_with_live_ref, ok)."""
+        quoted = option_quotes([dict(l, expiry=l.get("expiry") or trade_exp,
+                                     option_type=l.get("option_type") or (l.get("name", "") or "")[-2:])
+                                for l in legs], sess=sess, rows=rows)
+        by_key = {(round(float(q["strike"])), q["option_type"]): q.get("live_ltp") for q in quoted}
+        priced, ok = [], True
+        for l in legs:
+            opt = l.get("option_type") or (l.get("name", "") or "")[-2:]
+            ltp = by_key.get((round(float(l["strike"])), opt))
+            if ltp is None:
+                ok = False
+                break
+            priced.append(dict(option_type=opt, strike=float(l["strike"]), side=l["side"],
+                               ref_close=float(ltp), lot=int(l.get("lot") or idx.get("lot") or 65)))
+        return priced, ok
+
+    dte = None
+    # recompute each setup
+    for s in d.get("setups", []):
+        legs = s.get("legs", [])
+        trade_exp = (legs[0] or {}).get("expiry") if legs else None
+        if dte is None and trade_exp:
+            try:
+                dte = (dt_date_fromiso(trade_exp) - dt_date_fromiso(d.get("as_of"))).days
+            except Exception:
+                dte = None
+        priced, ok = live_legs(legs, trade_exp)
+        if not ok or spot is None or not sigma or not dte:
+            continue
+        lot = priced[0]["lot"]
+        pay = nc.payoff_profile(priced, float(spot), lot, sigma, int(dte))
+        ex = nc.exit_payoff_profile(priced, float(spot), lot, sigma, int(dte), nc.HOLD)
+        out["setups"].append(dict(rule=s.get("rule"),
+                                  legs=[dict(side=p["side"], strike=p["strike"], option_type=p["option_type"],
+                                             live_ltp=p["ref_close"], lot=p["lot"]) for p in priced],
+                                  payoff=pay, exit=ex,
+                                  stop_loss=_stop_loss(priced, pay, lot)))
+    # recompute comparison candidates
+    for c in (d.get("comparison") or {}).get("candidates", []):
+        legs = c.get("legs", [])
+        if not legs:
+            continue
+        priced, ok = live_legs(legs, c.get("expiry") or trade_exp)
+        if not ok or spot is None or not sigma or not dte:
+            continue
+        lot = priced[0]["lot"]
+        pay = nc.payoff_profile(priced, float(spot), lot, sigma, int(dte))
+        ex = nc.exit_payoff_profile(priced, float(spot), lot, sigma, int(dte), nc.HOLD)
+        maxrisk = abs(pay.get("max_loss") or 0) or 1
+        out["comparison"]["candidates"].append(dict(id=c.get("id"), name=c.get("name"),
+            max_profit_at_expiry=pay.get("max_profit"), max_loss_at_expiry=pay.get("max_loss"),
+            exit=ex, exp_return_on_risk_pct=round(100.0 * (ex or {}).get("exp_pnl_per_lot", 0) / maxrisk, 2),
+            stop_loss=_stop_loss(priced, pay, lot)))
+    # re-rank by live expected return on risk
+    cands = out["comparison"]["candidates"]
+    cands.sort(key=lambda x: -(x.get("exp_return_on_risk_pct") or -1e9))
+    if cands:
+        out["comparison"]["best_id"] = cands[0]["id"]
+    return out
+
+
+def _stop_loss(priced, payoff, lot):
+    """A simple, defined stop: for debit spreads/longs, stop at 50% of debit paid; for credit, at 2x credit.
+    Returns the rupee loss level per lot where the position should be closed."""
+    net = sum((1 if p["side"] == "BUY" else -1) * p["ref_close"] for p in priced)  # +debit / -credit
+    if net > 0:  # debit paid
+        return dict(type="debit", rule="Close if the position loses 50% of the debit paid",
+                    level_per_lot=round(-0.5 * net * lot, 2))
+    else:        # credit received
+        return dict(type="credit", rule="Close if the loss reaches 2x the credit received",
+                    level_per_lot=round(2.0 * net * lot, 2))
+
+
+def dt_date_fromiso(s):
+    import datetime
+    return datetime.date.fromisoformat(s)
+
 def write_live(path=LIVE_OUT):
     sess = login()
     data = nifty_live(sess=sess)
@@ -278,6 +379,11 @@ def write_live(path=LIVE_OUT):
             data["chain_as_of"] = as_of
     except Exception as e:
         data["option_legs_error"] = str(e)[:200]
+    # Full live maths (all setups + comparison recomputed with audited nifty_chain formulas)
+    try:
+        data["live_maths"] = reprice_live_maths()
+    except Exception as e:
+        data["live_maths_error"] = str(e)[:200]
     pathlib.Path(path).write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
     return data
 

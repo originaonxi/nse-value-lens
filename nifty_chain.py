@@ -1161,6 +1161,47 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                                                  "The 'exit' block is the expected P&L if the trade is closed after "
                                                  f"{HOLD} sessions (by {nxt[-1]}) instead of held to expiry \u2014 the number the "
                                                  "plan actually earns. Both use today's close as the next-open entry proxy.")))
+
+    # All non-baseline strategies as full priced cards (so every setup shows, not only the one firing).
+    _opt = raw_nifty[raw_nifty.FinInstrmTp == "IDO"]
+    _ch = _opt[_opt.exp == texp]
+    _raw_tab = strike_table(_ch, spot, int(t0.dte)) if not _ch.empty else None
+    pk = picks(_raw_tab, spot, int(t0.dte)) if _raw_tab is not None and not _raw_tab.empty else {}
+    fired_rules = {s["rule"] for s in setups}
+    all_setups = list(setups)  # firing ones first, fully priced already
+    for r in [x for x in RULES if not x["baseline"]]:
+        if r["id"] in fired_rules:
+            continue  # already built above with live fire context
+        info = rule_info[r["id"]]
+        legs, pos, ok = [], dict(delta=0.0, gamma=0.0, theta=0.0, vega=0.0), True
+        for opt, key, side in r["legs"]:
+            strike = pk.get(key)
+            if strike is None or trade_tab is None or strike not in trade_tab.index:
+                ok = False
+                break
+            col = "ce" if opt == "CE" else "pe"
+            ref = trade_tab.loc[strike].get(f"{col}_mark")
+            leg = dict(name=f"{SYMBOL} {texp} {strike:g} {opt}", option_type=opt, strike=float(strike),
+                       expiry=texp, side=side, ref_close=num(ref), lot=int(t0.lot))
+            sgn = 1 if side == "BUY" else -1
+            for g in pos:
+                v = trade_tab.loc[strike].get(f"{col}_{g}")
+                leg[g] = num(v, 6 if g == "gamma" else 3)
+                if v is not None and np.isfinite(v):
+                    pos[g] += sgn * float(v) * int(t0.lot)
+            legs.append(leg)
+        if not ok or not legs:
+            continue
+        all_setups.append(dict(rule=r["id"], label=info["label"], action=info["action"], view=info["view"],
+                               status=info["status"], condition=info["condition"], legs=legs, firing=False,
+                               position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
+                               payoff=payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte)),
+                               exit=exit_payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte), HOLD),
+                               plan=dict(entry="Next session's official open; skip any leg that does not trade",
+                                         exit_after_sessions=HOLD, exit_by=nxt[-1],
+                                         payoff_note="Not triggered today \u2014 shown for comparison. Max profit and probability are at EXPIRY; the exit block is the expected P&L after %d sessions." % HOLD)))
+    for s in setups:
+        s["firing"] = True
     validated = sorted([s for s in setups if s["status"] == "VALIDATED"],
                        key=lambda s: -(rule_info[s["rule"]]["stats"]["t_stat"] or 0))
     best = dict(rule=validated[0]["rule"], label=validated[0]["label"],
@@ -1316,7 +1357,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
             validation="VALIDATED needs at least 60 closed trades, a date-clustered t-stat of at least 2, a positive mean in both halves and a higher mean than the same structure taken every session. WEAK: positive but fails a test. NO_EDGE: mean at or below zero. INSUFFICIENT: under 30 trades.",
             no_lookahead="Every trigger uses data published up to the signal session; swing pivots count only once confirmed two sessions later; strikes are fixed from that session's chain."),
         index=index, expiries=expiries, hhhl=hhhl_chart, history=history, participants=part_today,
-        rules=rules, setups=setups, best_setup=best, constituents=constituents, constituents_count=len(constituents),
+        rules=rules, setups=all_setups, best_setup=best, constituents=constituents, constituents_count=len(constituents),
         breadth=breadth, jev=jev, research=research, comparison=_with_jev_pick(comparison, index_answer),
         limitations=[
             "End-of-day data only: no intraday prices, bid-ask spreads or order book. Real fills, especially in far strikes, can be worse than the modelled slippage.",

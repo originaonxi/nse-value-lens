@@ -291,14 +291,17 @@
     const rules = new Map((dataset.rules || []).map(r => [r.id, r]));
     $('setup-cards').innerHTML = setups.length ? setups.map(s => {
       const r = rules.get(s.rule) || {stats: {}}, st = r.stats || {}, g = s.position_greeks_per_lot || {}, pay = s.payoff || {};
-      return '<article class="nc-setup" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + statusBadge(s.status) + '</header>' +
+      const sl = s.stop_loss || {}, firing = s.firing !== false;
+      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
         '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (live / ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
         s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + (numeric(l.live_ltp) ? '<b class="pos">' + money(l.live_ltp) + '</b> <small class="muted">live</small>' : money(l.ref_close)) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
         '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +
         '<div><dt>Max profit (expiry)</dt><dd class="pos">' + (numeric(pay.max_profit) ? money(pay.max_profit) : 'Unlimited') + '</dd></div><div><dt>Max loss (expiry)</dt><dd class="neg">' + (numeric(pay.max_loss) ? money(pay.max_loss) : 'Unlimited') + '</dd></div>' +
         '<div><dt>Breakeven (expiry)</dt><dd>' + ((pay.breakevens || []).map(b => fmt(b, 0)).join(' / ') || '--') + '</dd></div><div><dt>Model P(profit) at expiry</dt><dd>' + pctPlain(pay.prob_profit_model, 0) + '</dd></div>' +
         '<div class="nc-exit"><dt>Expected P&amp;L at exit (' + ((s.exit || {}).hold_sessions || 5) + 's)</dt><dd class="' + cls((s.exit || {}).exp_pnl_per_lot) + '">' + (numeric((s.exit || {}).exp_pnl_per_lot) ? money((s.exit || {}).exp_pnl_per_lot) : '--') + '</dd></div>' +
-        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>' + pctPlain((s.exit || {}).p_profit, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div></dl>' +
+        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>' + pctPlain((s.exit || {}).p_profit, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div>' +
+        (sl.level_per_lot != null ? '<div class="nc-stop"><dt>Stop-loss / lot</dt><dd class="neg">' + money(sl.level_per_lot) + '</dd></div>' : '') + '</dl>' +
+        (sl.rule ? '<p class="muted"><small>\u26d4 Stop: ' + esc(sl.rule) + '</small></p>' : '') +
         payoffSvg(pay) + ((s.plan || {}).payoff_note ? '<p class="muted"><small>' + esc(s.plan.payoff_note) + '</small></p>' : '') + '<p class="muted">Backtest: ' + intFmt(st.trades) + ' trades, win ' + pctPlain(st.win_rate, 0) + ', mean ' + pct(st.mean_return_pct) + ' on ' + esc(st.return_basis || '') + ', t-stat ' + fmt(st.t_stat, 2) + ', worst ' + pct(st.worst_return_pct) + '.</p></article>';
     }).join('') : '<p class="muted">No setup\u2019s trigger condition is met today. See the evidence table below for every rule and how close each trigger is.</p>';
   }
@@ -468,136 +471,55 @@
         dataset.index.bank_nifty_change_pct = live.bank_nifty.per_change;
       }
       renderIndex();
-      repriceFromLive(live);
+      applyLiveMaths(live);
     } catch (err) {}
   }
 
-  // ---------------------------------------------------------------- live option repricing (Black-Scholes)
-  function normCdf(x) {
-    const t = 1 / (1 + 0.2316419 * Math.abs(x));
-    const d = 0.3989422804014327 * Math.exp(-x * x / 2);
-    let p = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
-    return x > 0 ? 1 - p : p;
-  }
-  function bsPrice(S, K, T, sigma, isCall) {
-    if (!(T > 0) || !(sigma > 0) || !(S > 0)) return Math.max(0, isCall ? S - K : K - S);
-    const d1 = (Math.log(S / K) + 0.5 * sigma * sigma * T) / (sigma * Math.sqrt(T));
-    const d2 = d1 - sigma * Math.sqrt(T);
-    return isCall ? S * normCdf(d1) - K * normCdf(d2) : K * normCdf(-d2) - S * normCdf(-d1);
-  }
-  // Implied vol from a traded premium, bisection.
-  function impliedVol(price, S, K, T, isCall) {
-    if (!(price > 0) || !(T > 0)) return null;
-    let lo = 0.01, hi = 3.0;
-    for (let i = 0; i < 60; i++) {
-      const mid = (lo + hi) / 2;
-      if (bsPrice(S, K, mid, T, isCall) > price) hi = mid; else lo = mid;
-    }
-    return (lo + hi) / 2;
-  }
-  function yearsTo(expiryIso) {
-    const exp = new Date(expiryIso + 'T15:30:00+05:30').getTime();
-    return Math.max(0, (exp - Date.now()) / (365.25 * 24 * 3600 * 1000));
-  }
-  // Build a map of {strike|type -> live_ltp} from the live feed.
-  function liveLegMap(legs) {
-    const m = {};
-    for (const l of legs || []) if (numeric(l.live_ltp)) m[Math.round(l.strike) + (l.option_type || '')] = l.live_ltp;
-    return m;
-  }
-  // Reprice one structure (array of {side,strike,option_type,lot}) at live premiums -> payoff + exit expectation.
-  function repriceStructure(legs, map, spot, expiryIso, sigma, holdDays) {
-    const lot = legs[0] && legs[0].lot || 65;
-    const T = yearsTo(expiryIso);
-    let net = 0; const priced = [];
-    for (const l of legs) {
-      const key = Math.round(l.strike) + (l.option_type || 'PE');
-      const prem = map[key];
-      if (!numeric(prem)) return null; // can't reprice without a live leg
-      const sgn = l.side === 'BUY' ? 1 : -1;
-      net += sgn * prem; // debit positive
-      priced.push({side: l.side, strike: l.strike, type: l.option_type || 'PE', prem: prem, lot: lot});
-    }
-    // Expiry payoff across a strike grid
-    const lo = spot * 0.85, hi = spot * 1.15, N = 120, price = [], pnl = [];
-    for (let i = 0; i <= N; i++) {
-      const S = lo + (hi - lo) * i / N;
-      let v = 0;
-      for (const p of priced) {
-        const intrinsic = p.type === 'CE' ? Math.max(0, S - p.strike) : Math.max(0, p.strike - S);
-        v += (p.side === 'BUY' ? 1 : -1) * intrinsic;
-      }
-      price.push(S); pnl.push((v - net) * lot);
-    }
-    const maxP = Math.max(...pnl), maxL = Math.min(...pnl);
-    // Expected P&L at the 5-session exit: reprice each leg via BS over the lognormal spot at exit
-    const Texit = Math.max(0, T - (holdDays || 5) / 365.25);
-    const mu = Math.log(spot) - 0.5 * sigma * sigma * (T - Texit);
-    const sd = sigma * Math.sqrt(Math.max(1e-6, T - Texit));
-    let expPnl = 0, pProfit = 0, W = 0;
-    for (let i = 0; i <= 80; i++) {
-      const z = -4 + 8 * i / 80, w = Math.exp(-z * z / 2);
-      const Sexit = Math.exp(mu + sd * z);
-      let val = 0;
-      for (const p of priced) {
-        const bs = bsPrice(Sexit, p.strike, Texit, sigma, p.type === 'CE');
-        val += (p.side === 'BUY' ? 1 : -1) * bs;
-      }
-      const legPnl = (val - net) * lot;
-      expPnl += w * legPnl; if (legPnl > 0) pProfit += w; W += w;
-    }
-    expPnl /= W; pProfit /= W;
-    const maxRisk = Math.abs(maxL) || 1;
-    return {net: net, lot: lot, max_profit: maxP > 0 ? maxP : null, max_loss: maxL < 0 ? maxL : null,
-            curve: {price: price, pnl: pnl}, exp_pnl_per_lot: expPnl, p_profit: pProfit,
-            exp_return_on_risk_pct: 100 * expPnl / maxRisk};
-  }
-  // Recompute the firing setup card + comparison table from live legs, then re-render.
-  function repriceFromLive(live) {
-    if (!live || !Array.isArray(live.option_legs) || !dataset) return;
-    const map = liveLegMap(live.option_legs);
-    const spot = (live.nifty50 && live.nifty50.ltp) || dataset.index.close;
-    // IV: use the setup's long leg live premium to imply sigma, else fall back to dataset ATM IV.
-    let sigma = (dataset.index.atm_iv || 13) / 100;
+  // ---------------------------------------------------------------- live display (maths done in backend)
+  // The backend (kotak_live.py) recomputes ALL setups + comparison with the audited nifty_chain
+  // formulas and ships them in live.live_maths. The browser ONLY displays — no math here.
+  function applyLiveMaths(live) {
+    if (!live || !live.live_maths || !dataset) return;
+    const lm = live.live_maths;
+    const spot = lm.spot || (live.nifty50 && live.nifty50.ltp) || dataset.index.close;
+    // Map backend setup results by rule id
+    const bySetup = {};
+    for (const s of lm.setups || []) bySetup[s.rule] = s;
     for (const s of dataset.setups || []) {
-      const exp = (s.legs[0] || {}).expiry;
-      for (const l of s.legs) {
-        const key = Math.round(l.strike) + (l.option_type || 'PE');
-        if (numeric(map[key])) {
-          const iv = impliedVol(map[key], spot, l.strike, yearsTo(exp), (l.option_type || 'PE') === 'CE');
-          if (iv) { sigma = iv; break; }
-        }
-      }
-      // Reprice the setup's own payoff + exit
-      const legs = s.legs.map(l => ({side: l.side, strike: l.strike, option_type: l.option_type || 'PE', lot: l.lot}));
-      const rp = repriceStructure(legs, map, spot, exp, sigma, (s.exit || {}).hold_sessions || 5);
-      if (rp) {
-        s.payoff = Object.assign({}, s.payoff, {max_profit: rp.max_profit, max_loss: rp.max_loss, curve: rp.curve});
-        s.exit = Object.assign({}, s.exit, {exp_pnl_per_lot: rp.exp_pnl_per_lot, p_profit: rp.p_profit});
-        // live leg premiums onto the leg rows
-        for (const l of s.legs) { const k = Math.round(l.strike) + (l.option_type || 'PE'); if (numeric(map[k])) l.live_ltp = map[k]; }
-      }
+      const live1 = bySetup[s.rule];
+      if (!live1) continue;
+      if (live1.payoff) s.payoff = Object.assign({}, s.payoff, live1.payoff);
+      if (live1.exit) s.exit = Object.assign({}, s.exit, live1.exit);
+      if (live1.stop_loss) s.stop_loss = live1.stop_loss;
+      // live leg premiums
+      const liveByStrike = {};
+      for (const l of live1.legs || []) liveByStrike[Math.round(l.strike) + (l.option_type || '')] = l.live_ltp;
+      for (const l of s.legs) { const k = Math.round(l.strike) + (l.option_type || 'PE'); if (numeric(liveByStrike[k])) l.live_ltp = liveByStrike[k]; }
     }
-    // Reprice comparison candidates
-    const cmp = dataset.comparison;
-    if (cmp && Array.isArray(cmp.candidates)) {
-      const exp = ((dataset.setups[0] || {}).legs[0] || {}).expiry || dataset.comparison.expiry;
+    // Comparison: apply backend-computed candidate numbers + re-rank by backend best
+    const cmp = dataset.comparison, lc = lm.comparison || {};
+    if (cmp && Array.isArray(cmp.candidates) && (lc.candidates || []).length) {
+      const byId = {};
+      for (const c of lc.candidates) byId[c.id] = c;
       for (const c of cmp.candidates) {
-        const legs = (c.legs || []).map(l => ({side: l.side, strike: l.strike, option_type: l.option_type || 'PE', lot: 65}));
-        const rp = repriceStructure(legs, map, spot, exp, sigma, 5);
-        if (rp) {
-          c.max_profit_at_expiry = rp.max_profit; c.max_loss_at_expiry = rp.max_loss;
-          c.exit = Object.assign({}, c.exit, {exp_pnl_per_lot: rp.exp_pnl_per_lot, p_profit: rp.p_profit});
-          c.exp_return_on_risk_pct = rp.exp_return_on_risk_pct;
-        }
+        const live2 = byId[c.id];
+        if (!live2) continue;
+        c.max_profit_at_expiry = live2.max_profit_at_expiry;
+        c.max_loss_at_expiry = live2.max_loss_at_expiry;
+        if (live2.exit) c.exit = Object.assign({}, c.exit, live2.exit);
+        c.exp_return_on_risk_pct = live2.exp_return_on_risk_pct;
+        c.stop_loss = live2.stop_loss;
       }
-      // Re-rank by expected return on risk at exit; keep Jev's pick label from EOD.
       cmp.candidates.sort((a, b) => (b.exp_return_on_risk_pct || -1e9) - (a.exp_return_on_risk_pct || -1e9));
-      cmp.best = {id: cmp.candidates[0].id, name: cmp.candidates[0].name,
-                  reason: 'Live: highest expected profit per rupee of risk at the 5-session exit (' + (cmp.candidates[0].exp_return_on_risk_pct || 0).toFixed(1) + '% on max risk).'};
+      if (lc.best_id) {
+        const top = cmp.candidates.find(c => c.id === lc.best_id) || cmp.candidates[0];
+        cmp.best = {id: top.id, name: top.name,
+                    reason: 'Live: highest expected profit per rupee of risk at the 5-session exit (' + (top.exp_return_on_risk_pct || 0).toFixed(1) + '% on max risk).'};
+      }
     }
     renderSetups(); renderComparison();
-    const stamp = $('live-stamp'); if (stamp) stamp.textContent = 'Live repriced ' + new Date().toLocaleTimeString('en-IN') + ' \u00b7 spot ' + fmt(spot);
+    const stamp = $('live-stamp');
+    if (stamp) stamp.textContent = 'Live (backend maths) ' + new Date().toLocaleTimeString('en-IN') + ' \u00b7 spot ' + fmt(spot);
   }
 
   function startLivePricePoll() {
