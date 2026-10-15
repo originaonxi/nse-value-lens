@@ -468,6 +468,14 @@ CONDOR = [("CE", "c20", "SELL"), ("CE", "cw", "BUY"), ("PE", "p20", "SELL"), ("P
 SHORT_STRADDLE = [("CE", "atm", "SELL"), ("PE", "atm", "SELL")]
 LONG_STRADDLE = [("CE", "atm", "BUY"), ("PE", "atm", "BUY")]
 ALWAYS = lambda f: pd.Series(True, index=f.index)
+LONG_STRANGLE  = [("CE", "c20", "BUY"),  ("PE", "p20", "BUY")]
+SHORT_STRANGLE = [("CE", "c20", "SELL"), ("PE", "p20", "SELL")]
+IRON_BUTTERFLY = [("CE", "atm", "SELL"), ("PE", "atm", "SELL"), ("CE", "bcs", "BUY"), ("PE", "bps", "BUY")]
+CALL_BUTTERFLY = [("CE", "atm", "BUY"),  ("CE", "bcs", "SELL"), ("CE", "bcs", "SELL"), ("CE", "cw", "BUY")]
+BEAR_CALL_SPD  = [("CE", "atm", "SELL"), ("CE", "bcs", "BUY")]
+BULL_PUT_SPD   = [("PE", "atm", "SELL"), ("PE", "bps", "BUY")]
+BUY_PUT        = [("PE", "atm", "BUY")]
+RISK_REV       = [("PE", "p20", "SELL"), ("CE", "c20", "BUY")]
 
 # Written before any backtest result was inspected. Thresholds are round numbers, not fitted.
 RULES = [
@@ -498,6 +506,42 @@ RULES = [
     _rule("put_heavy_pcr_bull_call_spread", "Put-heavy PCR (contrarian): bull call spread", "BULL CALL SPREAD", BULL, "debit", "bullish",
           "All-expiry Nifty put/call open-interest ratio is 1.3 or higher (puts heavily written or bought).",
           lambda f: f.pcr >= 1.3),
+    _rule("lhll_buy_put", "LH/LL trend: buy put", "BUY PUT", BUY_PUT, "debit", "bearish",
+          "Nifty's confirmed swing structure is LH/LL and the close is below its 20-session average.",
+          lambda f: f.falling & (f.close_idx < f.sma20)),
+    _rule("pcr_low_buy_put", "Low PCR (contrarian): buy put", "BUY PUT", BUY_PUT, "debit", "bearish",
+          "All-expiry Nifty put/call ratio is 0.70 or below \u2014 market holds far more calls than puts; historically a complacency signal ahead of reversals.",
+          lambda f: f.pcr <= 0.70),
+    _rule("lhll_bear_call_spread", "LH/LL trend: bear call spread (credit)", "BEAR CALL SPREAD", BEAR_CALL_SPD, "defined", "bearish",
+          "Nifty is in a confirmed LH/LL downtrend, close is below its 20-session average, and IV percentile is 30 or higher to make the credit spread worthwhile.",
+          lambda f: f.falling & (f.close_idx < f.sma20) & (f.iv_pct >= 30)),
+    _rule("fii_bear_call_spread", "FII futures short: bear call spread (credit)", "BEAR CALL SPREAD", BEAR_CALL_SPD, "defined", "bearish",
+          "FIIs hold 40% or less of their index-futures contracts long and IV percentile is 30 or higher \u2014 sell credit spread against the institutional short build-up.",
+          lambda f: (f.fii_ratio <= 0.40) & (f.iv_pct >= 30)),
+    _rule("hhhl_bull_put_spread", "HH/HL trend: bull put spread (credit)", "BULL PUT SPREAD", BULL_PUT_SPD, "defined", "bullish",
+          "Nifty is in a confirmed HH/HL uptrend, close is above its 20-session average, and IV percentile is 30 or higher to make the credit premium worthwhile.",
+          lambda f: f.rising & (f.close_idx > f.sma20) & (f.iv_pct >= 30)),
+    _rule("skew_bull_put_spread", "High put skew: bull put spread (credit)", "BULL PUT SPREAD", BULL_PUT_SPD, "defined", "bullish",
+          "25-delta put-call skew exceeds 3 vol points \u2014 puts cost significantly more than equivalent calls; sell the expensive side via a defined-risk spread.",
+          lambda f: f.skew25.fillna(0) >= 3.0),
+    _rule("hhhl_risk_reversal", "HH/HL uptrend + high skew: risk reversal", "RISK REVERSAL", RISK_REV, "margin", "bullish",
+          "Nifty is in a confirmed HH/HL uptrend and the 25-delta put-call skew is 3.5 vol points or higher \u2014 sell overpriced OTM put, fund OTM call with the premium.",
+          lambda f: f.rising & (f.skew25.fillna(0) >= 3.5)),
+    _rule("cheap_iv_long_strangle", "Cheap IV: long strangle", "LONG STRANGLE", LONG_STRANGLE, "debit", "volatility",
+          "ATM IV is in the bottom 30th percentile of its year and at or below 20-session realised vol \u2014 buy OTM call and put for wider breakevens at lower cost than a straddle.",
+          lambda f: (f.iv_pct <= 30) & (f.vrp <= 0)),
+    _rule("extreme_move_long_strangle", "Extreme recent move: long strangle", "LONG STRANGLE", LONG_STRANGLE, "debit", "volatility",
+          "Nifty's 5-session z-score is 2.0 or above in absolute value and IV is in the bottom half of its year \u2014 large recent move suggests realised vol will exceed current implied.",
+          lambda f: (f.z5.abs() >= 2.0) & (f.iv_pct <= 50)),
+    _rule("vrp_short_strangle", "Rich IV: short strangle (OTM)", "SHORT STRANGLE", SHORT_STRANGLE, "margin", "neutral",
+          "IV percentile is at or above the 60th percentile and at least 1.5 vol points above 20-session realised vol \u2014 sell OTM strangle for a wider profit tent. Undefined risk.",
+          lambda f: (f.iv_pct >= 60) & (f.vrp >= 1.5)),
+    _rule("rich_iv_iron_butterfly", "Very rich IV: iron butterfly", "IRON BUTTERFLY", IRON_BUTTERFLY, "defined", "neutral",
+          "ATM implied volatility is in the top 25th percentile \u2014 sell ATM straddle and buy OTM wings for maximum defined-risk premium collection at the centre of the distribution.",
+          lambda f: f.iv_pct >= 75),
+    _rule("flat_call_butterfly", "Flat market: long call butterfly", "CALL BUTTERFLY", CALL_BUTTERFLY, "debit", "neutral",
+          "5-session z-score is within \u00b10.5 (near-flat market) and IV is below the 35th percentile \u2014 low-cost defined-risk setup that profits if Nifty expires near the short strike.",
+          lambda f: (f.z5.abs() <= 0.5) & (f.iv_pct <= 35)),
     _rule("base_bull_call_spread", "Baseline: bull call spread every session", "BULL CALL SPREAD", BULL, "debit", "bullish",
           "Unconditional: the same spread taken whenever no position is open.", ALWAYS, baseline=True),
     _rule("base_bear_put_spread", "Baseline: bear put spread every session", "BEAR PUT SPREAD", BEAR, "debit", "bearish",
@@ -510,10 +554,32 @@ RULES = [
           "Unconditional.", ALWAYS, baseline=True),
     _rule("base_long_straddle", "Baseline: long straddle every session", "LONG STRADDLE", LONG_STRADDLE, "debit", "volatility",
           "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_buy_put", "Baseline: buy ATM put every session", "BUY PUT", BUY_PUT, "debit", "bearish",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_bear_call_spread", "Baseline: bear call spread every session", "BEAR CALL SPREAD", BEAR_CALL_SPD, "defined", "bearish",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_bull_put_spread", "Baseline: bull put spread every session", "BULL PUT SPREAD", BULL_PUT_SPD, "defined", "bullish",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_long_strangle", "Baseline: long strangle every session", "LONG STRANGLE", LONG_STRANGLE, "debit", "volatility",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_short_strangle", "Baseline: short strangle every session", "SHORT STRANGLE", SHORT_STRANGLE, "margin", "neutral",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_iron_butterfly", "Baseline: iron butterfly every session", "IRON BUTTERFLY", IRON_BUTTERFLY, "defined", "neutral",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_call_butterfly", "Baseline: call butterfly every session", "CALL BUTTERFLY", CALL_BUTTERFLY, "debit", "neutral",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_risk_reversal", "Baseline: risk reversal every session", "RISK REVERSAL", RISK_REV, "margin", "bullish",
+          "Unconditional.", ALWAYS, baseline=True),
 ]
-BASELINE_FOR = {"BULL CALL SPREAD": "base_bull_call_spread", "BEAR PUT SPREAD": "base_bear_put_spread",
-                "BUY CALL": "base_buy_call", "IRON CONDOR": "base_iron_condor", "SHORT STRADDLE": "base_short_straddle",
-                "LONG STRADDLE": "base_long_straddle"}
+BASELINE_FOR = {
+    "BULL CALL SPREAD": "base_bull_call_spread", "BEAR PUT SPREAD": "base_bear_put_spread",
+    "BUY CALL": "base_buy_call", "IRON CONDOR": "base_iron_condor",
+    "SHORT STRADDLE": "base_short_straddle", "LONG STRADDLE": "base_long_straddle",
+    "BUY PUT": "base_buy_put", "BEAR CALL SPREAD": "base_bear_call_spread",
+    "BULL PUT SPREAD": "base_bull_put_spread", "LONG STRANGLE": "base_long_strangle",
+    "SHORT STRANGLE": "base_short_strangle", "IRON BUTTERFLY": "base_iron_butterfly",
+    "CALL BUTTERFLY": "base_call_butterfly", "RISK REVERSAL": "base_risk_reversal",
+}
 RULE_BY_ID = {r["id"]: r for r in RULES}
 
 
@@ -718,38 +784,57 @@ def _lognorm_mass(grid, spot, sigma, t):
 # ---------------------------------------------------------------- same-risk candidate comparison
 CANDIDATE_SETS = {
     "bearish": [
-        ("bear_put_spread", "Bear put spread", [("PE", "atm", "BUY"), ("PE", 0.98, "SELL")], "defined"),
-        ("long_put", "Buy put (ATM)", [("PE", "atm", "BUY")], "debit"),
-        ("wide_bear_put_spread", "Wider bear put spread", [("PE", "atm", "BUY"), ("PE", 0.96, "SELL")], "defined"),
-        ("bear_call_spread", "Bear call spread (credit)", [("CE", 1.01, "SELL"), ("CE", 1.03, "BUY")], "defined"),
+        ("bear_put_spread",      "Bear put spread",              [("PE", "atm", "BUY"), ("PE", 0.98, "SELL")],  "defined"),
+        ("long_put",             "Buy put (ATM)",                [("PE", "atm", "BUY")],                        "debit"),
+        ("wide_bear_put_spread", "Wider bear put spread",        [("PE", "atm", "BUY"), ("PE", 0.96, "SELL")],  "defined"),
+        ("bear_call_spread",     "Bear call spread (credit)",    [("CE", 1.01, "SELL"), ("CE", 1.03, "BUY")],   "defined"),
     ],
     "bullish": [
-        ("bull_call_spread", "Bull call spread", [("CE", "atm", "BUY"), ("CE", 1.02, "SELL")], "defined"),
-        ("long_call", "Buy call (ATM)", [("CE", "atm", "BUY")], "debit"),
-        ("wide_bull_call_spread", "Wider bull call spread", [("CE", "atm", "BUY"), ("CE", 1.04, "SELL")], "defined"),
-        ("bull_put_spread", "Bull put spread (credit)", [("PE", 0.99, "SELL"), ("PE", 0.97, "BUY")], "defined"),
+        ("bull_call_spread",      "Bull call spread",            [("CE", "atm", "BUY"), ("CE", 1.02, "SELL")],  "defined"),
+        ("long_call",             "Buy call (ATM)",              [("CE", "atm", "BUY")],                        "debit"),
+        ("wide_bull_call_spread", "Wider bull call spread",      [("CE", "atm", "BUY"), ("CE", 1.04, "SELL")],  "defined"),
+        ("bull_put_spread",       "Bull put spread (credit)",    [("PE", 0.99, "SELL"), ("PE", 0.97, "BUY")],   "defined"),
     ],
     "neutral": [
-        ("iron_condor", "Iron condor", [("CE", 1.02, "SELL"), ("CE", 1.04, "BUY"), ("PE", 0.98, "SELL"), ("PE", 0.96, "BUY")], "defined"),
-        ("long_straddle", "Long straddle", [("CE", "atm", "BUY"), ("PE", "atm", "BUY")], "debit"),
-        ("short_straddle", "Short straddle (undefined risk)", [("CE", "atm", "SELL"), ("PE", "atm", "SELL")], "margin"),
+        ("iron_condor",     "Iron condor",                      [("CE", 1.02, "SELL"), ("CE", 1.04, "BUY"), ("PE", 0.98, "SELL"), ("PE", 0.96, "BUY")], "defined"),
+        ("iron_butterfly",  "Iron butterfly (ATM short)",       [("CE", "atm", "SELL"), ("PE", "atm", "SELL"), ("CE", 1.02, "BUY"), ("PE", 0.98, "BUY")], "defined"),
+        ("short_straddle",  "Short straddle (undefined risk)",  [("CE", "atm", "SELL"), ("PE", "atm", "SELL")], "margin"),
+        ("short_strangle",  "Short strangle OTM (undefined risk)", [("CE", 1.02, "SELL"), ("PE", 0.98, "SELL")], "margin"),
+        ("long_straddle",   "Long straddle",                    [("CE", "atm", "BUY"), ("PE", "atm", "BUY")],  "debit"),
+        ("long_strangle",   "Long strangle (OTM, cheaper)",     [("CE", 1.02, "BUY"), ("PE", 0.98, "BUY")],    "debit"),
+    ],
+    "volatility": [
+        ("long_straddle",  "Long straddle (ATM)",               [("CE", "atm", "BUY"), ("PE", "atm", "BUY")],  "debit"),
+        ("long_strangle",  "Long strangle (OTM, cheaper)",      [("CE", 1.02, "BUY"), ("PE", 0.98, "BUY")],    "debit"),
+        ("iron_condor",    "Iron condor (sell vol instead)",     [("CE", 1.02, "SELL"), ("CE", 1.04, "BUY"), ("PE", 0.98, "SELL"), ("PE", 0.96, "BUY")], "defined"),
     ],
 }
-CANDIDATE_ACTION = {"bear_put_spread": "BEAR PUT SPREAD", "wide_bear_put_spread": "BEAR PUT SPREAD",
-                    "bull_call_spread": "BULL CALL SPREAD", "wide_bull_call_spread": "BULL CALL SPREAD",
-                    "long_call": "BUY CALL", "iron_condor": "IRON CONDOR", "long_straddle": "LONG STRADDLE",
-                    "short_straddle": "SHORT STRADDLE"}
-CANDIDATE_SUIT = {"long_put": ("medium", "Single long option: full premium at risk, no short leg to finance it"),
-                  "long_call": ("medium", "Single long option: full premium at risk"),
-                  "bear_put_spread": ("high", "Defined risk and cheaper than a naked put"),
-                  "bull_call_spread": ("high", "Defined risk and cheaper than a naked call"),
-                  "wide_bear_put_spread": ("high", "Defined risk; keeps more of a deep fall than the tight spread"),
-                  "wide_bull_call_spread": ("high", "Defined risk; keeps more of a deep rally"),
-                  "bear_call_spread": ("medium", "Credit spread: wins if the index stays below the short call; capped loss"),
-                  "bull_put_spread": ("medium", "Credit spread: wins if the index stays above the short put; capped loss"),
-                  "iron_condor": ("medium", "Defined risk both sides; a breakout takes the capped loss"),
-                  "long_straddle": ("medium", "Needs a move larger than both premiums to pay"),
-                  "short_straddle": ("low", "Undefined risk: shown for evidence, not as a retail trade")}
+CANDIDATE_ACTION = {
+    "bear_put_spread": "BEAR PUT SPREAD", "wide_bear_put_spread": "BEAR PUT SPREAD",
+    "bull_call_spread": "BULL CALL SPREAD", "wide_bull_call_spread": "BULL CALL SPREAD",
+    "long_call": "BUY CALL", "long_put": "BUY PUT",
+    "iron_condor": "IRON CONDOR",
+    "long_straddle": "LONG STRADDLE", "short_straddle": "SHORT STRADDLE",
+    "long_strangle": "LONG STRANGLE", "short_strangle": "SHORT STRANGLE",
+    "iron_butterfly": "IRON BUTTERFLY",
+    "bear_call_spread": "BEAR CALL SPREAD", "bull_put_spread": "BULL PUT SPREAD",
+}
+CANDIDATE_SUIT = {
+    "long_put":             ("medium", "Single long option: full premium at risk, no short leg to finance it"),
+    "long_call":            ("medium", "Single long option: full premium at risk"),
+    "bear_put_spread":      ("high",   "Defined risk and cheaper than a naked put"),
+    "bull_call_spread":     ("high",   "Defined risk and cheaper than a naked call"),
+    "wide_bear_put_spread": ("high",   "Defined risk; keeps more of a deep fall than the tight spread"),
+    "wide_bull_call_spread":("high",   "Defined risk; keeps more of a deep rally"),
+    "bear_call_spread":     ("medium", "Credit spread: wins if index stays below the short call; capped loss"),
+    "bull_put_spread":      ("medium", "Credit spread: wins if index stays above the short put; capped loss"),
+    "iron_condor":          ("medium", "Defined risk both sides; a breakout takes the capped loss"),
+    "iron_butterfly":       ("medium", "Defined risk; maximum premium at ATM but narrower profit zone than condor"),
+    "long_straddle":        ("medium", "Needs a move larger than both premiums to pay; theta enemy every flat day"),
+    "short_straddle":       ("low",    "Undefined risk: shown for evidence only"),
+    "long_strangle":        ("medium", "Cheaper than straddle; needs a larger move to pay; theta enemy every flat day"),
+    "short_strangle":       ("low",    "Wider tent than short straddle but still undefined risk: shown for evidence only"),
+}
 
 
 def _candidate_leg(tab, texp, lot, opt, where, side, spot):
@@ -1216,11 +1301,12 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                               exit_after_sessions=HOLD, exit_by=nxt[-1],
                               payoff_note="Not triggered today \u2014 shown for comparison. Max profit and probability are at EXPIRY; the exit block is the expected P&L after %d sessions." % HOLD))
         # Volatility-edge decision block for move-either-way (straddle/strangle) and vol structures.
-        if r["action"] in ("LONG STRADDLE", "SHORT STRADDLE", "IRON CONDOR"):
+        if r["action"] in ("LONG STRADDLE", "SHORT STRADDLE", "IRON CONDOR",
+                            "LONG STRANGLE", "SHORT STRANGLE", "IRON BUTTERFLY"):
             be = card["payoff"].get("breakevens") or []
             move_needed = num(min(abs(b - spot) for b in be), 0) if be else None
             exp_move = num(spot * sigma_t * math.sqrt(max(int(t0.dte), 1) / 365.0)) if np.isfinite(sigma_t) else None
-            long_vol = r["action"] == "LONG STRADDLE"
+            long_vol = r["action"] in ("LONG STRADDLE", "LONG STRANGLE")
             _vrp = float(t0.vrp) if pd.notna(t0.get("vrp")) else None
             _rv20 = float(t0.rv20) if pd.notna(t0.get("rv20")) else None
             _ivpct = float(t0.iv_pct) if pd.notna(t0.get("iv_pct")) else None
