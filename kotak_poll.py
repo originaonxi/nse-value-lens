@@ -87,9 +87,12 @@ def polling_loop():
     
     try:
         while True:
+            t0 = time.time()
             refresh_prices()
-            logger.info(f"Next refresh in {POLL_INTERVAL}s...")
-            time.sleep(POLL_INTERVAL)
+            elapsed = time.time() - t0
+            sleep_for = max(1, POLL_INTERVAL - elapsed)  # target a true POLL_INTERVAL cycle
+            logger.info(f"Cycle took {elapsed:.1f}s; next refresh in {sleep_for:.1f}s (target {POLL_INTERVAL}s cycle)")
+            time.sleep(sleep_for)
     except KeyboardInterrupt:
         logger.info("=== Polling interrupted by user ===")
     finally:
