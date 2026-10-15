@@ -295,12 +295,41 @@
         '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Ref close</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
         s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + money(l.ref_close) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
         '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +
-        '<div><dt>Max profit</dt><dd class="pos">' + (numeric(pay.max_profit) ? money(pay.max_profit) : 'Unlimited') + '</dd></div><div><dt>Max loss</dt><dd class="neg">' + (numeric(pay.max_loss) ? money(pay.max_loss) : 'Unlimited') + '</dd></div>' +
-        '<div><dt>Breakeven</dt><dd>' + ((pay.breakevens || []).map(b => fmt(b, 0)).join(' / ') || '--') + '</dd></div><div><dt>Model P(profit) at expiry</dt><dd>' + pctPlain(pay.prob_profit_model, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div></dl>' +
+        '<div><dt>Max profit (expiry)</dt><dd class="pos">' + (numeric(pay.max_profit) ? money(pay.max_profit) : 'Unlimited') + '</dd></div><div><dt>Max loss (expiry)</dt><dd class="neg">' + (numeric(pay.max_loss) ? money(pay.max_loss) : 'Unlimited') + '</dd></div>' +
+        '<div><dt>Breakeven (expiry)</dt><dd>' + ((pay.breakevens || []).map(b => fmt(b, 0)).join(' / ') || '--') + '</dd></div><div><dt>Model P(profit) at expiry</dt><dd>' + pctPlain(pay.prob_profit_model, 0) + '</dd></div>' +
+        '<div class="nc-exit"><dt>Expected P&amp;L at exit (' + ((s.exit || {}).hold_sessions || 5) + 's)</dt><dd class="' + cls((s.exit || {}).exp_pnl_per_lot) + '">' + (numeric((s.exit || {}).exp_pnl_per_lot) ? money((s.exit || {}).exp_pnl_per_lot) : '--') + '</dd></div>' +
+        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>' + pctPlain((s.exit || {}).p_profit, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div></dl>' +
         payoffSvg(pay) + ((s.plan || {}).payoff_note ? '<p class="muted"><small>' + esc(s.plan.payoff_note) + '</small></p>' : '') + '<p class="muted">Backtest: ' + intFmt(st.trades) + ' trades, win ' + pctPlain(st.win_rate, 0) + ', mean ' + pct(st.mean_return_pct) + ' on ' + esc(st.return_basis || '') + ', t-stat ' + fmt(st.t_stat, 2) + ', worst ' + pct(st.worst_return_pct) + '.</p></article>';
     }).join('') : '<p class="muted">No setup\u2019s trigger condition is met today. See the evidence table below for every rule and how close each trigger is.</p>';
   }
 
+
+  function renderComparison() {
+    const cmp = dataset.comparison;
+    const host = $('compare-rows'), bestBox = $('compare-best'), note = $('compare-note');
+    if (!cmp || !(cmp.candidates || []).length) {
+      if (note) note.textContent = 'No directional comparison for today\u2019s view (needs a bullish or bearish swing structure and a live chain).';
+      if (host) host.innerHTML = '<tr><td colspan="9" class="muted">Not available for today.</td></tr>';
+      if (bestBox) bestBox.innerHTML = '';
+      return;
+    }
+    if (note) note.textContent = cmp.method || '';
+    const jev = cmp.jev || {};
+    const jevLine = jev.choice ? ' \u00b7 Jev\u2019s independent pick: <strong>' + esc(label(jev.choice)) + '</strong> (' + Math.round((jev.confidence || 0) * 100) + '% confidence)' : '';
+    if (bestBox) bestBox.innerHTML = '<div class="nc-best-structure"><span class="label">BEST STRUCTURE \u00b7 ' + esc(String(cmp.view || '').toUpperCase()) + ' VIEW</span><h3>' + esc((cmp.best || {}).name || '--') + '</h3><p>' + esc((cmp.best || {}).reason || '') + jevLine + '</p></div>';
+    host.innerHTML = cmp.candidates.map(c => {
+      const ex = c.exit || {}, bt = c.backtest || {}, isBest = (cmp.best || {}).id === c.id;
+      return '<tr class="' + (isBest ? 'nc-row-best' : '') + '"><td><strong>' + esc(c.name) + '</strong>' + (isBest ? ' <span class="nc-chip pos">best</span>' : '') + (jev.choice === c.id ? ' <span class="nc-chip">Jev</span>' : '') + '</td>' +
+        '<td>' + esc(c.debit_or_credit || '--') + '</td>' +
+        '<td class="pos">' + (numeric(c.max_profit_at_expiry) ? money(c.max_profit_at_expiry) : 'Unlimited') + '</td>' +
+        '<td class="neg">' + (numeric(c.max_loss_at_expiry) ? money(c.max_loss_at_expiry) : 'Undefined') + '</td>' +
+        '<td class="' + cls(ex.exp_pnl_per_lot) + '">' + (numeric(ex.exp_pnl_per_lot) ? money(ex.exp_pnl_per_lot) : '--') + '</td>' +
+        '<td>' + pctPlain(ex.p_profit, 0) + '</td>' +
+        '<td class="' + cls(c.exp_return_on_risk_pct) + '">' + (numeric(c.exp_return_on_risk_pct) ? fmt(c.exp_return_on_risk_pct, 1) + '%' : '--') + '</td>' +
+        '<td>' + (bt.mean_return_pct != null ? pct(bt.mean_return_pct) + ' <small class="muted">(' + intFmt(bt.trades) + ')</small>' : '<span class="muted">no exact backtest</span>') + '</td>' +
+        '<td><small>' + esc(c.retail_suitability || '') + '</small></td></tr>';
+    }).join('');
+  }
   function renderRules() {
     const rules = dataset.rules || [];
     const today = new Set((dataset.setups || []).map(s => s.rule));
@@ -428,7 +457,7 @@
       dataset = data;
       document.body.dataset.source = data.as_of;
       renderHeader(); renderIndex(); renderVerdict(); renderExpiryPicker(); renderSigma(); renderChain(); renderVol();
-      renderHhhl(); renderParticipants(); renderSetups(); renderRules(); renderBreadth(); renderConstituents();
+      renderHhhl(); renderParticipants(); renderSetups(); renderComparison(); renderRules(); renderBreadth(); renderConstituents();
       renderResearch(); renderCalibration(); renderMethod(); bind();
       document.body.dataset.ready = 'true';
     } catch (err) {

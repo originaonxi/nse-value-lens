@@ -648,6 +648,188 @@ def payoff_profile(legs, spot, lot, sigma, dte):
                 prob_profit_model=num(prob, 1), curve=dict(price=[num(x) for x in grid[::step]], pnl=[num(y) for y in pay[::step]]))
 
 
+def _bs_price(s, k, t, sigma, call):
+    """Black-Scholes price per index point. Scalars or arrays; t in years. t<=0 returns intrinsic."""
+    s = np.asarray(s, dtype=float)
+    if not (t and t > 0 and sigma and sigma > 0):
+        return np.maximum(s - k, 0.0) if call else np.maximum(k - s, 0.0)
+    rt = sigma * math.sqrt(t)
+    d1 = (np.log(s / k) + (od.RATE + 0.5 * sigma * sigma) * t) / rt
+    d2 = d1 - rt
+    disc = math.exp(-od.RATE * t)
+    if call:
+        return s * od.ncdf(d1) - k * disc * od.ncdf(d2)
+    return k * disc * od.ncdf(-d2) - s * od.ncdf(-d1)
+
+
+def exit_payoff_profile(legs, spot, lot, sigma, dte, hold=HOLD):
+    """Expected P&L and P(profit) if the trade is CLOSED after `hold` sessions, not held to expiry.
+
+    Spot at the horizon is lognormal(sigma over `hold` days); every leg is repriced with
+    Black-Scholes at the option life still remaining at that exit, and round-trip costs are
+    removed. This is the number the actual exit rule earns, as opposed to the expiry payoff."""
+    if not (sigma and np.isfinite(sigma) and dte and dte > 0):
+        return None
+    hold = min(int(hold), int(dte))
+    t_h = max(hold, 1) / 365.0                 # time to the exit horizon
+    t_rem = max(dte - hold, 0) / 365.0         # option life left when we exit
+    grid = np.linspace(spot * 0.80, spot * 1.20, 321)
+    val = np.zeros_like(grid)
+    entry_net = 0.0
+    cost_unit = 0.0
+    for l in legs:
+        call = l["option_type"] == "CE"
+        px = _bs_price(grid, l["strike"], t_rem, sigma, call)
+        sgn = 1.0 if l["side"] == "BUY" else -1.0
+        val += sgn * px
+        entry_net += sgn * l["ref_close"]
+        close_side = "SELL" if l["side"] == "BUY" else "BUY"
+        exp_px = float((px * _lognorm_mass(grid, spot, sigma, t_h)).sum())
+        cost_unit += float(od.leg_costs(np.array(l["ref_close"]), np.array(l["side"]), np.array("index")) +
+                           od.leg_costs(np.array(max(exp_px, 0.0)), np.array(close_side), np.array("index")))
+    mass = _lognorm_mass(grid, spot, sigma, t_h)
+    pnl_gross = (val - entry_net) * lot
+    costs = cost_unit * lot + od.BROKERAGE * 2 * len(legs) * (1 + od.GST)
+    pnl = pnl_gross - costs
+    exp_pnl = float((pnl * mass).sum())
+    p_profit = float(100.0 * mass[pnl > 0].sum())
+    order = np.argsort(pnl)
+    cum = np.cumsum(mass[order])
+    def q(p):
+        i = min(int(np.searchsorted(cum, p)), len(pnl) - 1)
+        return float(pnl[order][i])
+    step = max(1, len(grid) // 60)
+    return dict(hold_sessions=hold, remaining_dte=int(max(dte - hold, 0)), exp_pnl_per_lot=num(exp_pnl),
+                p_profit=num(p_profit, 1), round_trip_costs=num(costs), pnl_worst5=num(q(0.05)), pnl_median=num(q(0.5)),
+                pnl_best5=num(q(0.95)), curve=dict(price=[num(x) for x in grid[::step]], pnl=[num(y) for y in pnl[::step]]))
+
+
+def _lognorm_mass(grid, spot, sigma, t):
+    """Probability mass of the lognormal spot at horizon t, on the midpoints of `grid`."""
+    edges = np.r_[grid[0] - (grid[1] - grid[0]) / 2, (grid[1:] + grid[:-1]) / 2, grid[-1] + (grid[1] - grid[0]) / 2]
+    z = (np.log(edges / spot) - (od.RATE - 0.5 * sigma * sigma) * t) / (sigma * math.sqrt(t))
+    cdf = od.ncdf(z)
+    mass = np.diff(cdf)
+    mass[0] += cdf[0]
+    mass[-1] += 1 - cdf[-1]
+    return mass
+
+
+# ---------------------------------------------------------------- same-risk candidate comparison
+CANDIDATE_SETS = {
+    "bearish": [
+        ("bear_put_spread", "Bear put spread", [("PE", "atm", "BUY"), ("PE", 0.98, "SELL")], "defined"),
+        ("long_put", "Buy put (ATM)", [("PE", "atm", "BUY")], "debit"),
+        ("wide_bear_put_spread", "Wider bear put spread", [("PE", "atm", "BUY"), ("PE", 0.96, "SELL")], "defined"),
+        ("bear_call_spread", "Bear call spread (credit)", [("CE", 1.01, "SELL"), ("CE", 1.03, "BUY")], "defined"),
+    ],
+    "bullish": [
+        ("bull_call_spread", "Bull call spread", [("CE", "atm", "BUY"), ("CE", 1.02, "SELL")], "defined"),
+        ("long_call", "Buy call (ATM)", [("CE", "atm", "BUY")], "debit"),
+        ("wide_bull_call_spread", "Wider bull call spread", [("CE", "atm", "BUY"), ("CE", 1.04, "SELL")], "defined"),
+        ("bull_put_spread", "Bull put spread (credit)", [("PE", 0.99, "SELL"), ("PE", 0.97, "BUY")], "defined"),
+    ],
+    "neutral": [
+        ("iron_condor", "Iron condor", [("CE", 1.02, "SELL"), ("CE", 1.04, "BUY"), ("PE", 0.98, "SELL"), ("PE", 0.96, "BUY")], "defined"),
+        ("long_straddle", "Long straddle", [("CE", "atm", "BUY"), ("PE", "atm", "BUY")], "debit"),
+        ("short_straddle", "Short straddle (undefined risk)", [("CE", "atm", "SELL"), ("PE", "atm", "SELL")], "margin"),
+    ],
+}
+CANDIDATE_ACTION = {"bear_put_spread": "BEAR PUT SPREAD", "wide_bear_put_spread": "BEAR PUT SPREAD",
+                    "bull_call_spread": "BULL CALL SPREAD", "wide_bull_call_spread": "BULL CALL SPREAD",
+                    "long_call": "BUY CALL", "iron_condor": "IRON CONDOR", "long_straddle": "LONG STRADDLE",
+                    "short_straddle": "SHORT STRADDLE"}
+CANDIDATE_SUIT = {"long_put": ("medium", "Single long option: full premium at risk, no short leg to finance it"),
+                  "long_call": ("medium", "Single long option: full premium at risk"),
+                  "bear_put_spread": ("high", "Defined risk and cheaper than a naked put"),
+                  "bull_call_spread": ("high", "Defined risk and cheaper than a naked call"),
+                  "wide_bear_put_spread": ("high", "Defined risk; keeps more of a deep fall than the tight spread"),
+                  "wide_bull_call_spread": ("high", "Defined risk; keeps more of a deep rally"),
+                  "bear_call_spread": ("medium", "Credit spread: wins if the index stays below the short call; capped loss"),
+                  "bull_put_spread": ("medium", "Credit spread: wins if the index stays above the short put; capped loss"),
+                  "iron_condor": ("medium", "Defined risk both sides; a breakout takes the capped loss"),
+                  "long_straddle": ("medium", "Needs a move larger than both premiums to pay"),
+                  "short_straddle": ("low", "Undefined risk: shown for evidence, not as a retail trade")}
+
+
+def _candidate_leg(tab, texp, lot, opt, where, side, spot):
+    col = "ce" if opt == "CE" else "pe"
+    live = tab[tab[f"{col}_live"] & (tab[f"{col}_mark"] > 0)]
+    if live.empty:
+        return None
+    target = spot if where == "atm" else spot * float(where)
+    k = float(live.index[np.abs(live.index.to_numpy(float) - target).argmin()])
+    mark = float(tab.loc[k, f"{col}_mark"])
+    if not mark > 0:
+        return None
+    return dict(name=f"{SYMBOL} {texp} {k:g} {opt}", option_type=opt, strike=k, expiry=texp, side=side,
+                ref_close=num(mark), lot=int(lot))
+
+
+def candidate_comparison(trade_tab, spot, dte, lot, sigma, texp, view, rule_info, hold=HOLD):
+    """Build the directional alternatives for today's view and rank them by expected return on
+    risk at the actual 5-session exit, so the biggest max-profit headline does not decide."""
+    if trade_tab is None or trade_tab.empty or view not in CANDIDATE_SETS or not np.isfinite(sigma) or not dte:
+        return None
+    out = []
+    for cid, name, spec, basis in CANDIDATE_SETS[view]:
+        legs = []
+        for opt, where, side in spec:
+            leg = _candidate_leg(trade_tab, texp, lot, opt, where, side, spot)
+            if leg is None:
+                break
+            legs.append(leg)
+        if len(legs) != len(spec):
+            continue
+        expiry = payoff_profile(legs, spot, int(lot), sigma, int(dte))
+        exit_p = exit_payoff_profile(legs, spot, int(lot), sigma, int(dte), hold)
+        net = sum((1 if l["side"] == "BUY" else -1) * l["ref_close"] for l in legs) * int(lot)
+        max_loss = expiry.get("max_loss")
+        ror = None
+        if exit_p and max_loss and max_loss < 0:
+            ror = 100.0 * exit_p["exp_pnl_per_lot"] / abs(max_loss)
+        action = CANDIDATE_ACTION.get(cid)
+        base_id = BASELINE_FOR.get(action) if action else None
+        bt = rule_info.get(base_id, {}).get("stats") if base_id else None
+        backtest = None
+        if bt and bt.get("trades"):
+            backtest = dict(basis="unconditional baseline on official contract prices", trades=bt["trades"],
+                            win_rate=bt["win_rate"], mean_return_pct=bt["mean_return_pct"],
+                            avg_pnl_per_lot=bt["avg_pnl_per_lot"], t_stat=bt["t_stat"])
+        suit, why = CANDIDATE_SUIT.get(cid, ("medium", ""))
+        out.append(dict(id=cid, name=name, view=view, basis=basis,
+                        legs=[dict(option_type=l["option_type"], strike=l["strike"], side=l["side"], ref_close=l["ref_close"]) for l in legs],
+                        net_premium_per_lot=num(net), debit_or_credit="debit" if net > 0 else "credit",
+                        max_profit_at_expiry=expiry.get("max_profit"), max_loss_at_expiry=max_loss,
+                        breakevens=expiry.get("breakevens"), prob_profit_at_expiry=expiry.get("prob_profit_model"),
+                        exit=exit_p, exp_return_on_risk_pct=num(ror), backtest=backtest,
+                        retail_suitability=suit, suitability_reason=why))
+    if not out:
+        return None
+    ranked = sorted(out, key=lambda c: (c["exp_return_on_risk_pct"] is None, -(c["exp_return_on_risk_pct"] or -1e9),
+                                        -((c.get("backtest") or {}).get("t_stat") or -1e9)))
+    best = ranked[0]
+    return dict(view=view, hold_sessions=hold,
+                method=("Each structure is priced from today's official chain, then marked to its value after "
+                        f"{hold} sessions over the lognormal spot distribution (expected P&L at the exit, net of costs). "
+                        "Ranked by expected profit per rupee of maximum risk, not by the largest headline payoff."),
+                best=dict(id=best["id"], name=best["name"],
+                          reason=("Highest expected profit per rupee of risk at the 5-session exit"
+                                  + (f" ({best['exp_return_on_risk_pct']:.1f}% on max risk)" if best["exp_return_on_risk_pct"] is not None else "")
+                                  + "." )),
+                candidates=ranked)
+
+
+def _with_jev_pick(comparison, index_answer):
+    """Attach Jev's independent best-structure choice to the comparison, if it ran."""
+    if not comparison:
+        return comparison
+    pick = (index_answer or {}).get("best_structure")
+    if pick:
+        comparison["jev"] = dict(choice=pick.get("choice"), confidence=pick.get("confidence"),
+                                 probabilities=pick.get("probabilities"))
+    return comparison
+
 def chain_snapshot(raw_nifty, as_of, spot):
     opt = raw_nifty[raw_nifty.FinInstrmTp == "IDO"]
     exps = sorted(e for e in opt.exp.unique() if dte_of(e, as_of) > 0)
@@ -766,7 +948,7 @@ def _setup_criteria(rules):
     return crit
 
 
-def jev_review(index_state, rules, constituents, log=print):
+def jev_review(index_state, rules, constituents, comparison=None, log=print):
     try:
         from jev_client import Client, JevError, MODEL
     except ImportError:
@@ -788,6 +970,16 @@ def jev_review(index_state, rules, constituents, log=print):
             "risk": od._choice("Assess position-specific risk for a Nifty option position opened at the next open and held 5 "
                                "sessions, from supplied facts only (expiry distance, IV level, distance to OI walls, VIX).", od.RISK),
         }
+        if comparison and comparison.get("candidates"):
+            crit = {c["id"]: f"{c['name']}: expected {c['exp_return_on_risk_pct']}% on max risk at the 5-session exit, "
+                             f"P(profit) {(c['exit'] or {}).get('p_profit')}%, {c['retail_suitability']} retail suitability"
+                    for c in comparison["candidates"] if c["exp_return_on_risk_pct"] is not None}
+            if crit:
+                crit["no_trade"] = "None of the structures has a positive enough expected exit edge to justify the risk: stay flat"
+                questions["best_structure"] = od._choice(
+                    "From state.candidates, choose the structure with the best expected profit per rupee of risk at the actual "
+                    "5-session exit for today's view. Do not choose by the largest headline max profit; weigh the expected exit "
+                    "P&L, P(profit) and retail suitability.", crit)
         a = client.ask(index_state, questions)
         index_answer = {k: dict(choice=v["choice"], confidence=num(v["confidence"], 3),
                                 probabilities={c: num(p, 3) for c, p in v["probabilities"].items()}) for k, v in a.items()}
@@ -962,10 +1154,13 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                            condition=info["condition"], legs=legs,
                            position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
                            payoff=payoff_profile(legs, spot, int(s.lot), sigma_t, int(t0.dte)),
+                           exit=exit_payoff_profile(legs, spot, int(s.lot), sigma_t, int(t0.dte), HOLD),
                            plan=dict(entry="Next session's official open; skip any leg that does not trade",
                                      exit_after_sessions=HOLD, exit_by=nxt[-1],
-                                     payoff_note="The payoff, breakevens and model probability use today's closing premium as a "
-                                                 "proxy for the next-open entry; the backtest uses the actual official open.")))
+                                     payoff_note="Max profit, breakevens and the model probability are at EXPIRY. "
+                                                 "The 'exit' block is the expected P&L if the trade is closed after "
+                                                 f"{HOLD} sessions (by {nxt[-1]}) instead of held to expiry \u2014 the number the "
+                                                 "plan actually earns. Both use today's close as the next-open entry proxy.")))
     validated = sorted([s for s in setups if s["status"] == "VALIDATED"],
                        key=lambda s: -(rule_info[s["rule"]]["stats"]["t_stat"] or 0))
     best = dict(rule=validated[0]["rule"], label=validated[0]["label"],
@@ -973,6 +1168,8 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
         rule=None, label="No validated setup today",
         reason=("Setups fired today but none has validated history, so they are information only." if setups
                 else "No setup's trigger condition is met today.") + " Staying flat is a position.")
+    primary_view = "bearish" if bool(t0.falling) else "bullish" if bool(t0.rising) else "neutral"
+    comparison = candidate_comparison(trade_tab, spot, int(t0.dte), int(t0.lot), sigma_t, texp, primary_view, rule_info, HOLD)
 
     # Rule conditions as they stand today, so a reader can see how close each trigger is.
     def val(col, digits=2):
@@ -1067,9 +1264,15 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                                                     "pcr", "call_wall", "put_wall", "max_pain")},
         nearest_expiry={k: near_exp.get(k) for k in ("expiry", "days_to_expiry", "atm_iv", "expected_move", "call_wall", "put_wall", "max_pain")},
         participants=[{k: p[k] for k in ("participant", "fut_long_share", "fut_long_share_chg5", "net", "net_chg5")} for p in part_today or []],
-        setups=rule_summary)
+        setups=rule_summary,
+        candidates=[dict(id=c["id"], name=c["name"], view=c["view"],
+                         expected_return_on_risk_pct_at_exit=c["exp_return_on_risk_pct"],
+                         expected_exit_pnl_per_lot=(c["exit"] or {}).get("exp_pnl_per_lot"),
+                         prob_profit_at_exit_pct=(c["exit"] or {}).get("p_profit"),
+                         max_profit_at_expiry=c["max_profit_at_expiry"], max_loss_at_expiry=c["max_loss_at_expiry"],
+                         retail_suitability=c["retail_suitability"]) for c in (comparison or {}).get("candidates", [])])
 
-    jev, index_answer = (jev_review(index_state, rules, constituents, log=log) if use_jev
+    jev, index_answer = (jev_review(index_state, rules, constituents, comparison=comparison, log=log) if use_jev
                          else (dict(state="skipped", model="", assessed=0, message="Jev disabled for this run"), None))
     record = archive(as_of, jev, index_answer, constituents, setups, force=force_archive)
     if jev["state"] != "ok" and record.get("jev_state") == "ok":
@@ -1114,7 +1317,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
             no_lookahead="Every trigger uses data published up to the signal session; swing pivots count only once confirmed two sessions later; strikes are fixed from that session's chain."),
         index=index, expiries=expiries, hhhl=hhhl_chart, history=history, participants=part_today,
         rules=rules, setups=setups, best_setup=best, constituents=constituents, constituents_count=len(constituents),
-        breadth=breadth, jev=jev, research=research,
+        breadth=breadth, jev=jev, research=research, comparison=_with_jev_pick(comparison, index_answer),
         limitations=[
             "End-of-day data only: no intraday prices, bid-ask spreads or order book. Real fills, especially in far strikes, can be worse than the modelled slippage.",
             "Greeks are model values from closing prices; they move continuously during the session.",

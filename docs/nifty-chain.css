@@ -62,5 +62,12 @@ tr.baseline{opacity:.72}
 .nc-list li{margin-bottom:6px}
 .nc-cal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .nc-cal div{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px;font-size:12px;text-transform:capitalize}
+.nc-exit dt{color:#246c4e}
+.nc-exit dd{color:#246c4e}
+.nc-best-structure{border:1px solid var(--line);border-left:4px solid #246c4e;border-radius:9px;background:#f6faf7;padding:12px 16px;margin:12px 0}
+.nc-best-structure .label{font-size:9px;letter-spacing:.8px;color:var(--muted)}
+.nc-best-structure h3{margin:4px 0 6px;font:700 17px Manrope,sans-serif}
+.nc-best-structure p{margin:0;font-size:12.5px;line-height:1.5}
+tr.nc-row-best{background:#f1f8f3;font-weight:600}
 @media(max-width:1100px){.nc-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.nc-verdict,.nc-setups,.nc-research-cards{grid-template-columns:1fr}}
 @media(max-width:700px){.nc-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nc-mini{grid-template-columns:repeat(2,minmax(0,1fr))}.nc-cal{grid-template-columns:1fr 1fr}}
