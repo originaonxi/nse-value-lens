@@ -291,8 +291,10 @@
     const rules = new Map((dataset.rules || []).map(r => [r.id, r]));
     $('setup-cards').innerHTML = setups.length ? setups.map(s => {
       const r = rules.get(s.rule) || {stats: {}}, st = r.stats || {}, g = s.position_greeks_per_lot || {}, pay = s.payoff || {};
-      const sl = s.stop_loss || {}, firing = s.firing !== false;
-      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
+      const sl = s.stop_loss || {}, firing = s.firing !== false, jp = s.jev_priority || {};
+      const PRIO_CLS = {top: 'pos', high: 'pos', medium: 'warn', low: 'muted', avoid: 'neg'};
+      const prioBadge = jp.tier ? '<span class="nc-chip nc-prio-' + esc(jp.tier) + ' ' + (PRIO_CLS[jp.tier] || '') + '">JEV: ' + esc(jp.tier.toUpperCase()) + (numeric(jp.confidence) ? ' ' + Math.round(jp.confidence * 100) + '%' : '') + '</span>' : '';
+      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + prioBadge + ' ' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
         '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (live / ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
         s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + (numeric(l.live_ltp) ? '<b class="pos">' + money(l.live_ltp) + '</b> <small class="muted">live</small>' : money(l.ref_close)) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
         '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +

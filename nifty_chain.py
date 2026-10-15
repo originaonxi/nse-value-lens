@@ -980,6 +980,21 @@ def jev_review(index_state, rules, constituents, comparison=None, log=print):
                     "From state.candidates, choose the structure with the best expected profit per rupee of risk at the actual "
                     "5-session exit for today's view. Do not choose by the largest headline max profit; weigh the expected exit "
                     "P&L, P(profit) and retail suitability.", crit)
+        # Jev rates every setup card on its money-making priority today, so the cards can be ranked.
+        setup_list = index_state.get("setups") or []
+        PRIORITY = {
+            "top": "Best risk-adjusted money-maker today: positive expected exit P&L, acceptable P(profit), validated or near-validated edge, ordinary risk.",
+            "high": "Strong: positive expected exit edge but either weaker historical validation or elevated risk.",
+            "medium": "Marginal: roughly break-even expected exit edge; take only with a clear view.",
+            "low": "Weak: negative or negligible expected exit edge, or high risk for the reward.",
+            "avoid": "Do not trade today: negative expected edge, poor probability, or risk far exceeds reward.",
+        }
+        for i, s in enumerate(setup_list):
+            questions[f"prio_{i}"] = od._choice(
+                f"For the setup in state.setups[{i}] ({s.get('label')}): rate its money-making priority TODAY from the supplied "
+                "live legs, expected P&L at the 5-session exit, P(profit) at exit, max profit/loss, stop-loss and backtest stats. "
+                "Rank purely by expected profit per rupee of risk; a setup that is not triggered today or has a negative expected "
+                "exit edge must not be rated 'top' or 'high'.", PRIORITY)
         a = client.ask(index_state, questions)
         index_answer = {k: dict(choice=v["choice"], confidence=num(v["confidence"], 3),
                                 probabilities={c: num(p, 3) for c, p in v["probabilities"].items()}) for k, v in a.items()}
@@ -1287,7 +1302,12 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
             option_desk_rules_fired=fired, company_events_in_hold_window=d.get("events") or [])
         constituents.append(c)
 
+    setup_by_rule = {s["rule"]: s for s in all_setups}
     rule_summary = [dict(id=r["id"], label=r["label"], action=r["action"], status=r["status"], triggered_today=any(s["rule"] == r["id"] for s in setups),
+                         expected_exit_pnl_per_lot=((setup_by_rule.get(r["id"]) or {}).get("exit") or {}).get("exp_pnl_per_lot"),
+                         prob_profit_at_exit_pct=((setup_by_rule.get(r["id"]) or {}).get("exit") or {}).get("p_profit"),
+                         max_profit=((setup_by_rule.get(r["id"]) or {}).get("payoff") or {}).get("max_profit"),
+                         max_loss=((setup_by_rule.get(r["id"]) or {}).get("payoff") or {}).get("max_loss"),
                          history={k: r["stats"].get(k) for k in ("trades", "win_rate", "mean_return_pct", "t_stat", "worst_return_pct", "return_basis")})
                     for r in rules if not r["baseline"]]
     trade_exp = next((e for e in expiries if e["trade_expiry"]), expiries[0] if expiries else {})
@@ -1323,6 +1343,20 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
         jev = dict(state="ok", model=jev.get("model", ""), assessed=1 + len(record.get("stocks") or {}),
                    message="Reused this session's archived Jev review")
     jev["index"] = index_answer
+    # Attach Jev's money-making priority to each setup card and rank the cards by it.
+    PRIO_RANK = {"top": 5, "high": 4, "medium": 3, "low": 2, "avoid": 1}
+    if index_answer:
+        setup_by_rule = {s["rule"]: s for s in all_setups}
+        for i, rs in enumerate(rule_summary):
+            ans = index_answer.get(f"prio_{i}")
+            s = setup_by_rule.get(rs["id"])
+            if ans and s is not None:
+                s["jev_priority"] = dict(tier=ans["choice"], confidence=ans["confidence"],
+                                         rank=PRIO_RANK.get(ans["choice"], 0), probabilities=ans.get("probabilities"))
+    # Sort: Jev priority first (top -> avoid), then firing, then expected exit P&L.
+    all_setups.sort(key=lambda s: (-(s.get("jev_priority") or {}).get("rank", 0),
+                                   0 if s.get("firing") else 1,
+                                   -((s.get("exit") or {}).get("exp_pnl_per_lot") or -1e9)))
     jev["calibration"] = calibration(f)
     for c in constituents:
         c.pop("jev_state", None)
