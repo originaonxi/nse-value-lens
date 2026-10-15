@@ -32,7 +32,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-POLL_INTERVAL = 300  # 5 minutes
+POLL_INTERVAL = 30  # 30 seconds — genuine real-time refresh during market hours
 PID_FILE = Path(__file__).parent / ".kotak_poll.pid"
 OUTPUT_FILE = Path(__file__).parent / "docs" / "nifty_live.json"
 
@@ -53,30 +53,20 @@ def refresh_prices():
         
         logger.info(f"Price refresh OK | {result.stdout.strip()}")
         
-        # Commit and push to GitHub so GitHub Pages sees the updated file
+        # Commit and push to GitHub only if the live file actually changed (avoids identical 30s commits)
         try:
-            subprocess.run(
-                ["git", "add", "docs/nifty_live.json"],
-                cwd=Path(__file__).parent,
-                capture_output=True,
-                timeout=10,
-                check=False
-            )
-            subprocess.run(
-                ["git", "commit", "-m", f"chore: live prices @ {datetime.now().isoformat()}"],
-                cwd=Path(__file__).parent,
-                capture_output=True,
-                timeout=10,
-                check=False
-            )
-            subprocess.run(
-                ["git", "push", "origin", "master"],
-                cwd=Path(__file__).parent,
-                capture_output=True,
-                timeout=30,
-                check=False
-            )
-            logger.info("Committed and pushed nifty_live.json to GitHub")
+            subprocess.run(["git", "add", "docs/nifty_live.json"],
+                           cwd=Path(__file__).parent, capture_output=True, timeout=10, check=False)
+            changed = subprocess.run(["git", "diff", "--cached", "--quiet", "docs/nifty_live.json"],
+                                     cwd=Path(__file__).parent, capture_output=True, timeout=10, check=False)
+            if changed.returncode == 0:
+                logger.info("No price change; skip commit")
+            else:
+                subprocess.run(["git", "commit", "-m", f"chore: live prices @ {datetime.now().isoformat()}"],
+                               cwd=Path(__file__).parent, capture_output=True, timeout=10, check=False)
+                subprocess.run(["git", "push", "origin", "master"],
+                               cwd=Path(__file__).parent, capture_output=True, timeout=30, check=False)
+                logger.info("Committed and pushed nifty_live.json to GitHub")
         except Exception as e:
             logger.warning(f"Git commit/push failed (prices still local): {e}")
         
