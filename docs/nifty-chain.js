@@ -304,6 +304,13 @@
         '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>' + pctPlain((s.exit || {}).p_profit, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div>' +
         (sl.level_per_lot != null ? '<div class="nc-stop"><dt>Stop-loss / lot</dt><dd class="neg">' + money(sl.level_per_lot) + '</dd></div>' : '') + '</dl>' +
         (sl.rule ? '<p class="muted"><small>\u26d4 Stop: ' + esc(sl.rule) + '</small></p>' : '') +
+        ((s.vol_edge) ? '<div class="nc-voledge"><strong>Volatility maths</strong>' +
+          (s.vol_edge.verdict ? '<p class="nc-verdict-line">' + esc(s.vol_edge.verdict) + '</p>' : '') +
+          '<dl class="nc-mini"><div><dt>Move needed to profit</dt><dd>' + (numeric(s.vol_edge.move_needed_to_profit) ? '\u00b1' + fmt(s.vol_edge.move_needed_to_profit, 0) + ' (' + fmt(s.vol_edge.move_needed_pct, 1) + '%)' : '--') + '</dd></div>' +
+          '<div><dt>Expected move (1\u03c3)</dt><dd>\u00b1' + (numeric(s.vol_edge.expected_move_1sigma) ? fmt(s.vol_edge.expected_move_1sigma, 0) : '--') + '</dd></div>' +
+          '<div><dt>ATM IV vs realised</dt><dd>' + pctPlain(s.vol_edge.atm_iv, 1) + ' vs ' + pctPlain(s.vol_edge.realised_vol, 1) + '</dd></div>' +
+          '<div><dt>VRP</dt><dd class="' + cls(s.vol_edge.vrp_points) + '">' + (numeric(s.vol_edge.vrp_points) ? fmt(s.vol_edge.vrp_points, 1) + ' pts' : '--') + '</dd></div></dl>' +
+          '<p class="muted"><small>' + esc(s.vol_edge.edge || '') + '</small></p></div>' : '') +
         payoffSvg(pay) + ((s.plan || {}).payoff_note ? '<p class="muted"><small>' + esc(s.plan.payoff_note) + '</small></p>' : '') + '<p class="muted">Backtest: ' + intFmt(st.trades) + ' trades, win ' + pctPlain(st.win_rate, 0) + ', mean ' + pct(st.mean_return_pct) + ' on ' + esc(st.return_basis || '') + ', t-stat ' + fmt(st.t_stat, 2) + ', worst ' + pct(st.worst_return_pct) + '.</p></article>';
     }).join('') : '<p class="muted">No setup\u2019s trigger condition is met today. See the evidence table below for every rule and how close each trigger is.</p>';
   }

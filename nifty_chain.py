@@ -1207,14 +1207,38 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
             legs.append(leg)
         if not ok or not legs:
             continue
-        all_setups.append(dict(rule=r["id"], label=info["label"], action=info["action"], view=info["view"],
-                               status=info["status"], condition=info["condition"], legs=legs, firing=False,
-                               position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
-                               payoff=payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte)),
-                               exit=exit_payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte), HOLD),
-                               plan=dict(entry="Next session's official open; skip any leg that does not trade",
-                                         exit_after_sessions=HOLD, exit_by=nxt[-1],
-                                         payoff_note="Not triggered today \u2014 shown for comparison. Max profit and probability are at EXPIRY; the exit block is the expected P&L after %d sessions." % HOLD)))
+        card = dict(rule=r["id"], label=info["label"], action=info["action"], view=info["view"],
+                    status=info["status"], condition=info["condition"], legs=legs, firing=False,
+                    position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
+                    payoff=payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte)),
+                    exit=exit_payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte), HOLD),
+                    plan=dict(entry="Next session's official open; skip any leg that does not trade",
+                              exit_after_sessions=HOLD, exit_by=nxt[-1],
+                              payoff_note="Not triggered today \u2014 shown for comparison. Max profit and probability are at EXPIRY; the exit block is the expected P&L after %d sessions." % HOLD))
+        # Volatility-edge decision block for move-either-way (straddle/strangle) and vol structures.
+        if r["action"] in ("LONG STRADDLE", "SHORT STRADDLE", "IRON CONDOR"):
+            be = card["payoff"].get("breakevens") or []
+            move_needed = num(min(abs(b - spot) for b in be), 0) if be else None
+            exp_move = num(spot * sigma_t * math.sqrt(max(int(t0.dte), 1) / 365.0)) if np.isfinite(sigma_t) else None
+            long_vol = r["action"] == "LONG STRADDLE"
+            _vrp = float(t0.vrp) if pd.notna(t0.get("vrp")) else None
+            _rv20 = float(t0.rv20) if pd.notna(t0.get("rv20")) else None
+            _ivpct = float(t0.iv_pct) if pd.notna(t0.get("iv_pct")) else None
+            card["vol_edge"] = dict(
+                move_needed_to_profit=move_needed,
+                move_needed_pct=num(100 * move_needed / spot, 2) if move_needed else None,
+                expected_move_1sigma=exp_move,
+                atm_iv=num(100 * sigma_t, 1) if np.isfinite(sigma_t) else None,
+                realised_vol=num(_rv20),
+                vrp_points=num(_vrp),
+                iv_percentile=num(_ivpct, 0),
+                edge=("IV below realised and cheap: a move either way beyond the breakevens pays off" if long_vol and (_vrp or 0) < 0
+                      else "IV rich vs realised: the market is paying you to sell this move" if not long_vol and (_vrp or 0) > 0
+                      else "No volatility edge right now: premium is fairly priced, so theta is the enemy"),
+                verdict=("PROFITS IF Nifty moves more than \u00b1%s (%.1f%%) in %d sessions; LOSES if it stays inside." % (move_needed, 100*move_needed/spot, HOLD)
+                         if long_vol and move_needed else
+                         "PROFITS IF Nifty stays inside the breakevens; LOSES on a big move either way." if not long_vol else None))
+        all_setups.append(card)
     for s in setups:
         s["firing"] = True
     validated = sorted([s for s in setups if s["status"] == "VALIDATED"],
