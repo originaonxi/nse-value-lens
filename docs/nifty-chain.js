@@ -447,6 +447,164 @@
     notice.textContent = 'The Nifty chain snapshot could not be shown: ' + message;
     document.querySelectorAll('main > section.scan-section').forEach(s => { s.hidden = true; });
   }
+  async function loadLivePrices() {
+    try {
+      const res = await fetch('nifty_live.json?t=' + Date.now(), {cache: 'no-store'});
+      if (!res.ok) return;
+      const live = await res.json();
+      if (live.nifty50 && live.nifty50.ltp) {
+        const idx = dataset.index;
+        idx.close = live.nifty50.ltp;
+        idx.change_pct = live.nifty50.per_change;
+        idx.high = live.nifty50.high;
+        idx.low = live.nifty50.low;
+      }
+      if (live.india_vix && live.india_vix.ltp) {
+        dataset.index.vix = live.india_vix.ltp;
+        dataset.index.vix_change_pct = live.india_vix.per_change;
+      }
+      if (live.bank_nifty && live.bank_nifty.ltp) {
+        dataset.index.bank_nifty = live.bank_nifty.ltp;
+        dataset.index.bank_nifty_change_pct = live.bank_nifty.per_change;
+      }
+      renderIndex();
+      repriceFromLive(live);
+    } catch (err) {}
+  }
+
+  // ---------------------------------------------------------------- live option repricing (Black-Scholes)
+  function normCdf(x) {
+    const t = 1 / (1 + 0.2316419 * Math.abs(x));
+    const d = 0.3989422804014327 * Math.exp(-x * x / 2);
+    let p = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+    return x > 0 ? 1 - p : p;
+  }
+  function bsPrice(S, K, T, sigma, isCall) {
+    if (!(T > 0) || !(sigma > 0) || !(S > 0)) return Math.max(0, isCall ? S - K : K - S);
+    const d1 = (Math.log(S / K) + 0.5 * sigma * sigma * T) / (sigma * Math.sqrt(T));
+    const d2 = d1 - sigma * Math.sqrt(T);
+    return isCall ? S * normCdf(d1) - K * normCdf(d2) : K * normCdf(-d2) - S * normCdf(-d1);
+  }
+  // Implied vol from a traded premium, bisection.
+  function impliedVol(price, S, K, T, isCall) {
+    if (!(price > 0) || !(T > 0)) return null;
+    let lo = 0.01, hi = 3.0;
+    for (let i = 0; i < 60; i++) {
+      const mid = (lo + hi) / 2;
+      if (bsPrice(S, K, mid, T, isCall) > price) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
+  }
+  function yearsTo(expiryIso) {
+    const exp = new Date(expiryIso + 'T15:30:00+05:30').getTime();
+    return Math.max(0, (exp - Date.now()) / (365.25 * 24 * 3600 * 1000));
+  }
+  // Build a map of {strike|type -> live_ltp} from the live feed.
+  function liveLegMap(legs) {
+    const m = {};
+    for (const l of legs || []) if (numeric(l.live_ltp)) m[Math.round(l.strike) + (l.option_type || '')] = l.live_ltp;
+    return m;
+  }
+  // Reprice one structure (array of {side,strike,option_type,lot}) at live premiums -> payoff + exit expectation.
+  function repriceStructure(legs, map, spot, expiryIso, sigma, holdDays) {
+    const lot = legs[0] && legs[0].lot || 65;
+    const T = yearsTo(expiryIso);
+    let net = 0; const priced = [];
+    for (const l of legs) {
+      const key = Math.round(l.strike) + (l.option_type || 'PE');
+      const prem = map[key];
+      if (!numeric(prem)) return null; // can't reprice without a live leg
+      const sgn = l.side === 'BUY' ? 1 : -1;
+      net += sgn * prem; // debit positive
+      priced.push({side: l.side, strike: l.strike, type: l.option_type || 'PE', prem: prem, lot: lot});
+    }
+    // Expiry payoff across a strike grid
+    const lo = spot * 0.85, hi = spot * 1.15, N = 120, price = [], pnl = [];
+    for (let i = 0; i <= N; i++) {
+      const S = lo + (hi - lo) * i / N;
+      let v = 0;
+      for (const p of priced) {
+        const intrinsic = p.type === 'CE' ? Math.max(0, S - p.strike) : Math.max(0, p.strike - S);
+        v += (p.side === 'BUY' ? 1 : -1) * intrinsic;
+      }
+      price.push(S); pnl.push((v - net) * lot);
+    }
+    const maxP = Math.max(...pnl), maxL = Math.min(...pnl);
+    // Expected P&L at the 5-session exit: reprice each leg via BS over the lognormal spot at exit
+    const Texit = Math.max(0, T - (holdDays || 5) / 365.25);
+    const mu = Math.log(spot) - 0.5 * sigma * sigma * (T - Texit);
+    const sd = sigma * Math.sqrt(Math.max(1e-6, T - Texit));
+    let expPnl = 0, pProfit = 0, W = 0;
+    for (let i = 0; i <= 80; i++) {
+      const z = -4 + 8 * i / 80, w = Math.exp(-z * z / 2);
+      const Sexit = Math.exp(mu + sd * z);
+      let val = 0;
+      for (const p of priced) {
+        const bs = bsPrice(Sexit, p.strike, Texit, sigma, p.type === 'CE');
+        val += (p.side === 'BUY' ? 1 : -1) * bs;
+      }
+      const legPnl = (val - net) * lot;
+      expPnl += w * legPnl; if (legPnl > 0) pProfit += w; W += w;
+    }
+    expPnl /= W; pProfit /= W;
+    const maxRisk = Math.abs(maxL) || 1;
+    return {net: net, lot: lot, max_profit: maxP > 0 ? maxP : null, max_loss: maxL < 0 ? maxL : null,
+            curve: {price: price, pnl: pnl}, exp_pnl_per_lot: expPnl, p_profit: pProfit,
+            exp_return_on_risk_pct: 100 * expPnl / maxRisk};
+  }
+  // Recompute the firing setup card + comparison table from live legs, then re-render.
+  function repriceFromLive(live) {
+    if (!live || !Array.isArray(live.option_legs) || !dataset) return;
+    const map = liveLegMap(live.option_legs);
+    const spot = (live.nifty50 && live.nifty50.ltp) || dataset.index.close;
+    // IV: use the setup's long leg live premium to imply sigma, else fall back to dataset ATM IV.
+    let sigma = (dataset.index.atm_iv || 13) / 100;
+    for (const s of dataset.setups || []) {
+      const exp = (s.legs[0] || {}).expiry;
+      for (const l of s.legs) {
+        const key = Math.round(l.strike) + (l.option_type || 'PE');
+        if (numeric(map[key])) {
+          const iv = impliedVol(map[key], spot, l.strike, yearsTo(exp), (l.option_type || 'PE') === 'CE');
+          if (iv) { sigma = iv; break; }
+        }
+      }
+      // Reprice the setup's own payoff + exit
+      const legs = s.legs.map(l => ({side: l.side, strike: l.strike, option_type: l.option_type || 'PE', lot: l.lot}));
+      const rp = repriceStructure(legs, map, spot, exp, sigma, (s.exit || {}).hold_sessions || 5);
+      if (rp) {
+        s.payoff = Object.assign({}, s.payoff, {max_profit: rp.max_profit, max_loss: rp.max_loss, curve: rp.curve});
+        s.exit = Object.assign({}, s.exit, {exp_pnl_per_lot: rp.exp_pnl_per_lot, p_profit: rp.p_profit});
+        // live leg premiums onto the leg rows
+        for (const l of s.legs) { const k = Math.round(l.strike) + (l.option_type || 'PE'); if (numeric(map[k])) l.live_ltp = map[k]; }
+      }
+    }
+    // Reprice comparison candidates
+    const cmp = dataset.comparison;
+    if (cmp && Array.isArray(cmp.candidates)) {
+      const exp = ((dataset.setups[0] || {}).legs[0] || {}).expiry || dataset.comparison.expiry;
+      for (const c of cmp.candidates) {
+        const legs = (c.legs || []).map(l => ({side: l.side, strike: l.strike, option_type: l.option_type || 'PE', lot: 65}));
+        const rp = repriceStructure(legs, map, spot, exp, sigma, 5);
+        if (rp) {
+          c.max_profit_at_expiry = rp.max_profit; c.max_loss_at_expiry = rp.max_loss;
+          c.exit = Object.assign({}, c.exit, {exp_pnl_per_lot: rp.exp_pnl_per_lot, p_profit: rp.p_profit});
+          c.exp_return_on_risk_pct = rp.exp_return_on_risk_pct;
+        }
+      }
+      // Re-rank by expected return on risk at exit; keep Jev's pick label from EOD.
+      cmp.candidates.sort((a, b) => (b.exp_return_on_risk_pct || -1e9) - (a.exp_return_on_risk_pct || -1e9));
+      cmp.best = {id: cmp.candidates[0].id, name: cmp.candidates[0].name,
+                  reason: 'Live: highest expected profit per rupee of risk at the 5-session exit (' + (cmp.candidates[0].exp_return_on_risk_pct || 0).toFixed(1) + '% on max risk).'};
+    }
+    renderSetups(); renderComparison();
+    const stamp = $('live-stamp'); if (stamp) stamp.textContent = 'Live repriced ' + new Date().toLocaleTimeString('en-IN') + ' \u00b7 spot ' + fmt(spot);
+  }
+
+  function startLivePricePoll() {
+    loadLivePrices();
+    setInterval(loadLivePrices, 30000);
+  }
+
 
   async function load() {
     try {
@@ -460,6 +618,7 @@
       renderHhhl(); renderParticipants(); renderSetups(); renderComparison(); renderRules(); renderBreadth(); renderConstituents();
       renderResearch(); renderCalibration(); renderMethod(); bind();
       document.body.dataset.ready = 'true';
+      startLivePricePoll();
     } catch (err) {
       fail(err && err.message ? err.message : String(err));
       document.body.dataset.ready = 'error';
