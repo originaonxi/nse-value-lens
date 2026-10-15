@@ -292,8 +292,8 @@
     $('setup-cards').innerHTML = setups.length ? setups.map(s => {
       const r = rules.get(s.rule) || {stats: {}}, st = r.stats || {}, g = s.position_greeks_per_lot || {}, pay = s.payoff || {};
       return '<article class="nc-setup" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + statusBadge(s.status) + '</header>' +
-        '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Ref close</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
-        s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + money(l.ref_close) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
+        '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (live / ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
+        s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + (numeric(l.live_ltp) ? '<b class="pos">' + money(l.live_ltp) + '</b> <small class="muted">live</small>' : money(l.ref_close)) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
         '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +
         '<div><dt>Max profit (expiry)</dt><dd class="pos">' + (numeric(pay.max_profit) ? money(pay.max_profit) : 'Unlimited') + '</dd></div><div><dt>Max loss (expiry)</dt><dd class="neg">' + (numeric(pay.max_loss) ? money(pay.max_loss) : 'Unlimited') + '</dd></div>' +
         '<div><dt>Breakeven (expiry)</dt><dd>' + ((pay.breakevens || []).map(b => fmt(b, 0)).join(' / ') || '--') + '</dd></div><div><dt>Model P(profit) at expiry</dt><dd>' + pctPlain(pay.prob_profit_model, 0) + '</dd></div>' +

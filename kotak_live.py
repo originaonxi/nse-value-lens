@@ -162,6 +162,14 @@ def _scrip_master_rows(date_str=None):
     """Download (and cache for the day) the NSE F&O scrip master. Read-only CSV of tradeable contracts."""
     import csv, io, datetime
     date_str = date_str or (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d")
+    # Day-level disk cache: avoid re-downloading the ~85k-row CSV every poll.
+    try:
+        if SCRIP_CACHE.exists():
+            cached = json.loads(SCRIP_CACHE.read_text(encoding="utf-8"))
+            if cached.get("date") == date_str and cached.get("rows"):
+                return cached["rows"]
+    except Exception:
+        pass
     url = SCRIP_MASTER.format(date=date_str)
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=40) as r:
@@ -169,6 +177,11 @@ def _scrip_master_rows(date_str=None):
     rows = []
     for row in csv.DictReader(io.StringIO(txt)):
         rows.append({k.strip().rstrip(";").strip(): (v or "").strip() for k, v in row.items()})
+    try:
+        SCRIP_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        SCRIP_CACHE.write_text(json.dumps({"date": date_str, "rows": rows}, separators=(",", ":")), encoding="utf-8")
+    except Exception:
+        pass
     return rows
 
 
