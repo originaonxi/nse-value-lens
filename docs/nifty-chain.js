@@ -345,36 +345,30 @@
       for (let j=i+1;j<rows.length;j++) {
         const kL=rows[i],kH=rows[j],w=kH.strike-kL.strike;
         if (w<50||w>1200) continue;
-        // Bull call spread: BUY lower CE, SELL higher CE
-        // Exclude if BOTH calls ITM (short/higher strike still below spot => pseudo-arb)
-        if (kH.strike>S*0.985) {
-          const bPx=kL.ce.close,sPx=kH.ce.close;
-          if (bPx>sPx) {
-            totalScan++;
-            const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
-            if (mg>0&&ml>0) {
-              const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
-              const p=pExp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
-              if (p>=25) cands.push({view:'bullish',lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',
-                debit:deb.toFixed(2),mg,ml,pp:p.toFixed(1),rr:rr.toFixed(2),
-                score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
-            }
+        // Bull call spread: BUY lower CE, SELL higher CE — all widths, pure P×RR math
+        const bPx=kL.ce.close,sPx=kH.ce.close;
+        if (bPx>sPx) {
+          totalScan++;
+          const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
+          if (mg>0&&ml>0) {
+            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
+            const p=pExp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
+            if (p>=25) cands.push({view:'bullish',lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',
+              debit:deb.toFixed(2),mg,ml,pp:p.toFixed(1),rr:rr.toFixed(2),
+              score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
           }
         }
-        // Bear put spread: BUY higher PE, SELL lower PE
-        // Exclude if BOTH puts ITM (short/lower strike still above spot => pseudo-arb)
-        if (kL.strike<S*1.015) {
-          const bpPx=kH.pe.close,spPx=kL.pe.close;
-          if (bpPx>spPx) {
-            totalScan++;
-            const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
-            if (mg2>0&&ml2>0) {
-              const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
-              const p2=pExp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
-              if (p2>=25) cands.push({view:'bearish',lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',
-                debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp:p2.toFixed(1),rr:rr2.toFixed(2),
-                score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
-            }
+        // Bear put spread: BUY higher PE, SELL lower PE — all widths, pure P×RR math
+        const bpPx=kH.pe.close,spPx=kL.pe.close;
+        if (bpPx>spPx) {
+          totalScan++;
+          const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
+          if (mg2>0&&ml2>0) {
+            const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
+            const p2=pExp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
+            if (p2>=25) cands.push({view:'bearish',lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',
+              debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp:p2.toFixed(1),rr:rr2.toFixed(2),
+              score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
           }
         }
       }
@@ -383,7 +377,7 @@
     const top=[],ct={};
     for (const c of cands) { if ((ct[c.view]||0)>=3) continue; ct[c.view]=(ct[c.view]||0)+1; top.push(c); if (top.length>=5) break; }
     const vrpTxt=VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised';
-    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' qualifying spread combinations \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Both-legs-ITM spreads excluded. Not a trade recommendation.';
+    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
     el.innerHTML=top.length?top.map((c,i)=>
       '<article class="nc-math-card'+(i===0?' nc-math-best':'')+'">' +
         '<div class="nc-math-rank">' +
