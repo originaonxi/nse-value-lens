@@ -333,36 +333,48 @@
       const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));
       return x>=0?1-p:p;
     }
-    function pp(S,K,T,iv,call) {
+    function pExp(S,K,T,iv,call) {
       if (T<=0||iv<=0) return call?(S>K?1:0):(S<K?1:0);
       const d2=(Math.log(S/K)+(r-0.5*iv*iv)*T)/(iv*Math.sqrt(T));
       return call?ncdf(d2):ncdf(-d2);
     }
     const rows=exp.rows.filter(r=>r.ce&&r.ce.close>0.5&&r.pe&&r.pe.close>0.5);
     const cands=[];
-    let total=0;
+    let totalScan=0;
     for (let i=0;i<rows.length;i++) {
       for (let j=i+1;j<rows.length;j++) {
         const kL=rows[i],kH=rows[j],w=kH.strike-kL.strike;
-        if (w>1200) continue;
-        const bPx=kL.ce.close,sPx=kH.ce.close;
-        if (bPx>sPx) {
-          total++;
-          const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
-          if (mg>0&&ml>0) {
-            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
-            const p1=pp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
-            if (p1>=30) cands.push({lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',view:'bullish',debit:deb.toFixed(2),mg,ml,pp1:p1.toFixed(1),rr:rr.toFixed(2),score:(p1/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
+        if (w<50||w>1200) continue;
+        // Bull call spread: BUY lower CE, SELL higher CE
+        // Exclude if BOTH calls ITM (short/higher strike still below spot => pseudo-arb)
+        if (kH.strike>S*0.985) {
+          const bPx=kL.ce.close,sPx=kH.ce.close;
+          if (bPx>sPx) {
+            totalScan++;
+            const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
+            if (mg>0&&ml>0) {
+              const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
+              const p=pExp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
+              if (p>=25) cands.push({view:'bullish',lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',
+                debit:deb.toFixed(2),mg,ml,pp:p.toFixed(1),rr:rr.toFixed(2),
+                score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
+            }
           }
         }
-        const bpPx=kH.pe.close,spPx=kL.pe.close;
-        if (bpPx>spPx) {
-          total++;
-          const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
-          if (mg2>0&&ml2>0) {
-            const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
-            const p2=pp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
-            if (p2>=30) cands.push({lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',view:'bearish',debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp1:p2.toFixed(1),rr:rr2.toFixed(2),score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
+        // Bear put spread: BUY higher PE, SELL lower PE
+        // Exclude if BOTH puts ITM (short/lower strike still above spot => pseudo-arb)
+        if (kL.strike<S*1.015) {
+          const bpPx=kH.pe.close,spPx=kL.pe.close;
+          if (bpPx>spPx) {
+            totalScan++;
+            const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
+            if (mg2>0&&ml2>0) {
+              const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
+              const p2=pExp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
+              if (p2>=25) cands.push({view:'bearish',lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',
+                debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp:p2.toFixed(1),rr:rr2.toFixed(2),
+                score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
+            }
           }
         }
       }
@@ -370,20 +382,22 @@
     cands.sort((a,b)=>b.score-a.score);
     const top=[],ct={};
     for (const c of cands) { if ((ct[c.view]||0)>=3) continue; ct[c.view]=(ct[c.view]||0)+1; top.push(c); if (top.length>=5) break; }
-    if (noteEl) noteEl.textContent=total.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+(VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised')+') \u00b7 Ranked by P(profit) \u00d7 risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
+    const vrpTxt=VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised';
+    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' qualifying spread combinations \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Both-legs-ITM spreads excluded. Not a trade recommendation.';
     el.innerHTML=top.length?top.map((c,i)=>
       '<article class="nc-math-card'+(i===0?' nc-math-best':'')+'">' +
-      '<header style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
-      (i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-chip muted">#'+(i+1)+'</span>') +
-      ' <span class="nc-chip '+(c.view==='bullish'?'pos':'neg')+'">'+ esc(c.view)+'</span></header>'+
-      '<h4 style="margin:0 0 10px;font:700 15px Manrope,sans-serif">'+esc(c.lbl)+'</h4>'+
-      '<dl class="nc-mini">'+
-      '<div><dt>P(profit at expiry)</dt><dd class="pos">'+c.pp1+'%</dd></div>'+
-      '<div><dt>Max gain / lot</dt><dd class="pos">\u20b9'+intFmt(c.mg)+'</dd></div>'+
-      '<div><dt>Max loss / lot</dt><dd class="neg">\u20b9'+intFmt(c.ml)+'</dd></div>'+
-      '<div><dt>Risk-reward</dt><dd>'+c.rr+'\u00d7</dd></div>'+
-      '</dl>'+
-      '<p class="muted" style="font-size:11px;margin:4px 0 0">Debit \u20b9'+c.debit+'/unit \u00b7 buy\u00a0'+c.bs+', sell\u00a0'+c.ss+(VRP<-2?' \u00b7 IV cheap favours debit':'')+' </p>'+
+        '<div class="nc-math-rank">' +
+          (i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-math-num">#'+(i+1)+'</span>') +
+          ' <span class="nc-chip '+(c.view==='bullish'?'pos':'neg')+'">'+esc(c.view)+'</span>' +
+        '</div>' +
+        '<h4 class="nc-math-title">'+esc(c.lbl)+'</h4>' +
+        '<dl class="nc-math-stats">' +
+          '<div><dt>P(profit at expiry)</dt><dd class="pos">'+c.pp+'%</dd></div>' +
+          '<div><dt>Max gain / lot</dt><dd class="pos">\u20b9'+intFmt(c.mg)+'</dd></div>' +
+          '<div><dt>Max loss / lot</dt><dd class="neg">\u20b9'+intFmt(c.ml)+'</dd></div>' +
+          '<div><dt>Risk-reward</dt><dd>'+c.rr+'\u00d7</dd></div>' +
+        '</dl>' +
+        '<p class="nc-math-footer">Debit \u20b9'+c.debit+'/unit \u00b7 buy\u00a0'+c.bs+', sell\u00a0'+c.ss+(VRP<-2?' \u00b7 IV cheap favours debit':'')+' </p>' +
       '</article>'
     ).join(''):'<p class="muted">No qualifying spreads found in current chain.</p>';
   }
