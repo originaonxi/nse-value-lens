@@ -289,12 +289,16 @@
   function renderSetups() {
     const setups = dataset.setups || [];
     const rules = new Map((dataset.rules || []).map(r => [r.id, r]));
-    $('setup-cards').innerHTML = setups.length ? setups.map(s => {
+    const tierOrder = {top:0,high:1,medium:2,low:3,avoid:4};
+    const sorted = [...setups].sort((a,b)=>(tierOrder[(a.jev_priority||{}).tier]??5)-(tierOrder[(b.jev_priority||{}).tier]??5));
+    $('setup-cards').innerHTML = setups.length ? sorted.map(s => {
       const r = rules.get(s.rule) || {stats: {}}, st = r.stats || {}, g = s.position_greeks_per_lot || {}, pay = s.payoff || {};
       const sl = s.stop_loss || {}, firing = s.firing !== false, jp = s.jev_priority || {};
+      const isBest = jp.tier === 'top', isHigh = jp.tier === 'high';
       const PRIO_CLS = {top: 'pos', high: 'pos', medium: 'warn', low: 'muted', avoid: 'neg'};
       const prioBadge = jp.tier ? '<span class="nc-chip nc-prio-' + esc(jp.tier) + ' ' + (PRIO_CLS[jp.tier] || '') + '">JEV: ' + esc(jp.tier.toUpperCase()) + (numeric(jp.confidence) ? ' ' + Math.round(jp.confidence * 100) + '%' : '') + '</span>' : '';
-      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + prioBadge + ' ' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
+      const bestBadge = isBest ? '<span class="nc-chip nc-best-badge">\u2605 BEST</span> ' : (isHigh ? '<span class="nc-chip nc-best-badge" style="background:#4ade80">\u25b2 HIGH</span> ' : '');
+      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + (isBest || isHigh ? ' nc-best' : '') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + bestBadge + prioBadge + ' ' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
         '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (live / ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
         s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + (numeric(l.live_ltp) ? '<b class="pos">' + money(l.live_ltp) + '</b> <small class="muted">live</small>' : money(l.ref_close)) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
         '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +
@@ -314,6 +318,76 @@
         payoffSvg(pay) + ((s.plan || {}).payoff_note ? '<p class="muted"><small>' + esc(s.plan.payoff_note) + '</small></p>' : '') + '<p class="muted">Backtest: ' + intFmt(st.trades) + ' trades, win ' + pctPlain(st.win_rate, 0) + ', mean ' + pct(st.mean_return_pct) + ' on ' + esc(st.return_basis || '') + ', t-stat ' + fmt(st.t_stat, 2) + ', worst ' + pct(st.worst_return_pct) + '.</p></article>';
     }).join('') : '<p class="muted">No setup\u2019s trigger condition is met today. See the evidence table below for every rule and how close each trigger is.</p>';
   }
+
+  function renderMathBest() {
+    const el = $('math-best-cards'), noteEl = $('math-best-note');
+    if (!el) return;
+    const exp = (dataset.expiries || []).find(e => e.trade_expiry);
+    if (!exp || !exp.rows) { el.innerHTML = '<p class="muted">Chain data not loaded.</p>'; return; }
+    const S = dataset.index.option_spot || dataset.index.close;
+    const VRP = dataset.index.vrp || 0;
+    const T = exp.days_to_expiry / 365;
+    const r = 0.065, lot = dataset.index.lot || 75;
+    function ncdf(x) {
+      const t=1/(1+0.2316419*Math.abs(x)), d=0.3989422820*Math.exp(-x*x/2);
+      const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));
+      return x>=0?1-p:p;
+    }
+    function pp(S,K,T,iv,call) {
+      if (T<=0||iv<=0) return call?(S>K?1:0):(S<K?1:0);
+      const d2=(Math.log(S/K)+(r-0.5*iv*iv)*T)/(iv*Math.sqrt(T));
+      return call?ncdf(d2):ncdf(-d2);
+    }
+    const rows=exp.rows.filter(r=>r.ce&&r.ce.close>0.5&&r.pe&&r.pe.close>0.5);
+    const cands=[];
+    let total=0;
+    for (let i=0;i<rows.length;i++) {
+      for (let j=i+1;j<rows.length;j++) {
+        const kL=rows[i],kH=rows[j],w=kH.strike-kL.strike;
+        if (w>1200) continue;
+        const bPx=kL.ce.close,sPx=kH.ce.close;
+        if (bPx>sPx) {
+          total++;
+          const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
+          if (mg>0&&ml>0) {
+            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
+            const p1=pp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
+            if (p1>=30) cands.push({lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',view:'bullish',debit:deb.toFixed(2),mg,ml,pp1:p1.toFixed(1),rr:rr.toFixed(2),score:(p1/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
+          }
+        }
+        const bpPx=kH.pe.close,spPx=kL.pe.close;
+        if (bpPx>spPx) {
+          total++;
+          const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
+          if (mg2>0&&ml2>0) {
+            const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
+            const p2=pp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
+            if (p2>=30) cands.push({lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',view:'bearish',debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp1:p2.toFixed(1),rr:rr2.toFixed(2),score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
+          }
+        }
+      }
+    }
+    cands.sort((a,b)=>b.score-a.score);
+    const top=[],ct={};
+    for (const c of cands) { if ((ct[c.view]||0)>=3) continue; ct[c.view]=(ct[c.view]||0)+1; top.push(c); if (top.length>=5) break; }
+    if (noteEl) noteEl.textContent=total.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+(VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised')+') \u00b7 Ranked by P(profit) \u00d7 risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
+    el.innerHTML=top.length?top.map((c,i)=>
+      '<article class="nc-math-card'+(i===0?' nc-math-best':'')+'">' +
+      '<header style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+      (i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-chip muted">#'+(i+1)+'</span>') +
+      ' <span class="nc-chip '+(c.view==='bullish'?'pos':'neg')+'">'+ esc(c.view)+'</span></header>'+
+      '<h4 style="margin:0 0 10px;font:700 15px Manrope,sans-serif">'+esc(c.lbl)+'</h4>'+
+      '<dl class="nc-mini">'+
+      '<div><dt>P(profit at expiry)</dt><dd class="pos">'+c.pp1+'%</dd></div>'+
+      '<div><dt>Max gain / lot</dt><dd class="pos">\u20b9'+intFmt(c.mg)+'</dd></div>'+
+      '<div><dt>Max loss / lot</dt><dd class="neg">\u20b9'+intFmt(c.ml)+'</dd></div>'+
+      '<div><dt>Risk-reward</dt><dd>'+c.rr+'\u00d7</dd></div>'+
+      '</dl>'+
+      '<p class="muted" style="font-size:11px;margin:4px 0 0">Debit \u20b9'+c.debit+'/unit \u00b7 buy\u00a0'+c.bs+', sell\u00a0'+c.ss+(VRP<-2?' \u00b7 IV cheap favours debit':'')+' </p>'+
+      '</article>'
+    ).join(''):'<p class="muted">No qualifying spreads found in current chain.</p>';
+  }
+
 
 
   function renderComparison() {
@@ -546,7 +620,7 @@
       dataset = data;
       document.body.dataset.source = data.as_of;
       renderHeader(); renderIndex(); renderVerdict(); renderExpiryPicker(); renderSigma(); renderChain(); renderVol();
-      renderHhhl(); renderParticipants(); renderSetups(); renderComparison(); renderRules(); renderBreadth(); renderConstituents();
+      renderHhhl(); renderParticipants(); renderSetups(); renderComparison(); renderMathBest(); renderRules(); renderBreadth(); renderConstituents();
       renderResearch(); renderCalibration(); renderMethod(); bind();
       document.body.dataset.ready = 'true';
       startLivePricePoll();

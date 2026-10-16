@@ -79,5 +79,11 @@ tr.baseline{opacity:.72}
 .nc-best-structure h3{margin:4px 0 6px;font:700 17px Manrope,sans-serif}
 .nc-best-structure p{margin:0;font-size:12.5px;line-height:1.5}
 tr.nc-row-best{background:#f1f8f3;font-weight:600}
+.nc-setup.nc-best{border:2px solid #22c55e;background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)}
+.nc-chip.nc-best-badge{background:#22c55e;color:#052e16;font-weight:700;font-size:12px;letter-spacing:.04em;padding:2px 10px}
+.nc-math-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:14px 0}
+.nc-math-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:14px 16px}
+.nc-math-card.nc-math-best{border:2px solid #22c55e;background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)}
+.nc-math-note{margin:0 0 12px;font-size:12px;line-height:1.55;color:var(--muted)}
 @media(max-width:1100px){.nc-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.nc-verdict,.nc-setups,.nc-research-cards{grid-template-columns:1fr}}
 @media(max-width:700px){.nc-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nc-mini{grid-template-columns:repeat(2,minmax(0,1fr))}.nc-cal{grid-template-columns:1fr 1fr}}
