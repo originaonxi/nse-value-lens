@@ -326,49 +326,34 @@
     if (!exp || !exp.rows) { el.innerHTML = '<p class="muted">Chain data not loaded.</p>'; return; }
     const S = dataset.index.option_spot || dataset.index.close;
     const VRP = dataset.index.vrp || 0;
-    const T = exp.days_to_expiry / 365;
-    const r = 0.065, lot = dataset.index.lot || 75;
-    function ncdf(x) {
-      const t=1/(1+0.2316419*Math.abs(x)), d=0.3989422820*Math.exp(-x*x/2);
-      const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));
-      return x>=0?1-p:p;
-    }
-    function pExp(S,K,T,iv,call) {
-      if (T<=0||iv<=0) return call?(S>K?1:0):(S<K?1:0);
-      const d2=(Math.log(S/K)+(r-0.5*iv*iv)*T)/(iv*Math.sqrt(T));
-      return call?ncdf(d2):ncdf(-d2);
-    }
-    const rows=exp.rows.filter(r=>r.ce&&r.ce.close>0.5&&r.pe&&r.pe.close>0.5);
+    const DTE = exp.days_to_expiry, T = DTE/365;
+    const r = 0.065, lot = dataset.index.lot || 75, HOLD = 5;
+    const exitBy = ((dataset.setups || [])[0] || {}).plan ? dataset.setups[0].plan.exit_by : null;
+    function ncdf(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989422820*Math.exp(-x*x/2);const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));return x>=0?1-p:p;}
+    function npdf(x){return 0.3989422804*Math.exp(-x*x/2);}
+    function bsp(s,k,t,iv,call){if(t<=0||iv<=0)return call?Math.max(s-k,0):Math.max(k-s,0);const w=iv*Math.sqrt(t),d1=(Math.log(s/k)+(r+0.5*iv*iv)*t)/w,d2=d1-w,dc=Math.exp(-r*t);return call?s*ncdf(d1)-k*dc*ncdf(d2):k*dc*ncdf(-d2)-s*ncdf(-d1);}
+    function pITM(s,k,t,iv,call){if(t<=0)return call?(s>k?1:0):(s<k?1:0);const d2=(Math.log(s/k)+(r-0.5*iv*iv)*t)/(iv*Math.sqrt(t));return call?ncdf(d2):ncdf(-d2);}
+    const rows=exp.rows.filter(x=>x.ce&&x.ce.close>0.5&&x.pe&&x.pe.close>0.5);
     const cands=[];
     let totalScan=0;
     for (let i=0;i<rows.length;i++) {
       for (let j=i+1;j<rows.length;j++) {
         const kL=rows[i],kH=rows[j],w=kH.strike-kL.strike;
         if (w<50||w>1200) continue;
-        // Bull call spread: BUY lower CE, SELL higher CE — all widths, pure P×RR math
-        const bPx=kL.ce.close,sPx=kH.ce.close;
-        if (bPx>sPx) {
+        if (kL.ce.close>kH.ce.close) {
           totalScan++;
-          const deb=bPx-sPx,mg=(w-deb)*lot,ml=deb*lot;
+          const deb=kL.ce.close-kH.ce.close,mg=(w-deb)*lot,ml=deb*lot;
           if (mg>0&&ml>0) {
-            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100;
-            const p=pExp(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
-            if (p>=25) cands.push({view:'bullish',lbl:'Bull call '+kL.strike+'/'+kH.strike+' CE',
-              debit:deb.toFixed(2),mg,ml,pp:p.toFixed(1),rr:rr.toFixed(2),
-              score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0),bs:kL.strike,ss:kH.strike});
+            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100,p=pITM(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
+            if (p>=25) cands.push({view:'bullish',opt:'CE',bs:kL.strike,ss:kH.strike,pp:p,rr:rr,score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0)});
           }
         }
-        // Bear put spread: BUY higher PE, SELL lower PE — all widths, pure P×RR math
-        const bpPx=kH.pe.close,spPx=kL.pe.close;
-        if (bpPx>spPx) {
+        if (kH.pe.close>kL.pe.close) {
           totalScan++;
-          const deb2=bpPx-spPx,mg2=(w-deb2)*lot,ml2=deb2*lot;
-          if (mg2>0&&ml2>0) {
-            const iv2=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100;
-            const p2=pExp(S,kH.strike-deb2,T,iv2,false)*100,rr2=mg2/ml2;
-            if (p2>=25) cands.push({view:'bearish',lbl:'Bear put '+kH.strike+'/'+kL.strike+' PE',
-              debit:deb2.toFixed(2),mg:mg2,ml:ml2,pp:p2.toFixed(1),rr:rr2.toFixed(2),
-              score:(p2/100)*0.5+Math.min(rr2/4,1)*0.5+(VRP<-2?0.08:0),bs:kH.strike,ss:kL.strike});
+          const deb=kH.pe.close-kL.pe.close,mg=(w-deb)*lot,ml=deb*lot;
+          if (mg>0&&ml>0) {
+            const iv=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100,p=pITM(S,kH.strike-deb,T,iv,false)*100,rr=mg/ml;
+            if (p>=25) cands.push({view:'bearish',opt:'PE',bs:kH.strike,ss:kL.strike,pp:p,rr:rr,score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.08:0)});
           }
         }
       }
@@ -377,23 +362,61 @@
     const top=[],ct={};
     for (const c of cands) { if ((ct[c.view]||0)>=3) continue; ct[c.view]=(ct[c.view]||0)+1; top.push(c); if (top.length>=5) break; }
     const vrpTxt=VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised';
-    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+exp.days_to_expiry+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
-    el.innerHTML=top.length?top.map((c,i)=>
-      '<article class="nc-math-card'+(i===0?' nc-math-best':'')+'">' +
-        '<div class="nc-math-rank">' +
-          (i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-math-num">#'+(i+1)+'</span>') +
-          ' <span class="nc-chip '+(c.view==='bullish'?'pos':'neg')+'">'+esc(c.view)+'</span>' +
-        '</div>' +
-        '<h4 class="nc-math-title">'+esc(c.lbl)+'</h4>' +
-        '<dl class="nc-math-stats">' +
-          '<div><dt>P(profit at expiry)</dt><dd class="pos">'+c.pp+'%</dd></div>' +
-          '<div><dt>Max gain / lot</dt><dd class="pos">\u20b9'+intFmt(c.mg)+'</dd></div>' +
-          '<div><dt>Max loss / lot</dt><dd class="neg">\u20b9'+intFmt(c.ml)+'</dd></div>' +
-          '<div><dt>Risk-reward</dt><dd>'+c.rr+'\u00d7</dd></div>' +
-        '</dl>' +
-        '<p class="nc-math-footer">Debit \u20b9'+c.debit+'/unit \u00b7 buy\u00a0'+c.bs+', sell\u00a0'+c.ss+(VRP<-2?' \u00b7 IV cheap favours debit':'')+' </p>' +
-      '</article>'
-    ).join(''):'<p class="muted">No qualifying spreads found in current chain.</p>';
+    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+DTE+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
+    function build(c) {
+      const isBull=c.view==='bullish',opt=c.opt,sg=s=>s==='BUY'?1:-1;
+      const spec=[{strike:c.bs,side:'BUY'},{strike:c.ss,side:'SELL'}];
+      const legs=spec.map(L=>{
+        const row=rows.find(x=>Math.round(x.strike)===Math.round(L.strike));
+        const o=(opt==='CE'?row.ce:row.pe)||{};
+        return {name:'NIFTY '+exp.expiry+' '+L.strike+' '+opt,side:L.side,option_type:opt,strike:L.strike,
+          ref_close:o.close||0,delta:o.delta||0,theta:o.theta||0,vega:o.vega||0,iv:(o.iv_own||o.iv||exp.atm_iv)/100};
+      });
+      const pg={delta:legs.reduce((a,l)=>a+sg(l.side)*l.delta*lot,0),theta:legs.reduce((a,l)=>a+sg(l.side)*l.theta*lot,0),vega:legs.reduce((a,l)=>a+sg(l.side)*l.vega*lot,0)};
+      const netDebit=legs.reduce((a,l)=>a+sg(l.side)*l.ref_close,0);
+      const width=Math.abs(c.ss-c.bs);
+      const maxProfit=(width-Math.abs(netDebit))*lot, maxLoss=-Math.abs(netDebit)*lot;
+      const be=isBull?c.bs+netDebit:c.bs-netDebit;
+      const pExpiry=pITM(S,be,T,legs[0].iv,isBull)*100;
+      const curve={price:[],pnl:[]},lo=S*0.85,hi=S*1.15,N=60;
+      for (let i=0;i<=N;i++){const px=lo+(hi-lo)*i/N;let v=0;for(const l of legs){const it=l.option_type==='CE'?Math.max(px-l.strike,0):Math.max(l.strike-px,0);v+=sg(l.side)*it;}curve.price.push(px);curve.pnl.push((v-netDebit)*lot);}
+      const hX=Math.min(HOLD,DTE),tH=Math.max(hX,1)/365,tR=Math.max(DTE-hX,0)/365;
+      const cost=legs.reduce((a,l)=>a+Math.max(0.05,l.ref_close*0.005)*2,0)*lot;
+      let ev=0,pprof=0,msum=0;const steps=160;
+      for (let i=0;i<steps;i++){const z=-4.5+9*(i+0.5)/steps,m=npdf(z)*(9/steps);const sp=S*Math.exp((r-0.5*legs[0].iv*legs[0].iv)*tH+legs[0].iv*Math.sqrt(tH)*z);let v=0;for(const l of legs)v+=sg(l.side)*bsp(sp,l.strike,tR,l.iv,l.option_type==='CE');const pnl=(v-netDebit)*lot-cost;ev+=pnl*m;if(pnl>0)pprof+=m;msum+=m;}
+      ev/=msum;pprof=pprof/msum*100;
+      const stop=maxLoss*0.5;
+      return {legs,pg,maxProfit,maxLoss,be,pExpiry,curve,evExit:ev,pProfitExit:pprof,netDebit,stop,width};
+    }
+    el.innerHTML=top.length?top.map((c,i)=>{
+      const d=build(c),isBull=c.view==='bullish';
+      const label=(isBull?'Bull call spread ':'Bear put spread ')+c.bs+'/'+c.ss+' '+c.opt;
+      const badge=i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-chip muted">#'+(i+1)+'</span>';
+      const cond=(isBull?'Buy the '+c.bs+' call, sell the '+c.ss+' call \u2014 a defined-risk debit spread that profits if Nifty rises above the breakeven by expiry. Selected purely by P(profit)\u00d7risk-reward across all '+totalScan.toLocaleString('en-IN')+' scanned spreads.':'Buy the '+c.bs+' put, sell the '+c.ss+' put \u2014 a defined-risk debit spread that profits if Nifty falls below the breakeven by expiry. Selected purely by P(profit)\u00d7risk-reward across all '+totalScan.toLocaleString('en-IN')+' scanned spreads.');
+      return '<article class="nc-setup nc-firing'+(i===0?' nc-best':'')+'" data-rule="math-'+i+'">'+
+        '<header><h3>'+esc(label)+'</h3>'+badge+' <span class="nc-chip '+(isBull?'pos':'neg')+'">'+esc(c.view)+'</span> <span class="nc-chip muted">MATH RANK #'+(i+1)+'</span></header>'+
+        '<p class="muted">'+esc(cond)+'</p>'+
+        '<table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>'+
+        d.legs.map(l=>'<tr><td>'+sideTag(l.side)+'</td><td>'+esc(l.name)+'</td><td>'+money(l.ref_close)+'</td><td>'+fmt(l.delta,2)+'</td><td>'+fmt(l.theta,1)+'</td></tr>').join('')+'</tbody></table>'+
+        '<dl class="nc-mini">'+
+        '<div><dt>Position delta / lot</dt><dd>'+fmt(d.pg.delta,1)+'</dd></div>'+
+        '<div><dt>Theta / day / lot</dt><dd class="'+cls(d.pg.theta)+'">'+money(d.pg.theta)+'</dd></div>'+
+        '<div><dt>Vega / lot</dt><dd>'+money(d.pg.vega)+'</dd></div>'+
+        '<div><dt>Max profit (expiry)</dt><dd class="pos">'+money(d.maxProfit)+'</dd></div>'+
+        '<div><dt>Max loss (expiry)</dt><dd class="neg">'+money(d.maxLoss)+'</dd></div>'+
+        '<div><dt>Breakeven (expiry)</dt><dd>'+fmt(d.be,0)+'</dd></div>'+
+        '<div><dt>Model P(profit) at expiry</dt><dd>'+pctPlain(d.pExpiry,0)+'</dd></div>'+
+        '<div><dt>Risk-reward</dt><dd>'+c.rr.toFixed(2)+'\u00d7</dd></div>'+
+        '<div class="nc-exit"><dt>Expected P&amp;L at exit (5s)</dt><dd class="'+cls(d.evExit)+'">'+money(d.evExit)+'</dd></div>'+
+        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>'+pctPlain(d.pProfitExit,0)+'</dd></div>'+
+        (exitBy?'<div><dt>Exit by</dt><dd>'+esc(date(exitBy))+'</dd></div>':'')+
+        '<div class="nc-stop"><dt>Stop-loss / lot</dt><dd class="neg">'+money(d.stop)+'</dd></div>'+
+        '</dl>'+
+        '<p class="muted"><small>\u26d4 Stop: close if the loss reaches half the max loss (\u20b9'+intFmt(Math.abs(d.stop))+')</small></p>'+
+        payoffSvg({curve:d.curve})+
+        '<p class="muted"><small>Max profit, breakeven and model probability are at EXPIRY. The exit block is the expected P&amp;L if closed after 5 sessions'+(exitBy?' (by '+esc(date(exitBy))+')':'')+', net of modelled costs. Entry at today\u2019s close as the next-open proxy. Pure maths from today\u2019s official chain \u2014 no historical backtest for this exact strike pair.</small></p>'+
+      '</article>';
+    }).join(''):'<p class="muted">No qualifying spreads found in current chain.</p>';
   }
 
 
