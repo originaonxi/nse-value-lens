@@ -562,6 +562,15 @@ RULES = [
           "5-session z-score is within \u00b10.7 (near-flat) and IV percentile is 35th\u201370th. "
           "Asymmetric put butterfly (buy p20, sell 2\u00d7bps, buy pw wing): entered for small debit/credit; profits if Nifty stays flat or drifts up; downside bounded by the far put wing.",
           lambda f: (f.z5.abs() <= 0.7) & (f.iv_pct >= 35) & (f.iv_pct <= 70)),
+    _rule("expiry_week_short_strangle", "Last 7 DTE: short strangle (theta acceleration)", "SHORT STRANGLE", SHORT_STRANGLE, "margin", "neutral",
+          "The trade expiry is 7 or fewer sessions away and ATM IV is in the top half of its year with at least 2 vol points of VRP. "
+          "Theta decay is non-linear (Black-Scholes): it accelerates to its mathematical maximum in the final week. "
+          "Selling OTM strangle here harvests the steepest part of the decay curve.",
+          lambda f: (f.dte <= 7) & (f.iv_pct >= 50) & (f.vrp >= 2)),
+    _rule("pro_desk_iron_condor", "PRO desk short futures + rich IV: iron condor", "IRON CONDOR", CONDOR, "defined", "neutral",
+          "Proprietary trading desks hold 40% or fewer of their index-futures contracts long and ATM IV is in the top half of its year with at least 1.5 vol points of VRP. "
+          "PRO desks are systematic and often net-short futures when they expect range-bound price action; sell premium via iron condor in alignment.",
+          lambda f: (f.pro_ratio <= 0.40) & (f.iv_pct >= 50) & (f.vrp >= 1.5)),
     _rule("base_bull_call_spread", "Baseline: bull call spread every session", "BULL CALL SPREAD", BULL, "debit", "bullish",
           "Unconditional: the same spread taken whenever no position is open.", ALWAYS, baseline=True),
     _rule("base_bear_put_spread", "Baseline: bear put spread every session", "BEAR PUT SPREAD", BEAR, "debit", "bearish",
