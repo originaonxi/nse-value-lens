@@ -23,6 +23,7 @@ Pipeline (no look-ahead):
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import io
 import json
 import math
@@ -767,17 +768,43 @@ def _bs_price(s, k, t, sigma, call):
     return k * disc * od.ncdf(-d2) - s * od.ncdf(-d1)
 
 
-def exit_payoff_profile(legs, spot, lot, sigma, dte, hold=HOLD):
-    """Expected P&L and P(profit) if the trade is CLOSED after `hold` sessions, not held to expiry.
+def exit_payoff_profile(legs, spot, lot, sigma, dte, hold=HOLD, horizon_days=None):
+    """Expected P&L and P(profit) if the trade is CLOSED at the planned exit, not held to expiry.
 
-    Spot at the horizon is lognormal(sigma over `hold` days); every leg is repriced with
-    Black-Scholes at the option life still remaining at that exit, and round-trip costs are
-    removed. This is the number the actual exit rule earns, as opposed to the expiry payoff."""
+    `dte` is CALENDAR days from the signal session to expiry; `hold` is the number of trading
+    SESSIONS the plan holds (HOLD). `horizon_days` is the CALENDAR days from the signal session
+    close (the entry proxy) to the actual plan.exit_by date and is what production callers MUST
+    pass, because HOLD trading sessions span ~7-10 calendar days, not HOLD days. When omitted
+    (legacy callers only) it falls back to `hold` treated as calendar days -- the old, biased
+    behaviour -- and the returned `model` block flags it.
+
+    Spot at the horizon is lognormal(sigma over `horizon_days` calendar days); every leg is
+    repriced with Black-Scholes at the option life still remaining at that exit, and round-trip
+    costs are removed. This is the number the actual exit rule earns, not the expiry payoff."""
     if not (sigma and np.isfinite(sigma) and dte and dte > 0):
         return None
-    hold = min(int(hold), int(dte))
-    t_h = max(hold, 1) / 365.0                 # time to the exit horizon
-    t_rem = max(dte - hold, 0) / 365.0         # option life left when we exit
+    dte = int(dte)
+    hold = int(hold)
+    if horizon_days is None:
+        horizon_cal, horizon_source = max(hold, 1), "legacy_sessions_as_days"
+    else:
+        try:
+            hd = float(horizon_days)
+        except (TypeError, ValueError):
+            raise ValueError(f"horizon_days must be a finite number of calendar days, got {horizon_days!r}")
+        if not np.isfinite(hd):
+            raise ValueError(f"horizon_days must be finite, got {horizon_days!r}")
+        horizon_cal = int(round(hd))
+        if horizon_cal < 1:
+            raise ValueError(f"horizon_days must be >= 1 calendar day, got {horizon_cal}")
+        if horizon_cal < hold:
+            raise ValueError(f"horizon_days ({horizon_cal}) < hold sessions ({hold}): "
+                             "calendar days to exit cannot be fewer than the trading sessions held")
+        horizon_source = "plan_exit_by_calendar_days"
+    exit_at_expiry = horizon_cal >= dte            # never price a leg past its own expiry
+    horizon_cal = min(horizon_cal, dte)
+    t_h = max(horizon_cal, 1) / 365.0              # calendar time to the exit horizon
+    t_rem = max(dte - horizon_cal, 0) / 365.0      # option life left when we exit
     grid = np.linspace(spot * 0.80, spot * 1.20, 321)
     val = np.zeros_like(grid)
     entry_net = 0.0
@@ -804,9 +831,15 @@ def exit_payoff_profile(legs, spot, lot, sigma, dte, hold=HOLD):
         i = min(int(np.searchsorted(cum, p)), len(pnl) - 1)
         return float(pnl[order][i])
     step = max(1, len(grid) // 60)
-    return dict(hold_sessions=hold, remaining_dte=int(max(dte - hold, 0)), exp_pnl_per_lot=num(exp_pnl),
-                p_profit=num(p_profit, 1), round_trip_costs=num(costs), pnl_worst5=num(q(0.05)), pnl_median=num(q(0.5)),
-                pnl_best5=num(q(0.95)), curve=dict(price=[num(x) for x in grid[::step]], pnl=[num(y) for y in pnl[::step]]))
+    return dict(hold_sessions=hold, horizon_calendar_days=horizon_cal,
+                remaining_dte=int(max(dte - horizon_cal, 0)), exp_pnl_per_lot=num(exp_pnl),
+                p_profit=num(p_profit, 1), round_trip_costs=num(costs), pnl_worst5=num(q(0.05)),
+                pnl_median=num(q(0.5)), pnl_best5=num(q(0.95)),
+                model=dict(horizon_source=horizon_source, exit_at_or_after_expiry=bool(exit_at_expiry),
+                           entry_proxy="signal session close",
+                           diffusion="lognormal spot over horizon_calendar_days; legs repriced at the option "
+                                     "life remaining at exit; round-trip costs removed"),
+                curve=dict(price=[num(x) for x in grid[::step]], pnl=[num(y) for y in pnl[::step]]))
 
 
 def _lognorm_mass(grid, spot, sigma, t):
@@ -890,7 +923,7 @@ def _candidate_leg(tab, texp, lot, opt, where, side, spot):
                 ref_close=num(mark), lot=int(lot))
 
 
-def candidate_comparison(trade_tab, spot, dte, lot, sigma, texp, view, rule_info, hold=HOLD):
+def candidate_comparison(trade_tab, spot, dte, lot, sigma, texp, view, rule_info, hold=HOLD, horizon_days=None):
     """Build the directional alternatives for today's view and rank them by expected return on
     risk at the actual 5-session exit, so the biggest max-profit headline does not decide."""
     if trade_tab is None or trade_tab.empty or view not in CANDIDATE_SETS or not np.isfinite(sigma) or not dte:
@@ -906,7 +939,7 @@ def candidate_comparison(trade_tab, spot, dte, lot, sigma, texp, view, rule_info
         if len(legs) != len(spec):
             continue
         expiry = payoff_profile(legs, spot, int(lot), sigma, int(dte))
-        exit_p = exit_payoff_profile(legs, spot, int(lot), sigma, int(dte), hold)
+        exit_p = exit_payoff_profile(legs, spot, int(lot), sigma, int(dte), hold, horizon_days)
         net = sum((1 if l["side"] == "BUY" else -1) * l["ref_close"] for l in legs) * int(lot)
         max_loss = expiry.get("max_loss")
         ror = None
@@ -1149,7 +1182,15 @@ def jev_review(index_state, rules, constituents, comparison=None, log=print):
                 message=f"Jev reviewed the index and {done - 1} constituents ({client.calls} requests, {client.input_tokens} input tokens)."), index_answer
 
 
-def archive(as_of, jev, index_answer, constituents, today_setups, force=False):
+def _setup_fingerprint(rule_summary):
+    """Stable identity of the ordered, non-baseline setup set that Jev's per-setup priorities
+    (prio_i) are enumerated over. Archived priorities are only reattached to a snapshot whose
+    fingerprint matches, so a changed rule set or forecast model never silently remaps old scores."""
+    payload = json.dumps(rule_summary or [], sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return VERSION + "|exit-calendar-v2|" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def archive(as_of, jev, index_answer, constituents, today_setups, setup_fingerprint=None, force=False):
     HIST.mkdir(parents=True, exist_ok=True)
     path = HIST / f"{as_of}.json"
     if path.exists() and not force:
@@ -1158,6 +1199,7 @@ def archive(as_of, jev, index_answer, constituents, today_setups, force=False):
             return old
     record = dict(version=VERSION, as_of=as_of, archived_at=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                   jev_state=jev.get("state"), index=index_answer, setups=[s["rule"] for s in today_setups],
+                  setup_fingerprint=setup_fingerprint,
                   stocks={c["symbol"]: c.get("jev") for c in constituents if c.get("jev")})
     path.write_text(json.dumps(od.clean(record), separators=(",", ":"), allow_nan=False), encoding="utf-8")
     return record
@@ -1257,6 +1299,8 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
     rule_info = {r["id"]: r for r in rules}
     skip = od.holidays()
     nxt = od.next_sessions(as_of, HOLD, skip)
+    exit_by = nxt[-1]                                            # actual plan exit session (HOLD sessions ahead)
+    horizon_days = (dt.date.fromisoformat(exit_by) - dt.date.fromisoformat(as_of)).days  # calendar days to exit_by
     today = f[f.date == as_of]
     if today.empty:
         raise SystemExit(f"No NIFTY option chain for {as_of}")
@@ -1293,7 +1337,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                            condition=info["condition"], legs=legs,
                            position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
                            payoff=payoff_profile(legs, spot, int(s.lot), sigma_t, int(t0.dte)),
-                           exit=exit_payoff_profile(legs, spot, int(s.lot), sigma_t, int(t0.dte), HOLD),
+                           exit=exit_payoff_profile(legs, spot, int(s.lot), sigma_t, int(t0.dte), HOLD, horizon_days),
                            plan=dict(entry="Next session's official open; skip any leg that does not trade",
                                      exit_after_sessions=HOLD, exit_by=nxt[-1],
                                      payoff_note="Max profit, breakevens and the model probability are at EXPIRY. "
@@ -1335,7 +1379,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                     status=info["status"], condition=info["condition"], legs=legs, firing=False,
                     position_greeks_per_lot={k: num(v, 4 if k == "gamma" else 2) for k, v in pos.items()},
                     payoff=payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte)),
-                    exit=exit_payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte), HOLD),
+                    exit=exit_payoff_profile(legs, spot, int(t0.lot), sigma_t, int(t0.dte), HOLD, horizon_days),
                     plan=dict(entry="Next session's official open; skip any leg that does not trade",
                               exit_after_sessions=HOLD, exit_by=nxt[-1],
                               payoff_note="Not triggered today \u2014 shown for comparison. Max profit and probability are at EXPIRY; the exit block is the expected P&L after %d sessions." % HOLD))
@@ -1374,7 +1418,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
         reason=("Setups fired today but none has validated history, so they are information only." if setups
                 else "No setup's trigger condition is met today.") + " Staying flat is a position.")
     primary_view = "bearish" if bool(t0.falling) else "bullish" if bool(t0.rising) else "neutral"
-    comparison = candidate_comparison(trade_tab, spot, int(t0.dte), int(t0.lot), sigma_t, texp, primary_view, rule_info, HOLD)
+    comparison = candidate_comparison(trade_tab, spot, int(t0.dte), int(t0.lot), sigma_t, texp, primary_view, rule_info, HOLD, horizon_days)
 
     # Rule conditions as they stand today, so a reader can see how close each trigger is.
     def val(col, digits=2):
@@ -1484,17 +1528,27 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
 
     jev, index_answer = (jev_review(index_state, rules, constituents, comparison=comparison, log=log) if use_jev
                          else (dict(state="skipped", model="", assessed=0, message="Jev disabled for this run"), None))
-    record = archive(as_of, jev, index_answer, constituents, setups, force=force_archive)
+    setup_fp = _setup_fingerprint(rule_summary)
+    reused_priorities_ok = True
+    record = archive(as_of, jev, index_answer, constituents, setups, setup_fingerprint=setup_fp, force=force_archive)
     if jev["state"] != "ok" and record.get("jev_state") == "ok":
         index_answer = record.get("index")
         for c in constituents:
             c["jev"] = c["jev"] or (record.get("stocks") or {}).get(c["symbol"])
         jev = dict(state="ok", model=jev.get("model", ""), assessed=1 + len(record.get("stocks") or {}),
                    message="Reused this session's archived Jev review")
+        # prio_i is positional over the setup snapshot; only trust reused per-setup priorities when the
+        # archived fingerprint matches today's setup set, else fail closed (index direction still reused).
+        reused_priorities_ok = record.get("setup_fingerprint") == setup_fp
+        if not reused_priorities_ok:
+            jev["priority_note"] = ("Archived Jev per-setup priorities suppressed: the setup set changed since "
+                                    "the archived review (fingerprint mismatch or absent). Index direction reused; "
+                                    "cards ranked without stale Jev priority.")
     jev["index"] = index_answer
+    jev["setup_fingerprint"] = setup_fp
     # Attach Jev's money-making priority to each setup card and rank the cards by it.
     PRIO_RANK = {"top": 5, "high": 4, "medium": 3, "low": 2, "avoid": 1}
-    if index_answer:
+    if index_answer and reused_priorities_ok:
         setup_by_rule = {s["rule"]: s for s in all_setups}
         for i, rs in enumerate(rule_summary):
             ans = index_answer.get(f"prio_{i}")

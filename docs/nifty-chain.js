@@ -1,663 +1,719 @@
 'use strict';
+/* nifty-chain.js — trader-2 — requires nifty-math.js loaded first (defer order) */
 (() => {
+
+  /* ── Helpers ── */
   const $ = id => document.getElementById(id);
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-  const numeric = value => typeof value === 'number' && Number.isFinite(value);
-  const fmt = (value, digits = 2) => numeric(value) ? value.toLocaleString('en-IN', {minimumFractionDigits: digits, maximumFractionDigits: digits}) : '--';
-  const intFmt = value => numeric(value) ? Math.round(value).toLocaleString('en-IN') : '--';
-  const signedInt = value => numeric(value) ? (value > 0 ? '+' : '') + intFmt(value) : '--';
-  const pct = (value, digits = 1) => numeric(value) ? (value > 0 ? '+' : '') + fmt(value, digits) + '%' : '--';
-  const pctPlain = (value, digits = 1) => numeric(value) ? fmt(value, digits) + '%' : '--';
-  const money = value => numeric(value) ? '\u20b9' + fmt(value) : '--';
-  const date = value => /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? new Date(value + 'T00:00:00Z').toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC'}) : '--';
-  const safeUrl = value => /^https?:\/\//i.test(value || '') ? value : null;
-  const link = (url, text) => safeUrl(url) ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(text) + '</a>' : esc(text);
-  const statusBadge = s => '<span class="rule-status ' + esc(s) + '">' + esc(s || '--') + '</span>';
-  const sideTag = side => '<span class="side ' + (side === 'SELL' ? 'side-sell' : 'side-buy') + '">' + esc(side || '--') + '</span>';
-  const cls = value => numeric(value) ? (value > 0 ? 'pos' : value < 0 ? 'neg' : '') : '';
-  const label = s => String(s || '').replace(/_/g, ' ');
-  const STANCE_CLASS = {bullish: 'pos', bearish: 'neg', neutral: '', insufficient: 'muted'};
-  const RISK_CLASS = {high: 'neg', elevated: 'warn', ordinary: '', unknown: 'muted'};
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fin = v => typeof v === 'number' && Number.isFinite(v);
+  const fmt  = (v, d=2) => fin(v) ? v.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d}) : '\u2014';
+  const iInt = v => fin(v) ? Math.round(v).toLocaleString('en-IN') : '\u2014';
+  const money = v => fin(v) ? '\u20b9'+fmt(v) : '\u2014';
+  const pct  = (v,d=1) => fin(v) ? (v>0?'+':'')+fmt(v,d)+'%' : '\u2014';
+  const pctP = (v,d=1) => fin(v) ? fmt(v,d)+'%' : '\u2014';
+  const cls  = v => fin(v) ? (v>0?'pos':v<0?'neg':'') : '';
+  const isoD = v => /^\d{4}-\d{2}-\d{2}$/.test(v||'') ?
+    new Date(v+'T00:00:00Z').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}) : '\u2014';
+  const sideTag = s => '<span class="nc-side-'+(s==='SELL'?'sell':'buy')+'">'+esc(s||'\u2014')+'</span>';
 
-  let dataset = null, expiry = null, width = 20, oiMode = 'oi';
-  const constState = {status: 'ALL', stance: 'ALL', sort: 'symbol', search: ''};
+  let dataset=null, ranked=[], activeFilter='all', searchQ='';
+  const byRule=new Map();
 
-  function validate(data) {
-    if (!data || data.symbol !== 'NIFTY') throw new Error('Not a Nifty chain snapshot.');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.as_of || '')) throw new Error('Missing or invalid session date.');
-    if (!data.index || !numeric(data.index.close)) throw new Error('Missing Nifty index close.');
-    if (!Array.isArray(data.expiries) || !data.expiries.length) throw new Error('No option expiries in the snapshot.');
-    for (const e of data.expiries) {
-      if (!Array.isArray(e.rows) || !e.rows.length) throw new Error('Expiry ' + e.expiry + ' has no strikes.');
-    }
-    if (!Array.isArray(data.constituents) || data.constituents_count !== data.constituents.length) throw new Error('constituents_count does not match the constituent rows.');
-    if (new Set(data.constituents.map(c => c.symbol)).size !== data.constituents.length) throw new Error('Duplicate constituents in the snapshot.');
-    if (!Array.isArray(data.rules)) throw new Error('No rules in the snapshot.');
+  /* ── Validate snapshot ── */
+  function validate(d) {
+    if (!d || d.symbol !== 'NIFTY') throw new Error('Not a Nifty chain snapshot.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.as_of||'')) throw new Error('Missing or invalid session date.');
+    if (!d.index || !fin(d.index.close)) throw new Error('Missing index close price.');
+    if (!Array.isArray(d.expiries) || !d.expiries.length) throw new Error('No expiries in snapshot.');
+    if (!Array.isArray(d.rules)) throw new Error('No rules array.');
+    if (!Array.isArray(d.constituents) || d.constituents_count !== d.constituents.length)
+      throw new Error('constituents_count mismatch \u2014 snapshot may be corrupt.');
   }
 
-  // ---------------------------------------------------------------- header + index cards
-  function renderHeader() {
-    const src = dataset.source || {};
-    $('session-date').textContent = date(dataset.as_of);
-    $('coverage').textContent = intFmt(src.sessions) + ' sessions of official F&O bhavcopy \u00b7 ' + intFmt(src.participant_sessions) + ' of participant OI \u00b7 ' + dataset.constituents_count + ' constituents';
-    $('next-session').textContent = dataset.next_session ? 'Setups enter at the next open: ' + date(dataset.next_session) : '';
-    const stale = (dataset.inputs || {}).stale || [];
-    const notice = $('notice');
-    notice.textContent = stale.length ? 'Note: ' + stale.join(' and ') + ' not yet updated to ' + date(dataset.as_of) + '; constituent columns from those pages may be one session behind.' : '';
-    notice.hidden = !stale.length;
+  /* ── Payoff SVG from risk.curve (expiryRisk exact extrema) ── */
+  function payoffSvg(curve) {
+    if (!curve||!Array.isArray(curve.price)||!curve.price.length||
+        !Array.isArray(curve.pnl)||curve.pnl.length!==curve.price.length) return '';
+    const pr=curve.price, pn=curve.pnl;
+    const W=560,H=140,L=60,R=12,T=12,B=28;
+    const loV=Math.min(...pn), hiV=Math.max(...pn);
+    const klo=pr[0], khi=pr[pr.length-1];
+    const xf=k=>L+(W-L-R)*(k-klo)/(khi-klo||1);
+    const yf=v=>T+(H-T-B)*(1-(v-loV)/(hiV-loV||1));
+    const z=yf(0);
+    const pts=pr.map((k,i)=>xf(k).toFixed(1)+','+yf(pn[i]).toFixed(1)).join(' ');
+    const ax='font-size="9" fill="#6b7a91" font-family="system-ui,sans-serif"';
+    let s='<svg viewBox="0 0 '+W+' '+H+'" class="nc-payoff-svg" role="img" aria-label="Gross payoff at expiry per lot">';
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+z.toFixed(1)+'" y2="'+z.toFixed(1)+'" stroke="#dde3ec" stroke-width="1"/>';
+    s+='<polyline points="'+pts+'" fill="none" stroke="#0d8a7a" stroke-width="2" stroke-linejoin="round"/>';
+    [0,Math.floor(pr.length/2),pr.length-1].forEach(i=>
+      s+='<text x="'+xf(pr[i]).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" '+ax+'>'+Math.round(pr[i]).toLocaleString('en-IN')+'</text>');
+    s+='<text x="'+(L-4)+'" y="'+(T+8)+'" text-anchor="end" '+ax+'>'+Math.round(hiV).toLocaleString('en-IN')+'</text>';
+    s+='<text x="'+(L-4)+'" y="'+(z+4).toFixed(1)+'" text-anchor="end" '+ax+'>0</text>';
+    if (Math.abs(loV-hiV)>1) s+='<text x="'+(L-4)+'" y="'+(H-B+2)+'" text-anchor="end" '+ax+'>'+Math.round(loV).toLocaleString('en-IN')+'</text>';
+    s+='</svg>';
+    return '<div class="nc-payoff-wrap">'+s+'</div>';
   }
 
-  function card(title, value, sub, tone) {
-    return '<div class="nc-card"><dt>' + esc(title) + '</dt><dd class="' + esc(tone || '') + '">' + value + '</dd>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  /* ── Build one setup card HTML ── */
+  function buildCard(r, expanded) {
+    const s=r.setup, rObj=r.rule||{}, legs=s.legs||{}, ex=s.exit||{}, plan=s.plan||{}, rsk=r.risk, mc=r.mathComponents||{};
+    const legsArr=Array.isArray(legs)?legs:[];
+    const horizonWarn=r.warnings.some(w=>w.includes('calendar-time'));
+    const bLabels={consider:'Consider',watch:'Watch',inactive:'Inactive',avoid:'Avoid'};
+    const bCls='nc-bucket-'+(r.bucket||'inactive');
+    const statusLower=(s.status||'').toLowerCase().replace(/[^a-z0-9]/g,'_');
+
+    /* legs table */
+    const legsHtml=legsArr.length
+      ?'<div class="nc-table-scroll"><table class="nc-legs-table">'
+        +'<thead><tr><th>Side</th><th>Contract</th><th>Expiry</th><th>Strike</th><th>Ref close</th><th>Lot</th><th>Qty</th>'
+        +'<th title="Position delta per lot">\u0394 delta</th><th title="Position gamma per lot">\u0393 gamma</th>'
+        +'<th title="Daily decay per lot">\u0398/day</th><th title="Vega per lot">V vega</th></tr></thead>'
+        +'<tbody>'+legsArr.map(l=>'<tr>'
+          +'<td>'+sideTag(l.side)+'</td>'
+          +'<td>'+esc(l.name||l.option_type+' '+l.strike)+'</td>'
+          +'<td>'+esc(l.expiry||'\u2014')+'</td>'
+          +'<td class="nc-num">'+iInt(l.strike)+'</td>'
+          +'<td class="nc-num">'+money(l.ref_close)+'</td>'
+          +'<td class="nc-num">'+esc(String(l.lot||'\u2014'))+'</td>'
+          +'<td class="nc-num">'+esc(String(l.quantity??1))+'</td>'
+          +'<td class="nc-num '+cls(l.delta)+'">'+fmt(l.delta,3)+'</td>'
+          +'<td class="nc-num">'+fmt(l.gamma,5)+'</td>'
+          +'<td class="nc-num '+cls(l.theta)+'">'+fmt(l.theta,1)+'</td>'
+          +'<td class="nc-num '+cls(l.vega)+'">'+fmt(l.vega,1)+'</td>'
+          +'</tr>').join('')
+        +'</tbody></table></div>'
+        +'<p class="nc-caveat">Entry proxy: next-session official open. Ref close = today\'s EOD \u2014 actual fills will differ. Lot: '
+        +esc(String(legsArr[0]?.lot||'\u2014'))+'. Values per lot \xd7 quantity, gross before fees.</p>'
+      :'<p class="nc-muted">No legs available.</p>';
+
+    /* greeks grid */
+    const g=r.greeks||{};
+    const gCells=[
+      ['\u0394 delta/lot',  fmt(g.delta,2),  cls(g.delta),  'Position delta per lot \u2014 direction sensitivity, not a profit signal.'],
+      ['\u0393 gamma/lot',  fmt(g.gamma,4),  cls(g.gamma),  'Delta rate of change. High near ATM and near expiry.'],
+      ['\u0398 theta \u20b9/d', money(g.theta), cls(g.theta), 'Daily premium decay per lot. Negative = buyer pays; positive = seller collects.'],
+      ['V vega \u20b9/pt',  money(g.vega),   cls(g.vega),   '\u20b9 change per 1-pt implied vol move per lot.'],
+      ['ATM IV',            pctP(r.iv),        '',            'Expiry-specific ATM implied vol (annualised). Null when expiry data unavailable.'],
+      ['1\u03c3 to exp.',   fin(r.sigmaMove)?'\xb1'+iInt(r.sigmaMove):'\u2014', '', 'spot \xd7 IV% \xd7 \u221a(DTE/365). Expected \xb1 range to expiry.'],
+    ];
+    const greeksHtml='<div class="nc-greeks-grid">'+gCells.map(([nm,val,vc,tip])=>
+      '<div class="nc-greek-cell"><dl><dt title="'+esc(tip)+'">'+esc(nm)+'</dt><dd class="'+esc(vc)+'">'+val+'</dd></dl></div>'
+    ).join('')+'</div>';
+
+    /* exit EV (primary) */
+    const holdDesc=fin(ex.hold_sessions)?ex.hold_sessions+' sessions':'5 sessions';
+    const calNote=fin(ex.horizon_calendar_days)?' ('+ex.horizon_calendar_days+' calendar days)'
+                 :horizonWarn?' (legacy approximation \u2014 backend fix in progress)':'';
+    const evCls=cls(ex.exp_pnl_per_lot);
+    const evPosCls=fin(ex.exp_pnl_per_lot)&&ex.exp_pnl_per_lot>0?' nc-ev-pos':fin(ex.exp_pnl_per_lot)&&ex.exp_pnl_per_lot<0?' nc-ev-neg':'';
+    const exitHtml=
+      '<div class="nc-ev-grid">'
+      +'<div class="nc-ev-cell'+evPosCls+'"><dl><dt>Model exit EV / lot</dt><dd class="'+evCls+'">'+money(ex.exp_pnl_per_lot)+'</dd></dl></div>'
+      +'<div class="nc-ev-cell"><dl><dt>P(profit) at exit</dt><dd>'+pctP(ex.p_profit,0)+'</dd></dl></div>'
+      +'<div class="nc-ev-cell"><dl><dt>Hold horizon</dt><dd>'+esc(holdDesc+calNote)+'</dd></dl></div>'
+      +'<div class="nc-ev-cell"><dl><dt>Exit by</dt><dd>'+isoD(plan.exit_by)+'</dd></dl></div>'
+      +'<div class="nc-ev-cell"><dl><dt>Round-trip costs</dt><dd>'+money(ex.round_trip_costs)+'</dd></dl></div>'
+      +'<div class="nc-ev-cell"><dl><dt>EV / max-risk</dt><dd class="'+cls(r.evOnRisk)+'">'+(fin(r.evOnRisk)?fmt(r.evOnRisk,1)+'%':'\u2014')+'</dd></dl></div>'
+      +'</div>'
+      +(horizonWarn?'<p class="nc-caveat nc-caveat-warn">\u26a0 Exit model calendar-time metadata is inconsistent or missing (backend correction in progress). Values shown are legacy approximations; do not use EV for position sizing.</p>':'')
+      +'<p class="nc-caveat">Exit EV and P(profit) use a constant-volatility lognormal model at the planned exit date, not a backtested win rate. Jev confidence \u2260 profit probability. Expiry payoff is in the risk section below.</p>';
+
+    /* risk at expiry (secondary) */
+    const mpStr=rsk.unlimitedProfit?'Unlimited \u2191':money(rsk.maxProfit);
+    const mlStr=rsk.unlimitedLoss  ?'\u26a0 Unlimited \u2193':money(rsk.maxLoss);
+    const mlCls=rsk.unlimitedLoss  ?'nc-warn':'neg';
+    const riskHtml=
+      '<div class="nc-risk-grid">'
+      +'<div class="nc-risk-cell nc-risk-gain"><dl><dt>Max profit (expiry)</dt><dd>'+mpStr+'</dd></dl></div>'
+      +'<div class="nc-risk-cell nc-risk-loss"><dl><dt>Max loss (expiry)</dt><dd class="'+mlCls+'">'+mlStr+'</dd></dl></div>'
+      +'<div class="nc-risk-cell"><dl><dt>Breakeven(s)</dt><dd>'+(rsk.breakevens.map(b=>iInt(b)).join(' / ')||'\u2014')+'</dd></dl></div>'
+      +'<div class="nc-risk-cell"><dl><dt>Risk / reward</dt><dd>'+(fin(rsk.riskReward)?rsk.riskReward.toFixed(2)+'\xd7':'\u2014')+'</dd></dl></div>'
+      +'<div class="nc-risk-cell"><dl><dt>Net debit(+)/credit(\u2212)</dt><dd>'+money(rsk.netDebit)+'</dd></dl></div>'
+      +'<div class="nc-risk-cell"><dl><dt>P(profit at expiry)</dt><dd>'+pctP((s.payoff||{}).prob_profit_model,0)+'</dd></dl></div>'
+      +'</div>'
+      +'<p class="nc-caveat">Expiry values computed from today\'s EOD leg prices \u2014 gross per lot, before fees and slippage. Assumes holding to contract expiry; the exit EV section above is what the plan actually targets. Max profit/loss use exact payoff extrema, not a sampled grid.</p>';
+
+    /* payoff SVG */
+    const svgHtml=payoffSvg(rsk.curve);
+
+    /* plan */
+    const planHtml=
+      '<div class="nc-plan-row">'
+      +'<div><dl><dt>Entry</dt><dd>'+esc(plan.entry||'Next-session official open')+'</dd></dl></div>'
+      +'<div><dl><dt>Hold</dt><dd>'+esc(holdDesc+calNote)+'</dd></dl></div>'
+      +'<div><dl><dt>Exit by</dt><dd>'+isoD(plan.exit_by)+'</dd></dl></div>'
+      +'<div><dl><dt>DTE to expiry</dt><dd>'+(fin(r.daysToExpiry)?r.daysToExpiry+' days':'\u2014')+'</dd></dl></div>'
+      +'</div>'
+      +(plan.payoff_note?'<p class="nc-caveat">'+esc(plan.payoff_note)+'</p>':'');
+
+    /* reasons + warnings (all from module — no invented text) */
+    const rwHtml=
+      '<div class="nc-reasons-list">'
+      +r.warnings.map(t=>'<div class="nc-reason nc-reason-warn">'+esc(t)+'</div>').join('')
+      +r.reasons.map(t =>'<div class="nc-reason nc-reason-info">'+esc(t)+'</div>').join('')
+      +'</div>';
+
+    /* Jev block */
+    const jevHtml=r.jev.available
+      ?'<div class="sc-section"><h4 class="sc-section-title">Jev setup assessment</h4>'
+        +'<p style="font-size:13px;color:var(--nc-navy2)">Tier: <strong>'+esc(r.jev.tier)+'</strong>\u2002\xb7\u2002Confidence: <strong>'
+        +(fin(r.jev.confidence)?Math.round(r.jev.confidence*100)+'%':'\u2014')+'</strong>\u2002\xb7\u2002Rank: <strong>'+r.rank+' of '+ranked.length+'</strong></p>'
+        +'<p class="nc-caveat">Jev tier = structural alignment of this setup with current index state as assessed by the model. Top/high = strong alignment found; not a trade recommendation. Confidence = model posterior on its own tier choice, not a probability of profit.</p>'
+        +'</div>'
+      :'<div class="sc-section"><p class="nc-muted" style="font-size:12.5px">Jev review not available for this setup.</p></div>';
+
+    /* backtest stats */
+    const stats=rObj.stats||{};
+    const statsHtml=fin(stats.trades)
+      ?'<div class="sc-section"><h4 class="sc-section-title">Backtest statistics\u00a0<span class="nc-status-chip nc-status-'+esc(statusLower)+'">'+esc(s.status||'\u2014')+'</span></h4>'
+        +'<p class="nc-caveat">Paper simulation on NSE F&amp;O bhavcopy. Costs include modelled commission, taxes and slippage \u2014 not executable quotes. Validation gate: \u226560 trades, t-stat \u22652.0, positive mean in both sample halves. Past results \u2260 future performance. Return basis: '+esc(stats.return_basis||'\u2014')+'.</p>'
+        +'<div class="nc-table-scroll"><table class="nc-stats-table"><thead><tr><th>Metric</th><th>Value</th><th>Note</th></tr></thead><tbody>'
+        +'<tr><td>Trades</td><td>'+iInt(stats.trades)+'</td><td>Sample size</td></tr>'
+        +'<tr><td>Win rate</td><td>'+pctP(stats.win_rate,1)+'</td><td>Win rate without EV edge is unreliable</td></tr>'
+        +'<tr><td>Mean return</td><td class="'+cls(stats.mean_return_pct)+'">'+pct(stats.mean_return_pct,2)+'</td><td>Arithmetic; skewed by tails</td></tr>'
+        +'<tr><td>Median return</td><td class="'+cls(stats.median_return_pct)+'">'+pct(stats.median_return_pct,2)+'</td><td>More robust than mean</td></tr>'
+        +'<tr><td>T-stat</td><td class="'+cls(stats.t_stat)+'">'+fmt(stats.t_stat,2)+'</td><td>|t|\u22652 = conventional significance</td></tr>'
+        +'<tr><td>Worst return</td><td class="neg">'+pct(stats.worst_return_pct,2)+'</td><td>Tail risk reference</td></tr>'
+        +(stats.first_half ?'<tr><td>1st-half mean</td><td class="'+cls(stats.first_half.mean_return_pct)+'">'+pct(stats.first_half.mean_return_pct,2)+'</td><td>Stability check</td></tr>':'')
+        +(stats.second_half?'<tr><td>2nd-half mean</td><td class="'+cls(stats.second_half.mean_return_pct)+'">'+pct(stats.second_half.mean_return_pct,2)+'</td><td>Stability check</td></tr>':'')
+        +'</tbody></table></div></div>'
+      :'<div class="sc-section"><p class="nc-caveat">No backtest statistics for this rule. Treat as structural/model research only.</p></div>';
+
+    /* math score bar */
+    const scoreHtml=
+      '<div class="nc-score-bar">'
+      +'<div><div class="nc-score-num">'+(fin(r.mathScore)?r.mathScore.toFixed(0):'\u2014')+'<span class="nc-score-denom">/100</span></div>'
+      +'<div style="font-size:10px;color:var(--nc-muted);margin-top:3px">Heuristic \u2014 not a probability</div></div>'
+      +'<div class="nc-score-breakdown">'
+      +(fin(mc.exitProbability)?'<div class="nc-score-comp"><span>Exit P(profit) \xd750%</span><div class="nc-score-track"><div class="nc-score-fill" style="width:'+Math.round(mc.exitProbability)+'%"></div></div><span>'+mc.exitProbability.toFixed(0)+'</span></div>':'')
+      +(fin(mc.expectedReturn) ?'<div class="nc-score-comp"><span>EV/risk \xd730%</span><div class="nc-score-track"><div class="nc-score-fill" style="width:'+Math.round(mc.expectedReturn)+'%"></div></div><span>'+mc.expectedReturn.toFixed(0)+'</span></div>':'')
+      +(fin(mc.downside)       ?'<div class="nc-score-comp"><span>Downside buffer \xd720%</span><div class="nc-score-track"><div class="nc-score-fill" style="width:'+Math.round(mc.downside)+'%"></div></div><span>'+mc.downside.toFixed(0)+'</span></div>':'')
+      +(!fin(r.mathScore)?'<p class="nc-muted" style="font-size:11px;margin:4px 0 0">Score unavailable \u2014 risk or exit data incomplete or horizon inconsistent.</p>':'')
+      +'</div></div>';
+
+    /* assemble */
+    return '<article class="nc-setup-card'+(expanded?' is-expanded':'')+'" data-rule="'+esc(s.rule)+'" data-bucket="'+esc(r.bucket)+'">'
+      /* compact header */
+      +'<button class="nc-setup-compact" aria-expanded="'+expanded+'" type="button">'
+        +'<div class="nc-rank-badge nc-rank-'+esc(r.bucket)+'">#'+r.rank+'</div>'
+        +'<div class="nc-setup-info">'
+          +'<span class="nc-setup-label">'+esc(s.label||s.rule)+'</span>'
+          +'<div class="nc-setup-chips">'
+            +'<span class="nc-chip '+bCls+'">'+esc(bLabels[r.bucket]||r.bucket)+'</span>'
+            +'<span class="nc-chip nc-chip-action">'+esc(s.action||'\u2014')+'</span>'
+            +(s.firing?'<span class="nc-chip nc-chip-firing">\u25cf Firing</span>':'<span class="nc-chip nc-chip-dormant">\u25cb Not firing</span>')
+            +(r.jev.available
+              ?'<span class="nc-chip nc-chip-jev">Jev '+esc(r.jev.tier)+(fin(r.jev.confidence)?' '+Math.round(r.jev.confidence*100)+'%':'')+'</span>'
+              :'<span class="nc-chip nc-chip-jev-none">Jev \u2014</span>')
+            +'<span class="nc-status-chip nc-status-'+esc(statusLower)+'">'+esc(s.status||'\u2014')+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<div class="nc-setup-ev">'
+          +'<span class="nc-ev-val '+cls(ex.exp_pnl_per_lot)+'">'+money(ex.exp_pnl_per_lot)+'</span>'
+          +'<span class="nc-ev-lbl">'+(fin(r.mathScore)?'score '+r.mathScore.toFixed(0):'score \u2014')+'</span>'
+        +'</div>'
+        +'<span class="nc-expand-icon" aria-hidden="true">\u25be</span>'
+      +'</button>'
+      /* full body — always in DOM; CSS hides until is-expanded */
+      +'<div class="nc-setup-body">'
+        +scoreHtml
+        +'<div class="sc-section"><h4 class="sc-section-title">Model exit P&amp;L \u00b7 '+esc(holdDesc)+' horizon (primary)</h4>'+exitHtml+'</div>'
+        +'<div class="sc-section"><h4 class="sc-section-title">Legs \u00b7 EOD reference prices</h4>'+legsHtml+'</div>'
+        +'<div class="sc-section"><h4 class="sc-section-title">Position Greeks per lot (sensitivity \u2014 not standalone alpha)</h4>'+greeksHtml+'</div>'
+        +'<div class="sc-section"><h4 class="sc-section-title">Risk at expiry \u00b7 gross per lot (secondary \u00b7 theoretical)</h4>'+riskHtml+'</div>'
+        +(svgHtml?'<div class="sc-section"><h4 class="sc-section-title">Gross payoff at expiry (computed from EOD leg prices)</h4>'+svgHtml
+          +'<p class="nc-caveat" style="margin-top:6px">X-axis: Nifty spot at expiry. Y-axis: gross P&amp;L per lot before fees. Theoretical expiry scenario \u2014 not the planned 5-session exit.</p></div>':'')
+        +'<div class="sc-section"><h4 class="sc-section-title">Entry &amp; exit plan</h4>'+planHtml+'</div>'
+        +'<div class="sc-section"><h4 class="sc-section-title">Signal assessment &amp; blockers</h4>'+rwHtml+'</div>'
+        +jevHtml
+        +statsHtml
+      +'</div>'
+    +'</article>';
   }
 
-  function renderIndex() {
-    const x = dataset.index, s = x.structure || {};
-    const trade = dataset.expiries.find(e => e.trade_expiry) || dataset.expiries[0];
-    $('index-source').textContent = x.official_close_file ? 'NSE index close file' : 'Option underlying price (index file unavailable)';
-    $('index-cards').innerHTML = '<dl class="nc-card-grid">' + [
-      card('Nifty 50', fmt(x.close), pct(x.change_pct, 2) + ' \u00b7 H ' + fmt(x.high) + ' L ' + fmt(x.low), cls(x.change_pct)),
-      card('5-session move', pct(x.ret5_pct, 2), numeric(x.z5) ? fmt(x.z5, 1) + ' sigma' : '', cls(x.ret5_pct)),
-      card('India VIX', fmt(x.vix), pct(x.vix_change_pct, 2)),
-      card('ATM IV (trade expiry)', pctPlain(x.atm_iv), 'IV percentile ' + intFmt(x.iv_pct) + ' \u00b7 realised ' + pctPlain(x.rv20)),
-      card('Vol risk premium', numeric(x.vrp) ? (x.vrp > 0 ? '+' : '') + fmt(x.vrp, 1) + ' pts' : '--', 'IV minus 20-session realised vol', cls(x.vrp)),
-      card('Expected move', trade ? '\u00b1' + fmt(trade.expected_move, 0) : '--', trade ? '1\u03c3 to ' + date(trade.expiry) + ': ' + fmt(trade.sigma_1[0], 0) + ' \u2013 ' + fmt(trade.sigma_1[1], 0) : ''),
-      card('Swing structure', esc(s.structure || '--'), s.breakout ? 'Fresh HH/HL breakout' : 'Swing high ' + fmt(s.confirmed_high, 0) + ' \u00b7 low ' + fmt(s.confirmed_low, 0), s.rising ? 'pos' : s.falling ? 'neg' : ''),
-      card('PCR (all expiries)', fmt(x.pcr, 2), numeric(x.pcr_chg5) ? (x.pcr_chg5 > 0 ? '+' : '') + fmt(x.pcr_chg5, 2) + ' in 5 sessions' : ''),
-      card('Futures', fmt(x.futures_close), 'Basis ' + (numeric(x.basis) ? (x.basis > 0 ? '+' : '') + fmt(x.basis, 1) : '--') + ' \u00b7 OI ' + pct(x.fut_oi5_pct) + ' (' + esc(x.buildup) + ')'),
-      card('FII index futures', numeric(s.fii_long_share) ? pctPlain(s.fii_long_share, 0) + ' long' : '--', numeric(s.fii_long_share_chg5) ? (s.fii_long_share_chg5 > 0 ? '+' : '') + fmt(s.fii_long_share_chg5, 1) + ' pts in 5 sessions' : ''),
-      card('Valuation', 'P/E ' + fmt(x.pe), 'P/B ' + fmt(x.pb) + ' \u00b7 yield ' + pctPlain(x.div_yield, 2)),
-      card('Bank Nifty', fmt(x.bank_nifty), pct(x.bank_nifty_change_pct, 2), cls(x.bank_nifty_change_pct)),
-    ].join('') + '</dl>';
-  }
-
-  // ---------------------------------------------------------------- best setup + Jev
-  function probBars(p) {
-    if (!p) return '';
-    return '<div class="nc-probs">' + Object.entries(p).sort((a, b) => (b[1] || 0) - (a[1] || 0)).map(([k, v]) =>
-      '<div><span>' + esc(label(k)) + '</span><i style="width:' + (numeric(v) ? Math.round(v * 100) : 0) + '%"></i><b>' + (numeric(v) ? Math.round(v * 100) + '%' : '--') + '</b></div>').join('') + '</div>';
-  }
-
-  function renderVerdict() {
-    const best = dataset.best_setup || {};
-    const setup = (dataset.setups || []).find(s => s.rule === best.rule);
-    $('best-setup').innerHTML = '<span class="label">BEST SETUP (BACKTEST-VALIDATED ONLY)</span><h3>' + esc(best.label || 'No validated setup today') + '</h3><p>' + esc(best.reason || '') + '</p>' +
-      (setup ? '<p class="muted">' + setup.legs.map(l => sideTag(l.side) + ' ' + esc(l.name) + ' @ ' + money(l.ref_close)).join('<br>') + '</p>' : '') +
-      '<p class="muted">Fired today: ' + ((dataset.setups || []).length ? dataset.setups.map(s => esc(s.label) + ' ' + statusBadge(s.status)).join(' \u00b7 ') : 'none') + '</p>';
-    const jev = dataset.jev || {}, j = jev.index;
-    if (!j) {
-      $('jev-index').innerHTML = '<span class="label">JEV REVIEW</span><h3>Jev not run</h3><p class="muted">' + esc(jev.message || '') + '</p>';
-      return;
-    }
-    const row = (title, a) => a ? '<div class="nc-jev-row"><div><strong>' + esc(title) + ':</strong> <span class="nc-chip ' + esc(STANCE_CLASS[a.choice] || RISK_CLASS[a.choice] || '') + '">' + esc(label(a.choice)) + '</span> <small class="muted">confidence ' + (numeric(a.confidence) ? Math.round(a.confidence * 100) + '%' : '--') + '</small></div>' + probBars(a.probabilities) + '</div>' : '';
-    const setupRule = j.setup && (dataset.rules || []).find(r => r.id === j.setup.choice);
-    $('jev-index').innerHTML = '<span class="label">JEV REVIEW \u00b7 ' + esc(jev.model || '') + '</span>' +
-      row('Direction (5 sessions)', j.direction) + row('Implied volatility', j.volatility) + row('Institutional positioning', j.positioning) +
-      (j.setup ? '<div class="nc-jev-row"><div><strong>Setup pick:</strong> <span class="nc-chip">' + esc(setupRule ? setupRule.label : label(j.setup.choice)) + '</span> <small class="muted">confidence ' + (numeric(j.setup.confidence) ? Math.round(j.setup.confidence * 100) + '%' : '--') + '</small></div></div>' : '') +
-      row('Position risk', j.risk) + '<p class="muted">' + esc(jev.message || '') + ' Jev reads only the numbers on this page; its confidence is not a probability of profit.</p>';
-  }
-
-  // ---------------------------------------------------------------- chain table
-  const currentExpiry = () => dataset.expiries.find(e => e.expiry === expiry) || dataset.expiries[0];
-
-  function renderExpiryPicker() {
-    const sel = $('expiry');
-    sel.innerHTML = dataset.expiries.map(e => '<option value="' + esc(e.expiry) + '">' + esc(date(e.expiry)) + ' \u00b7 ' + e.days_to_expiry + 'd ' + esc(e.kind) + (e.trade_expiry ? ' (setups)' : '') + '</option>').join('');
-    const pick = dataset.expiries.find(e => e.trade_expiry) || dataset.expiries[0];
-    expiry = pick.expiry;
-    sel.value = expiry;
-  }
-
-  function renderSigma() {
-    const e = currentExpiry(), spot = dataset.index.option_spot;
-    $('sigma-card').innerHTML = '<dl class="nc-card-grid">' + [
-      card('ATM strike / IV', fmt(e.atm, 0), pctPlain(e.atm_iv, 2) + ' implied'),
-      card('ATM straddle', money(e.straddle), pctPlain(e.straddle_pct, 2) + ' of spot'),
-      card('1 sigma (68%)', fmt(e.sigma_1[0], 0) + ' \u2013 ' + fmt(e.sigma_1[1], 0), '\u00b1' + fmt(e.expected_move, 0) + ' points'),
-      card('2 sigma (95%)', fmt(e.sigma_2[0], 0) + ' \u2013 ' + fmt(e.sigma_2[1], 0), 'Spot ' + fmt(spot)),
-      card('25-delta skew', numeric(e.skew25) ? (e.skew25 > 0 ? '+' : '') + fmt(e.skew25, 2) + ' pts' : '--', 'Put ' + fmt(e.put25_strike, 0) + ' vs call ' + fmt(e.call25_strike, 0) + ' IV'),
-      card('Walls / max pain', fmt(e.put_wall, 0) + ' / ' + fmt(e.call_wall, 0), 'Max pain ' + fmt(e.max_pain, 0) + ' \u00b7 PCR ' + fmt(e.pcr, 2)),
-    ].join('') + '</dl>';
-  }
-
-  function renderChain() {
-    const e = currentExpiry(), spot = dataset.index.option_spot;
-    const centre = e.rows.reduce((best, r, i) => Math.abs(r.strike - spot) < Math.abs(e.rows[best].strike - spot) ? i : best, 0);
-    const rows = e.rows.slice(Math.max(0, centre - width), centre + width + 1);
-    const maxOi = Math.max(1, ...rows.map(r => Math.max(r.ce.oi || 0, r.pe.oi || 0)));
-    const lo = e.sigma_1[0], hi = e.sigma_1[1];
-    const side = (o, call) => {
-      const itm = call ? rowStrike < spot : rowStrike > spot;
-      const cells = [intFmt(o.oi), signedInt(o.oi_chg), intFmt(o.volume), (numeric(o.iv) ? fmt(o.iv, 1) : '--') + (o.iv_estimated ? '*' : ''), fmt(o.delta, 2), fmt(o.gamma, 5), fmt(o.theta, 1), fmt(o.vega, 1)];
-      const bar = '<i class="nc-oibar ' + (call ? 'ce' : 'pe') + '" style="width:' + Math.round(100 * (o.oi || 0) / maxOi) + '%"></i>';
-      const ordered = call ? cells : cells.slice().reverse();
-      return ordered.map((c, i) => '<td class="' + (itm ? 'itm ' : '') + ((call && i === 0) || (!call && i === ordered.length - 1) ? 'nc-oicell' : '') + '">' + ((call && i === 0) || (!call && i === ordered.length - 1) ? bar : '') + c + '</td>').join('');
-    };
-    let rowStrike = 0;
-    $('chain-rows').innerHTML = rows.map(r => {
-      rowStrike = r.strike;
-      const ce = side(r.ce, true);
-      const pe = side(r.pe, false);
-      const atm = r.strike === e.atm;
-      const inSigma = r.strike >= lo && r.strike <= hi;
-      const tags = [r.strike === e.call_wall ? 'call wall' : '', r.strike === e.put_wall ? 'put wall' : '', r.strike === e.max_pain ? 'max pain' : ''].filter(Boolean);
-      return '<tr data-strike="' + r.strike + '" class="' + (atm ? 'nc-atm ' : '') + (inSigma ? 'nc-sigma1' : '') + '">' + ce +
-        '<td class="itm-ce">' + money(r.ce.close) + '</td><td class="nc-strike"><strong>' + fmt(r.strike, 0) + '</strong>' + (tags.length ? '<small>' + esc(tags.join(' \u00b7 ')) + '</small>' : '') + '</td><td>' + money(r.pe.close) + '</td>' + pe + '</tr>';
-    }).join('');
-    $('oi-heading').textContent = date(e.expiry) + ' \u00b7 ' + e.days_to_expiry + ' days';
-    renderOiChart(e);
-  }
-
-  // ---------------------------------------------------------------- SVG charts
-  function svgLines(host, series, opts = {}) {
-    const W = opts.width || 640, H = opts.height || 220, P = {l: 46, r: 46, t: 14, b: 26};
-    const n = Math.max(0, ...series.map(s => s.values.length));
-    if (!n) { host.innerHTML = '<p class="muted">No history.</p>'; return; }
-    const axes = {};
-    for (const s of series) {
-      const vals = s.values.filter(numeric);
-      if (!vals.length) continue;
-      const a = axes[s.axis || 'l'] || (axes[s.axis || 'l'] = {min: Infinity, max: -Infinity});
-      a.min = Math.min(a.min, ...vals); a.max = Math.max(a.max, ...vals);
-    }
-    for (const a of Object.values(axes)) { if (a.max === a.min) { a.max += 1; a.min -= 1; } const pad = (a.max - a.min) * 0.06; a.max += pad; a.min -= pad; }
-    const x = i => P.l + (W - P.l - P.r) * (n === 1 ? 0.5 : i / (n - 1));
-    const y = (v, ax) => { const a = axes[ax || 'l']; return P.t + (H - P.t - P.b) * (1 - (v - a.min) / (a.max - a.min)); };
-    let out = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(opts.title || 'chart') + '">';
-    for (const [ax, a] of Object.entries(axes)) {
-      for (let k = 0; k <= 3; k++) {
-        const v = a.min + (a.max - a.min) * k / 3, yy = y(v, ax);
-        if (ax === 'l') out += '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + yy + '" y2="' + yy + '" class="grid"/>';
-        out += '<text x="' + (ax === 'l' ? P.l - 4 : W - P.r + 4) + '" y="' + (yy + 3) + '" text-anchor="' + (ax === 'l' ? 'end' : 'start') + '" class="axis">' + esc(fmt(v, opts.digits ?? 1)) + '</text>';
-      }
-    }
-    for (const s of series) {
-      let d = '', pen = false;
-      s.values.forEach((v, i) => { if (numeric(v)) { d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v, s.axis).toFixed(1); pen = true; } else pen = false; });
-      out += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="1.8"' + (s.dash ? ' stroke-dasharray="4 3"' : '') + '/>';
-    }
-    const dates = opts.dates || [];
-    if (dates.length) {
-      out += '<text x="' + P.l + '" y="' + (H - 6) + '" class="axis">' + esc(date(dates[0])) + '</text><text x="' + (W - P.r) + '" y="' + (H - 6) + '" text-anchor="end" class="axis">' + esc(date(dates[dates.length - 1])) + '</text>';
-    }
-    out += '</svg><p class="chart-legend">' + series.map(s => '<span class="nc-key" style="--k:' + s.color + '">' + esc(s.name) + (s.axis === 'r' ? ' (right)' : '') + '</span>').join(' ') + '</p>';
-    host.innerHTML = out;
-  }
-
-  function renderOiChart(e) {
-    const p = e.oi_profile, host = $('oi-chart');
-    if (!p || !p.strikes.length) { host.innerHTML = '<p class="muted">No open-interest profile for this expiry.</p>'; return; }
-    const W = 640, H = 240, P = {l: 50, r: 10, t: 12, b: 34}, spot = dataset.index.option_spot;
-    const ce = oiMode === 'oi' ? p.ce_oi : p.ce_oi_chg, pe = oiMode === 'oi' ? p.pe_oi : p.pe_oi_chg;
-    const lo = Math.min(0, ...ce, ...pe), hi = Math.max(1, ...ce, ...pe);
-    const kmin = p.strikes[0], kmax = p.strikes[p.strikes.length - 1];
-    const x = k => P.l + (W - P.l - P.r) * (kmax === kmin ? 0.5 : (k - kmin) / (kmax - kmin));
-    const y = v => P.t + (H - P.t - P.b) * (1 - (v - lo) / (hi - lo));
-    const bw = Math.max(2, (W - P.l - P.r) / p.strikes.length / 2.4);
-    let out = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Open interest by strike">';
-    const s1 = e.sigma_1;
-    if (numeric(s1[0]) && numeric(s1[1])) out += '<rect x="' + x(Math.max(kmin, s1[0])) + '" width="' + Math.max(0, x(Math.min(kmax, s1[1])) - x(Math.max(kmin, s1[0]))) + '" y="' + P.t + '" height="' + (H - P.t - P.b) + '" class="nc-band"/>';
-    out += '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y(0) + '" y2="' + y(0) + '" class="grid"/>';
-    p.strikes.forEach((k, i) => {
-      const yc = y(Math.max(0, ce[i])), yp = y(Math.max(0, pe[i]));
-      out += '<rect class="bar-ce" x="' + (x(k) - bw) + '" width="' + bw + '" y="' + Math.min(yc, y(ce[i])) + '" height="' + Math.abs(y(ce[i]) - y(0)) + '"><title>' + esc(fmt(k, 0) + ' CE ' + intFmt(ce[i])) + '</title></rect>';
-      out += '<rect class="bar-pe" x="' + x(k) + '" width="' + bw + '" y="' + Math.min(yp, y(pe[i])) + '" height="' + Math.abs(y(pe[i]) - y(0)) + '"><title>' + esc(fmt(k, 0) + ' PE ' + intFmt(pe[i])) + '</title></rect>';
-    });
-    const mark = (k, cls2, text) => numeric(k) && k >= kmin && k <= kmax ? '<line x1="' + x(k) + '" x2="' + x(k) + '" y1="' + P.t + '" y2="' + (H - P.b) + '" class="' + cls2 + '"/><text x="' + (x(k) + 3) + '" y="' + (P.t + 10) + '" class="axis">' + esc(text) + '</text>' : '';
-    out += mark(spot, 'spot-line', 'spot') + mark(e.max_pain, 'mp-line', 'max pain');
-    [0, Math.floor(p.strikes.length / 2), p.strikes.length - 1].forEach(i => { out += '<text x="' + x(p.strikes[i]) + '" y="' + (H - 18) + '" text-anchor="middle" class="axis">' + esc(fmt(p.strikes[i], 0)) + '</text>'; });
-    out += '<text x="' + (P.l - 4) + '" y="' + (y(hi) + 3) + '" text-anchor="end" class="axis">' + esc(intFmt(hi / 1e5)) + 'L</text></svg>';
-    host.innerHTML = out;
-  }
-
-  function renderVol() {
-    const h = dataset.history || {};
-    const vix = new Map((h.vix_dates || []).map((d, i) => [d, h.vix[i]]));
-    svgLines($('vol-chart'), [
-      {name: 'ATM IV', values: h.atm_iv || [], color: '#3066a0'},
-      {name: 'Realised vol (20d)', values: h.rv20 || [], color: '#785b20', dash: true},
-      {name: 'India VIX', values: (h.dates || []).map(d => vix.has(d) ? vix.get(d) : null), color: '#ad4037'},
-    ], {dates: h.dates, title: 'Volatility history'});
-  }
-
-  function renderHhhl() {
-    const c = dataset.hhhl || {}, host = $('hhhl-chart'), s = (dataset.index || {}).structure || {};
-    $('hhhl-state').textContent = (s.structure || '--') + (s.breakout ? ' \u00b7 fresh breakout' : '') + ' \u00b7 close ' + fmt(s.close) + ' vs 20-day ' + fmt(s.sma20);
-    const n = (c.dates || []).length;
-    if (!n) { host.innerHTML = '<p class="muted">No index price history.</p>'; return; }
-    const W = 1100, H = 320, P = {l: 56, r: 12, t: 22, b: 40};
-    const lo = Math.min(...c.low.filter(numeric)), hi = Math.max(...c.high.filter(numeric));
-    const x = i => P.l + (W - P.l - P.r) * (i + 0.5) / n;
-    const y = v => P.t + (H - P.t - P.b) * (1 - (v - lo) / (hi - lo || 1));
-    const bw = Math.max(1.5, (W - P.l - P.r) / n * 0.6);
-    let out = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Nifty candles with confirmed swing labels">';
-    for (let k = 0; k <= 4; k++) { const v = lo + (hi - lo) * k / 4; out += '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y(v) + '" y2="' + y(v) + '" class="grid"/><text x="' + (P.l - 4) + '" y="' + (y(v) + 3) + '" text-anchor="end" class="axis">' + esc(fmt(v, 0)) + '</text>'; }
-    c.dates.forEach((d, i) => {
-      const o = c.open[i], cl = c.close[i];
-      if (![o, cl, c.high[i], c.low[i]].every(numeric)) return;
-      const up = cl >= o;
-      out += '<line x1="' + x(i) + '" x2="' + x(i) + '" y1="' + y(c.high[i]) + '" y2="' + y(c.low[i]) + '" class="' + (up ? 'wick-up' : 'wick-dn') + '"/>' +
-        '<rect x="' + (x(i) - bw / 2) + '" width="' + bw + '" y="' + y(Math.max(o, cl)) + '" height="' + Math.max(1, Math.abs(y(o) - y(cl))) + '" class="' + (up ? 'candle-up' : 'candle-dn') + '"><title>' + esc(d + ' O ' + fmt(o) + ' H ' + fmt(c.high[i]) + ' L ' + fmt(c.low[i]) + ' C ' + fmt(cl)) + '</title></rect>';
-    });
-    let d = '', pen = false;
-    (c.sma20 || []).forEach((v, i) => { if (numeric(v)) { d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; } });
-    out += '<path d="' + d + '" fill="none" stroke="#667264" stroke-width="1.4"/>';
-    const idx = new Map(c.dates.map((dd, i) => [dd, i]));
-    for (const p of c.swings || []) {
-      if (!idx.has(p.pivot_date)) continue;
-      const i = idx.get(p.pivot_date), good = p.label === 'HH' || p.label === 'HL', bad = p.label === 'LH' || p.label === 'LL';
-      const yy = p.kind === 'high' ? y(p.price) - 7 : y(p.price) + 14;
-      out += '<text x="' + x(i) + '" y="' + yy + '" text-anchor="middle" class="swing ' + (good ? 'swing-good' : bad ? 'swing-bad' : '') + '">' + esc(p.label) + '</text>';
-    }
-    out += '<text x="' + P.l + '" y="' + (H - 6) + '" class="axis">' + esc(date(c.dates[0])) + '</text><text x="' + (W - P.r) + '" y="' + (H - 6) + '" text-anchor="end" class="axis">' + esc(date(c.dates[n - 1])) + '</text></svg>';
-    host.innerHTML = out;
-  }
-
-  // ---------------------------------------------------------------- participants
-  function renderParticipants() {
-    const rows = dataset.participants || [];
-    $('participant-rows').innerHTML = rows.length ? rows.map(p => {
-      const n = p.net || {}, c = p.net_chg5 || {};
-      return '<tr data-participant="' + esc(p.participant) + '"><td><strong>' + esc(p.participant) + '</strong></td><td>' + intFmt(p.fut_long) + '</td><td>' + intFmt(p.fut_short) + '</td><td>' + pctPlain(p.fut_long_share, 0) +
-        (numeric(p.fut_long_share_chg5) ? ' <small class="' + cls(p.fut_long_share_chg5) + '">(' + (p.fut_long_share_chg5 > 0 ? '+' : '') + fmt(p.fut_long_share_chg5, 1) + ')</small>' : '') + '</td>' +
-        '<td class="' + cls(n.futures) + '">' + signedInt(n.futures) + '</td><td class="' + cls(n.calls) + '">' + signedInt(n.calls) + '</td><td class="' + cls(n.puts) + '">' + signedInt(n.puts) + '</td>' +
-        '<td><small>Fut ' + signedInt(c.futures) + ' \u00b7 C ' + signedInt(c.calls) + ' \u00b7 P ' + signedInt(c.puts) + '</small></td><td class="nc-read">' + esc(p.read) + '</td></tr>';
-    }).join('') : '<tr><td colspan="9" class="muted">Participant-wise OI was not available for this session.</td></tr>';
-    const h = dataset.history || {};
-    svgLines($('part-chart'), [
-      {name: 'FII index-futures long share %', values: h.fii_long_share || [], color: '#3066a0'},
-      {name: 'Client long share %', values: h.client_long_share || [], color: '#ad4037', dash: true},
-      {name: 'Nifty', values: h.spot || [], color: '#667264', axis: 'r'},
-    ], {dates: h.dates, title: 'Participant positioning history', width: 1100, height: 240, digits: 0});
-  }
-
-  // ---------------------------------------------------------------- setups + payoff
-  function payoffSvg(p) {
-    const c = (p || {}).curve || {};
-    if (!c.price || !c.price.length) return '';
-    const W = 360, H = 140, P = {l: 44, r: 8, t: 8, b: 18};
-    const lo = Math.min(0, ...c.pnl), hi = Math.max(0, ...c.pnl), spot = dataset.index.option_spot;
-    const x = v => P.l + (W - P.l - P.r) * (v - c.price[0]) / (c.price[c.price.length - 1] - c.price[0]);
-    const y = v => P.t + (H - P.t - P.b) * (1 - (v - lo) / (hi - lo || 1));
-    const d = c.price.map((v, i) => (i ? 'L' : 'M') + x(v).toFixed(1) + ' ' + y(c.pnl[i]).toFixed(1)).join('');
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="nc-payoff" role="img" aria-label="Expiry payoff per lot"><line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y(0) + '" y2="' + y(0) + '" class="grid"/>' +
-      '<line x1="' + x(spot) + '" x2="' + x(spot) + '" y1="' + P.t + '" y2="' + (H - P.b) + '" class="spot-line"/><path d="' + d + '" fill="none" stroke="#246c4e" stroke-width="2"/>' +
-      '<text x="' + (P.l - 4) + '" y="' + (y(hi) + 3) + '" text-anchor="end" class="axis">' + esc(intFmt(hi)) + '</text><text x="' + (P.l - 4) + '" y="' + (y(lo) + 3) + '" text-anchor="end" class="axis">' + esc(intFmt(lo)) + '</text>' +
-      '<text x="' + P.l + '" y="' + (H - 4) + '" class="axis">' + esc(fmt(c.price[0], 0)) + '</text><text x="' + (W - P.r) + '" y="' + (H - 4) + '" text-anchor="end" class="axis">' + esc(fmt(c.price[c.price.length - 1], 0)) + '</text></svg>';
-  }
-
-  function renderSetups() {
-    const setups = dataset.setups || [];
-    const rules = new Map((dataset.rules || []).map(r => [r.id, r]));
-    const tierOrder = {top:0,high:1,medium:2,low:3,avoid:4};
-    const sorted = [...setups].sort((a,b)=>(tierOrder[(a.jev_priority||{}).tier]??5)-(tierOrder[(b.jev_priority||{}).tier]??5));
-    $('setup-cards').innerHTML = setups.length ? sorted.map(s => {
-      const r = rules.get(s.rule) || {stats: {}}, st = r.stats || {}, g = s.position_greeks_per_lot || {}, pay = s.payoff || {};
-      const sl = s.stop_loss || {}, firing = s.firing !== false, jp = s.jev_priority || {};
-      const isBest = jp.tier === 'top', isHigh = jp.tier === 'high';
-      const PRIO_CLS = {top: 'pos', high: 'pos', medium: 'warn', low: 'muted', avoid: 'neg'};
-      const prioBadge = jp.tier ? '<span class="nc-chip nc-prio-' + esc(jp.tier) + ' ' + (PRIO_CLS[jp.tier] || '') + '">JEV: ' + esc(jp.tier.toUpperCase()) + (numeric(jp.confidence) ? ' ' + Math.round(jp.confidence * 100) + '%' : '') + '</span>' : '';
-      const bestBadge = isBest ? '<span class="nc-chip nc-best-badge">\u2605 BEST</span> ' : (isHigh ? '<span class="nc-chip nc-best-badge" style="background:#4ade80">\u25b2 HIGH</span> ' : '');
-      return '<article class="nc-setup ' + (firing ? 'nc-firing' : 'nc-dormant') + (isBest || isHigh ? ' nc-best' : '') + '" data-rule="' + esc(s.rule) + '"><header><h3>' + esc(s.label) + '</h3>' + bestBadge + prioBadge + ' ' + (firing ? '<span class="nc-chip pos">FIRING TODAY</span>' : '<span class="nc-chip muted">not triggered</span>') + ' ' + statusBadge(s.status) + '</header>' +
-        '<p class="muted">' + esc(s.condition) + '</p><table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (live / ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>' +
-        s.legs.map(l => '<tr><td>' + sideTag(l.side) + '</td><td>' + esc(l.name) + '</td><td>' + (numeric(l.live_ltp) ? '<b class="pos">' + money(l.live_ltp) + '</b> <small class="muted">live</small>' : money(l.ref_close)) + '</td><td>' + fmt(l.delta, 2) + '</td><td>' + fmt(l.theta, 1) + '</td></tr>').join('') + '</tbody></table>' +
-        '<dl class="nc-mini"><div><dt>Position delta / lot</dt><dd>' + fmt(g.delta, 1) + '</dd></div><div><dt>Theta / day / lot</dt><dd class="' + cls(g.theta) + '">' + money(g.theta) + '</dd></div><div><dt>Vega / lot</dt><dd>' + money(g.vega) + '</dd></div>' +
-        '<div><dt>Max profit (expiry)</dt><dd class="pos">' + (numeric(pay.max_profit) ? money(pay.max_profit) : 'Unlimited') + '</dd></div><div><dt>Max loss (expiry)</dt><dd class="neg">' + (numeric(pay.max_loss) ? money(pay.max_loss) : 'Unlimited') + '</dd></div>' +
-        '<div><dt>Breakeven (expiry)</dt><dd>' + ((pay.breakevens || []).map(b => fmt(b, 0)).join(' / ') || '--') + '</dd></div><div><dt>Model P(profit) at expiry</dt><dd>' + pctPlain(pay.prob_profit_model, 0) + '</dd></div>' +
-        '<div class="nc-exit"><dt>Expected P&amp;L at exit (' + ((s.exit || {}).hold_sessions || 5) + 's)</dt><dd class="' + cls((s.exit || {}).exp_pnl_per_lot) + '">' + (numeric((s.exit || {}).exp_pnl_per_lot) ? money((s.exit || {}).exp_pnl_per_lot) : '--') + '</dd></div>' +
-        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>' + pctPlain((s.exit || {}).p_profit, 0) + '</dd></div><div><dt>Exit by</dt><dd>' + esc(date((s.plan || {}).exit_by)) + '</dd></div>' +
-        (sl.level_per_lot != null ? '<div class="nc-stop"><dt>Stop-loss / lot</dt><dd class="neg">' + money(sl.level_per_lot) + '</dd></div>' : '') + '</dl>' +
-        (sl.rule ? '<p class="muted"><small>\u26d4 Stop: ' + esc(sl.rule) + '</small></p>' : '') +
-        ((s.vol_edge) ? '<div class="nc-voledge"><strong>Volatility maths</strong>' +
-          (s.vol_edge.verdict ? '<p class="nc-verdict-line">' + esc(s.vol_edge.verdict) + '</p>' : '') +
-          '<dl class="nc-mini"><div><dt>Move needed to profit</dt><dd>' + (numeric(s.vol_edge.move_needed_to_profit) ? '\u00b1' + fmt(s.vol_edge.move_needed_to_profit, 0) + ' (' + fmt(s.vol_edge.move_needed_pct, 1) + '%)' : '--') + '</dd></div>' +
-          '<div><dt>Expected move (1\u03c3)</dt><dd>\u00b1' + (numeric(s.vol_edge.expected_move_1sigma) ? fmt(s.vol_edge.expected_move_1sigma, 0) : '--') + '</dd></div>' +
-          '<div><dt>ATM IV vs realised</dt><dd>' + pctPlain(s.vol_edge.atm_iv, 1) + ' vs ' + pctPlain(s.vol_edge.realised_vol, 1) + '</dd></div>' +
-          '<div><dt>VRP</dt><dd class="' + cls(s.vol_edge.vrp_points) + '">' + (numeric(s.vol_edge.vrp_points) ? fmt(s.vol_edge.vrp_points, 1) + ' pts' : '--') + '</dd></div></dl>' +
-          '<p class="muted"><small>' + esc(s.vol_edge.edge || '') + '</small></p></div>' : '') +
-        payoffSvg(pay) + ((s.plan || {}).payoff_note ? '<p class="muted"><small>' + esc(s.plan.payoff_note) + '</small></p>' : '') + '<p class="muted">Backtest: ' + intFmt(st.trades) + ' trades, win ' + pctPlain(st.win_rate, 0) + ', mean ' + pct(st.mean_return_pct) + ' on ' + esc(st.return_basis || '') + ', t-stat ' + fmt(st.t_stat, 2) + ', worst ' + pct(st.worst_return_pct) + '.</p></article>';
-    }).join('') : '<p class="muted">No setup\u2019s trigger condition is met today. See the evidence table below for every rule and how close each trigger is.</p>';
-  }
-
-  function renderMathBest() {
-    const el = $('math-best-cards'), noteEl = $('math-best-note');
-    if (!el) return;
-    const exp = (dataset.expiries || []).find(e => e.trade_expiry);
-    if (!exp || !exp.rows) { el.innerHTML = '<p class="muted">Chain data not loaded.</p>'; return; }
-    const S = dataset.index.option_spot || dataset.index.close;
-    const VRP = dataset.index.vrp || 0;
-    const DTE = exp.days_to_expiry, T = DTE/365;
-    const r = 0.065, lot = dataset.index.lot || 75, HOLD = 5;
-    const exitBy = ((dataset.setups || [])[0] || {}).plan ? dataset.setups[0].plan.exit_by : null;
-    function ncdf(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989422820*Math.exp(-x*x/2);const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));return x>=0?1-p:p;}
-    function npdf(x){return 0.3989422804*Math.exp(-x*x/2);}
-    function bsp(s,k,t,iv,call){if(t<=0||iv<=0)return call?Math.max(s-k,0):Math.max(k-s,0);const w=iv*Math.sqrt(t),d1=(Math.log(s/k)+(r+0.5*iv*iv)*t)/w,d2=d1-w,dc=Math.exp(-r*t);return call?s*ncdf(d1)-k*dc*ncdf(d2):k*dc*ncdf(-d2)-s*ncdf(-d1);}
-    function pITM(s,k,t,iv,call){if(t<=0)return call?(s>k?1:0):(s<k?1:0);const d2=(Math.log(s/k)+(r-0.5*iv*iv)*t)/(iv*Math.sqrt(t));return call?ncdf(d2):ncdf(-d2);}
-    const rows=exp.rows.filter(x=>x.ce&&x.ce.close>0.5&&x.pe&&x.pe.close>0.5);
-    const cands=[];
-    let totalScan=0;
-    for (let i=0;i<rows.length;i++) {
-      for (let j=i+1;j<rows.length;j++) {
-        const kL=rows[i],kH=rows[j],w=kH.strike-kL.strike;
-        if (w<50||w>1200) continue;
-        if (kL.ce.close>kH.ce.close) {
-          totalScan++;
-          const deb=kL.ce.close-kH.ce.close,mg=(w-deb)*lot,ml=deb*lot;
-          if (mg>0&&ml>0) {
-            const iv=(kL.ce.iv_own||kL.ce.iv||exp.atm_iv)/100,p=pITM(S,kL.strike+deb,T,iv,true)*100,rr=mg/ml;
-            if (p>=25) cands.push({view:'bullish',opt:'CE',bs:kL.strike,ss:kH.strike,pp:p,rr:rr,score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.1:0)});
-          }
-        }
-        if (kH.pe.close>kL.pe.close) {
-          totalScan++;
-          const deb=kH.pe.close-kL.pe.close,mg=(w-deb)*lot,ml=deb*lot;
-          if (mg>0&&ml>0) {
-            const iv=(kH.pe.iv_own||kH.pe.iv||exp.atm_iv)/100,p=pITM(S,kH.strike-deb,T,iv,false)*100,rr=mg/ml;
-            if (p>=25) cands.push({view:'bearish',opt:'PE',bs:kH.strike,ss:kL.strike,pp:p,rr:rr,score:(p/100)*0.5+Math.min(rr/4,1)*0.5+(VRP<-2?0.08:0)});
-          }
-        }
-      }
-    }
-    cands.sort((a,b)=>b.score-a.score);
-    const top=[],ct={};
-    for (const c of cands) { if ((ct[c.view]||0)>=3) continue; ct[c.view]=(ct[c.view]||0)+1; top.push(c); if (top.length>=5) break; }
-    const vrpTxt=VRP<-1?'IV cheap vs realised \u2192 debit buyers favoured':VRP>1?'IV rich vs realised \u2192 credit sellers favoured':'IV near realised';
-    if (noteEl) noteEl.textContent=totalScan.toLocaleString('en-IN')+' spread combinations scanned \u00b7 '+rows.length+' strikes \u00d7 '+DTE+'-DTE chain \u00b7 VRP '+(VRP>0?'+':'')+VRP.toFixed(1)+'pts ('+vrpTxt+') \u00b7 Ranked by P(profit)\u00d7risk-reward. Illustrative; no costs modelled. Not a trade recommendation.';
-    function build(c) {
-      const isBull=c.view==='bullish',opt=c.opt,sg=s=>s==='BUY'?1:-1;
-      const spec=[{strike:c.bs,side:'BUY'},{strike:c.ss,side:'SELL'}];
-      const legs=spec.map(L=>{
-        const row=rows.find(x=>Math.round(x.strike)===Math.round(L.strike));
-        const o=(opt==='CE'?row.ce:row.pe)||{};
-        return {name:'NIFTY '+exp.expiry+' '+L.strike+' '+opt,side:L.side,option_type:opt,strike:L.strike,
-          ref_close:o.close||0,delta:o.delta||0,theta:o.theta||0,vega:o.vega||0,iv:(o.iv_own||o.iv||exp.atm_iv)/100};
+  /* ── Render all cards into #setup-cards ── */
+  function renderSetupFeed() {
+    const host=$('setup-cards'); if(!host) return;
+    host.innerHTML=ranked.map((r,i)=>buildCard(r,i<3)).join('');
+    ranked.forEach(r=>byRule.set(r.setup.rule,r));
+    updateCounts();
+    updateVisibility();
+    host.querySelectorAll('.nc-setup-compact').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const card=btn.closest('.nc-setup-card');
+        const exp=card.classList.toggle('is-expanded');
+        btn.setAttribute('aria-expanded',String(exp));
       });
-      const pg={delta:legs.reduce((a,l)=>a+sg(l.side)*l.delta*lot,0),theta:legs.reduce((a,l)=>a+sg(l.side)*l.theta*lot,0),vega:legs.reduce((a,l)=>a+sg(l.side)*l.vega*lot,0)};
-      const netDebit=legs.reduce((a,l)=>a+sg(l.side)*l.ref_close,0);
-      const width=Math.abs(c.ss-c.bs);
-      const maxProfit=(width-Math.abs(netDebit))*lot, maxLoss=-Math.abs(netDebit)*lot;
-      const be=isBull?c.bs+netDebit:c.bs-netDebit;
-      const pExpiry=pITM(S,be,T,legs[0].iv,isBull)*100;
-      const curve={price:[],pnl:[]},lo=S*0.85,hi=S*1.15,N=60;
-      for (let i=0;i<=N;i++){const px=lo+(hi-lo)*i/N;let v=0;for(const l of legs){const it=l.option_type==='CE'?Math.max(px-l.strike,0):Math.max(l.strike-px,0);v+=sg(l.side)*it;}curve.price.push(px);curve.pnl.push((v-netDebit)*lot);}
-      const hX=Math.min(HOLD,DTE),tH=Math.max(hX,1)/365,tR=Math.max(DTE-hX,0)/365;
-      const cost=legs.reduce((a,l)=>a+Math.max(0.05,l.ref_close*0.005)*2,0)*lot;
-      let ev=0,pprof=0,msum=0;const steps=160;
-      for (let i=0;i<steps;i++){const z=-4.5+9*(i+0.5)/steps,m=npdf(z)*(9/steps);const sp=S*Math.exp((r-0.5*legs[0].iv*legs[0].iv)*tH+legs[0].iv*Math.sqrt(tH)*z);let v=0;for(const l of legs)v+=sg(l.side)*bsp(sp,l.strike,tR,l.iv,l.option_type==='CE');const pnl=(v-netDebit)*lot-cost;ev+=pnl*m;if(pnl>0)pprof+=m;msum+=m;}
-      ev/=msum;pprof=pprof/msum*100;
-      const stop=maxLoss*0.5;
-      return {legs,pg,maxProfit,maxLoss,be,pExpiry,curve,evExit:ev,pProfitExit:pprof,netDebit,stop,width};
-    }
-    el.innerHTML=top.length?top.map((c,i)=>{
-      const d=build(c),isBull=c.view==='bullish';
-      const label=(isBull?'Bull call spread ':'Bear put spread ')+c.bs+'/'+c.ss+' '+c.opt;
-      const badge=i===0?'<span class="nc-chip nc-best-badge">\u2605 BEST BY MATHS</span>':'<span class="nc-chip muted">#'+(i+1)+'</span>';
-      const cond=(isBull?'Buy the '+c.bs+' call, sell the '+c.ss+' call \u2014 a defined-risk debit spread that profits if Nifty rises above the breakeven by expiry. Selected purely by P(profit)\u00d7risk-reward across all '+totalScan.toLocaleString('en-IN')+' scanned spreads.':'Buy the '+c.bs+' put, sell the '+c.ss+' put \u2014 a defined-risk debit spread that profits if Nifty falls below the breakeven by expiry. Selected purely by P(profit)\u00d7risk-reward across all '+totalScan.toLocaleString('en-IN')+' scanned spreads.');
-      return '<article class="nc-setup nc-firing'+(i===0?' nc-best':'')+'" data-rule="math-'+i+'">'+
-        '<header><h3>'+esc(label)+'</h3>'+badge+' <span class="nc-chip '+(isBull?'pos':'neg')+'">'+esc(c.view)+'</span> <span class="nc-chip muted">MATH RANK #'+(i+1)+'</span></header>'+
-        '<p class="muted">'+esc(cond)+'</p>'+
-        '<table class="nc-legs"><thead><tr><th>Side</th><th>Contract</th><th>Price (ref)</th><th>Delta</th><th>Theta</th></tr></thead><tbody>'+
-        d.legs.map(l=>'<tr><td>'+sideTag(l.side)+'</td><td>'+esc(l.name)+'</td><td>'+money(l.ref_close)+'</td><td>'+fmt(l.delta,2)+'</td><td>'+fmt(l.theta,1)+'</td></tr>').join('')+'</tbody></table>'+
-        '<dl class="nc-mini">'+
-        '<div><dt>Position delta / lot</dt><dd>'+fmt(d.pg.delta,1)+'</dd></div>'+
-        '<div><dt>Theta / day / lot</dt><dd class="'+cls(d.pg.theta)+'">'+money(d.pg.theta)+'</dd></div>'+
-        '<div><dt>Vega / lot</dt><dd>'+money(d.pg.vega)+'</dd></div>'+
-        '<div><dt>Max profit (expiry)</dt><dd class="pos">'+money(d.maxProfit)+'</dd></div>'+
-        '<div><dt>Max loss (expiry)</dt><dd class="neg">'+money(d.maxLoss)+'</dd></div>'+
-        '<div><dt>Breakeven (expiry)</dt><dd>'+fmt(d.be,0)+'</dd></div>'+
-        '<div><dt>Model P(profit) at expiry</dt><dd>'+pctPlain(d.pExpiry,0)+'</dd></div>'+
-        '<div><dt>Risk-reward</dt><dd>'+c.rr.toFixed(2)+'\u00d7</dd></div>'+
-        '<div class="nc-exit"><dt>Expected P&amp;L at exit (5s)</dt><dd class="'+cls(d.evExit)+'">'+money(d.evExit)+'</dd></div>'+
-        '<div class="nc-exit"><dt>P(profit) at exit</dt><dd>'+pctPlain(d.pProfitExit,0)+'</dd></div>'+
-        (exitBy?'<div><dt>Exit by</dt><dd>'+esc(date(exitBy))+'</dd></div>':'')+
-        '<div class="nc-stop"><dt>Stop-loss / lot</dt><dd class="neg">'+money(d.stop)+'</dd></div>'+
-        '</dl>'+
-        '<p class="muted"><small>\u26d4 Stop: close if the loss reaches half the max loss (\u20b9'+intFmt(Math.abs(d.stop))+')</small></p>'+
-        payoffSvg({curve:d.curve})+
-        '<p class="muted"><small>Max profit, breakeven and model probability are at EXPIRY. The exit block is the expected P&amp;L if closed after 5 sessions'+(exitBy?' (by '+esc(date(exitBy))+')':'')+', net of modelled costs. Entry at today\u2019s close as the next-open proxy. Pure maths from today\u2019s official chain \u2014 no historical backtest for this exact strike pair.</small></p>'+
-      '</article>';
-    }).join(''):'<p class="muted">No qualifying spreads found in current chain.</p>';
+    });
   }
 
+  /* ── Filter predicates ── */
+  function matchFilter(r) {
+    if (activeFilter==='active')   return r.bucket==='consider'||r.bucket==='watch';
+    if (activeFilter==='buyers') {
+      const a=(r.setup.action||'').toUpperCase();
+      return fin(r.risk.netDebit) && r.risk.netDebit > 0 && !a.startsWith('SHORT');
+    }
+    if (activeFilter==='defined')  return r.risk.valid&&!r.risk.unlimitedLoss;
+    if (activeFilter==='inactive') return r.bucket==='inactive';
+    if (activeFilter==='avoid')    return r.bucket==='avoid';
+    return true;
+  }
+  function matchSearch(r) {
+    if (!searchQ) return true;
+    return (r.setup.label||'').toLowerCase().includes(searchQ)||
+           (r.setup.rule||'').toLowerCase().includes(searchQ)||
+           (r.setup.action||'').toLowerCase().includes(searchQ);
+  }
+  function updateVisibility() {
+    let vis=0;
+    document.querySelectorAll('#setup-cards [data-rule]').forEach(card=>{
+      const r=byRule.get(card.dataset.rule);
+      const show=r?(matchFilter(r)&&matchSearch(r)):false;
+      card.classList.toggle('setup-hidden',!show);
+      if(show) vis++;
+    });
+    const el=$('feed-count'); if(el) el.textContent=vis+' of '+ranked.length+' setups';
+  }
+  function updateCounts() {
+    const defFn=r=>r.risk.valid&&!r.risk.unlimitedLoss;
+    const buyFn=r=>fin(r.risk.netDebit)&&r.risk.netDebit>0&&!(r.setup.action||'').toUpperCase().startsWith('SHORT');
+    const c={all:ranked.length,active:ranked.filter(r=>r.bucket==='consider'||r.bucket==='watch').length,buyers:ranked.filter(buyFn).length,defined:ranked.filter(defFn).length,inactive:ranked.filter(r=>r.bucket==='inactive').length,avoid:ranked.filter(r=>r.bucket==='avoid').length};
+    Object.entries(c).forEach(([f,n])=>{const el=$('count-'+f);if(el) el.textContent=n;});
+  }
 
+  /* ── Bind filter tabs + search ── */
+  function bindFilters() {
+    const tabs=$('filter-tabs');
+    if(tabs) {
+      tabs.querySelectorAll('[data-filter]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          activeFilter=btn.dataset.filter;
+          tabs.querySelectorAll('.nc-tab').forEach(b=>{
+            const active=b===btn;
+            b.classList.toggle('nc-tab-active',active);
+            b.setAttribute('aria-pressed',String(active));
+          });
+          updateVisibility();
+        });
+      });
+    }
+    const srch=$('setup-search');
+    if(srch){
+      let t;
+      srch.addEventListener('input',()=>{
+        clearTimeout(t);
+        t=setTimeout(()=>{searchQ=srch.value.trim().toLowerCase();updateVisibility();},200);
+      });
+    }
+  }
 
-  function renderComparison() {
-    const cmp = dataset.comparison;
-    const host = $('compare-rows'), bestBox = $('compare-best'), note = $('compare-note');
-    if (!cmp || !(cmp.candidates || []).length) {
-      if (note) note.textContent = 'No directional comparison for today\u2019s view (needs a bullish or bearish swing structure and a live chain).';
-      if (host) host.innerHTML = '<tr><td colspan="9" class="muted">Not available for today.</td></tr>';
-      if (bestBox) bestBox.innerHTML = '';
+  /* ── Header ── */
+  function renderHeader() {
+    const d=dataset;
+    const el=$('session-date'); if(el) el.textContent='EOD '+isoD(d.as_of);
+    const cv=$('coverage'); if(cv) cv.textContent=(d.expiries||[]).length+' expiries \u00b7 '+(d.constituents_count||50)+' constituents';
+    const ns=$('next-session'); if(ns) ns.textContent='Next: '+isoD(d.next_session);
+  }
+
+  /* ── Decision summary ── */
+  function renderDecisionSummary() {
+    const el=$('decision-summary'); if(!el) return;
+    const eligible=ranked.filter(r=>r.eligible);
+    if (!eligible.length) {
+      const top=ranked[0];
+      const topW=top?top.warnings.filter(w=>!w.startsWith('Maths score')&&!w.startsWith('Rank by')&&!w.startsWith('Expiry payoff')&&!w.startsWith('Jev provenance')).slice(0,1):[];
+      el.innerHTML='<div class="nc-ds-wait">'
+        +'<span class="nc-ds-wait-icon" aria-hidden="true">\u23f8</span>'
+        +'<div><strong>WAIT \u2014 No setup qualifies today</strong>'
+        +'<p>No setup clears every evidence, model-return and risk check.'
+        +(topW.length?' '+esc(topW[0]):'')
+        +' The watchlist is for research, not an entry signal. Open a card for its numbers and failed checks.</p>'
+        +'</div></div>';
       return;
     }
-    if (note) note.textContent = cmp.method || '';
-    const jev = cmp.jev || {};
-    const jevLine = jev.choice ? ' \u00b7 Jev\u2019s independent pick: <strong>' + esc(label(jev.choice)) + '</strong> (' + Math.round((jev.confidence || 0) * 100) + '% confidence)' : '';
-    if (bestBox) bestBox.innerHTML = '<div class="nc-best-structure"><span class="label">BEST STRUCTURE \u00b7 ' + esc(String(cmp.view || '').toUpperCase()) + ' VIEW</span><h3>' + esc((cmp.best || {}).name || '--') + '</h3><p>' + esc((cmp.best || {}).reason || '') + jevLine + '</p></div>';
-    host.innerHTML = cmp.candidates.map(c => {
-      const ex = c.exit || {}, bt = c.backtest || {}, isBest = (cmp.best || {}).id === c.id;
-      return '<tr class="' + (isBest ? 'nc-row-best' : '') + '"><td><strong>' + esc(c.name) + '</strong>' + (isBest ? ' <span class="nc-chip pos">best</span>' : '') + (jev.choice === c.id ? ' <span class="nc-chip">Jev</span>' : '') + '</td>' +
-        '<td>' + esc(c.debit_or_credit || '--') + '</td>' +
-        '<td class="pos">' + (numeric(c.max_profit_at_expiry) ? money(c.max_profit_at_expiry) : 'Unlimited') + '</td>' +
-        '<td class="neg">' + (numeric(c.max_loss_at_expiry) ? money(c.max_loss_at_expiry) : 'Undefined') + '</td>' +
-        '<td class="' + cls(ex.exp_pnl_per_lot) + '">' + (numeric(ex.exp_pnl_per_lot) ? money(ex.exp_pnl_per_lot) : '--') + '</td>' +
-        '<td>' + pctPlain(ex.p_profit, 0) + '</td>' +
-        '<td class="' + cls(c.exp_return_on_risk_pct) + '">' + (numeric(c.exp_return_on_risk_pct) ? fmt(c.exp_return_on_risk_pct, 1) + '%' : '--') + '</td>' +
-        '<td>' + (bt.mean_return_pct != null ? pct(bt.mean_return_pct) + ' <small class="muted">(' + intFmt(bt.trades) + ')</small>' : '<span class="muted">no exact backtest</span>') + '</td>' +
-        '<td><small>' + esc(c.retail_suitability || '') + '</small></td></tr>';
-    }).join('');
-  }
-  function renderRules() {
-    const rules = dataset.rules || [];
-    const today = new Set((dataset.setups || []).map(s => s.rule));
-    const half = h => h && h.trades ? pct(h.mean_return_pct) + ' <small>(' + h.trades + ')</small>' : '--';
-    $('rule-rows').innerHTML = rules.map(r => {
-      const s = r.stats || {};
-      return '<tr data-rule="' + esc(r.id) + '" class="' + (r.baseline ? 'baseline' : '') + '"><td><strong>' + esc(r.label) + '</strong><small class="muted nc-cond">' + esc(r.condition) + '</small></td><td>' + statusBadge(r.status) + '</td><td>' + esc(r.action) + '</td><td>' + (today.has(r.id) ? '<span class="nc-chip pos">fired</span>' : '') + '</td>' +
-        '<td>' + intFmt(s.trades) + '</td><td>' + pctPlain(s.win_rate, 0) + '</td><td class="' + cls(s.mean_return_pct) + '">' + pct(s.mean_return_pct) + '</td><td>' + pct(s.median_return_pct) + '</td><td>' + fmt(s.t_stat, 2) + '</td><td>' + pct(s.worst_return_pct) + '</td><td>' + half(s.first_half) + '</td><td>' + half(s.second_half) + '</td><td>' + esc(s.return_basis || '') + '</td></tr>';
-    }).join('');
-    const v = rules.filter(r => !r.baseline && r.status === 'VALIDATED').length;
-    $('rules-note').textContent = v + ' of ' + rules.filter(r => !r.baseline).length + ' setups validated \u00b7 baselines shown for comparison';
+    const top=eligible[0], s=top.setup, ev=s.exit?.exp_pnl_per_lot;
+    el.innerHTML='<div class="nc-ds-candidate">'
+      +'<div>'
+        +'<div class="nc-ds-badge consider">Top candidate \u2014 consider</div>'
+        +'<h3 class="nc-ds-title">'+esc(s.label||s.rule)+'</h3>'
+        +'<div class="nc-ds-chips">'
+          +'<span class="nc-chip nc-chip-action">'+esc(s.action||'\u2014')+'</span>'
+          +'<span class="nc-chip nc-bucket-consider">Consider</span>'
+          +(top.jev.available?'<span class="nc-chip nc-chip-jev">Jev '+esc(top.jev.tier)+(fin(top.jev.confidence)?' '+Math.round(top.jev.confidence*100)+'%':'')+'</span>':'')
+        +'</div>'
+        +'<p class="nc-ds-ev">Model exit EV: <strong class="'+cls(ev)+'">'+money(ev)+'</strong>\u2002\xb7\u2002P(profit at exit): <strong>'+pctP(s.exit?.p_profit,0)+'</strong></p>'
+        +'<p class="nc-ds-caveat">EOD snapshot only. Model EV is not a profit guarantee. Jev confidence \u2260 profit probability. Not investment advice.</p>'
+      +'</div>'
+      +'<div class="nc-ds-score">'
+        +'<span class="nc-ds-score-num">'+(fin(top.mathScore)?top.mathScore.toFixed(0):'\u2014')+'</span>'
+        +'<span class="nc-ds-score-lbl">Math score<br><em>heuristic/100</em></span>'
+      +'</div>'
+    +'</div>';
   }
 
-  // ---------------------------------------------------------------- constituents
-  function constituentRows() {
-    const q = constState.search.trim().toLowerCase();
-    let rows = dataset.constituents.filter(c =>
-      (constState.status === 'ALL' || c.hhhl_status === constState.status) &&
-      (constState.stance === 'ALL' || (c.jev || {}).stance === constState.stance) &&
-      (!q || c.symbol.toLowerCase().includes(q) || (c.industry || '').toLowerCase().includes(q) || (c.name || '').toLowerCase().includes(q)));
-    const key = {symbol: c => c.symbol, ret5: c => -(c.ret5_pct ?? -1e9), iv: c => -((c.greeks || {}).atm_iv ?? -1e9),
-                 move: c => -(((c.greeks || {}).expected_move_5d ?? -1e9) / (c.spot || 1)), jev: c => -((c.jev || {}).stance_confidence ?? -1)}[constState.sort];
-    rows = rows.slice().sort((a, b) => { const x = key(a), y = key(b); return typeof x === 'string' ? x.localeCompare(y) : x - y; });
-    return rows;
-  }
-
-  function renderConstituents() {
-    const rows = constituentRows();
-    $('const-count').textContent = rows.length + ' of ' + dataset.constituents.length + ' constituents shown';
-    $('constituent-rows').innerHTML = rows.map(c => {
-      const g = c.greeks || {}, j = c.jev || {};
-      return '<tr data-symbol="' + esc(c.symbol) + '"><td><strong>' + esc(c.symbol) + '</strong><small class="muted nc-cond">' + esc(c.industry) + '</small></td>' +
-        '<td><span class="status ' + esc(c.hhhl_status || '') + '">' + esc(c.hhhl_status || '--') + '</span></td><td>' + esc(c.structure || '--') + '</td><td>' + fmt(c.spot) + '</td>' +
-        '<td class="' + cls(c.ret5_pct) + '">' + pct(c.ret5_pct, 2) + '</td><td>' + esc(c.buildup || '--') + '</td><td>' + fmt(c.pcr, 2) + '</td><td>' + pctPlain(g.atm_iv) + '</td>' +
-        '<td>' + fmt(g.call_delta, 2) + '</td><td>' + fmt(g.put_delta, 2) + '</td><td>' + fmt(g.call_theta, 2) + '</td><td>' + (numeric(g.expected_move_5d) ? '\u00b1' + fmt(g.expected_move_5d, 1) : '--') + '</td>' +
-        '<td><small>' + esc(label(c.desk_bucket || '--')) + '</small></td>' +
-        '<td>' + (j.stance ? '<span class="nc-chip ' + esc(STANCE_CLASS[j.stance] || '') + '">' + esc(j.stance) + '</span> <small class="muted">' + Math.round((j.stance_confidence || 0) * 100) + '%</small>' : '<small class="muted">not run</small>') + '</td>' +
-        '<td><small>' + esc(label(j.play || '')) + '</small></td><td>' + (j.risk ? '<span class="nc-chip ' + esc(RISK_CLASS[j.risk] || '') + '">' + esc(j.risk) + '</span>' : '') + '</td></tr>';
-    }).join('');
-  }
-
-  function renderBreadth() {
-    const b = dataset.breadth || {};
-    const chips = (obj, kind) => Object.entries(obj || {}).map(([k, v]) => '<span class="nc-chip ' + esc(kind === 'stance' ? STANCE_CLASS[k] || '' : '') + '">' + esc(label(k)) + ' ' + v + '</span>').join(' ');
-    $('breadth').innerHTML = '<div><strong>HH/HL status</strong> ' + chips(b.hhhl) + '</div><div><strong>Futures build-up</strong> ' + chips(b.buildup) + '</div><div><strong>Jev stance</strong> ' + chips(b.jev_stance, 'stance') + '</div><div><strong>HH / HL structure</strong> <span class="nc-chip">' + intFmt(b.structure_hh_hl) + ' of ' + intFmt(b.total) + '</span></div>';
-  }
-
-  function downloadConstituents() {
-    const cols = ['symbol', 'name', 'industry', 'hhhl_status', 'structure', 'spot', 'ret5_pct', 'buildup', 'pcr', 'atm_iv', 'call_delta', 'put_delta', 'call_theta', 'vega', 'expected_move_5d', 'desk_bucket', 'jev_stance', 'jev_stance_confidence', 'jev_play', 'jev_risk'];
-    const val = (c, k) => ({atm_iv: (c.greeks || {}).atm_iv, call_delta: (c.greeks || {}).call_delta, put_delta: (c.greeks || {}).put_delta, call_theta: (c.greeks || {}).call_theta,
-      vega: (c.greeks || {}).vega, expected_move_5d: (c.greeks || {}).expected_move_5d, jev_stance: (c.jev || {}).stance, jev_stance_confidence: (c.jev || {}).stance_confidence,
-      jev_play: (c.jev || {}).play, jev_risk: (c.jev || {}).risk})[k] ?? c[k];
-    const cell = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const csv = [cols.join(',')].concat(constituentRows().map(c => cols.map(k => cell(val(c, k))).join(','))).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
-    a.download = 'nifty50-options-' + dataset.as_of + '.csv';
-    document.body.appendChild(a); a.click(); a.remove();
-  }
-
-  // ---------------------------------------------------------------- research
-  function renderResearch() {
-    const r = dataset.research || {};
-    $('research-meta').textContent = r.generated_at ? 'Cited research compiled ' + date(String(r.generated_at).slice(0, 10)) : 'Research file not available';
-    $('institution-list').innerHTML = (r.institutions || []).map(i => '<article class="nc-research"><h4>' + link(i.source_url, i.title) + '</h4><p>' + esc(i.summary) + '</p><small class="muted">' + esc(i.source_name || '') + ' \u00b7 ' + esc(i.date || '') + '</small></article>').join('') || '<p class="muted">No institutional research loaded.</p>';
-    const tested = new Map();
-    for (const rule of dataset.rules || []) if (rule.catalog) tested.set(rule.catalog, rule);
-    $('strategy-rows').innerHTML = (r.strategies || []).map(s => {
-      const t = tested.get(s.id);
-      return '<tr data-strategy="' + esc(s.id) + '"><td><strong>' + esc(s.name) + '</strong></td><td>' + esc(s.view) + '</td><td><small>' + esc(s.who_uses) + '</small></td><td><small>' + esc(s.legs) + '</small></td><td><small>' + esc(s.edge_source) + '</small></td><td><small>' + esc(s.main_risk) + '</small></td><td><small>' + esc(s.retail_suitability) + '</small></td>' +
-        '<td>' + (t ? statusBadge(t.status) + '<small class="muted nc-cond">' + esc(t.label) + '</small>' : '<small class="muted">' + (s.testable_on_eod ? 'not yet' : 'needs intraday data') + '</small>') + '</td><td>' + link(s.source_url, 'source') + '</td></tr>';
-    }).join('');
-    $('evidence-list').innerHTML = (r.evidence || []).map(e => '<li><strong>' + link(e.source_url, e.title) + '</strong> ' + esc(e.finding) + ' <small class="muted">' + esc(e.source_name || '') + (e.year ? ', ' + esc(e.year) : '') + '</small></li>').join('');
-    $('github-rows').innerHTML = (r.github || []).map(g => '<tr><td>' + link(g.url, g.repo) + '</td><td><small>' + esc(g.what) + '</small></td><td>' + esc(g.license || '--') + '</td><td>' + esc(g.last_activity || '--') + '</td></tr>').join('');
-    $('caveat-list').innerHTML = (r.caveats || []).concat((r.unverified || []).map(u => 'Unverified: ' + u)).map(c => '<li>' + esc(c) + '</li>').join('');
-  }
-
-  function renderCalibration() {
-    const cal = (dataset.jev || {}).calibration || {};
-    const rows = Object.entries(cal.by_call || {});
-    $('jev-calibration').innerHTML = '<p>' + intFmt(cal.matured) + ' matured index calls. ' + esc(cal.note || '') + '</p><div class="nc-cal">' + rows.map(([k, v]) => '<div><strong>' + esc(label(k)) + '</strong><span>' + v.n + ' calls</span><span>' + (v.n ? Math.round(100 * v.hits / v.n) + '% hit' : 'no matured calls yet') + '</span></div>').join('') + '</div>';
-  }
-
-  function renderMethod() {
-    const m = dataset.method || {}, src = dataset.source || {};
-    $('method-greeks').textContent = m.greeks || '';
-    $('method-sigma').textContent = m.sigma || '';
-    $('method-entry').textContent = (m.entry || '') + ' ' + (m.exit || '');
-    $('method-cost').textContent = (m.cost_model || '') + ' ' + (m.return_basis || '');
-    $('method-validation').textContent = m.validation || '';
-    $('method-nolook').textContent = m.no_lookahead || '';
-    $('data-audit').innerHTML = '<ul class="nc-list"><li>F&O bhavcopy: ' + esc(src.bhavcopy_url) + ' (' + intFmt(src.sessions) + ' sessions, ' + esc(src.first_session) + ' to ' + esc(src.last_session) + ')</li>' +
-      '<li>Participant-wise OI: ' + esc(src.participant_url) + ' (' + intFmt(src.participant_sessions) + ' sessions)</li><li>Index close: ' + esc(src.index_url) + '</li>' +
-      '<li>Constituents: ' + esc(src.constituents_url) + ' (' + esc(src.constituents_source) + ')</li><li>Generated ' + esc(dataset.generated_at) + '</li>' +
-      ((src.missing_sessions || []).length ? '<li>Weekdays without a bhavcopy (not holidays): ' + esc(src.missing_sessions.join(', ')) + '</li>' : '') + '</ul>' +
-      '<ul class="nc-list">' + (dataset.limitations || []).map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>';
-  }
-
-  // ---------------------------------------------------------------- wiring
-  function bind() {
-    $('expiry').addEventListener('change', e => { expiry = e.target.value; renderSigma(); renderChain(); });
-    $('width').addEventListener('change', e => { width = Number(e.target.value) || 20; renderChain(); });
-    $('oi-mode').addEventListener('change', e => { oiMode = e.target.value; renderOiChart(currentExpiry()); });
-    $('const-status').addEventListener('change', e => { constState.status = e.target.value; renderConstituents(); });
-    $('const-stance').addEventListener('change', e => { constState.stance = e.target.value; renderConstituents(); });
-    $('const-sort').addEventListener('change', e => { constState.sort = e.target.value; renderConstituents(); });
-    $('const-search').addEventListener('input', e => { constState.search = e.target.value; renderConstituents(); });
-    $('const-download').addEventListener('click', downloadConstituents);
-  }
-
-  function fail(message) {
-    const notice = $('notice');
-    notice.hidden = false;
-    notice.classList.add('error');
-    notice.textContent = 'The Nifty chain snapshot could not be shown: ' + message;
-    document.querySelectorAll('main > section.scan-section').forEach(s => { s.hidden = true; });
-  }
-  async function loadLivePrices() {
-    try {
-      const res = await fetch('nifty_live.json?t=' + Date.now(), {cache: 'no-store'});
-      if (!res.ok) return;
-      const live = await res.json();
-      if (live.nifty50 && live.nifty50.ltp) {
-        const idx = dataset.index;
-        idx.close = live.nifty50.ltp;
-        idx.change_pct = live.nifty50.per_change;
-        idx.high = live.nifty50.high;
-        idx.low = live.nifty50.low;
-      }
-      if (live.india_vix && live.india_vix.ltp) {
-        dataset.index.vix = live.india_vix.ltp;
-        dataset.index.vix_change_pct = live.india_vix.per_change;
-      }
-      if (live.bank_nifty && live.bank_nifty.ltp) {
-        dataset.index.bank_nifty = live.bank_nifty.ltp;
-        dataset.index.bank_nifty_change_pct = live.bank_nifty.per_change;
-      }
-      renderIndex();
-      applyLiveMaths(live);
-    } catch (err) {}
-  }
-
-  // ---------------------------------------------------------------- live display (maths done in backend)
-  // The backend (kotak_live.py) recomputes ALL setups + comparison with the audited nifty_chain
-  // formulas and ships them in live.live_maths. The browser ONLY displays — no math here.
-  function applyLiveMaths(live) {
-    if (!live || !live.live_maths || !dataset) return;
-    const lm = live.live_maths;
-    const spot = lm.spot || (live.nifty50 && live.nifty50.ltp) || dataset.index.close;
-    // Map backend setup results by rule id
-    const bySetup = {};
-    for (const s of lm.setups || []) bySetup[s.rule] = s;
-    for (const s of dataset.setups || []) {
-      const live1 = bySetup[s.rule];
-      if (!live1) continue;
-      if (live1.payoff) s.payoff = Object.assign({}, s.payoff, live1.payoff);
-      if (live1.exit) s.exit = Object.assign({}, s.exit, live1.exit);
-      if (live1.stop_loss) s.stop_loss = live1.stop_loss;
-      // live leg premiums
-      const liveByStrike = {};
-      for (const l of live1.legs || []) liveByStrike[Math.round(l.strike) + (l.option_type || '')] = l.live_ltp;
-      for (const l of s.legs) { const k = Math.round(l.strike) + (l.option_type || 'PE'); if (numeric(liveByStrike[k])) l.live_ltp = liveByStrike[k]; }
+  /* ── Market cards ── */
+  function renderMarketCards() {
+    const idx=dataset.index||{};
+    const spot=idx.option_spot||idx.close;
+    const sigma=ranked.length&&fin(ranked[0].sigmaMove)?ranked[0].sigmaMove:null;
+    const el=$('market-cards'); if(!el) return;
+    const cards=[
+      {l:'Nifty spot',    v:iInt(spot),           sub:pct(idx.change_pct)+' today',      vc:cls(idx.change_pct)},
+      {l:'ATM IV',        v:pctP(idx.atm_iv),     sub:'Implied vol (1m)',                vc:''},
+      {l:'Realised vol',  v:pctP(idx.rv20),       sub:'20-day RV',                       vc:''},
+      {l:'VRP (IV\u2212RV)',v:pct(idx.vrp,1),     sub:'Negative = cheap options',        vc:cls(fin(idx.vrp)?-idx.vrp:null)},
+      {l:'IV percentile', v:pctP(idx.iv_pct,0),   sub:'1-year rank',                    vc:''},
+      {l:'1\u03c3 to exp.',v:fin(sigma)?'\xb1'+iInt(sigma):'\u2014',sub:'To trade expiry',vc:''},
+      {l:'PCR',           v:fmt(idx.pcr),          sub:pct(idx.pcr_chg5)+' (5d)',        vc:cls(idx.pcr_chg5)},
+      {l:'India VIX',     v:fmt(idx.vix),          sub:pct(idx.vix_change_pct)+' today', vc:cls(fin(idx.vix_change_pct)?-idx.vix_change_pct:null)},
+    ];
+    el.innerHTML=cards.map(c=>
+      '<div class="mkt-card"><dl><dt>'+esc(c.l)+'</dt><dd class="'+esc(c.vc)+'">'+c.v+'</dd><dd><small>'+c.sub+'</small></dd></dl></div>'
+    ).join('');
+    const expl=$('market-explain');
+    if(expl){
+      const vrp=idx.vrp,pcr=idx.pcr;
+      const vt=fin(vrp)?(vrp<-2?'IV below recent realised vol \u2014 options look relatively cheap.':vrp>2?'IV above recent realised vol \u2014 options look relatively expensive.':'Vol fairly priced vs recent realised moves.'):'';
+      const pt=fin(pcr)?(pcr>1.3?' Put OI dominates \u2014 institutional hedging signal.':pcr<0.8?' Call OI dominates.':' PCR near neutral.'):'';
+      const bt=idx.buildup?' Futures build-up: '+idx.buildup+'.':'';
+      expl.innerHTML=esc(vt+pt+bt)+' All values are EOD official NSE data \u2014 not live prices.';
     }
-    // Comparison: apply backend-computed candidate numbers + re-rank by backend best
-    const cmp = dataset.comparison, lc = lm.comparison || {};
-    if (cmp && Array.isArray(cmp.candidates) && (lc.candidates || []).length) {
-      const byId = {};
-      for (const c of lc.candidates) byId[c.id] = c;
-      for (const c of cmp.candidates) {
-        const live2 = byId[c.id];
-        if (!live2) continue;
-        c.max_profit_at_expiry = live2.max_profit_at_expiry;
-        c.max_loss_at_expiry = live2.max_loss_at_expiry;
-        if (live2.exit) c.exit = Object.assign({}, c.exit, live2.exit);
-        c.exp_return_on_risk_pct = live2.exp_return_on_risk_pct;
-        c.stop_loss = live2.stop_loss;
-      }
-      cmp.candidates.sort((a, b) => (b.exp_return_on_risk_pct || -1e9) - (a.exp_return_on_risk_pct || -1e9));
-      if (lc.best_id) {
-        const top = cmp.candidates.find(c => c.id === lc.best_id) || cmp.candidates[0];
-        cmp.best = {id: top.id, name: top.name,
-                    reason: 'Live: highest expected profit per rupee of risk at the 5-session exit (' + (top.exp_return_on_risk_pct || 0).toFixed(1) + '% on max risk).'};
-      }
+  }
+
+  /* ── Comparison section ── */
+  function renderComparisonSection() {
+    const cmp=dataset.comparison; if(!cmp) return;
+    const note=$('comparison-note');
+    if(note) note.textContent='Research comparison at the planned exit, net of modelled costs. Negative EV is not a buy signal. Expiry bounds below are exact gross leg payoffs, not an early-exit loss guarantee.';
+    const host=$('comparison-rows'); if(!host) return;
+    const cands=cmp.candidates||[];
+    if(!cands.length){host.innerHTML='<tr><td colspan="8" class="nc-muted">Not available for today\u2019s view.</td></tr>';return;}
+    host.innerHTML=cands.map(c=>{
+      const ex=c.exit||{},bt=c.backtest||{},idx=dataset.index||{};
+      const risk=NiftyMath.expiryRisk((c.legs||[]).map(l=>({...l,expiry:idx.trade_expiry,lot:idx.lot})),idx.option_spot||idx.close);
+      const ror=risk.valid&&!risk.unlimitedLoss&&risk.maxLoss<0&&fin(ex.exp_pnl_per_lot)?100*ex.exp_pnl_per_lot/-risk.maxLoss:null;
+      return '<tr>'
+        +'<td><strong>'+esc(c.name||c.id)+'</strong></td>'
+        +'<td class="'+cls(c.net_premium_per_lot)+'">'+money(c.net_premium_per_lot)+'</td>'
+        +'<td class="pos">'+(risk.unlimitedProfit?'Unlimited ↑':money(risk.maxProfit))+'</td>'
+        +'<td class="neg">'+(risk.unlimitedLoss?'Unbounded':money(risk.maxLoss))+'</td>'
+        +'<td class="'+cls(ex.exp_pnl_per_lot)+'">'+money(ex.exp_pnl_per_lot)+'</td>'
+        +'<td>'+pctP(ex.p_profit,0)+'</td>'
+        +'<td class="'+cls(ror)+'">'+pctP(ror,1)+'</td>'
+        +'<td class="'+cls(bt.mean_return_pct)+'">'+pct(bt.mean_return_pct,2)+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  /* ── SVG multi-line chart (vol history) ── */
+  function svgLines(host,series,opts) {
+    if(!host) return;
+    const dates=(opts&&opts.dates)||[];
+    const n=dates.length; if(!n){host.innerHTML='<p class="nc-muted">No data.</p>';return;}
+    const W=1100,H=200,L=52,R=14,T=14,B=36;
+    const all=series.flatMap(s2=>(s2.values||[]).filter(fin));
+    if(!all.length){host.innerHTML='<p class="nc-muted">No values.</p>';return;}
+    const lo=Math.min(...all),hi=Math.max(...all);
+    const xf=i=>L+(W-L-R)*(i+0.5)/n;
+    const yf=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo||1));
+    const ax='font-size="9" fill="#6b7a91" font-family="system-ui"';
+    let svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc((opts&&opts.title)||'Chart')+'">';
+    for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yf(v).toFixed(1)+'" y2="'+yf(v).toFixed(1)+'" stroke="#eef1ec" stroke-width="1"/><text x="'+(L-4)+'" y="'+(yf(v)+3).toFixed(1)+'" text-anchor="end" '+ax+'>'+v.toFixed(1)+'%</text>';}
+    let lx=L;
+    series.forEach(s2=>{
+      const vals=s2.values||[];
+      const pts=[];
+      vals.forEach((v,i)=>{if(fin(v)) pts.push(xf(i).toFixed(1)+','+yf(v).toFixed(1));});
+      if(pts.length>1) svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+esc(s2.color||'#000')+'" stroke-width="1.5"'+(s2.dash?' stroke-dasharray="4 3"':'')+'/>';
+      svg+='<line x1="'+lx+'" x2="'+(lx+12)+'" y1="8" y2="8" stroke="'+esc(s2.color||'#000')+'" stroke-width="2"'+(s2.dash?' stroke-dasharray="4 3"':'')+'/><text x="'+(lx+16)+'" y="11" '+ax+'>'+esc(s2.name||'')+'</text>';
+      lx+=100;
+    });
+    [0,Math.floor(n/2),n-1].forEach(i=>{if(dates[i]) svg+='<text x="'+xf(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" '+ax+'>'+esc(String(dates[i]).slice(5))+'</text>';});
+    svg+='</svg>';
+    host.innerHTML=svg;
+  }
+
+  /* ── Chain section ── */
+  let curExp=null;
+  function renderChainSection(){
+    const exps=dataset.expiries||[]; if(!exps.length) return;
+    curExp=exps[0];
+    const sel=$('expiry-select');
+    if(sel){
+      sel.innerHTML=exps.map(e=>'<option value="'+esc(e.expiry)+'">'+esc(e.expiry)+'</option>').join('');
+      sel.addEventListener('change',()=>{curExp=exps.find(e=>e.expiry===sel.value)||exps[0];renderSigma();renderOI();renderChainTable();});
+      document.querySelectorAll('input[name="oi-mode"]').forEach(r=>r.addEventListener('change',renderOI));
     }
-    renderSetups(); renderComparison();
-    const stamp = $('live-stamp');
-    if (stamp) stamp.textContent = 'Live (backend maths) ' + new Date().toLocaleTimeString('en-IN') + ' \u00b7 spot ' + fmt(spot);
+    renderSigma(); renderOI(); renderChainTable();
+    const h=dataset.history||{};
+    const vix=new Map((h.vix_dates||[]).map((d,i)=>[d,(h.vix||[])[i]]));
+    svgLines($('vol-chart'),[
+      {name:'ATM IV',    values:h.atm_iv||[],                                           color:'#0d8a7a'},
+      {name:'RV (20d)',  values:h.rv20||[],                                             color:'#c07830',dash:true},
+      {name:'India VIX', values:(h.dates||[]).map(d=>vix.has(d)?vix.get(d):null),      color:'#c0392b'},
+    ],{dates:h.dates||[],title:'Volatility history'});
+    renderHhhl();
+  }
+  function renderSigma(){
+    const e=curExp; if(!e) return;
+    const el=$('sigma-cards'); if(!el) return;
+    const s1=e.sigma_1||[],s2=e.sigma_2||[];
+    el.innerHTML='<div class="nc-sigma-cards">'
+      +'<div class="nc-sigma-card"><dl><dt>Expiry</dt><dd>'+esc(e.expiry||'\u2014')+'</dd></dl></div>'
+      +'<div class="nc-sigma-card"><dl><dt>Max pain</dt><dd>'+iInt(e.max_pain)+'</dd></dl></div>'
+      +'<div class="nc-sigma-card"><dl><dt>1\u03c3 band</dt><dd>'+(s1.length===2?iInt(s1[0])+' \u2013 '+iInt(s1[1]):'\u2014')+'</dd></dl></div>'
+      +'<div class="nc-sigma-card"><dl><dt>2\u03c3 band</dt><dd>'+(s2.length===2?iInt(s2[0])+' \u2013 '+iInt(s2[1]):'\u2014')+'</dd></dl></div>'
+      +'</div>';
+  }
+  function renderOI(){
+    const e=curExp; if(!e||!Array.isArray(e.rows)||!e.rows.length) return;
+    const host=$('oi-chart-wrap'); if(!host) return;
+    const spot=(dataset.index||{}).option_spot||(dataset.index||{}).close||0;
+    const modeEl=document.querySelector('input[name="oi-mode"]:checked');
+    const mode=modeEl?modeEl.value:'oi';
+    const rows=e.rows.filter(r=>r.strike>=spot*0.82&&r.strike<=spot*1.18);
+    if(!rows.length){host.innerHTML='<p class="nc-muted">No nearby strikes.</p>';return;}
+    const str=rows.map(r=>r.strike);
+    const ceV=rows.map(r=>mode==='oi_change'?(r.ce?.oi_change||0):(r.ce?.oi||0));
+    const peV=rows.map(r=>mode==='oi_change'?(r.pe?.oi_change||0):(r.pe?.oi||0));
+    const maxV=Math.max(...ceV.map(Math.abs),...peV.map(Math.abs),1);
+    const W=1100,H=220,L=56,R=16,T=20,B=44,n=str.length;
+    const bw=Math.max(2,Math.floor((W-L-R)/n/2.6));
+    const xc=i=>L+(W-L-R)*(i+0.5)/n;
+    const yb=T+(H-T-B); // base line (zero)
+    const yf=v=>T+(H-T-B)*(1-v/maxV);
+    const ax='font-size="9" fill="#6b7a91" font-family="system-ui"';
+    let svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Open interest by strike">';
+    const s1=e.sigma_1||[];
+    if(s1.length===2){
+      const x1=L+(W-L-R)*(Math.max(str[0],s1[0])-str[0])/(str[n-1]-str[0]||1);
+      const x2=L+(W-L-R)*(Math.min(str[n-1],s1[1])-str[0])/(str[n-1]-str[0]||1);
+      if(x2>x1) svg+='<rect x="'+x1.toFixed(1)+'" width="'+(x2-x1).toFixed(1)+'" y="'+T+'" height="'+(H-T-B)+'" fill="#0d8a7a" opacity="0.07"/>';
+    }
+    str.forEach((k,i)=>{
+      const yc=yf(Math.max(0,ceV[i])),yp=yf(Math.max(0,peV[i]));
+      svg+='<rect x="'+(xc(i)-bw).toFixed(1)+'" width="'+bw+'" y="'+yc.toFixed(1)+'" height="'+(yb-yc).toFixed(1)+'" class="nc-bar-ce"><title>'+esc(k+' CE: '+iInt(ceV[i]))+'</title></rect>';
+      svg+='<rect x="'+xc(i).toFixed(1)+'" width="'+bw+'" y="'+yp.toFixed(1)+'" height="'+(yb-yp).toFixed(1)+'" class="nc-bar-pe"><title>'+esc(k+' PE: '+iInt(peV[i]))+'</title></rect>';
+    });
+    const spotX=L+(W-L-R)*(spot-str[0])/(str[n-1]-str[0]||1);
+    if(spotX>L&&spotX<W-R) svg+='<line x1="'+spotX.toFixed(1)+'" x2="'+spotX.toFixed(1)+'" y1="'+T+'" y2="'+yb+'" class="nc-spot-line"/><text x="'+(spotX+4).toFixed(1)+'" y="'+(T+10)+'" '+ax+'>spot</text>';
+    if(fin(e.max_pain)){const mx=L+(W-L-R)*(e.max_pain-str[0])/(str[n-1]-str[0]||1);if(mx>L&&mx<W-R) svg+='<line x1="'+mx.toFixed(1)+'" x2="'+mx.toFixed(1)+'" y1="'+T+'" y2="'+yb+'" class="nc-mp-line"/><text x="'+(mx+4).toFixed(1)+'" y="'+(T+20)+'" '+ax+' fill="#c07830">max pain</text>';}
+    [0,Math.floor(n/2),n-1].forEach(i=>svg+='<text x="'+xc(i).toFixed(1)+'" y="'+(H-18)+'" text-anchor="middle" '+ax+'>'+str[i]+'</text>');
+    svg+='<text x="'+(L-4)+'" y="'+(T+8)+'" text-anchor="end" '+ax+'>'+iInt(maxV/1e5)+'L</text>';
+    svg+='<rect x="'+L+'" y="'+(H-14)+'" width="10" height="8" class="nc-bar-ce" opacity="0.8"/><text x="'+(L+14)+'" y="'+(H-8)+'" '+ax+'>CE</text>';
+    svg+='<rect x="'+(L+50)+'" y="'+(H-14)+'" width="10" height="8" class="nc-bar-pe" opacity="0.8"/><text x="'+(L+64)+'" y="'+(H-8)+'" '+ax+'>PE</text>';
+    svg+='</svg>';
+    host.innerHTML=svg;
+  }
+  function renderChainTable(){
+    const e=curExp; if(!e||!Array.isArray(e.rows)||!e.rows.length) return;
+    const host=$('chain-table-wrap'); if(!host) return;
+    const spot=(dataset.index||{}).option_spot||(dataset.index||{}).close||0;
+    const rows=e.rows.filter(r=>r.strike>=spot*0.88&&r.strike<=spot*1.12);
+    if(!rows.length){host.innerHTML='<p class="nc-muted">No strikes in range.</p>';return;}
+    const atm=rows.reduce((a,b)=>Math.abs(b.strike-spot)<Math.abs(a.strike-spot)?b:a).strike;
+    host.innerHTML='<table class="nc-chain-table nc-table" style="min-width:500px">'
+      +'<thead><tr><th>\u0394 CE</th><th>IV% CE</th><th>OI CE</th><th class="nc-strike-cell">Strike</th><th>OI PE</th><th>IV% PE</th><th>\u0394 PE</th></tr></thead>'
+      +'<tbody>'+rows.map(r=>{
+        const ce=r.ce||{},pe=r.pe||{},isAtm=r.strike===atm;
+        return '<tr'+(isAtm?' class="nc-atm"':'')+'>'
+          +'<td class="nc-num '+cls(ce.delta)+'">'+fmt(ce.delta,3)+'</td>'
+          +'<td class="nc-num">'+pctP(ce.iv,1)+'</td>'
+          +'<td class="nc-num">'+iInt(ce.oi)+'</td>'
+          +'<td class="nc-strike-cell">'+iInt(r.strike)+(isAtm?'<small>ATM</small>':'')+'</td>'
+          +'<td class="nc-num">'+iInt(pe.oi)+'</td>'
+          +'<td class="nc-num">'+pctP(pe.iv,1)+'</td>'
+          +'<td class="nc-num '+cls(pe.delta)+'">'+fmt(pe.delta,3)+'</td>'
+          +'</tr>';
+      }).join('')+'</tbody></table>';
+  }
+  function renderHhhl(){
+    const c=dataset.hhhl||{},host=$('hhhl-chart'),str=(dataset.index||{}).structure||{};
+    const stEl=$('hhhl-state');
+    if(stEl) stEl.textContent=(str.structure||'\u2014')+(str.breakout?' \u00b7 fresh breakout':'')+' \u00b7 close '+fmt(str.close)+' vs 20d SMA '+fmt(str.sma20);
+    if(!host) return;
+    const n=(c.dates||[]).length; if(!n){host.innerHTML='<p class="nc-muted">No price history.</p>';return;}
+    const W=1100,H=270,L=56,R=12,T=20,B=40;
+    const lo=Math.min(...(c.low||[]).filter(fin)), hi=Math.max(...(c.high||[]).filter(fin));
+    const xf=i=>L+(W-L-R)*(i+0.5)/n;
+    const yf=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo||1));
+    const bw=Math.max(1.5,(W-L-R)/n*0.55);
+    const ax='font-size="9" fill="#6b7a91" font-family="system-ui"';
+    let svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Nifty price chart">';
+    for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yf(v).toFixed(1)+'" y2="'+yf(v).toFixed(1)+'" stroke="#eef1ec" stroke-width="1"/><text x="'+(L-4)+'" y="'+(yf(v)+3).toFixed(1)+'" text-anchor="end" '+ax+'>'+fmt(v,0)+'</text>';}
+    c.dates.forEach((d,i)=>{
+      const o=(c.open||[])[i],h2=(c.high||[])[i],l2=(c.low||[])[i],cl2=(c.close||[])[i];
+      if(!fin(o)||!fin(cl2)) return;
+      const up=cl2>=o;
+      svg+='<line x1="'+xf(i).toFixed(1)+'" x2="'+xf(i).toFixed(1)+'" y1="'+yf(h2).toFixed(1)+'" y2="'+yf(l2).toFixed(1)+'" class="'+(up?'nc-wick-up':'nc-wick-dn')+'"/>';
+      svg+='<rect x="'+(xf(i)-bw/2).toFixed(1)+'" width="'+bw.toFixed(1)+'" y="'+yf(Math.max(o,cl2)).toFixed(1)+'" height="'+Math.max(1,Math.abs(yf(o)-yf(cl2))).toFixed(1)+'" class="'+(up?'nc-candle-up':'nc-candle-dn')+'"/>';
+      const lbl=(c.labels||[])[i];
+      if(lbl) svg+='<text x="'+xf(i).toFixed(1)+'" y="'+(T+10)+'" text-anchor="middle" font-size="8" fill="'+(lbl.includes('HH')||lbl.includes('HL')?'#0d8a7a':'#c0392b')+'" font-family="system-ui">'+esc(lbl)+'</text>';
+    });
+    [0,Math.floor(n/4),Math.floor(n/2),Math.floor(3*n/4),n-1].forEach(i=>{if(c.dates[i]) svg+='<text x="'+xf(i).toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" '+ax+'>'+esc(String(c.dates[i]).slice(5))+'</text>';});
+    svg+='</svg>';
+    host.innerHTML=svg;
   }
 
-  function startLivePricePoll() {
-    loadLivePrices();
-    setInterval(loadLivePrices, 30000);
+  /* ── Participants ── */
+  function renderParticipantsSection(){
+    const parts=dataset.participants; const host=$('participant-cards'); if(!host) return;
+    const rows=Array.isArray(parts)?parts:[];
+    if(!rows.length){host.innerHTML='<p class="nc-muted">No participant data.</p>';return;}
+    host.innerHTML=rows.map(p=>{
+      const net=p.net||{};
+      return '<div class="nc-part-card"><h4>'+esc(p.participant||'\u2014')+'</h4>'
+        +'<dl>'
+        +(fin(net.futures)?'<dt>Net futures</dt><dd class="'+cls(net.futures)+'">'+iInt(net.futures)+'</dd>':'')
+        +(fin(net.calls)?'<dt>Net calls</dt><dd class="'+cls(net.calls)+'">'+iInt(net.calls)+'</dd>':'')
+        +(fin(net.puts)?'<dt>Net puts</dt><dd class="'+cls(net.puts)+'">'+iInt(net.puts)+'</dd>':'')
+        +'</dl>'
+        +(p.read?'<div class="nc-part-read">'+esc(String(p.read).slice(0,220))+'</div>':'')
+        +'</div>';
+    }).join('');
   }
 
+  /* ── Rules evidence ── */
+  function renderRulesSection(){
+    const rules=dataset.rules||[]; const host=$('rules-wrap'); if(!host) return;
+    if(!rules.length){host.innerHTML='<p class="nc-muted">No rules data.</p>';return;}
+    host.innerHTML='<table class="nc-table" style="min-width:600px">'
+      +'<thead><tr><th>Rule</th><th>Action</th><th>Status</th><th>Trades</th><th>Win rate</th><th>Mean rtn</th><th>T-stat</th></tr></thead>'
+      +'<tbody>'+rules.map(r=>{
+        const st=r.stats||{},sl=(r.status||'').toLowerCase().replace(/[^a-z0-9]/g,'_');
+        return '<tr>'
+          +'<td>'+esc(r.label||r.id||'\u2014')+'</td>'
+          +'<td>'+esc(r.action||'\u2014')+'</td>'
+          +'<td><span class="nc-status-chip nc-status-'+esc(sl)+'">'+esc(r.status||'\u2014')+'</span></td>'
+          +'<td class="nc-num">'+iInt(st.trades)+'</td>'
+          +'<td class="nc-num">'+pctP(st.win_rate,1)+'</td>'
+          +'<td class="nc-num '+cls(st.mean_return_pct)+'">'+pct(st.mean_return_pct,2)+'</td>'
+          +'<td class="nc-num '+cls(st.t_stat)+'">'+fmt(st.t_stat,2)+'</td>'
+          +'</tr>';
+      }).join('')+'</tbody></table>';
+  }
 
-  async function load() {
+  /* ── Constituents ── */
+  let constS={status:'',stance:'',sort:'symbol',q:''};
+  function renderConstituentsSection(){
+    filterConst();
+    ['const-status','const-stance','const-sort'].forEach(id=>{
+      const el=$(id); if(!el) return;
+      el.addEventListener('change',()=>{
+        if(id==='const-status') constS.status=el.value;
+        else if(id==='const-stance') constS.stance=el.value;
+        else constS.sort=el.value;
+        filterConst();
+      });
+    });
+    const s2=$('const-search');
+    if(s2){let t;s2.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{constS.q=s2.value.trim().toLowerCase();filterConst();},220);});}
+  }
+  function filterConst(){
+    let rows=(dataset.constituents||[]).slice();
+    if(constS.status) rows=rows.filter(c=>(c.hhhl_status||'')===constS.status);
+    if(constS.stance) rows=rows.filter(c=>(c.jev||{}).stance===constS.stance);
+    if(constS.q) rows=rows.filter(c=>(c.symbol||'').toLowerCase().includes(constS.q));
+    if(constS.sort==='iv') rows.sort((a,b)=>(b.iv_pct||0)-(a.iv_pct||0));
+    else if(constS.sort==='ret5') rows.sort((a,b)=>(b.ret5_pct||0)-(a.ret5_pct||0));
+    else rows.sort((a,b)=>(a.symbol||'').localeCompare(b.symbol||''));
+    const cnt=$('const-count'); if(cnt) cnt.textContent=rows.length+' of '+(dataset.constituents||[]).length+' constituents';
+    const host=$('constituents-wrap'); if(!host) return;
+    host.innerHTML='<table class="nc-table" style="min-width:540px">'
+      +'<thead><tr><th>Symbol</th><th>Name</th><th>Spot</th><th>5d ret</th><th>HH/HL</th><th>Jev stance</th><th>IV %ile</th><th>Desk</th></tr></thead>'
+      +'<tbody>'+rows.map(c=>{
+        const jd=(c.jev||{}).stance||'\u2014';
+        return '<tr>'
+          +'<td><strong>'+esc(c.symbol||'\u2014')+'</strong></td>'
+          +'<td>'+esc((c.name||'').slice(0,26))+'</td>'
+          +'<td class="nc-num">'+iInt(c.spot)+'</td>'
+          +'<td class="nc-num '+cls(c.ret5_pct)+'">'+pct(c.ret5_pct,1)+'</td>'
+          +'<td>'+esc(c.hhhl_status||'\u2014')+'</td>'
+          +'<td class="'+(jd==='bullish'?'pos':jd==='bearish'?'neg':'')+'">'+esc(jd)+'</td>'
+          +'<td class="nc-num">'+pctP(c.iv_pct,0)+'</td>'
+          +'<td>'+esc(c.desk_bucket||'\u2014')+'</td>'
+          +'</tr>';
+      }).join('')+'</tbody></table>';
+  }
+
+  /* ── Jev section ── */
+  function renderJevSection(){
+    const jev=dataset.jev||{},idx=jev.index||{};
+    const el=$('jev-index-cards'); if(!el) return;
+    const items=[{l:'Direction',d:idx.direction||{}},{l:'Volatility',d:idx.volatility||{}},{l:'Positioning',d:idx.positioning||{}},{l:'Favoured setup',d:idx.setup||{}}];
+    el.innerHTML=items.map(it=>'<div class="nc-jev-card"><dl><dt>'+esc(it.l)+'</dt><dd class="nc-jev-choice">'+esc(it.d.choice||'\u2014')+'</dd><dd class="nc-jev-conf">Conf: '+pctP(fin(it.d.confidence)?it.d.confidence*100:null,0)+'</dd></dl></div>').join('');
+    if(jev.message) el.insertAdjacentHTML('afterend','<p class="nc-caveat nc-caveat-warn">Jev provenance: '+esc(jev.message)+'</p>');
+    const cal=jev.calibration; const calEl=$('jev-calibration'); if(!calEl) return;
+    if(!cal||!fin(cal.matured)){calEl.innerHTML='<p class="nc-muted">No calibration data.</p>';return;}
+    calEl.innerHTML='<p class="nc-caveat">'+iInt(cal.matured)+' matured index reviews. '+esc(cal.note||'')+' Small samples do not establish predictive reliability.</p>'
+      +'<div class="nc-jev-cal">'+Object.entries(cal.by_call||{}).map(([name,c])=>'<div class="nc-jev-cal-item"><strong>'+esc(name)+'</strong><span>'+iInt(c.hits)+' hits / '+iInt(c.n)+' observations</span></div>').join('')+'</div>';
+  }
+
+  /* ── Research ── */
+  function renderResearchSection(){
+    const res=dataset.research||{},host=$('research-body'); if(!host) return;
+    const sections=['institutions','strategies','evidence','github'];
+    host.innerHTML=sections.map(section=>{
+      const rows=Array.isArray(res[section])?res[section]:[];
+      return '<details class="nc-details"><summary>'+esc(section)+' · '+rows.length+'</summary><div class="nc-research-list">'+rows.map(r=>{
+        const url=r.source_url||r.url||'';
+        const text=r.summary||r.finding||r.what||[r.legs,r.edge_source,r.main_risk].filter(Boolean).join(' · ');
+        return '<article class="nc-research-item"><h4>'+esc(r.title||r.name||r.repo||'Research')+'</h4><p>'+esc(text||'')+'</p>'
+          +(/^https?:\/\//.test(url)?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Source</a>':'')+'</article>';
+      }).join('')+'</div></details>';
+    }).join('');
+  }
+
+  /* ── Method / data audit ── */
+  function renderMethodSection(){
+    const src=dataset.source||{},lims=dataset.limitations;
+    const host=$('method-body'); if(!host) return;
+    let html='';
+    if(src.name) html+='<p><strong>Source:</strong> '+esc(src.name)+'</p>';
+    if(dataset.method) html+='<dl>'+Object.entries(dataset.method).map(([k,v])=>'<dt><strong>'+esc(k.replaceAll('_',' '))+'</strong></dt><dd>'+esc(typeof v==='object'?JSON.stringify(v):v)+'</dd>').join('')+'</dl>';
+    if(Array.isArray(lims)&&lims.length) html+='<ul style="font-size:12.5px;color:var(--nc-muted);padding-left:18px">'+lims.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>';
+    host.innerHTML=html;
+    const audit=$('data-audit');
+    if(audit&&dataset.inputs) audit.textContent='Inputs: '+JSON.stringify(dataset.inputs).slice(0,300);
+  }
+
+  /* ── Main load ── */
+  async function load(){
+    const notice=$('notice');
     try {
-      const res = await fetch('nifty_chain.json?t=' + Date.now(), {cache: 'no-store'});
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
+      const src=document.body.dataset.source||new URLSearchParams(location.search).get('source')||'nifty_chain.json';
+      const res=await fetch(src,{cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status+' loading '+src);
+      const data=await res.json();
       validate(data);
-      dataset = data;
-      document.body.dataset.source = data.as_of;
-      renderHeader(); renderIndex(); renderVerdict(); renderExpiryPicker(); renderSigma(); renderChain(); renderVol();
-      renderHhhl(); renderParticipants(); renderSetups(); renderComparison(); renderMathBest(); renderRules(); renderBreadth(); renderConstituents();
-      renderResearch(); renderCalibration(); renderMethod(); bind();
-      document.body.dataset.ready = 'true';
-      startLivePricePoll();
-    } catch (err) {
-      fail(err && err.message ? err.message : String(err));
-      document.body.dataset.ready = 'error';
+      dataset=data;
+      document.body.dataset.source=data.as_of;
+      if(notice) notice.hidden=true;
+      ranked=NiftyMath.rankTradeSetups(data);
+      renderHeader();
+      renderDecisionSummary();
+      renderMarketCards();
+      renderSetupFeed();
+      renderComparisonSection();
+      renderChainSection();
+      renderParticipantsSection();
+      renderRulesSection();
+      renderConstituentsSection();
+      renderJevSection();
+      renderResearchSection();
+      renderMethodSection();
+      bindFilters();
+      document.body.dataset.ready='true';
+    } catch(err){
+      document.body.dataset.ready='error';
+      if(notice){
+        notice.hidden=false;
+        notice.className='nc-notice error';
+        notice.textContent='\u26a0 '+((err&&err.message)||String(err));
+      }
     }
   }
 
