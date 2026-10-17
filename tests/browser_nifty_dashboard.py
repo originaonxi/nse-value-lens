@@ -38,6 +38,19 @@ def run(url, screenshots=None):
         body = page.locator('body').inner_text()
         assert 'BEST BY MATHS' not in body
         assert 'NaN' not in page.content() and '>undefined<' not in page.content()
+        scanner = page.locator('#mathplay-card').inner_text()
+        assert 'P(any profit)' not in scanner and 'P(max profit)' not in scanner
+        assert 'statistically underpriced' not in scanner
+        plays = page.evaluate('data => NiftyMath.findBestDebitSpread(data)', data)
+        if plays:
+            assert 'RESEARCH ONLY' in scanner and 'all-in loss cap' in scanner
+            theta = plays[0]['theta_net']
+            if theta is not None:
+                displayed = page.locator('#mathplay-card .nc-mp-g').filter(has_text='Net θ / day').inner_text()
+                rounded = page.evaluate('v => Math.abs(v).toFixed(0)', theta)
+                assert ('−' if theta < 0 else '+') + '₹' + rounded in displayed
+        else:
+            assert 'No current reference-price candidate' in scanner
         assert not errors, errors
         # Regression: every visible read-only field uses reference snapshot prices.
         assert 'Live repricing' not in body
@@ -56,11 +69,18 @@ def run(url, screenshots=None):
         search.fill('unlikely-no-such-contract')
         expect(page.locator('#setup-cards [data-rule]:visible')).to_have_count(0)
         search.fill('')
+        expect(page.locator('#setup-cards [data-rule]:visible')).to_have_count(len(data['setups']))
         # Buyer filter must not misclassify short straddles/strangles as purchases.
         page.locator('[data-filter="buyers"]').click()
         visible_rules = page.locator('#setup-cards [data-rule]:visible').evaluate_all('(xs)=>xs.map(x=>x.dataset.rule)')
         by_rule = {s['rule']: s for s in data['setups']}
         assert all(not by_rule[r]['action'].startswith('SHORT') for r in visible_rules)
+        page.locator('[data-filter="all"]').click()
+        page.locator('[data-filter="defined"]').click()
+        defined_rules = page.locator('#setup-cards [data-rule]:visible').evaluate_all('(xs)=>xs.map(x=>x.dataset.rule)')
+        safe_rules = page.evaluate('data => NiftyMath.rankTradeSetups(data).filter(r=>r.risk.valid&&!r.risk.unlimitedLoss&&!r.risk.tailRisk).map(r=>r.setup.rule)', data)
+        assert set(defined_rules) == set(safe_rules)
+        assert 'skew_jade_lizard' not in defined_rules
         page.locator('[data-filter="all"]').click()
         for section in ['chain', 'participants', 'rules', 'constituents', 'comparison', 'jev', 'research', 'method']:
             page.locator(f'#section-{section} > summary').click()

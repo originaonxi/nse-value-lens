@@ -32,6 +32,9 @@
     const values = knots.map(value);
     const slope = lot * legs.filter(l => l.option_type === 'CE').reduce((v, l) => v + sign(l) * quantity(l), 0);
     const unlimitedProfit = slope > 0, unlimitedLoss = slope < 0;
+    // Index prices cannot fall below zero: short-put loss is finite, but unhedged.
+    const tailRisk = legs.filter(l => l.option_type === 'PE')
+      .reduce((v, l) => v + sign(l) * quantity(l), 0) < 0;
     const maxProfit = unlimitedProfit ? null : Math.max(...values);
     const maxLoss = unlimitedLoss ? null : Math.min(...values);
     const be = [];
@@ -48,7 +51,7 @@
     const prices = [...new Set([...Array.from({length: 61}, (_, i) => lo + (hi - lo) * i / 60),
       ...knots.filter(x => x >= lo && x <= hi), ...be.filter(x => x >= lo && x <= hi)])].sort((a, b) => a - b);
     return {valid: true, maxProfit, maxLoss, breakevens: [...new Set(be)].sort((a, b) => a - b),
-      unlimitedProfit, unlimitedLoss, netDebit: debit * lot,
+      unlimitedProfit, unlimitedLoss, tailRisk, netDebit: debit * lot,
       riskReward: finite(maxProfit) && maxProfit > 0 && finite(maxLoss) && maxLoss < 0 ? maxProfit / -maxLoss : null,
       curve: {price: prices, pnl: prices.map(value)}};
   }
@@ -85,7 +88,7 @@
       const jevAvailable = (data.jev || {}).state === 'ok' && Object.hasOwn(tierOrder, jp.tier) &&
         finite(jp.confidence) && jp.confidence >= 0 && jp.confidence <= 1;
       const jev = {available: jevAvailable, tier: jevAvailable ? jp.tier : null, confidence: jevAvailable ? jp.confidence : null};
-      const bounded = risk.valid && !risk.unlimitedLoss && finite(risk.maxLoss) && risk.maxLoss < 0;
+      const bounded = risk.valid && !risk.unlimitedLoss && !risk.tailRisk && finite(risk.maxLoss) && risk.maxLoss < 0;
       const evOnRisk = bounded && finite(ex.exp_pnl_per_lot) ? ex.exp_pnl_per_lot / -risk.maxLoss * 100 : null;
       const exitDate = day((setup.plan || {}).exit_by);
       const calendarDays = exitDate !== null && asof !== null ? (exitDate - asof) / 86400000 : null;
@@ -119,7 +122,8 @@
       if (!forecastUnitsOK) warnings.push('Quantity-coded legs do not match the producer forecast unit contract; ranking withheld.');
       if (!risk.valid) warnings.push('Incomplete legs, mixed expiries or invalid contract inputs: payoff is unavailable.');
       if (risk.unlimitedLoss) warnings.push('Unbounded upside loss: naked net short calls. Not a defined-risk buy candidate.');
-      if (risk.valid && !bounded && !risk.unlimitedLoss) warnings.push('No positive finite loss budget: check quotes, costs and execution; apparent arbitrage is not trade-ready.');
+      if (risk.tailRisk) warnings.push('Unhedged downside exposure: net short puts. Loss is finite at index zero but not protected by a lower wing; excluded from safe-buy ranking.');
+      if (risk.valid && !bounded && !risk.unlimitedLoss && !risk.tailRisk) warnings.push('No positive finite loss budget: check quotes, costs and execution; apparent arbitrage is not trade-ready.');
       if (!complete) warnings.push('Missing or inconsistent Greeks, IV, exit horizon or cost-adjusted exit model.');
       if (!horizonOK) warnings.push('Exit model calendar-time metadata is missing or inconsistent with the planned exit. Legacy five-calendar-day forecasts cannot rank as five-session forecasts.');
       if (finite(ex.exp_pnl_per_lot) && ex.exp_pnl_per_lot <= 0) warnings.push('Expected P&L at the planned exit is non-positive after modelled costs.');
@@ -154,9 +158,16 @@
     const idx   = data.index || {};
     const spot  = idx.option_spot || idx.close;
     const lot   = idx.lot;
-    if (!finite(spot) || !finite(lot) || lot <= 0) return [];
+    if (!finite(spot) || spot <= 0 || !Number.isInteger(lot) || lot <= 0 ||
+        !finite(maxLoss) || maxLoss <= 0 || !finite(minProfit) || minProfit <= 0 ||
+        !Number.isInteger(maxLots) || maxLots < 1 || maxLots > 100) return [];
     const tradeExp = (data.expiries || []).find(e => e.trade_expiry);
     if (!tradeExp || !Array.isArray(tradeExp.rows)) return [];
+    const now = opts && opts.now instanceof Date ? opts.now : new Date();
+    const current = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const asof = day(data.as_of), expiry = day(tradeExp.expiry);
+    if (!finite(current) || asof === null || asof > current || current - asof > 4 * 86400000 ||
+        expiry === null || expiry <= current || ((data.inputs || {}).stale || []).length) return [];
     const ceMap = {};
     tradeExp.rows.forEach(r => {
       if (r.ce && finite(r.ce.close) && r.ce.close > 0.5 && finite(r.strike) && r.strike > 0)
@@ -186,9 +197,10 @@
               rr: mp / ml,
               breakeven: Kb + deb,
               breakeven_move_pct: (Kb + deb - spot) / spot * 100,
-              delta_buy: cb.delta || null, delta_sell: cs.delta || null,
-              theta_buy: cb.theta || null, theta_sell: cs.theta || null,
-              iv_buy: cb.iv || null, iv_sell: cs.iv || null,
+              delta_buy: finite(cb.delta) ? cb.delta : null, delta_sell: finite(cs.delta) ? cs.delta : null,
+              theta_buy: finite(cb.theta) ? cb.theta : null, theta_sell: finite(cs.theta) ? cs.theta : null,
+              theta_net: finite(cb.theta) && finite(cs.theta) ? (cb.theta - cs.theta) * lot * n : null,
+              iv_buy: finite(cb.iv) ? cb.iv : null, iv_sell: finite(cs.iv) ? cs.iv : null,
               vrp: idx.vrp, atm_iv: idx.atm_iv, rv20: idx.rv20,
               as_of: data.as_of, expiry: tradeExp.expiry, dte: tradeExp.days_to_expiry,
             });

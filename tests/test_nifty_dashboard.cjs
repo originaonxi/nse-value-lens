@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const {expiryRisk, positionGreeks, rankTradeSetups} = require('../docs/nifty-math.js');
+const {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread} = require('../docs/nifty-math.js');
 const approx = (a, b, eps = 1e-8) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 const leg = (side, option_type, strike, ref_close, extra = {}) => ({side, option_type, strike, ref_close,
   expiry: '2026-11-03', lot: 65, delta: .4, gamma: .002, theta: -2, vega: 12, ...extra});
@@ -18,6 +18,9 @@ const shortCall = expiryRisk([leg('SELL', 'CE', 23000, 150)], 23000);
 assert.equal(shortCall.unlimitedLoss, true); assert.equal(shortCall.maxLoss, null);
 const shortPut = expiryRisk([leg('SELL', 'PE', 23000, 150)], 23000);
 approx(shortPut.maxLoss, -(23000 - 150) * 65); assert.equal(shortPut.unlimitedLoss, false);
+assert.equal(shortPut.tailRisk, true);
+assert.equal(expiryRisk(putSpread, 23050).tailRisk, false);
+assert.equal(expiryRisk(callSpread, 23050).tailRisk, false);
 const ratio = expiryRisk([leg('BUY', 'CE', 23000, 150), leg('SELL', 'CE', 23100, 100, {quantity: 2})], 23050);
 const duplicated = expiryRisk([leg('BUY', 'CE', 23000, 150), leg('SELL', 'CE', 23100, 100), leg('SELL', 'CE', 23100, 100)], 23050);
 assert.deepEqual(ratio, duplicated); assert.equal(ratio.unlimitedLoss, true); assert.ok(ratio.breakevens.some(b => b > 23100));
@@ -48,6 +51,12 @@ approx(ranked[0].sigmaMove, 23100 * .15 * Math.sqrt(18 / 365));
 assert.ok(ranked[0].mathScore >= 0 && ranked[0].mathScore <= 100);
 ranked = rank([setup('bad-ev', {exit: {...setup('x').exit, exp_pnl_per_lot: -1, p_profit: 99}}), setup('positive')]);
 assert.equal(ranked[0].setup.rule, 'positive'); assert.equal(ranked[1].bucket, 'avoid');
+const jadeLegs = [leg('SELL', 'PE', 23000, 150), leg('SELL', 'CE', 23100, 100), leg('BUY', 'CE', 23200, 50)];
+const jade = rank([setup('jade', {legs: jadeLegs})])[0];
+assert.equal(jade.bucket, 'avoid'); assert.equal(jade.eligible, false);
+assert.equal(jade.mathScore, null); assert.equal(jade.risk.unlimitedLoss, false);
+approx(jade.risk.maxLoss, -(23000 - 200) * 65);
+assert.ok(jade.warnings.some(w => w.includes('Unhedged downside')));
 assert.equal(rank([setup('unknown', {jev_priority: null})])[0].bucket, 'watch');
 assert.equal(rank([setup('avoid', {jev_priority: {tier: 'avoid', confidence: .99}})])[0].bucket, 'avoid');
 assert.equal(rank([setup('inactive', {firing: false})])[0].bucket, 'inactive');
@@ -78,4 +87,31 @@ for (const s of actual.setups) {
 assert.ok(report.every(s => s.mathScore === null || Number.isFinite(s.mathScore)));
 assert.equal(new Set(report.map(r => r.setup.rule)).size, report.length);
 assert.deepEqual(rankTradeSetups(actual, options), rankTradeSetups(actual, options));
+// Synthetic scanner quotes: asymmetric spread, signed theta and no invented probabilities.
+const scanData = {as_of: '2026-10-16', inputs: {stale: []}, index: {option_spot: 23000, lot: 65},
+  expiries: [{trade_expiry: true, expiry: '2026-11-03', days_to_expiry: 18, rows: [
+    {strike: 23900, ce: {close: 40, theta: -4, delta: .13}},
+    {strike: 24150, ce: {close: 20, theta: -2.5, delta: .07}}
+  ]}]};
+const scanned = findBestDebitSpread(scanData, options)[0];
+assert.ok(scanned); assert.equal(scanned.n_lots, 7);
+approx(scanned.max_loss, 9100); approx(scanned.max_profit, 104650);
+approx(scanned.theta_net, (-4 + 2.5) * 65 * 7);
+approx(scanned.breakeven, 23920);
+const nullTheta = structuredClone(scanData); nullTheta.expiries[0].rows[0].ce.theta = null;
+assert.equal(findBestDebitSpread(nullTheta, options)[0].theta_net, null);
+const zeroGreek = structuredClone(scanData); zeroGreek.expiries[0].rows[0].ce.delta = 0;
+assert.equal(findBestDebitSpread(zeroGreek, options)[0].delta_buy, 0);
+assert.deepEqual(findBestDebitSpread(scanData, {...options, now: new Date('2026-11-04')}), []);
+assert.deepEqual(findBestDebitSpread({...scanData, as_of: '2026-10-18'}, options), []);
+assert.deepEqual(findBestDebitSpread({...scanData, as_of: '2026-10-01'}, options), []);
+assert.deepEqual(findBestDebitSpread({...scanData, inputs: {stale: ['chain']}}, options), []);
+assert.deepEqual(findBestDebitSpread(scanData, {...options, maxLoss: -1}), []);
+for (const p of findBestDebitSpread(actual, {now: new Date(actual.as_of + 'T12:00:00Z')})) {
+  assert.ok(p.max_loss <= 20000 && p.max_profit >= 100000);
+  approx(p.max_loss + p.max_profit, p.width * p.lot * p.n_lots, 1.01);
+  const risk = expiryRisk([leg('BUY', 'CE', p.K_buy, p.P_buy, {quantity: p.n_lots, lot: p.lot}),
+    leg('SELL', 'CE', p.K_sell, p.P_sell, {quantity: p.n_lots, lot: p.lot})], actual.index.option_spot);
+  approx(-risk.maxLoss, p.max_loss, .51); approx(risk.maxProfit, p.max_profit, .51);
+}
 console.log(`Dashboard maths regression passed; ${report.length} current setups ranked, ${report.filter(s => s.eligible).length} pass entry-research gate.`);
