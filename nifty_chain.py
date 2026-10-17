@@ -476,6 +476,10 @@ BEAR_CALL_SPD  = [("CE", "atm", "SELL"), ("CE", "bcs", "BUY")]
 BULL_PUT_SPD   = [("PE", "atm", "SELL"), ("PE", "bps", "BUY")]
 BUY_PUT        = [("PE", "atm", "BUY")]
 RISK_REV       = [("PE", "p20", "SELL"), ("CE", "c20", "BUY")]
+PUT_RATIO_SPD    = [("PE", "atm", "BUY"), ("PE", "bps", "SELL"), ("PE", "bps", "SELL")]
+CALL_RATIO_SPD   = [("CE", "atm", "BUY"), ("CE", "bcs", "SELL"), ("CE", "bcs", "SELL")]
+JADE_LIZARD      = [("PE", "atm", "SELL"), ("CE", "c20", "SELL"), ("CE", "cw",  "BUY")]
+BROKEN_WING_BULL = [("PE", "p20", "BUY"), ("PE", "bps", "SELL"), ("PE", "bps", "SELL"), ("PE", "pw", "BUY")]
 
 # Written before any backtest result was inspected. Thresholds are round numbers, not fitted.
 RULES = [
@@ -542,6 +546,31 @@ RULES = [
     _rule("flat_call_butterfly", "Flat market: long call butterfly", "CALL BUTTERFLY", CALL_BUTTERFLY, "debit", "neutral",
           "5-session z-score is within \u00b10.5 (near-flat market) and IV is below the 35th percentile \u2014 low-cost defined-risk setup that profits if Nifty expires near the short strike.",
           lambda f: (f.z5.abs() <= 0.5) & (f.iv_pct <= 35)),
+    _rule("vrp_put_ratio", "Very rich IV: 1\u00d72 put ratio spread", "PUT RATIO SPREAD", PUT_RATIO_SPD, "margin", "neutral",
+          "ATM IV is in the top 25th percentile and at least 4 vol points above 20-session realised vol (extreme VRP). "
+          "Buy 1 ATM put, sell 2 OTM puts \u2014 the extra premium sold is structurally overpriced; profits if market stays flat or falls mildly.",
+          lambda f: (f.iv_pct >= 75) & (f.vrp >= 4) & ~f.rising),
+    _rule("trend_call_ratio", "HH/HL uptrend + rich IV: 1\u00d72 call ratio spread", "CALL RATIO SPREAD", CALL_RATIO_SPD, "margin", "bullish",
+          "Nifty is in a confirmed HH/HL uptrend and ATM IV is at or above the 65th percentile and at least 3 vol points above realised vol. "
+          "Buy 1 ATM call, sell 2 OTM calls \u2014 captures bullish trend bias while harvesting excess call-side VRP.",
+          lambda f: f.rising & (f.iv_pct >= 65) & (f.vrp >= 3)),
+    _rule("skew_jade_lizard", "High put skew: jade lizard", "JADE LIZARD", JADE_LIZARD, "margin", "neutral",
+          "25-delta put-call skew is 2.5 vol points or higher and IV percentile is 40th\u201380th \u2014 puts are structurally overpriced. "
+          "Sell ATM put + sell OTM call spread: no upside risk when spread width < total credit; fat put premium fully finances the trade.",
+          lambda f: (f.skew25.fillna(0) >= 2.5) & (f.iv_pct >= 40) & (f.iv_pct <= 80) & ~f.falling),
+    _rule("flat_broken_wing", "Flat market: broken-wing put butterfly", "BROKEN WING PUT", BROKEN_WING_BULL, "margin", "bullish",
+          "5-session z-score is within \u00b10.7 (near-flat) and IV percentile is 35th\u201370th. "
+          "Asymmetric put butterfly (buy p20, sell 2\u00d7bps, buy pw wing): entered for small debit/credit; profits if Nifty stays flat or drifts up; downside bounded by the far put wing.",
+          lambda f: (f.z5.abs() <= 0.7) & (f.iv_pct >= 35) & (f.iv_pct <= 70)),
+    _rule("expiry_week_short_strangle", "Last 7 DTE: short strangle (theta acceleration)", "SHORT STRANGLE", SHORT_STRANGLE, "margin", "neutral",
+          "The trade expiry is 7 or fewer sessions away and ATM IV is in the top half of its year with at least 2 vol points of VRP. "
+          "Theta decay is non-linear (Black-Scholes): it accelerates to its mathematical maximum in the final week. "
+          "Selling OTM strangle here harvests the steepest part of the decay curve.",
+          lambda f: (f.dte <= 7) & (f.iv_pct >= 50) & (f.vrp >= 2)),
+    _rule("pro_desk_iron_condor", "PRO desk short futures + rich IV: iron condor", "IRON CONDOR", CONDOR, "defined", "neutral",
+          "Proprietary trading desks hold 40% or fewer of their index-futures contracts long and ATM IV is in the top half of its year with at least 1.5 vol points of VRP. "
+          "PRO desks are systematic and often net-short futures when they expect range-bound price action; sell premium via iron condor in alignment.",
+          lambda f: (f.pro_ratio <= 0.40) & (f.iv_pct >= 50) & (f.vrp >= 1.5)),
     _rule("base_bull_call_spread", "Baseline: bull call spread every session", "BULL CALL SPREAD", BULL, "debit", "bullish",
           "Unconditional: the same spread taken whenever no position is open.", ALWAYS, baseline=True),
     _rule("base_bear_put_spread", "Baseline: bear put spread every session", "BEAR PUT SPREAD", BEAR, "debit", "bearish",
@@ -570,6 +599,14 @@ RULES = [
           "Unconditional.", ALWAYS, baseline=True),
     _rule("base_risk_reversal", "Baseline: risk reversal every session", "RISK REVERSAL", RISK_REV, "margin", "bullish",
           "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_put_ratio_spread", "Baseline: 1\u00d72 put ratio spread every session", "PUT RATIO SPREAD", PUT_RATIO_SPD, "margin", "neutral",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_call_ratio_spread", "Baseline: 1\u00d72 call ratio spread every session", "CALL RATIO SPREAD", CALL_RATIO_SPD, "margin", "bullish",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_jade_lizard", "Baseline: jade lizard every session", "JADE LIZARD", JADE_LIZARD, "margin", "neutral",
+          "Unconditional.", ALWAYS, baseline=True),
+    _rule("base_broken_wing", "Baseline: broken-wing put butterfly every session", "BROKEN WING PUT", BROKEN_WING_BULL, "margin", "bullish",
+          "Unconditional.", ALWAYS, baseline=True),
 ]
 BASELINE_FOR = {
     "BULL CALL SPREAD": "base_bull_call_spread", "BEAR PUT SPREAD": "base_bear_put_spread",
@@ -579,6 +616,8 @@ BASELINE_FOR = {
     "BULL PUT SPREAD": "base_bull_put_spread", "LONG STRANGLE": "base_long_strangle",
     "SHORT STRANGLE": "base_short_strangle", "IRON BUTTERFLY": "base_iron_butterfly",
     "CALL BUTTERFLY": "base_call_butterfly", "RISK REVERSAL": "base_risk_reversal",
+    "PUT RATIO SPREAD": "base_put_ratio_spread", "CALL RATIO SPREAD": "base_call_ratio_spread",
+    "JADE LIZARD": "base_jade_lizard", "BROKEN WING PUT": "base_broken_wing",
 }
 RULE_BY_ID = {r["id"]: r for r in RULES}
 
