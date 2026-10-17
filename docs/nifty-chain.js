@@ -680,6 +680,64 @@
     if(audit&&dataset.inputs) audit.textContent='Inputs: '+JSON.stringify(dataset.inputs).slice(0,300);
   }
 
+  /* ── Mathematical play scanner ── */
+  function renderMathPlay(){
+    const host=$('mathplay-card');
+    if(!host||typeof NiftyMath.findBestDebitSpread!=='function') return;
+    const plays=NiftyMath.findBestDebitSpread(dataset);
+    if(!plays.length){host.innerHTML='<p class="nc-muted" style="font-size:13px">No defined-risk play qualifies today within ₹20,000 loss / ₹1,00,000 profit constraint.</p>';return;}
+    const p=plays[0],idx=dataset.index||{},jev=dataset.jev||{};
+    const jdir=((jev.index||{}).direction)||{},jvol=((jev.index||{}).volatility)||{};
+    const ntd=((p.theta_buy||0)-Math.abs(p.theta_sell||0))*p.n_lots;
+    const aligns=jdir.choice==='bullish';
+    host.innerHTML=
+      '<div class="nc-mp">'
+      +'<div class="nc-mp-hdr">'
+      +'<div>'
+      +'<div class="nc-mp-tag">&#9650; BEST MATHEMATICAL PLAY &nbsp;·&nbsp; VRP='+pct(p.vrp,2)+' &nbsp;(IV '+(fin(p.vrp)&&p.vrp<0?'BELOW':'ABOVE')+' RV → '+(fin(p.vrp)&&p.vrp<0?'BUY CALLS':'SELL PREMIUM')+')</div>'
+      +'<h3 class="nc-mp-title">'+p.n_lots+'-lot Bull Call Spread: BUY '+p.K_buy+' / SELL '+p.K_sell+' CE</h3>'
+      +'<div class="nc-mp-leg">Buy '+p.n_lots+'&times; '+p.K_buy+' CE @ &#8377;'+p.P_buy.toFixed(2)+'&nbsp;&nbsp;+&nbsp;&nbsp;Sell '+p.n_lots+'&times; '+p.K_sell+' CE @ &#8377;'+p.P_sell.toFixed(2)+'&nbsp;&nbsp;&middot;&nbsp;&nbsp;Debit &#8377;'+p.net_debit.toFixed(2)+'/unit &middot; Expiry '+esc(p.expiry||'')+'</div>'
+      +'</div>'
+      +'<div class="nc-mp-rr-block"><span class="nc-mp-rr">'+p.rr.toFixed(1)+'&times;</span><span class="nc-mp-rr-lbl">R / R</span></div>'
+      +'</div>'
+      +'<div class="nc-mp-pnl">'
+      +'<div class="nc-mp-box neg"><div class="nc-mp-box-lbl">MAX LOSS (defined)</div><div class="nc-mp-box-amt">&#8722;&#8377;'+p.max_loss.toLocaleString('en-IN')+'</div><div class="nc-mp-box-note">Both legs expire worthless (Nifty &lt; '+p.K_buy+')</div></div>'
+      +'<div class="nc-mp-box pos"><div class="nc-mp-box-lbl">MAX PROFIT (if Nifty runs)</div><div class="nc-mp-box-amt">+&#8377;'+p.max_profit.toLocaleString('en-IN')+'</div><div class="nc-mp-box-note">Nifty &gt; '+p.K_sell+' at expiry ('+esc(p.expiry||'')+')</div></div>'
+      +'<div class="nc-mp-box"><div class="nc-mp-box-lbl">BREAKEVEN at expiry</div><div class="nc-mp-box-amt">'+p.breakeven.toFixed(0)+'</div><div class="nc-mp-box-note">Nifty needs +'+p.breakeven_move_pct.toFixed(1)+'% from '+iInt(idx.option_spot||idx.close)+'</div></div>'
+      +'</div>'
+      +'<div class="nc-mp-greeks">'
+      +(fin(p.delta_buy)?'<div class="nc-mp-g"><span>\u0394'+p.K_buy+'</span><strong>'+p.delta_buy.toFixed(3)+'</strong><span>P(any profit)</span></div>':'')
+      +(fin(p.delta_sell)?'<div class="nc-mp-g"><span>\u0394'+p.K_sell+'</span><strong>'+p.delta_sell.toFixed(3)+'</strong><span>P(max profit)</span></div>':'')
+      +(fin(p.atm_iv)?'<div class="nc-mp-g"><span>ATM IV</span><strong>'+p.atm_iv.toFixed(1)+'%</strong></div>':'')
+      +(fin(p.rv20)?'<div class="nc-mp-g"><span>RV 20d</span><strong>'+p.rv20.toFixed(1)+'%</strong></div>':'')
+      +(fin(p.vrp)?'<div class="nc-mp-g '+(p.vrp<0?'pos':'neg')+'"><span>VRP</span><strong>'+(p.vrp>=0?'+':'')+p.vrp.toFixed(2)+'%</strong><span>IV\u2212RV</span></div>':'')
+      +(fin(p.iv_buy)?'<div class="nc-mp-g"><span>IV paid</span><strong>'+p.iv_buy.toFixed(1)+'%</strong></div>':'')
+      +(fin(ntd)?'<div class="nc-mp-g neg"><span>\u03b8 drag/day</span><strong>&#8377;'+Math.abs(ntd*p.lot).toFixed(0)+'</strong><span>'+p.n_lots+' lots</span></div>':'')
+      +'</div>'
+      +'<div class="nc-mp-edge">'
+      +(fin(p.vrp)&&p.vrp<0
+       ?'<strong>Mathematical edge — VRP = '+p.vrp.toFixed(2)+'%:</strong> IV is '+Math.abs(p.vrp).toFixed(1)+'% below 20-day realised vol. Options are statistically underpriced vs recent movement. Buying a defined-risk call spread captures this IV discount with loss hard-capped at &#8377;'+p.max_loss.toLocaleString('en-IN')+'. '
+       :'')
+      +(fin(p.delta_buy)?'\u0394'+p.K_buy+' = '+p.delta_buy.toFixed(3)+' \u2192 ~'+(p.delta_buy*100).toFixed(0)+'% probability of any profit at expiry. ':'')
+      +(fin(p.delta_sell)?'\u0394'+p.K_sell+' = '+p.delta_sell.toFixed(3)+' \u2192 ~'+(p.delta_sell*100).toFixed(0)+'% probability of full '+p.rr.toFixed(1)+'\u00d7 payout.':'')
+      +'</div>'
+      +(jev.state==='ok'
+       ?'<div class="nc-mp-jev"><span class="nc-muted">Jev:</span> Direction <strong class="'+(aligns?'pos':jdir.choice==='bearish'?'neg':'')+'">'
+        +esc(jdir.choice||'\u2014')+'</strong>'+(fin(jdir.confidence)?' ('+Math.round(jdir.confidence*100)+'% conf.)':'')
+        +' &middot; Volatility <strong>'+esc(jvol.choice||'\u2014')+'</strong>'+(fin(jvol.confidence)?' ('+Math.round(jvol.confidence*100)+'% conf.)':'')
+        +(aligns?' <em>\u2014 direction supports long call structure</em>':' <em>\u2014 low directional conviction; size for defined risk</em>')
+        +'<p class="nc-caveat" style="margin:3px 0 0">Jev confidence \u2260 profit probability. LLM assessment, not a market prediction.</p></div>'
+       :'')
+      +'<p class="nc-mp-disc">Paper research on EOD NSE bhavcopy. Reference closes \u2014 actual fills differ. Max loss assumes holding to expiry; cut earlier to limit losses. '+(p.n_lots*p.lot)+' total contracts: confirm margin with broker. Not investment advice.</p>'
+      +(plays.length>1
+       ?'<details class="nc-mp-more"><summary>'+plays.length+' qualifying setups \u2014 see all</summary>'
+        +'<table class="nc-table" style="min-width:480px;margin-top:8px"><thead><tr><th>Buy</th><th>Sell</th><th>Lots</th><th>Debit</th><th>Max loss</th><th>Max profit</th><th>R/R</th><th>BE</th></tr></thead><tbody>'
+        +plays.map(q=>'<tr><td>'+q.K_buy+' CE</td><td>'+q.K_sell+' CE</td><td>'+q.n_lots+'</td><td>&#8377;'+q.net_debit+'</td><td class="neg">&#8377;'+q.max_loss.toLocaleString('en-IN')+'</td><td class="pos">&#8377;'+q.max_profit.toLocaleString('en-IN')+'</td><td>'+q.rr.toFixed(1)+'\u00d7</td><td>'+q.breakeven.toFixed(0)+'</td></tr>').join('')
+        +'</tbody></table></details>'
+       :'')
+      +'</div>';
+  }
+
   /* ── Main load ── */
   async function load(){
     const notice=$('notice');
@@ -694,6 +752,7 @@
       if(notice) notice.hidden=true;
       ranked=NiftyMath.rankTradeSetups(data);
       renderHeader();
+      renderMathPlay();
       renderDecisionSummary();
       renderMarketCards();
       renderSetupFeed();

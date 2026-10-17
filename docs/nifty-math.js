@@ -147,5 +147,58 @@
       (b.jev.confidence ?? -1) - (a.jev.confidence ?? -1) || String(a.setup.rule).localeCompare(String(b.setup.rule)));
     return result.map((r, i) => ({...r, rank: i + 1}));
   }
-  return {expiryRisk, positionGreeks, rankTradeSetups};
+  function findBestDebitSpread(data, opts) {
+    const maxLoss   = (opts && finite(opts.maxLoss))   ? opts.maxLoss   : 20000;
+    const minProfit = (opts && finite(opts.minProfit)) ? opts.minProfit : 100000;
+    const maxLots   = (opts && opts.maxLots)           ? opts.maxLots   : 8;
+    const idx   = data.index || {};
+    const spot  = idx.option_spot || idx.close;
+    const lot   = idx.lot;
+    if (!finite(spot) || !finite(lot) || lot <= 0) return [];
+    const tradeExp = (data.expiries || []).find(e => e.trade_expiry);
+    if (!tradeExp || !Array.isArray(tradeExp.rows)) return [];
+    const ceMap = {};
+    tradeExp.rows.forEach(r => {
+      if (r.ce && finite(r.ce.close) && r.ce.close > 0.5 && finite(r.strike) && r.strike > 0)
+        ceMap[r.strike] = r.ce;
+    });
+    const strikes = Object.keys(ceMap).map(Number).sort((a, b) => a - b);
+    const out = [];
+    for (let i = 0; i < strikes.length; i++) {
+      const Kb = strikes[i];
+      if (Kb < spot * 0.99) continue;
+      const Pb = ceMap[Kb].close;
+      for (let j = i + 1; j < strikes.length; j++) {
+        const Ks = strikes[j], Ps = ceMap[Ks].close;
+        const deb = Pb - Ps;
+        if (deb <= 0) continue;
+        const w = Ks - Kb, mp1 = (w - deb) * lot, ml1 = deb * lot;
+        if (mp1 <= 0) continue;
+        for (let n = 1; n <= maxLots; n++) {
+          const ml = ml1 * n, mp = mp1 * n;
+          if (ml > maxLoss) break;
+          if (mp >= minProfit) {
+            const cb = ceMap[Kb], cs = ceMap[Ks];
+            out.push({
+              K_buy: Kb, K_sell: Ks, P_buy: Pb, P_sell: Ps, n_lots: n,
+              net_debit: Math.round(deb * 100) / 100, width: w, lot,
+              max_loss: Math.round(ml), max_profit: Math.round(mp),
+              rr: mp / ml,
+              breakeven: Kb + deb,
+              breakeven_move_pct: (Kb + deb - spot) / spot * 100,
+              delta_buy: cb.delta || null, delta_sell: cs.delta || null,
+              theta_buy: cb.theta || null, theta_sell: cs.theta || null,
+              iv_buy: cb.iv || null, iv_sell: cs.iv || null,
+              vrp: idx.vrp, atm_iv: idx.atm_iv, rv20: idx.rv20,
+              as_of: data.as_of, expiry: tradeExp.expiry, dte: tradeExp.days_to_expiry,
+            });
+            break;
+          }
+        }
+      }
+    }
+    out.sort((a, b) => b.rr - a.rr);
+    return out.slice(0, 5);
+  }
+  return {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread};
 });
