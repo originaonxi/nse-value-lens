@@ -286,5 +286,90 @@
     out.sort((a, b) => b.ev_per_lot - a.ev_per_lot);
     return out.slice(0, maxR);
   }
-  return {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread, rankSpreadsByEV};
+  function buildHedgedMoveCard(data) {
+    const xss=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const f2=v=>finite(v)?Number(v).toFixed(2):'\u2014';
+    const idx=data.index||{};
+    const spot=idx.option_spot||idx.close,lot=idx.lot;
+    if(!finite(spot)||spot<=0||!Number.isInteger(lot)||lot<=0) return '';
+    const tradeExp=(data.expiries||[]).find(e=>e.trade_expiry);
+    if(!tradeExp||!Array.isArray(tradeExp.rows)) return '';
+    const ceMap={},peMap={};
+    tradeExp.rows.forEach(r=>{
+      if(r.ce&&finite(r.ce.close)&&r.ce.close>0.5&&finite(r.strike)&&r.strike>0) ceMap[r.strike]=r.ce;
+      if(r.pe&&finite(r.pe.close)&&r.pe.close>0.5&&finite(r.strike)&&r.strike>0) peMap[r.strike]=r.pe;
+    });
+    const ceS=Object.keys(ceMap).map(Number).sort((a,b)=>a-b);
+    const peS=Object.keys(peMap).map(Number).sort((a,b)=>a-b);
+    if(!ceS.length||!peS.length) return '';
+    const atm=ceS.reduce((b,k)=>Math.abs(k-spot)<Math.abs(b-spot)?k:b,ceS[0]);
+    const bcS=ceS.find(k=>k>=atm+350)||ceS[ceS.length-1];
+    const bpH=[...peS].reverse().find(k=>k<=spot-350)||peS[0];
+    const bpB=[...peS].reverse().find(k=>k<=spot*1.001)||peS[peS.length-1];
+    const bpSl=[...peS].reverse().find(k=>k<=bpB-300)||peS[0];
+    const bcH=ceS.find(k=>k>=spot+350)||ceS[ceS.length-1];
+    if(!ceMap[atm]||!ceMap[bcS]||!peMap[bpH]||!peMap[bpB]||!peMap[bpSl]||!ceMap[bcH]) return '';
+    const hhhl=data.hhhl||{};
+    const allCl=hhhl.close||[],hArr=hhhl.high||[],lArr=hhhl.low||[];
+    const fCl=allCl.filter(v=>finite(v));
+    let ema9=null;
+    if(fCl.length>=9){const k9=2/10;ema9=fCl.slice(0,9).reduce((s,v)=>s+v,0)/9;for(let i=9;i<fCl.length;i++) ema9=fCl[i]*k9+ema9*(1-k9);}
+    let vwap20=null;
+    const n20=Math.min(20,allCl.length);
+    if(n20>0){let vs=0,vc=0;for(let i=allCl.length-n20;i<allCl.length;i++){if(finite(hArr[i])&&finite(lArr[i])&&finite(allCl[i])){vs+=(hArr[i]+lArr[i]+allCl[i])/3;vc++;}}if(vc) vwap20=vs/vc;}
+    const lastCl=fCl.length?fCl[fCl.length-1]:null;
+    const e9Bull=finite(ema9)&&finite(lastCl)&&lastCl>ema9;
+    const vwBull=finite(vwap20)&&finite(lastCl)&&lastCl>vwap20;
+    const bias=(e9Bull&&vwBull)?'bullish':(!e9Bull&&!vwBull)?'bearish':'mixed';
+    const setups=Array.isArray(data.setups)?data.setups:[];
+    const str=idx.structure||{};
+    const bullSU=setups.find(s=>s.rule==='hhhl_breakout_call'||s.rule==='hhhl_bull_call_spread');
+    const bearSU=setups.find(s=>s.rule==='lhll_bear_put_spread'||s.rule==='lhll_buy_put');
+    const bFire=bullSU&&bullSU.firing,beFire=bearSU&&bearSU.firing;
+    const curStr=(str.structure||'').toLowerCase();
+    const isHh=curStr.includes('hh'),isLh=curStr.includes('lh');
+    let sigL='NO CONFIRMED SIGNAL \u2014 reference only',sigC='nc-hm-wait',sigD='wait';
+    if(bFire){sigL='\u25b2 HH+HL CONFIRMED \u2014 BULLISH ACTIVE';sigC='nc-hm-bull';sigD='bull';}
+    else if(beFire){sigL='\u25bc LH+LL CONFIRMED \u2014 BEARISH ACTIVE';sigC='nc-hm-bear';sigD='bear';}
+    else if(isHh&&bias==='bullish'){sigL='\u26a0 HH/HL+EMA9+VWAP all bullish \u2014 awaiting backtest gate';sigC='nc-hm-watch';}
+    else if(isLh&&bias==='bearish'){sigL='\u26a0 LH/LL+EMA9+VWAP all bearish \u2014 awaiting backtest gate';sigC='nc-hm-watch';}
+    const jev=(data.jev||{}).index||{};
+    const jDir=jev.direction||{},jPos=jev.positioning||{},jSet=jev.setup||{};
+    const jBear=jPos.choice==='institutions_bearish'||(jSet.choice||'').includes('bear');
+    const jBull=jDir.choice==='bullish';
+    const bD=Math.round((ceMap[atm].close-ceMap[bcS].close+peMap[bpH].close)*lot);
+    const beD=Math.round((peMap[bpB].close-peMap[bpSl].close+ceMap[bcH].close)*lot);
+    const scens=[-700,-500,-300,-100,0,200,400,600,800].map(d=>Math.round(spot+d));
+    const bPnl=s=>Math.round((Math.max(s-atm,0)-Math.max(s-bcS,0)-(ceMap[atm].close-ceMap[bcS].close)+Math.max(bpH-s,0)-peMap[bpH].close)*lot);
+    const bePnl=s=>Math.round((Math.max(bpB-s,0)-Math.max(bpSl-s,0)-(peMap[bpB].close-peMap[bpSl].close)+Math.max(s-bcH,0)-ceMap[bcH].close)*lot);
+    const pC=v=>v>0?'pos':v<0?'neg':'';
+    const fP=v=>(v>=0?'+':'')+'\u20b9'+Math.abs(v).toLocaleString('en-IN');
+    const tR=fn=>scens.map(s=>{const v=fn(s),ch=Math.round((s-spot)/spot*100);return '<tr><td class="nc-num">'+s.toLocaleString('en-IN')+' <span class="nc-hm-chg">'+(ch>=0?'+':'')+ch+'%</span></td><td class="nc-num '+pC(v)+'">'+fP(v)+'</td></tr>';}).join('');
+    const chips=''
+      +'<span class="nc-hm-chip '+(e9Bull?'pos':'neg')+'">EMA 9: '+(finite(ema9)?Math.round(ema9).toLocaleString('en-IN'):'\u2014')+'\u202f\u2014\u202fclose '+(e9Bull?'above \u2191':'below \u2193')+'</span>'
+      +'<span class="nc-hm-chip '+(vwBull?'pos':'neg')+'">VWAP-20d: '+(finite(vwap20)?Math.round(vwap20).toLocaleString('en-IN'):'\u2014')+'\u202f\u2014\u202fclose '+(vwBull?'above \u2191':'below \u2193')+'</span>'
+      +'<span class="nc-hm-chip '+(isHh?'pos':isLh?'neg':'')+'">HH/HL: '+xss(str.structure||'n/a')+'</span>'
+      +'<span class="nc-hm-chip '+(bias==='bullish'?'pos':bias==='bearish'?'neg':'')+'">Combined bias: '+xss(bias)+'</span>';
+    const jevR='<div class="nc-hm-jev">Jev: direction <strong class="'+(jBull?'pos':jDir.choice==='bearish'?'neg':'')+'">'
+      +xss(jDir.choice||'\u2014')+'</strong>'+(finite(jDir.confidence)?' ('+Math.round(jDir.confidence*100)+'% conf.)':'')
+      +' \u00b7 positioning <strong class="'+(jBear?'neg':'pos')+'">'+xss(jPos.choice||'\u2014')+'</strong>'
+      +(jBear?' <span class="nc-hm-warn">\u26a0 Institutions SHORT</span>':'')+'</div>';
+    const mkCard=(dir,legs,deb,fn,dim)=>'<div class="nc-hm-trade'+dim+'">'
+      +'<div class="nc-hm-trade-hdr nc-hm-'+(dir==='bull'?'bull':'bear')+'-hdr">'
+      +(dir==='bull'?'\u25b2 BULLISH HEDGED \u2014 deploy when HH+HL fires':'\u25bc BEARISH HEDGED \u2014 deploy when LH+LL fires'+(jBear?' \u00b7 \u26a0 Jev: insts short':''))+'</div>'
+      +'<div class="nc-hm-legs">'+legs+'<strong class="nc-hm-debit">Debit \u20b9'+deb.toLocaleString('en-IN')+'/lot</strong></div>'
+      +'<table class="nc-hm-tbl"><thead><tr><th>Nifty at expiry</th><th>P&amp;L / lot</th></tr></thead><tbody>'+tR(fn)+'</tbody></table>'
+      +'<p class="nc-caveat">Gross at expiry \u00b7 lot='+lot+' \u00b7 EOD closes \u00b7 fees excluded \u00b7 not advice.</p></div>';
+    const bLegs='<span class="pos">BUY</span> '+atm+' CE @\u20b9'+f2(ceMap[atm].close)+' &nbsp;<span class="neg">SELL</span> '+bcS+' CE @\u20b9'+f2(ceMap[bcS].close)+' &nbsp;<span class="pos">BUY</span> '+bpH+' PE @\u20b9'+f2(peMap[bpH].close)+' ';
+    const beLegs='<span class="pos">BUY</span> '+bpB+' PE @\u20b9'+f2(peMap[bpB].close)+' &nbsp;<span class="neg">SELL</span> '+bpSl+' PE @\u20b9'+f2(peMap[bpSl].close)+' &nbsp;<span class="pos">BUY</span> '+bcH+' CE @\u20b9'+f2(ceMap[bcH].close)+' ';
+    return '<div class="nc-hm-wrap">'
+      +'<div class="nc-hm-signal '+sigC+'">'+xss(sigL)+'</div>'
+      +'<div class="nc-hm-inds">'+chips+'</div>'
+      +jevR
+      +'<p class="nc-hm-note">EMA9 &amp; VWAP computed from EOD daily closes. For intraday 3-5-10 min precision, apply same signal logic on a live chart. Bullish: close above EMA9 &amp; VWAP; bearish: below both.</p>'
+      +'<div class="nc-hm-trades">'+mkCard('bull',bLegs,bD,bPnl,sigD==='bear'?' nc-hm-dim':'')+mkCard('bear',beLegs,beD,bePnl,sigD==='bull'?' nc-hm-dim':'')+'</div>'
+      +'<p class="nc-hm-disc">Framework: HH+HL + EMA9 + VWAP confirm \u2192 deploy matched hedged spread. Wait for confirmed HHHL backtest gate before entry. Not investment advice.</p>'
+      +'</div>';
+  }
+  return {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread, rankSpreadsByEV, buildHedgedMoveCard};
 });

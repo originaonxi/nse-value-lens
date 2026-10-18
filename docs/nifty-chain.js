@@ -554,6 +554,24 @@
       if(lbl) svg+='<text x="'+xf(i).toFixed(1)+'" y="'+(T+10)+'" text-anchor="middle" font-size="8" fill="'+(lbl.includes('HH')||lbl.includes('HL')?'#0d8a7a':'#c0392b')+'" font-family="system-ui">'+esc(lbl)+'</text>';
     });
     [0,Math.floor(n/4),Math.floor(n/2),Math.floor(3*n/4),n-1].forEach(i=>{if(c.dates[i]) svg+='<text x="'+xf(i).toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" '+ax+'>'+esc(String(c.dates[i]).slice(5))+'</text>';});
+    // EMA9 overlay (purple solid)
+    const eArr=c.close||[];
+    if(eArr.length>=9&&eArr.slice(0,9).every(v=>fin(v))){
+      const k9=2/10; let ev9=eArr.slice(0,9).reduce((s,v)=>s+v,0)/9;
+      const ep9=[xf(8).toFixed(1)+','+yf(ev9).toFixed(1)];
+      for(let i=9;i<eArr.length;i++){if(fin(eArr[i])){ev9=eArr[i]*k9+ev9*(1-k9);ep9.push(xf(i).toFixed(1)+','+yf(ev9).toFixed(1));}}
+      if(ep9.length>1){svg+='<polyline points="'+ep9.join(' ')+'" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.85"/><text x="'+(W-R-2)+'" y="'+Math.max(T+8,Math.min(H-B-4,yf(ev9))).toFixed(1)+'" text-anchor="end" font-size="8" fill="#7c3aed" font-family="system-ui">EMA9</text>';}
+    }
+    // VWAP-20d proxy (amber dashed) — rolling 20-day mean of (H+L+C)/3
+    const vwH2=c.high||[],vwL2=c.low||[],vwC2=c.close||[];
+    let vwS2=0,vwN2=0,vwLst=null; const vwPts2=[];
+    for(let i=0;i<n;i++){
+      const tp2=(fin(vwH2[i])&&fin(vwL2[i])&&fin(vwC2[i]))?(vwH2[i]+vwL2[i]+vwC2[i])/3:null;
+      if(tp2!==null){vwS2+=tp2;vwN2++;}
+      if(i>=20){const tp3=(fin(vwH2[i-20])&&fin(vwL2[i-20])&&fin(vwC2[i-20]))?(vwH2[i-20]+vwL2[i-20]+vwC2[i-20])/3:null;if(tp3!==null){vwS2-=tp3;vwN2--;}}
+      if(vwN2>0&&i>=19){vwLst=vwS2/vwN2;vwPts2.push(xf(i).toFixed(1)+','+yf(vwLst).toFixed(1));}
+    }
+    if(vwPts2.length>1&&vwLst!==null){svg+='<polyline points="'+vwPts2.join(' ')+'" fill="none" stroke="#c07830" stroke-width="1" stroke-dasharray="4 3" opacity="0.75"/><text x="'+(W-R-2)+'" y="'+Math.max(T+16,Math.min(H-B-4,yf(vwLst))).toFixed(1)+'" text-anchor="end" font-size="8" fill="#c07830" font-family="system-ui">VWAP~</text>';}
     svg+='</svg>';
     host.innerHTML=svg;
   }
@@ -764,6 +782,14 @@
       +' Fees, slippage, legging risk and margin with broker excluded. Not investment advice.</p>';
   }
 
+  /* ── Hedged Move Card (HH/HL + EMA9 + VWAP + options structures) ── */
+  function renderHedgedMoveCard() {
+    const host=$('hedged-move-card'); if(!host) return;
+    const html=(typeof NiftyMath!=='undefined'&&typeof NiftyMath.buildHedgedMoveCard==='function')
+      ?NiftyMath.buildHedgedMoveCard(dataset):'';
+    host.innerHTML=html||'<p class="nc-muted">Hedged move signals unavailable for this snapshot.</p>';
+  }
+
   /* ── Main load ── */
   async function load(){
     const notice=$('notice');
@@ -779,6 +805,7 @@
       ranked=NiftyMath.rankTradeSetups(data);
       renderHeader();
       renderMathPlay();
+      renderHedgedMoveCard();
       renderDecisionSummary();
       renderMarketCards();
       renderSetupFeed();

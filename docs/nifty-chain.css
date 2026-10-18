@@ -544,3 +544,32 @@ text.nc-ax { font-size: 9px; fill: #6b7a91; font-family: system-ui,sans-serif; }
 /* ── No overflow on any viewport ── */
 html, body { max-width: 100%; overflow-x: hidden; }
 .nc-shell  { max-width: 100%; overflow-x: hidden; }
+
+/* ═══ Hedged Move Card ═══ */
+.nc-hm-wrap  { display:flex; flex-direction:column; gap:10px; }
+.nc-hm-signal { padding:8px 12px; border-radius:4px; font-weight:700; font-size:13px; letter-spacing:.01em; }
+.nc-hm-bull  { background:#d4f0e7; color:#0a5c47; border:1px solid #0d8a7a; }
+.nc-hm-bear  { background:#fde8e8; color:#7f1d1d; border:1px solid #c0392b; }
+.nc-hm-watch { background:#fef3c7; color:#78350f; border:1px solid #c07830; }
+.nc-hm-wait  { background:#f0f4f8; color:#4a5568; border:1px solid var(--nc-border); }
+.nc-hm-inds  { display:flex; flex-wrap:wrap; gap:6px; }
+.nc-hm-chip  { padding:4px 9px; border-radius:12px; font-size:11.5px; background:var(--nc-bg); border:1px solid var(--nc-border); }
+.nc-hm-chip.pos { border-color:#0d8a7a; color:#0a5c47; }
+.nc-hm-chip.neg { border-color:#c0392b; color:#7f1d1d; }
+.nc-hm-jev   { font-size:12.5px; color:var(--nc-muted); padding:3px 0; }
+.nc-hm-warn  { color:#c07830; font-weight:600; }
+.nc-hm-note  { font-size:12px; color:var(--nc-muted); background:var(--nc-bg); padding:6px 10px; border-radius:4px; border-left:3px solid var(--nc-border); margin:0; }
+.nc-hm-trades { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.nc-hm-trade { background:var(--nc-card); border:1px solid var(--nc-border); border-radius:6px; padding:12px; }
+.nc-hm-trade.nc-hm-dim { opacity:0.4; }
+.nc-hm-trade-hdr { font-weight:700; font-size:12.5px; padding:6px 10px; border-radius:4px; margin-bottom:8px; }
+.nc-hm-bull-hdr { background:#d4f0e7; color:#0a5c47; }
+.nc-hm-bear-hdr { background:#fde8e8; color:#7f1d1d; }
+.nc-hm-legs  { font-size:12px; margin-bottom:8px; line-height:2; }
+.nc-hm-debit { display:block; margin-top:3px; font-size:13px; }
+.nc-hm-tbl   { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:6px; }
+.nc-hm-tbl th, .nc-hm-tbl td { padding:4px 6px; border-bottom:1px solid var(--nc-border); text-align:right; }
+.nc-hm-tbl th { background:var(--nc-bg); font-weight:600; font-size:11px; }
+.nc-hm-chg   { font-size:10px; color:var(--nc-muted); }
+.nc-hm-disc  { font-size:11.5px; color:var(--nc-muted); margin:4px 0 0; }
+@media (max-width:768px) { .nc-hm-trades { grid-template-columns:1fr; } }
