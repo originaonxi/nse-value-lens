@@ -680,59 +680,88 @@
     if(audit&&dataset.inputs) audit.textContent='Inputs: '+JSON.stringify(dataset.inputs).slice(0,300);
   }
 
-  /* ── Mathematical play scanner ── */
+  /* ── EV-ranked spread candidates (payoff research) ── */
+  function buildEVCard(p,i){
+    const spot=(dataset.index||{}).option_spot||(dataset.index||{}).close||0;
+    const rank=i+1;
+    const bePct=p.breakeven_pct!==undefined?p.breakeven_pct:(p.breakeven_move_pct||0);
+    const mpPct=p.max_profit_pct!==undefined?p.max_profit_pct:(spot?Math.round((p.K2-spot)/spot*1000)/10:0);
+    return '<div class="nc-ev-card" data-ev-rank="'+rank+'">'
+      +'<div class="nc-ev-rank-badge">#'+rank+' by EV</div>'
+      +'<div class="nc-ev-trade-name">BUY '+p.K1+' / SELL '+p.K2+' CE</div>'
+      +'<div class="nc-ev-expiry-row">'+esc(p.expiry||'')+(p.dte?' \u00b7 '+p.dte+'d':'')+' \u00b7 Lot '+p.lot+'</div>'
+      +'<table class="nc-ev-legs-tbl"><thead><tr><th>Side</th><th>Strike</th><th>Premium</th><th>\u0394</th></tr></thead><tbody>'
+      +'<tr><td class="pos">BUY</td><td>'+p.K1+' CE</td><td>&#8377;'+Number(p.P1).toFixed(2)+'</td><td>'+(fin(p.delta_buy)?p.delta_buy.toFixed(3):'\u2014')+'</td></tr>'
+      +'<tr><td class="neg">SELL</td><td>'+p.K2+' CE</td><td>&#8377;'+Number(p.P2).toFixed(2)+'</td><td>'+(fin(p.delta_sell)?p.delta_sell.toFixed(3):'\u2014')+'</td></tr>'
+      +'<tr class="nc-ev-debit-row"><td colspan="2">Net debit / unit</td><td><strong>&#8377;'+Number(p.net_debit).toFixed(2)+'</strong></td><td></td></tr>'
+      +'</tbody></table>'
+      +'<div class="nc-ev-pnl-row">'
+      +'<div class="nc-ev-stat neg"><div class="nc-ev-stat-lbl">MAX LOSS (gross)</div><div class="nc-ev-stat-val">&#8722;&#8377;'+Number(p.max_loss).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">Nifty \u2264 '+p.K1+' at expiry</div></div>'
+      +'<div class="nc-ev-stat pos"><div class="nc-ev-stat-lbl">COND. MAX PROFIT</div><div class="nc-ev-stat-val">+&#8377;'+Number(p.max_profit).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">Nifty \u2265 '+p.K2+' at expiry</div></div>'
+      +(fin(p.ev_per_lot)?'<div class="nc-ev-stat ev"><div class="nc-ev-stat-lbl">EV / LOT (realised vol)</div><div class="nc-ev-stat-val">+&#8377;'+Number(p.ev_per_lot).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">E[P&amp;L] using RV='+(fin(p.rv20)?p.rv20.toFixed(1):'?')+'% lognormal</div></div>':'')
+      +'</div>'
+      +'<div class="nc-ev-chips">'
+      +'<div class="nc-ev-chip"><span>R/R</span><strong>'+Number(p.rr).toFixed(2)+'&#215;</strong></div>'
+      +'<div class="nc-ev-chip"><span>Breakeven</span><strong>'+Number(p.breakeven).toFixed(0)+'</strong><span>+'+Number(bePct).toFixed(1)+'% from spot</span></div>'
+      +'<div class="nc-ev-chip"><span>Full profit at</span><strong>&#8805;'+p.K2+'</strong><span>+'+Number(mpPct).toFixed(1)+'% move</span></div>'
+      +(fin(p.p_any_rv)?'<div class="nc-ev-chip pos"><span>Prob. profit (RV)</span><strong>'+Number(p.p_any_rv).toFixed(1)+'%</strong><span>realised-vol lognormal</span></div>':'')
+      +(fin(p.p_max_rv)?'<div class="nc-ev-chip"><span>Prob. full profit (RV)</span><strong>'+Number(p.p_max_rv).toFixed(1)+'%</strong></div>':'')
+      +(fin(p.theta_net)?'<div class="nc-ev-chip neg"><span>Net \u03b8/day</span><strong>'+(p.theta_net<0?'&#8722;':'+')+'&#8377;'+Math.abs(p.theta_net).toFixed(0)+'</strong><span>time decay cost</span></div>':'')
+      +(fin(p.net_delta)?'<div class="nc-ev-chip"><span>Net \u0394 (1 lot)</span><strong>'+(p.net_delta>=0?'+':'')+Number(p.net_delta).toFixed(1)+'</strong></div>':'')
+      +'</div>'
+      +'</div>';
+  }
+
   function renderMathPlay(){
     const host=$('mathplay-card');
-    if(!host||typeof NiftyMath.findBestDebitSpread!=='function') return;
-    const plays=NiftyMath.findBestDebitSpread(dataset);
-    if(!plays.length){host.innerHTML='<p class="nc-muted" style="font-size:13px">No current reference-price candidate meets the gross expiry payoff screen (loss ≤ ₹20,000; potential profit ≥ ₹1,00,000), or data is stale/unavailable. This is not a validated entry signal.</p>';return;}
-    const p=plays[0],idx=dataset.index||{},jev=dataset.jev||{};
+    if(!host) return;
+    const jev=dataset.jev||{},idx=dataset.index||{};
     const jdir=((jev.index||{}).direction)||{},jvol=((jev.index||{}).volatility)||{};
-    const ntd=p.theta_net;
+    const spot=idx.option_spot||idx.close||0;
+    let spreads=[];
+    if(typeof NiftyMath.rankSpreadsByEV==='function'){
+      spreads=NiftyMath.rankSpreadsByEV(dataset,{maxResults:5});
+    } else if(typeof NiftyMath.findBestDebitSpread==='function'){
+      const raw=NiftyMath.findBestDebitSpread(dataset);
+      spreads=raw.map(p=>({K1:p.K_buy,K2:p.K_sell,P1:p.P_buy,P2:p.P_sell,
+        max_loss:p.max_loss,max_profit:p.max_profit,net_debit:p.net_debit,rr:p.rr,
+        breakeven:p.breakeven,breakeven_pct:p.breakeven_move_pct,
+        ev_per_lot:null,p_any_rv:null,p_max_rv:null,
+        theta_net:p.theta_net,net_delta:null,delta_buy:p.delta_buy,delta_sell:p.delta_sell,
+        lot:p.lot,expiry:p.expiry,dte:p.dte,rv20:p.rv20,atm_iv:p.atm_iv,vrp:p.vrp}));
+    }
+    if(!spreads.length){host.innerHTML='<p class="nc-muted" style="font-size:13px">No spread candidates available (data stale or no qualifying strikes). Research only — not an entry signal.</p>';return;}
+    const dte0=(spreads[0]||{}).dte||18;
+    const sigT=fin(idx.rv20)?idx.rv20/100*Math.sqrt(dte0/365):null;
+    const sigStr=sigT&&spot?'\u00b1'+Math.round(spot*sigT)+' pts (\u00b1'+(sigT*100).toFixed(1)+'%)':'';
     const aligns=jdir.choice==='bullish';
     host.innerHTML=
-      '<div class="nc-mp">'
-      +'<div class="nc-mp-hdr">'
-      +'<div>'
-      +'<div class="nc-mp-tag">GROSS PAYOFF SCREEN — RESEARCH ONLY · NOT AN ENTRY SIGNAL</div>'
-      +'<h3 class="nc-mp-title">'+p.n_lots+'-lot Bull Call Spread: BUY '+p.K_buy+' / SELL '+p.K_sell+' CE</h3>'
-      +'<div class="nc-mp-leg">Buy '+p.n_lots+'&times; '+p.K_buy+' CE @ &#8377;'+p.P_buy.toFixed(2)+'&nbsp;&nbsp;+&nbsp;&nbsp;Sell '+p.n_lots+'&times; '+p.K_sell+' CE @ &#8377;'+p.P_sell.toFixed(2)+'&nbsp;&nbsp;&middot;&nbsp;&nbsp;Debit &#8377;'+p.net_debit.toFixed(2)+'/unit &middot; Expiry '+esc(p.expiry||'')+'</div>'
+      '<div class="nc-ev-header">'
+      +'<div class="nc-ev-context-row">'
+      +'<span class="nc-ev-vrp-badge '+(fin(idx.vrp)&&idx.vrp<0?'pos':'neg')+'">'
+      +'VRP '+(fin(idx.vrp)?(idx.vrp>=0?'+':'')+idx.vrp.toFixed(2)+'%':'N/A')
+      +' (IV '+(fin(idx.atm_iv)?idx.atm_iv.toFixed(1):'?')+'% vs RV '+(fin(idx.rv20)?idx.rv20.toFixed(1):'?')+'%)</span>'
+      +(sigStr?'<span class="nc-ev-sigma">\u03c3\u221aT \u2248 '+sigStr+' from '+iInt(spot)+' spot</span>':'')
       +'</div>'
-      +'<div class="nc-mp-rr-block"><span class="nc-mp-rr">'+p.rr.toFixed(1)+'&times;</span><span class="nc-mp-rr-lbl">R / R</span></div>'
+      +'<p class="nc-ev-disc-hdr">GROSS PAYOFF SCREEN \u2014 RESEARCH ONLY \u00b7 NOT ENTRY SIGNALS \u00b7 Ranked by expected value using realised-vol probabilities. EOD closes only \u2014 not live bid/ask. Fees, slippage and legging risk excluded.</p>'
       +'</div>'
-      +'<div class="nc-mp-pnl">'
-      +'<div class="nc-mp-box neg"><div class="nc-mp-box-lbl">GROSS MAX LOSS</div><div class="nc-mp-box-amt">&#8722;&#8377;'+p.max_loss.toLocaleString('en-IN')+'</div><div class="nc-mp-box-note">At expiry if Nifty ≤ '+p.K_buy+'. Fees and slippage extra.</div></div>'
-      +'<div class="nc-mp-box pos"><div class="nc-mp-box-lbl">CONDITIONAL GROSS MAX PROFIT</div><div class="nc-mp-box-amt">+&#8377;'+p.max_profit.toLocaleString('en-IN')+'</div><div class="nc-mp-box-note">Only if Nifty ≥ '+p.K_sell+' at expiry ('+esc(p.expiry||'')+')</div></div>'
-      +'<div class="nc-mp-box"><div class="nc-mp-box-lbl">BREAKEVEN at expiry</div><div class="nc-mp-box-amt">'+p.breakeven.toFixed(0)+'</div><div class="nc-mp-box-note">Nifty needs +'+p.breakeven_move_pct.toFixed(1)+'% from '+iInt(idx.option_spot||idx.close)+'</div></div>'
-      +'</div>'
-      +'<div class="nc-mp-greeks">'
-      +(fin(p.delta_buy)?'<div class="nc-mp-g"><span>\u0394'+p.K_buy+'</span><strong>'+p.delta_buy.toFixed(3)+'</strong><span>Long-option sensitivity</span></div>':'')
-      +(fin(p.delta_sell)?'<div class="nc-mp-g"><span>\u0394'+p.K_sell+'</span><strong>'+p.delta_sell.toFixed(3)+'</strong><span>Short-leg option delta</span></div>':'')
-      +(fin(p.atm_iv)?'<div class="nc-mp-g"><span>ATM IV</span><strong>'+p.atm_iv.toFixed(1)+'%</strong></div>':'')
-      +(fin(p.rv20)?'<div class="nc-mp-g"><span>RV 20d</span><strong>'+p.rv20.toFixed(1)+'%</strong></div>':'')
-      +(fin(p.vrp)?'<div class="nc-mp-g '+(p.vrp<0?'pos':'neg')+'"><span>VRP</span><strong>'+(p.vrp>=0?'+':'')+p.vrp.toFixed(2)+'%</strong><span>IV\u2212RV</span></div>':'')
-      +(fin(p.iv_buy)?'<div class="nc-mp-g"><span>IV paid</span><strong>'+p.iv_buy.toFixed(1)+'%</strong></div>':'')
-      +(fin(ntd)?'<div class="nc-mp-g '+(ntd<0?'neg':'pos')+'"><span>Net \u03b8 / day</span><strong>'+(ntd<0?'−':'+')+'&#8377;'+Math.abs(ntd).toFixed(0)+'</strong><span>'+p.n_lots+' lots; local sensitivity</span></div>':'<div class="nc-mp-g"><span>Net \u03b8 / day</span><strong>Unavailable</strong></div>')
-      +'</div>'
-      +'<div class="nc-mp-edge">'
-      +(fin(p.vrp)?'IV minus trailing realised volatility is '+p.vrp.toFixed(2)+' percentage points. This comparison does not establish mispricing or positive expected returns. ':'')
-      +'Delta measures price sensitivity, not probability of profit. No calibrated profit probability or positive expected value has been established for this scanned spread. Candidates are sorted only by gross maximum reward/risk among the tested call spreads; a high ratio can require an unlikely move.'
+      +'<div class="nc-ev-grid">'
+      +spreads.map((p,i)=>buildEVCard(p,i)).join('')
       +'</div>'
       +(jev.state==='ok'
-       ?'<div class="nc-mp-jev"><span class="nc-muted">Jev:</span> Direction <strong class="'+(aligns?'pos':jdir.choice==='bearish'?'neg':'')+'">'
-        +esc(jdir.choice||'\u2014')+'</strong>'+(fin(jdir.confidence)?' ('+Math.round(jdir.confidence*100)+'% conf.)':'')
-        +' &middot; Volatility <strong>'+esc(jvol.choice||'\u2014')+'</strong>'+(fin(jvol.confidence)?' ('+Math.round(jvol.confidence*100)+'% conf.)':'')
-        +' <em>— market context only; Jev has not reviewed this specific scanned spread</em>'
-        +'<p class="nc-caveat" style="margin:3px 0 0">Jev confidence \u2260 profit probability. LLM assessment, not a market prediction.</p></div>'
-       :'')
-      +'<p class="nc-mp-disc">Paper research on EOD NSE bhavcopy ('+esc(p.as_of)+'). Reference closes are not executable bid/ask quotes. Payoffs assume both legs fill at those closes and remain intact through expiry; fees, slippage and legging risk are excluded. This does not verify a ₹20,000 all-in loss cap. '+p.n_lots+' lots × '+p.lot+' units per leg: confirm prices, liquidity and margin with broker. Stops cannot guarantee an exit price. Not investment advice.</p>'
-      +(plays.length>1
-       ?'<details class="nc-mp-more"><summary>Top '+plays.length+' gross-payoff candidates — not validated trades</summary>'
-        +'<table class="nc-table" style="min-width:480px;margin-top:8px"><thead><tr><th>Buy</th><th>Sell</th><th>Lots</th><th>Debit</th><th>Max loss</th><th>Max profit</th><th>R/R</th><th>BE</th></tr></thead><tbody>'
-        +plays.map(q=>'<tr><td>'+q.K_buy+' CE</td><td>'+q.K_sell+' CE</td><td>'+q.n_lots+'</td><td>&#8377;'+q.net_debit+'</td><td class="neg">&#8377;'+q.max_loss.toLocaleString('en-IN')+'</td><td class="pos">&#8377;'+q.max_profit.toLocaleString('en-IN')+'</td><td>'+q.rr.toFixed(1)+'\u00d7</td><td>'+q.breakeven.toFixed(0)+'</td></tr>').join('')
-        +'</tbody></table></details>'
-       :'')
-      +'</div>';
+        ?'<div class="nc-mp-jev nc-ev-jev-row">'
+          +'<span class="nc-muted">Jev market context (index level):</span>'
+          +' Direction <strong class="'+(aligns?'pos':jdir.choice==='bearish'?'neg':'')+'">'
+          +esc(jdir.choice||'\u2014')+'</strong>'+(fin(jdir.confidence)?' ('+Math.round(jdir.confidence*100)+'% conf.)':'')
+          +' \u00b7 Volatility <strong>'+esc(jvol.choice||'\u2014')+'</strong>'+(fin(jvol.confidence)?' ('+Math.round(jvol.confidence*100)+'% conf.)':'')
+          +' <em>\u2014 Jev has not reviewed these specific spreads; market context only</em>'
+          +'<p class="nc-caveat" style="margin:3px 0 0">Jev confidence \u2260 profit probability. \u0394 = price sensitivity, not profit probability. EV uses realised-vol distribution, not a forecast.</p>'
+          +'</div>'
+        :'')
+      +'<p class="nc-mp-disc">Paper research on EOD NSE bhavcopy ('
+      +esc(((spreads[0]||{}).as_of)||dataset.as_of||'')+').'
+      +' Reference closes are not executable quotes. Payoffs assume both legs fill at EOD closes and hold to expiry.'
+      +' Fees, slippage, legging risk and margin with broker excluded. Not investment advice.</p>';
   }
 
   /* ── Main load ── */

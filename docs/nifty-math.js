@@ -212,5 +212,79 @@
     out.sort((a, b) => b.rr - a.rr);
     return out.slice(0, 5);
   }
-  return {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread};
+  function rankSpreadsByEV(data, opts) {
+    const maxR = opts && Number.isInteger(opts.maxResults) && opts.maxResults > 0 ? opts.maxResults : 5;
+    const maxL = opts && finite(opts.maxLoss) && opts.maxLoss > 0 ? opts.maxLoss : 100000;
+    const idx   = data.index || {};
+    const spot  = idx.option_spot || idx.close;
+    const lot   = idx.lot;
+    const rv20  = idx.rv20;
+    if (!finite(spot) || spot <= 0 || !Number.isInteger(lot) || lot <= 0 || !finite(rv20) || rv20 <= 0) return [];
+    const tradeExp = (data.expiries || []).find(e => e.trade_expiry);
+    if (!tradeExp || !Array.isArray(tradeExp.rows)) return [];
+    const dte = tradeExp.days_to_expiry;
+    if (!finite(dte) || dte <= 0) return [];
+    const T   = dte / 365;
+    const now = opts && opts.now instanceof Date ? opts.now : new Date();
+    const current = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const asof = day(data.as_of), expDate = day(tradeExp.expiry);
+    if (!finite(current) || asof === null || asof > current || current - asof > 4 * 86400000 ||
+        expDate === null || expDate <= current || ((data.inputs || {}).stale || []).length) return [];
+    const sig = rv20 / 100;
+    function normCdf(x) {
+      const t = 1 / (1 + 0.2316419 * Math.abs(x));
+      const p = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+      const phi = Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+      return x >= 0 ? 1 - phi * p : phi * p;
+    }
+    function pAbove(K) {
+      const d2 = (Math.log(spot / K) - 0.5 * sig * sig * T) / (sig * Math.sqrt(T));
+      return normCdf(d2);
+    }
+    const ceMap = {};
+    tradeExp.rows.forEach(r => {
+      if (r.ce && finite(r.ce.close) && r.ce.close > 0.5 && finite(r.strike) && r.strike > 0)
+        ceMap[r.strike] = r.ce;
+    });
+    const strikes = Object.keys(ceMap).map(Number).sort((a, b) => a - b);
+    const out = [];
+    for (let i = 0; i < strikes.length; i++) {
+      const K1 = strikes[i];
+      if (K1 < spot * 0.99) continue;
+      const cb = ceMap[K1];
+      for (let j = i + 1; j < strikes.length; j++) {
+        const K2 = strikes[j], cs = ceMap[K2];
+        const deb = cb.close - cs.close;
+        if (deb <= 0) continue;
+        const width = K2 - K1, mpUnit = width - deb;
+        if (mpUnit <= 0) continue;
+        const ml = Math.round(deb * lot);
+        if (ml > maxL) continue;
+        const mp = Math.round(mpUnit * lot), rr = mp / ml;
+        const be = K1 + deb;
+        const pA = pAbove(be), pM = pAbove(K2);
+        const ev = Math.round(pM * mp + (pA - pM) * (mp * 0.5) - (1 - pA) * ml);
+        out.push({
+          K1, K2, P1: cb.close, P2: cs.close,
+          net_debit: Math.round(deb * 100) / 100,
+          width, lot, max_loss: ml, max_profit: mp, rr,
+          breakeven: Math.round(be * 10) / 10,
+          breakeven_pct: Math.round((be - spot) / spot * 1000) / 10,
+          max_profit_pct: Math.round((K2 - spot) / spot * 1000) / 10,
+          p_any_rv: Math.round(pA * 1000) / 10,
+          p_max_rv: Math.round(pM * 1000) / 10,
+          ev_per_lot: ev,
+          theta_net: finite(cb.theta) && finite(cs.theta) ? Math.round((cb.theta - cs.theta) * lot * 10) / 10 : null,
+          net_delta: finite(cb.delta) && finite(cs.delta) ? Math.round((cb.delta - cs.delta) * lot * 10) / 10 : null,
+          delta_buy: finite(cb.delta) ? cb.delta : null,
+          delta_sell: finite(cs.delta) ? cs.delta : null,
+          vrp: idx.vrp, atm_iv: idx.atm_iv, rv20,
+          as_of: data.as_of, expiry: tradeExp.expiry, dte,
+        });
+      }
+    }
+    out.sort((a, b) => b.ev_per_lot - a.ev_per_lot);
+    return out.slice(0, maxR);
+  }
+  return {expiryRisk, positionGreeks, rankTradeSetups, findBestDebitSpread, rankSpreadsByEV};
 });

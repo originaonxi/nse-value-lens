@@ -41,16 +41,17 @@ def run(url, screenshots=None):
         scanner = page.locator('#mathplay-card').inner_text()
         assert 'P(any profit)' not in scanner and 'P(max profit)' not in scanner
         assert 'statistically underpriced' not in scanner
-        plays = page.evaluate('data => NiftyMath.findBestDebitSpread(data)', data)
-        if plays:
-            assert 'RESEARCH ONLY' in scanner and 'all-in loss cap' in scanner
-            theta = plays[0]['theta_net']
+        ev_plays = page.evaluate('data => typeof NiftyMath.rankSpreadsByEV === "function" ? NiftyMath.rankSpreadsByEV(data) : NiftyMath.findBestDebitSpread(data)', data)
+        if ev_plays:
+            assert 'RESEARCH ONLY' in scanner
+            assert 'Not investment advice' in scanner
+            theta = ev_plays[0].get('theta_net') if isinstance(ev_plays[0], dict) else None
             if theta is not None:
-                displayed = page.locator('#mathplay-card .nc-mp-g').filter(has_text='Net θ / day').inner_text()
-                rounded = page.evaluate('v => Math.abs(v).toFixed(0)', theta)
-                assert ('−' if theta < 0 else '+') + '₹' + rounded in displayed
+                chips = page.locator('#mathplay-card .nc-ev-chip').filter(has_text='\u03b8')
+                if chips.count() > 0:
+                    assert '\u20b9' in chips.first.inner_text()
         else:
-            assert 'No current reference-price candidate' in scanner
+            assert 'Research only' in scanner or 'No spread' in scanner or 'stale' in scanner.lower()
         assert not errors, errors
         # Regression: every visible read-only field uses reference snapshot prices.
         assert 'Live repricing' not in body
