@@ -833,8 +833,8 @@
   /* ── Pine Signal Card (EMA9 + RSI + SL/TP + OB/FVG summary) ── */
   function renderPineSignalCard() {
     const host=$('pine-signal-card'); if(!host) return;
-    const ps=((dataset.hhhl||{}).signals)||{};
-    const cur=ps.current||{}; const par=ps.params||{};
+    const pine_signal=((dataset.hhhl||{}).signals)||{};
+    const ps=pine_signal, cur=ps.current||{}, par=ps.params||{};
     if(!cur.direction){host.innerHTML='<p class="nc-muted">Signal data not available in this snapshot.</p>';return;}
     const isBull=cur.direction==='buy', isBear=cur.direction==='sell', isFlat=cur.direction==='flat';
     const dirCls=isBull?'nc-ps-bull':isBear?'nc-ps-bear':'nc-ps-flat';
