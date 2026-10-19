@@ -1230,14 +1230,14 @@ def calibration(f):
 # ---------------------------------------------------------------- build
 
 def compute_pine_signals(ohlc, ema_len=9, rsi_len=14, rsi_level=50.0,
-                          sl_lookback=4, sl_buffer=20.0, tp_step=100.0,
+                          sl_lookback=4, sl_buffer=0.0, tp_step=0.0,
                           swing_len=5, max_ob=3, fvg_min_atr=0.25, max_fvg=3):
     """Port of PineScript '9 EMA + RSI Signals (SL + 3 TPs) + OB/FVG' to Nifty daily.
 
-    Adapted defaults for Nifty daily (from 15m XAUUSD defaults in the source script):
-      tp_step=100   was 10.0  — 100 pts per TP target on Nifty
-      sl_buffer=20  was 0.0   — 20 pt buffer beyond swing low/high
-      swing_len=5   was 10    — 5 bars each side on daily chart
+    ATR-based defaults scale to any instrument (0 = auto; pass explicit value to override):
+      tp_step=0  → 1×ATR14 per TP level  (Nifty ≈ 150-200 pts; ₹180 stock ≈ ₹3-4)
+      sl_buffer=0 → 0.1×ATR14 beyond swing low/high  (prevents trivial wick stops)
+      swing_len=5 — 5 bars each side on daily chart
     No look-ahead: every bar i uses only data from bars 0..i.
     """
     if len(ohlc) < max(ema_len + rsi_len + 2, swing_len * 2 + 2):
@@ -1281,6 +1281,14 @@ def compute_pine_signals(ohlc, ema_len=9, rsi_len=14, rsi_level=50.0,
         atr[13] = tr[:14].mean()
         for i in range(14, n):
             atr[i] = atr[i - 1] * (1 - kw14) + tr[i] * kw14
+
+    # ATR-based defaults — adapts to Nifty index and individual stocks
+    fin_atr = atr[np.isfinite(atr)]
+    cur_atr = float(fin_atr[-1]) if len(fin_atr) else float(cl[-1]) * 0.01
+    if not tp_step:
+        tp_step = cur_atr            # 1×ATR14 per TP level
+    if not sl_buffer:
+        sl_buffer = cur_atr * 0.1   # 0.1×ATR14 buffer beyond swing low/high
 
     # Bull / Bear conditions (close above/below EMA + RSI above/below level)
     bull = np.array([bool(cl[i] > ema[i] and np.isfinite(rsi[i]) and rsi[i] > rsi_level) for i in range(n)])
@@ -1415,9 +1423,10 @@ def compute_pine_signals(ohlc, ema_len=9, rsi_len=14, rsi_level=50.0,
     num2 = lambda v: round(float(v), 2) if np.isfinite(v) else None
     return {
         "params": {"ema_len": ema_len, "rsi_len": rsi_len, "rsi_level": rsi_level,
-                   "sl_lookback": sl_lookback, "sl_buffer": sl_buffer, "tp_step": tp_step,
+                   "sl_lookback": sl_lookback, "sl_buffer": round(sl_buffer, 2),
+                   "tp_step": round(tp_step, 2), "cur_atr": round(cur_atr, 2),
                    "swing_len": swing_len,
-                   "note": "Adapted for Nifty daily: tp_step=100, sl_buffer=20, swing_len=5"},
+                   "note": "ATR-based: tp_step=1\u00d7ATR14, sl_buffer=0.1\u00d7ATR14, swing_len=5"},
         "ema9":      [num2(v) for v in ema[rs:]],
         "rsi14":     [round(float(v), 1) if np.isfinite(v) else None for v in rsi[rs:]],
         "bull_cond": [bool(v) for v in bull[rs:]],
