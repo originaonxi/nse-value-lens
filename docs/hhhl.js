@@ -172,6 +172,115 @@
     [0,Math.floor((bars.length-1)/3),Math.floor(2*(bars.length-1)/3),bars.length-1].forEach((i,n)=>{
       svg+='<text x="'+x(i)+'" y="'+(h-12)+'" text-anchor="'+(n===0?'start':n===3?'end':'middle')+'" fill="#748078" font-size="10">'+esc(bars[i].date)+'</text>';
     });
+    // ── Pine Signal overlays: EMA9 + RSI + OB + FVG (chart-signals checkbox) ──
+    if($('chart-signals')&&$('chart-signals').checked){
+      const N=bars.length;
+      // EMA9 (Pine ta.ema: exponential moving average)
+      const k9=2/10;
+      const ema9=new Array(N);ema9[0]=bars[0].close;
+      for(let i=1;i<N;i++) ema9[i]=bars[i].close*k9+ema9[i-1]*(1-k9);
+      // RSI14 (Wilder RMA — same as Pine ta.rsi)
+      const kw=1/14,ag2=new Array(N).fill(0),al2=new Array(N).fill(0);
+      if(N>=15){
+        let ga=0,la=0;for(let j=1;j<=14;j++){const d=bars[j].close-bars[j-1].close;if(d>0)ga+=d;else la-=d;}
+        ag2[14]=ga/14;al2[14]=la/14;
+        for(let i=15;i<N;i++){const d=bars[i].close-bars[i-1].close;ag2[i]=ag2[i-1]*(1-kw)+(d>0?d:0)*kw;al2[i]=al2[i-1]*(1-kw)+(d<0?-d:0)*kw;}
+      }
+      const rsi14=bars.map((_,i)=>i<14||al2[i]===0?NaN:100-100/(1+ag2[i]/al2[i]));
+      // ATR14 (Wilder) for FVG min gap and TP step
+      const kw14=1/14,atr14=new Array(N).fill(NaN);
+      if(N>=14){
+        let s=0;for(let i=0;i<14;i++) s+=bars[i].high-bars[i].low;
+        atr14[13]=s/14;
+        for(let i=14;i<N;i++) atr14[i]=atr14[i-1]*(1-kw14)+Math.max(bars[i].high-bars[i].low,Math.abs(bars[i].high-bars[i-1].close),Math.abs(bars[i].low-bars[i-1].close))*kw14;
+      }
+      const curAtr=atr14[N-1]||((hi-lo)*0.025);
+      const tpStep=curAtr; // 1×ATR per TP level — adapts to each stock's volatility
+      // Bull/Bear conditions (close > EMA9 and RSI > 50)
+      const bull2=bars.map((b,i)=>i>=14&&b.close>ema9[i]&&rsi14[i]>50);
+      const bear2=bars.map((b,i)=>i>=14&&b.close<ema9[i]&&rsi14[i]<50);
+      // Walk-forward signal simulation — no look-ahead (exact PineScript logic)
+      let dirSt=0,eBar2=-1,eVal2=0,slV2=0,tp1v=0,tp2v=0,tp3v=0,h1=false,h2=false,h3=false;
+      const buyBs=[],sellBs=[],tp1h=new Array(N).fill(false),tp2h=new Array(N).fill(false),tp3h=new Array(N).fill(false),slH=new Array(N).fill(false);
+      for(let i=0;i<N;i++){
+        const b=bars[i];
+        const buySig=bull2[i]&&(i===0||!bull2[i-1])&&dirSt!==1;
+        const selSig=bear2[i]&&(i===0||!bear2[i-1])&&dirSt!==-1;
+        if(dirSt!==0&&i>eBar2){
+          const isL=dirSt===1,hit=isL?b.low<=slV2:b.high>=slV2;
+          if(hit){slH[i]=true;}else{
+            if(!h1&&(isL?b.high>=tp1v:b.low<=tp1v)){h1=true;tp1h[i]=true;}
+            if(!h2&&(isL?b.high>=tp2v:b.low<=tp2v)){h2=true;tp2h[i]=true;}
+            if(!h3&&(isL?b.high>=tp3v:b.low<=tp3v)){h3=true;tp3h[i]=true;}
+          }
+          if(hit||h3)dirSt=0;
+        }
+        if(buySig||selSig){
+          dirSt=buySig?1:-1;eBar2=i;eVal2=b.close;
+          const st=Math.max(0,i-4); // slLookback=4, shifted by 1 = bars [i-4..i-1]
+          slV2=buySig?Math.min(...bars.slice(st,i).map(b=>b.low)||[b.low]):Math.max(...bars.slice(st,i).map(b=>b.high)||[b.high]);
+          tp1v=eVal2+dirSt*tpStep;tp2v=eVal2+dirSt*tpStep*2;tp3v=eVal2+dirSt*tpStep*3;
+          h1=h2=h3=false;(buySig?buyBs:sellBs).push(i);
+        }
+      }
+      // Order Blocks: swing_len=5, last bearish/bullish candle before pivot-break
+      const sLen=5;
+      const bOBs=[],beOBs=[];
+      let swHv2=NaN,swLv2=NaN,swHb2=-1,swLb2=-1,swHu2=true,swLu2=true;
+      for(let i=0;i<N;i++){
+        const phb=i-sLen;
+        if(phb>=sLen){const sl2=bars.slice(phb-sLen,phb+sLen+1);if(sl2.length===sLen*2+1&&bars[phb].high===Math.max(...sl2.map(b=>b.high))&&bars[phb].high>bars[phb-1].high&&bars[phb].high>bars[phb+1].high){swHv2=bars[phb].high;swHb2=phb;swHu2=false;}}
+        const plb=i-sLen;
+        if(plb>=sLen){const sl2=bars.slice(plb-sLen,plb+sLen+1);if(sl2.length===sLen*2+1&&bars[plb].low===Math.min(...sl2.map(b=>b.low))&&bars[plb].low<bars[plb-1].low&&bars[plb].low<bars[plb+1].low){swLv2=bars[plb].low;swLb2=plb;swLu2=false;}}
+        for(let j=bOBs.length-1;j>=0;j--){if(bars[i].close<bOBs[j].bot)bOBs.splice(j,1);}
+        for(let j=beOBs.length-1;j>=0;j--){if(bars[i].close>beOBs[j].top)beOBs.splice(j,1);}
+        if(!swHu2&&!isNaN(swHv2)&&bars[i].close>swHv2){
+          swHu2=true;const sp=Math.min(i-swHb2,200);let ot=null,ob=null,oi=i-1;
+          for(let j=1;j<=sp;j++){const idx=i-j;if(idx>=0&&bars[idx].close<bars[idx].open){ot=bars[idx].high;ob=bars[idx].low;oi=idx;break;}}
+          if(ot===null&&sp>0){const ib=Array.from({length:Math.min(sp,i)},(_,k)=>i-1-k).reduce((b,c)=>bars[c].low<bars[b].low?c:b,i-1);ot=bars[ib].high;ob=bars[ib].low;oi=ib;}
+          if(ot!==null){bOBs.push({top:ot,bot:ob,bi:oi});if(bOBs.length>3)bOBs.shift();}
+        }
+        if(!swLu2&&!isNaN(swLv2)&&bars[i].close<swLv2){
+          swLu2=true;const sp=Math.min(i-swLb2,200);let ot=null,ob=null,oi=i-1;
+          for(let j=1;j<=sp;j++){const idx=i-j;if(idx>=0&&bars[idx].close>bars[idx].open){ot=bars[idx].high;ob=bars[idx].low;oi=idx;break;}}
+          if(ot===null&&sp>0){const ib=Array.from({length:Math.min(sp,i)},(_,k)=>i-1-k).reduce((b,c)=>bars[c].high>bars[b].high?c:b,i-1);ot=bars[ib].high;ob=bars[ib].low;oi=ib;}
+          if(ot!==null){beOBs.push({top:ot,bot:ob,bi:oi});if(beOBs.length>3)beOBs.shift();}
+        }
+      }
+      // FVGs (3-bar gap ≥ 0.25×ATR)
+      const bFVGs=[],beFVGs=[],mg=curAtr*0.25;
+      for(let i=2;i<N;i++){
+        if(bars[i].low>bars[i-2].high&&(bars[i].low-bars[i-2].high)>=mg){bFVGs.push({top:bars[i].low,bot:bars[i-2].high,bi:i-2});for(let j=bFVGs.length-1;j>=0;j--){if(bars[i].close<bFVGs[j].bot)bFVGs.splice(j,1);}if(bFVGs.length>3)bFVGs.shift();}
+        if(bars[i].high<bars[i-2].low&&(bars[i-2].low-bars[i].high)>=mg){beFVGs.push({top:bars[i-2].low,bot:bars[i].high,bi:i-2});for(let j=beFVGs.length-1;j>=0;j--){if(bars[i].close>beFVGs[j].top)beFVGs.splice(j,1);}if(beFVGs.length>3)beFVGs.shift();}
+      }
+      // Draw OB boxes
+      const dbox=(ot,ob,bi,col,labTop)=>{const xt=x(bi),x2=plotRight;if(xt>=x2)return;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.12" stroke="'+col+'" stroke-width="0.5" rx="1"/><text x="'+(xt+3)+'" y="'+(labTop?y(ot)+10:y(ob)-2).toFixed(1)+'" font-size="8" fill="'+col+'" font-family="system-ui">'+(labTop?'Bear OB':'Bull OB')+'</text>';};
+      bOBs.forEach(ob=>dbox(ob.top,ob.bot,ob.bi,'#2962ff',false));
+      beOBs.forEach(ob=>dbox(ob.top,ob.bot,ob.bi,'#e040fb',true));
+      // Draw FVG zones
+      const dfvg=(ot,ob,bi,col)=>{const xt=x(bi),x2=plotRight;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.1" stroke="'+col+'" stroke-width="0.5"/>';};
+      bFVGs.forEach(f=>dfvg(f.top,f.bot,f.bi,'#00bcd4'));
+      beFVGs.forEach(f=>dfvg(f.top,f.bot,f.bi,'#ff9800'));
+      // EMA9 polyline (purple — same as emaCol in Pine)
+      svg+='<polyline points="'+ema9.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')+'" fill="none" stroke="#2962ff" stroke-width="1.8" opacity="0.85"/>';
+      svg+='<text x="'+x(N-1).toFixed(1)+'" y="'+(y(ema9[N-1])-5).toFixed(1)+'" font-size="9" fill="#2962ff" font-family="system-ui" text-anchor="end">EMA9</text>';
+      // Buy ▲ / Sell ▼ markers
+      buyBs.forEach(i=>{svg+='<text x="'+x(i).toFixed(1)+'" y="'+(y(bars[i].low)+14).toFixed(1)+'" text-anchor="middle" font-size="14" fill="#43d443" font-weight="bold">\u25b2</text><text x="'+x(i).toFixed(1)+'" y="'+(y(bars[i].low)+24).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#43d443" font-family="system-ui">Buy</text>';});
+      sellBs.forEach(i=>{svg+='<text x="'+x(i).toFixed(1)+'" y="'+(y(bars[i].high)-9).toFixed(1)+'" text-anchor="middle" font-size="14" fill="#f44336" font-weight="bold">\u25bc</text><text x="'+x(i).toFixed(1)+'" y="'+(y(bars[i].high)-20).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#f44336" font-family="system-ui">Sell</text>';});
+      // TP/SL hit dots
+      tp1h.forEach((v,i)=>{if(v)svg+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(bars[i].high).toFixed(1)+'" r="4" fill="#43d443" opacity="0.85"><title>TP1 hit</title></circle>';});
+      tp2h.forEach((v,i)=>{if(v)svg+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(bars[i].high).toFixed(1)+'" r="4" fill="#2e7d32" opacity="0.85"><title>TP2 hit</title></circle>';});
+      tp3h.forEach((v,i)=>{if(v)svg+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(bars[i].high).toFixed(1)+'" r="4" fill="#1b5e20" opacity="0.85"><title>TP3 hit</title></circle>';});
+      slH.forEach((v,i)=>{if(v)svg+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(bars[i].low).toFixed(1)+'" r="4" fill="#f44336" opacity="0.85"><title>SL hit</title></circle>';});
+      // Current active SL / TP lines (dashed horizontal — same as PineScript drawTrade)
+      if(dirSt!==0&&eBar2>=0){
+        const ex=x(eBar2),x2=plotRight;
+        svg+='<line x1="'+ex.toFixed(1)+'" x2="'+x2+'" y1="'+y(slV2).toFixed(1)+'" y2="'+y(slV2).toFixed(1)+'" stroke="#f44336" stroke-width="1.5" stroke-dasharray="5 3"/><text x="'+(x2+5)+'" y="'+(y(slV2)+4).toFixed(1)+'" font-size="9" fill="#f44336" font-family="system-ui">SL '+fmt(slV2)+'</text>';
+        [[tp1v,'TP1','#43d443'],[tp2v,'TP2','#2e7d32'],[tp3v,'TP3','#1b5e20']].forEach(([tp,lbl,col])=>{if(!numeric(tp))return;svg+='<line x1="'+ex.toFixed(1)+'" x2="'+x2+'" y1="'+y(tp).toFixed(1)+'" y2="'+y(tp).toFixed(1)+'" stroke="'+col+'" stroke-width="1" stroke-dasharray="4 2"/><text x="'+(x2+5)+'" y="'+(y(tp)-2).toFixed(1)+'" font-size="9" fill="'+col+'" font-family="system-ui">'+lbl+' '+fmt(tp)+'</text>';});
+        // Entry vertical tick
+        svg+='<line x1="'+ex.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y1="'+y(tp3v).toFixed(1)+'" y2="'+y(slV2).toFixed(1)+'" stroke="#9e9e9e" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.5"/>';
+      }
+    }
     return svg+'</svg>';
   }
 
@@ -415,7 +524,7 @@
   $('priority-list').addEventListener('click',event=>{const card=event.target.closest('button[data-symbol]');if(card)selectPriority(card.dataset.symbol);});
   $('stock-rows').addEventListener('click',event=>{const button=event.target.closest('button[data-symbol]');if(button) showDetail(button.dataset.symbol);});
   $('download-csv').addEventListener('click',exportCsv);
-  for(const id of ['chart-swings','chart-levels','chart-all-pivots','chart-events','chart-volume','chart-window']) $(id).addEventListener('change',()=>{
+    for(const id of ['chart-swings','chart-levels','chart-all-pivots','chart-events','chart-volume','chart-signals','chart-window']) $(id)?.addEventListener('change',()=>{
     if(selected)renderChart(dataset.rows.find(r=>r.symbol===selected));
   });
   $('stock-chart').addEventListener('click',inspectSwing);
