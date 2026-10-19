@@ -572,6 +572,46 @@
       if(vwN2>0&&i>=19){vwLst=vwS2/vwN2;vwPts2.push(xf(i).toFixed(1)+','+yf(vwLst).toFixed(1));}
     }
     if(vwPts2.length>1&&vwLst!==null){svg+='<polyline points="'+vwPts2.join(' ')+'" fill="none" stroke="#c07830" stroke-width="1" stroke-dasharray="4 3" opacity="0.75"/><text x="'+(W-R-2)+'" y="'+Math.max(T+16,Math.min(H-B-4,yf(vwLst))).toFixed(1)+'" text-anchor="end" font-size="8" fill="#c07830" font-family="system-ui">VWAP~</text>';}
+    // Pine Signal overlays: OB boxes / FVG zones / buy-sell markers / SL-TP lines
+    const ps=c.signals||{};
+    if(Object.keys(ps).length){
+      const dIdx2={};(c.dates||[]).forEach((d,i2)=>{dIdx2[d]=i2;});
+      const hiA=c.high||[],loA=c.low||[];
+      const box2=(rx,yw,yt,yh,col,op,lbl,lblY)=>{
+        svg+='<rect x="'+rx.toFixed(1)+'" width="'+Math.max(2,yw).toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="'+col+'" opacity="'+op+'" stroke="'+col+'" stroke-width="0.5" rx="1"/>';
+        if(lbl) svg+='<text x="'+(rx+3)+'" y="'+lblY.toFixed(1)+'" font-size="7" fill="'+col+'" font-family="system-ui">'+lbl+'</text>';
+      };
+      const x2r=W-R-2;
+      // Bull OBs (blue)
+      ((ps.order_blocks||{}).bull||[]).forEach(ob=>{const xi=dIdx2[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=x2r-rx,yt=yf(ob.top),yb=yf(ob.bot);box2(rx,rw,yt,yb-yt,'#2962ff',0.12,'Bull OB',yb-2);});
+      // Bear OBs (purple)
+      ((ps.order_blocks||{}).bear||[]).forEach(ob=>{const xi=dIdx2[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=x2r-rx,yt=yf(ob.top),yb=yf(ob.bot);box2(rx,rw,yt,yb-yt,'#e040fb',0.12,'Bear OB',yt+9);});
+      // Bull FVGs (teal)
+      ((ps.fvgs||{}).bull||[]).forEach(fvg=>{const xi=dIdx2[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=x2r-rx,yt=yf(fvg.top),yb=yf(fvg.bot);box2(rx,rw,yt,yb-yt,'#00bcd4',0.1,'',0);});
+      // Bear FVGs (amber)
+      ((ps.fvgs||{}).bear||[]).forEach(fvg=>{const xi=dIdx2[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=x2r-rx,yt=yf(fvg.top),yb=yf(fvg.bot);box2(rx,rw,yt,yb-yt,'#ff9800',0.1,'',0);});
+      // Buy ▲ markers (green below candle)
+      (ps.buy_bars||[]).forEach(i2=>{if(i2>=0&&i2<n&&fin(loA[i2])) svg+='<text x="'+xf(i2).toFixed(1)+'" y="'+(yf(loA[i2])+12).toFixed(1)+'" text-anchor="middle" font-size="11" fill="#43d443" font-family="system-ui" font-weight="bold">\u25b2</text>';});
+      // Sell ▼ markers (red above candle)
+      (ps.sell_bars||[]).forEach(i2=>{if(i2>=0&&i2<n&&fin(hiA[i2])) svg+='<text x="'+xf(i2).toFixed(1)+'" y="'+(yf(hiA[i2])-4).toFixed(1)+'" text-anchor="middle" font-size="11" fill="#f44336" font-family="system-ui" font-weight="bold">\u25bc</text>';});
+      // TP hit dots (green) and SL hit dots (red)
+      (ps.tp1_hits||[]).forEach((v,i2)=>{if(v&&i2<n&&fin(hiA[i2])) svg+='<circle cx="'+xf(i2).toFixed(1)+'" cy="'+yf(hiA[i2]).toFixed(1)+'" r="3.5" fill="#43d443"/>';});
+      (ps.sl_hits||[]).forEach((v,i2)=>{if(v&&i2<n&&fin(loA[i2])) svg+='<circle cx="'+xf(i2).toFixed(1)+'" cy="'+yf(loA[i2]).toFixed(1)+'" r="3.5" fill="#f44336"/>';});
+      // Current SL/TP dashed lines
+      const psCur=ps.current||{};
+      if(psCur.direction!=='flat'&&fin(psCur.sl)&&fin(psCur.tp1)){
+        const isBull=psCur.direction==='buy';
+        const xe=psCur.entry_date?dIdx2[psCur.entry_date]:0;
+        const x1=xf(xe!==undefined?xe:0);
+        svg+='<line x1="'+x1.toFixed(1)+'" x2="'+x2r+'" y1="'+yf(psCur.sl).toFixed(1)+'" y2="'+yf(psCur.sl).toFixed(1)+'" stroke="#f44336" stroke-width="1.2" stroke-dasharray="5 3"/>';
+        svg+='<text x="'+x2r+'" y="'+(yf(psCur.sl)+4).toFixed(1)+'" text-anchor="end" font-size="8" fill="#f44336" font-family="system-ui">SL '+iInt(psCur.sl)+'</text>';
+        [['tp1','TP1'],['tp2','TP2'],['tp3','TP3']].forEach(([k,lbl])=>{
+          if(!fin(psCur[k]))return;
+          svg+='<line x1="'+x1.toFixed(1)+'" x2="'+x2r+'" y1="'+yf(psCur[k]).toFixed(1)+'" y2="'+yf(psCur[k]).toFixed(1)+'" stroke="#43d443" stroke-width="1" stroke-dasharray="4 2"/>';
+          svg+='<text x="'+x2r+'" y="'+(yf(psCur[k])-2).toFixed(1)+'" text-anchor="end" font-size="8" fill="#43d443" font-family="system-ui">'+lbl+' '+iInt(psCur[k])+'</text>';
+        });
+      }
+    }
     svg+='</svg>';
     host.innerHTML=svg;
   }
@@ -790,6 +830,38 @@
     host.innerHTML=html||'<p class="nc-muted">Hedged move signals unavailable for this snapshot.</p>';
   }
 
+  /* ── Pine Signal Card (EMA9 + RSI + SL/TP + OB/FVG summary) ── */
+  function renderPineSignalCard() {
+    const host=$('pine-signal-card'); if(!host) return;
+    const ps=((dataset.hhhl||{}).signals)||{};
+    const cur=ps.current||{}; const par=ps.params||{};
+    if(!cur.direction){host.innerHTML='<p class="nc-muted">Signal data not available in this snapshot.</p>';return;}
+    const isBull=cur.direction==='buy', isBear=cur.direction==='sell', isFlat=cur.direction==='flat';
+    const dirCls=isBull?'nc-ps-bull':isBear?'nc-ps-bear':'nc-ps-flat';
+    const dirLabel=isBull?'\u25b2 BUY':isBear?'\u25bc SELL':'FLAT';
+    const hitBadge=(hit,lbl)=>'<span class="nc-ps-tp '+(hit?'nc-ps-hit':'nc-ps-open')+'">'+lbl+(hit?' \u2713':'')+' </span>';
+    const obs=(ps.order_blocks||{}); const fvgs=(ps.fvgs||{});
+    const obRows=[...(obs.bull||[]).map(o=>'<span class="nc-ps-ob-bull">Bull OB '+iInt(o.bot)+'\u2013'+iInt(o.top)+'</span>'),
+                  ...(obs.bear||[]).map(o=>'<span class="nc-ps-ob-bear">Bear OB '+iInt(o.bot)+'\u2013'+iInt(o.top)+'</span>')].join(' ');
+    const fvgRows=[...(fvgs.bull||[]).map(f=>'<span class="nc-ps-fvg-bull">FVG\u25b2 '+iInt(f.bot)+'\u2013'+iInt(f.top)+'</span>'),
+                   ...(fvgs.bear||[]).map(f=>'<span class="nc-ps-fvg-bear">FVG\u25bc '+iInt(f.bot)+'\u2013'+iInt(f.top)+'</span>')].join(' ');
+    host.innerHTML='<div class="nc-ps-wrap">'
+      +'<div class="nc-ps-hdr '+dirCls+'">'
+        +dirLabel
+        +(cur.entry_date&&!isFlat?' \u00b7 Entry '+isoD(cur.entry_date):'')
+        +(fin(cur.entry)?' \u00b7 @ '+iInt(cur.entry):'')
+      +'</div>'
+      +(!isFlat?'<div class="nc-ps-levels">'
+        +'<span class="nc-ps-sl">\u26d4 SL '+iInt(cur.sl)+'</span>'
+        +hitBadge(cur.hit1,'TP1 '+iInt(cur.tp1))
+        +hitBadge(cur.hit2,'TP2 '+iInt(cur.tp2))
+        +hitBadge(cur.hit3,'TP3 '+iInt(cur.tp3))
+      +'</div>':'')
+      +(obRows||fvgRows?'<div class="nc-ps-zones">'+obRows+fvgRows+'</div>':'')
+      +'<p class="nc-ps-note">EMA9+RSI daily signal \u00b7 tp_step='+(par.tp_step||100)+' pts \u00b7 sl_buffer='+(par.sl_buffer||20)+' pts \u00b7 swing_len='+(par.swing_len||5)+' \u00b7 EOD only \u00b7 not advice</p>'
+      +'</div>';
+  }
+
   /* ── Main load ── */
   async function load(){
     const notice=$('notice');
@@ -806,6 +878,7 @@
       renderHeader();
       renderMathPlay();
       renderHedgedMoveCard();
+      renderPineSignalCard();
       renderDecisionSummary();
       renderMarketCards();
       renderSetupFeed();

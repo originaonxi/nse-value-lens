@@ -573,3 +573,23 @@ html, body { max-width: 100%; overflow-x: hidden; }
 .nc-hm-chg   { font-size:10px; color:var(--nc-muted); }
 .nc-hm-disc  { font-size:11.5px; color:var(--nc-muted); margin:4px 0 0; }
 @media (max-width:768px) { .nc-hm-trades { grid-template-columns:1fr; } }
+
+/* ═══ Pine Signal Card ═══ */
+.nc-ps-wrap  { display:flex; flex-direction:column; gap:8px; }
+.nc-ps-hdr   { padding:10px 14px; border-radius:4px; font-weight:700; font-size:14px; letter-spacing:.01em; }
+.nc-ps-bull  { background:#d4f0e7; color:#0a5c47; border:1px solid #0d8a7a; }
+.nc-ps-bear  { background:#fde8e8; color:#7f1d1d; border:1px solid #c0392b; }
+.nc-ps-flat  { background:#f0f4f8; color:#4a5568; border:1px solid var(--nc-border); }
+.nc-ps-levels { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.nc-ps-sl    { padding:4px 10px; border-radius:3px; font-size:12.5px; font-weight:600;
+               background:#fde8e8; color:#7f1d1d; border:1px solid #c0392b; }
+.nc-ps-tp    { padding:4px 10px; border-radius:3px; font-size:12.5px;
+               background:var(--nc-bg); border:1px solid var(--nc-border); }
+.nc-ps-tp.nc-ps-hit  { background:#d4f0e7; color:#0a5c47; border-color:#0d8a7a; text-decoration:none; }
+.nc-ps-tp.nc-ps-open { color:var(--nc-muted); }
+.nc-ps-zones { display:flex; flex-wrap:wrap; gap:6px; }
+.nc-ps-ob-bull { padding:3px 8px; border-radius:10px; font-size:11px; background:#e8f0fe; color:#1a56db; border:1px solid #2962ff; }
+.nc-ps-ob-bear { padding:3px 8px; border-radius:10px; font-size:11px; background:#fce4fc; color:#9b1fa8; border:1px solid #e040fb; }
+.nc-ps-fvg-bull { padding:3px 8px; border-radius:10px; font-size:11px; background:#e0f7fa; color:#006064; border:1px solid #00bcd4; }
+.nc-ps-fvg-bear { padding:3px 8px; border-radius:10px; font-size:11px; background:#fff3e0; color:#e65100; border:1px solid #ff9800; }
+.nc-ps-note  { font-size:11.5px; color:var(--nc-muted); margin:0; }

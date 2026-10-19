@@ -1228,6 +1228,211 @@ def calibration(f):
 
 
 # ---------------------------------------------------------------- build
+
+def compute_pine_signals(ohlc, ema_len=9, rsi_len=14, rsi_level=50.0,
+                          sl_lookback=4, sl_buffer=20.0, tp_step=100.0,
+                          swing_len=5, max_ob=3, fvg_min_atr=0.25, max_fvg=3):
+    """Port of PineScript '9 EMA + RSI Signals (SL + 3 TPs) + OB/FVG' to Nifty daily.
+
+    Adapted defaults for Nifty daily (from 15m XAUUSD defaults in the source script):
+      tp_step=100   was 10.0  — 100 pts per TP target on Nifty
+      sl_buffer=20  was 0.0   — 20 pt buffer beyond swing low/high
+      swing_len=5   was 10    — 5 bars each side on daily chart
+    No look-ahead: every bar i uses only data from bars 0..i.
+    """
+    if len(ohlc) < max(ema_len + rsi_len + 2, swing_len * 2 + 2):
+        return {}
+    cl = ohlc["Close"].to_numpy(dtype=float)
+    hi = ohlc["High"].to_numpy(dtype=float)
+    lo = ohlc["Low"].to_numpy(dtype=float)
+    op = ohlc["Open"].to_numpy(dtype=float)
+    dates = [str(d.date()) for d in ohlc.index]
+    n = len(cl)
+
+    # EMA9 — ta.ema(close, emaLen)
+    k = 2.0 / (ema_len + 1)
+    ema = np.empty(n); ema[0] = cl[0]
+    for i in range(1, n):
+        ema[i] = cl[i] * k + ema[i - 1] * (1 - k)
+
+    # RSI14 — Wilder RMA = same smoothing as Pine ta.rsi
+    delta = np.diff(cl, prepend=cl[0])
+    gains  = np.where(delta > 0,  delta, 0.0)
+    losses = np.where(delta < 0, -delta, 0.0)
+    kw = 1.0 / rsi_len
+    ag = np.zeros(n); al = np.zeros(n)
+    seed = rsi_len
+    if n > seed:
+        ag[seed] = gains[1:seed + 1].mean()
+        al[seed] = losses[1:seed + 1].mean()
+        for i in range(seed + 1, n):
+            ag[i] = ag[i - 1] * (1 - kw) + gains[i] * kw
+            al[i] = al[i - 1] * (1 - kw) + losses[i] * kw
+    rsi = np.where(al == 0, 100.0, 100.0 - 100.0 / (1.0 + ag / np.where(al == 0, 1e-10, al)))
+    rsi[:seed] = np.nan
+
+    # ATR14 — Wilder smoothing for FVG minimum gap filter
+    tr = np.array([max(hi[i] - lo[i],
+                       abs(hi[i] - cl[i - 1]) if i > 0 else 0.0,
+                       abs(lo[i] - cl[i - 1]) if i > 0 else 0.0) for i in range(n)])
+    atr = np.empty(n); atr[:14] = np.nan
+    kw14 = 1.0 / 14
+    if n >= 14:
+        atr[13] = tr[:14].mean()
+        for i in range(14, n):
+            atr[i] = atr[i - 1] * (1 - kw14) + tr[i] * kw14
+
+    # Bull / Bear conditions (close above/below EMA + RSI above/below level)
+    bull = np.array([bool(cl[i] > ema[i] and np.isfinite(rsi[i]) and rsi[i] > rsi_level) for i in range(n)])
+    bear = np.array([bool(cl[i] < ema[i] and np.isfinite(rsi[i]) and rsi[i] < rsi_level) for i in range(n)])
+
+    # Walk-forward signal simulation — no look-ahead
+    dir_st = 0; e_bar = -1
+    e_val = sl_val = tp1 = tp2 = tp3 = 0.0
+    hit1 = hit2 = hit3 = False
+    buy_bars = []; sell_bars = []
+    tp1_hits = [False] * n; tp2_hits = [False] * n; tp3_hits = [False] * n
+    sl_hits  = [False] * n; sig_dir  = [0] * n
+
+    for i in range(n):
+        buy_sig  = bool(bull[i] and (i == 0 or not bull[i - 1]) and dir_st != 1)
+        sell_sig = bool(bear[i] and (i == 0 or not bear[i - 1]) and dir_st != -1)
+
+        if dir_st != 0 and i > e_bar:
+            is_long = (dir_st == 1)
+            slhit = (lo[i] <= sl_val) if is_long else (hi[i] >= sl_val)
+            if slhit:
+                sl_hits[i] = True
+            else:
+                if not hit1 and ((hi[i] >= tp1) if is_long else (lo[i] <= tp1)):
+                    hit1 = True; tp1_hits[i] = True
+                if not hit2 and ((hi[i] >= tp2) if is_long else (lo[i] <= tp2)):
+                    hit2 = True; tp2_hits[i] = True
+                if not hit3 and ((hi[i] >= tp3) if is_long else (lo[i] <= tp3)):
+                    hit3 = True; tp3_hits[i] = True
+            if slhit or hit3:
+                dir_st = 0
+
+        if buy_sig or sell_sig:
+            dir_st = 1 if buy_sig else -1; e_bar = i; e_val = cl[i]
+            start = max(0, i - sl_lookback)
+            p_lo = float(lo[start:i].min()) if i > 0 else float(lo[i])
+            p_hi = float(hi[start:i].max()) if i > 0 else float(hi[i])
+            sl_val = (p_lo - sl_buffer) if buy_sig else (p_hi + sl_buffer)
+            tp1 = e_val + dir_st * tp_step
+            tp2 = e_val + dir_st * tp_step * 2
+            tp3 = e_val + dir_st * tp_step * 3
+            hit1 = hit2 = hit3 = False
+            (buy_bars if buy_sig else sell_bars).append(i)
+        sig_dir[i] = dir_st
+
+    last = n - 1; ld = sig_dir[last]
+    current = dict(
+        direction="buy" if ld == 1 else "sell" if ld == -1 else "flat",
+        entry=round(float(e_val), 2) if ld != 0 else None,
+        sl=round(float(sl_val), 2) if ld != 0 else None,
+        tp1=round(float(tp1), 2) if ld != 0 else None,
+        tp2=round(float(tp2), 2) if ld != 0 else None,
+        tp3=round(float(tp3), 2) if ld != 0 else None,
+        hit1=hit1, hit2=hit2, hit3=hit3,
+        entry_date=dates[e_bar] if ld != 0 and e_bar >= 0 else None,
+    )
+
+    # Order Blocks: last bearish/bullish candle before pivot-breakout
+    bull_obs = []; bear_obs = []
+    sw_hi = sw_lo = np.nan
+    sw_hi_bar = sw_lo_bar = -1
+    sw_hi_used = sw_lo_used = True
+
+    for i in range(n):
+        ph_bar = i - swing_len
+        if ph_bar >= swing_len:
+            hi_sl = hi[ph_bar - swing_len: ph_bar + swing_len + 1]
+            if (len(hi_sl) == swing_len * 2 + 1 and hi[ph_bar] == hi_sl.max()
+                    and hi[ph_bar] > hi[ph_bar - 1] and hi[ph_bar] > hi[ph_bar + 1]):
+                sw_hi = hi[ph_bar]; sw_hi_bar = ph_bar; sw_hi_used = False
+        pl_bar = i - swing_len
+        if pl_bar >= swing_len:
+            lo_sl = lo[pl_bar - swing_len: pl_bar + swing_len + 1]
+            if (len(lo_sl) == swing_len * 2 + 1 and lo[pl_bar] == lo_sl.min()
+                    and lo[pl_bar] < lo[pl_bar - 1] and lo[pl_bar] < lo[pl_bar + 1]):
+                sw_lo = lo[pl_bar]; sw_lo_bar = pl_bar; sw_lo_used = False
+
+        bull_obs = [b for b in bull_obs if cl[i] >= b["bot"]]
+        bear_obs = [b for b in bear_obs if cl[i] <= b["top"]]
+
+        if not sw_hi_used and not np.isnan(sw_hi) and cl[i] > sw_hi:
+            sw_hi_used = True
+            span = min(i - sw_hi_bar, 200)
+            ob_top = ob_bot = ob_date = None
+            for j in range(1, span + 1):
+                idx = i - j
+                if idx >= 0 and cl[idx] < op[idx]:
+                    ob_top = float(hi[idx]); ob_bot = float(lo[idx]); ob_date = dates[idx]; break
+            if ob_top is None and span > 0:
+                idx_b = min(range(max(0, i - span), i), key=lambda x: lo[x])
+                ob_top = float(hi[idx_b]); ob_bot = float(lo[idx_b]); ob_date = dates[idx_b]
+            if ob_top is not None:
+                bull_obs.append({"top": round(ob_top, 2), "bot": round(ob_bot, 2), "date": ob_date})
+                if len(bull_obs) > max_ob:
+                    bull_obs.pop(0)
+
+        if not sw_lo_used and not np.isnan(sw_lo) and cl[i] < sw_lo:
+            sw_lo_used = True
+            span = min(i - sw_lo_bar, 200)
+            ob_top = ob_bot = ob_date = None
+            for j in range(1, span + 1):
+                idx = i - j
+                if idx >= 0 and cl[idx] > op[idx]:
+                    ob_top = float(hi[idx]); ob_bot = float(lo[idx]); ob_date = dates[idx]; break
+            if ob_top is None and span > 0:
+                idx_b = max(range(max(0, i - span), i), key=lambda x: hi[x])
+                ob_top = float(hi[idx_b]); ob_bot = float(lo[idx_b]); ob_date = dates[idx_b]
+            if ob_top is not None:
+                bear_obs.append({"top": round(ob_top, 2), "bot": round(ob_bot, 2), "date": ob_date})
+                if len(bear_obs) > max_ob:
+                    bear_obs.pop(0)
+
+    # Fair Value Gaps
+    bull_fvgs = []; bear_fvgs = []
+    for i in range(2, n):
+        if np.isnan(atr[i]):
+            continue
+        mg = atr[i] * fvg_min_atr
+        if lo[i] > hi[i - 2] and (lo[i] - hi[i - 2]) >= mg:
+            bull_fvgs.append({"top": round(float(lo[i]), 2), "bot": round(float(hi[i - 2]), 2), "date": dates[i - 2]})
+            bull_fvgs = [f for f in bull_fvgs if cl[i] >= f["bot"]]
+            if len(bull_fvgs) > max_fvg:
+                bull_fvgs.pop(0)
+        if hi[i] < lo[i - 2] and (lo[i - 2] - hi[i]) >= mg:
+            bear_fvgs.append({"top": round(float(lo[i - 2]), 2), "bot": round(float(hi[i]), 2), "date": dates[i - 2]})
+            bear_fvgs = [f for f in bear_fvgs if cl[i] <= f["top"]]
+            if len(bear_fvgs) > max_fvg:
+                bear_fvgs.pop(0)
+
+    rs = max(0, n - HISTORY)
+    trim = lambda lst: [x - rs for x in lst if x >= rs]
+    num2 = lambda v: round(float(v), 2) if np.isfinite(v) else None
+    return {
+        "params": {"ema_len": ema_len, "rsi_len": rsi_len, "rsi_level": rsi_level,
+                   "sl_lookback": sl_lookback, "sl_buffer": sl_buffer, "tp_step": tp_step,
+                   "swing_len": swing_len,
+                   "note": "Adapted for Nifty daily: tp_step=100, sl_buffer=20, swing_len=5"},
+        "ema9":      [num2(v) for v in ema[rs:]],
+        "rsi14":     [round(float(v), 1) if np.isfinite(v) else None for v in rsi[rs:]],
+        "bull_cond": [bool(v) for v in bull[rs:]],
+        "bear_cond": [bool(v) for v in bear[rs:]],
+        "buy_bars":  trim(buy_bars),
+        "sell_bars": trim(sell_bars),
+        "tp1_hits":  [bool(v) for v in tp1_hits[rs:]],
+        "tp2_hits":  [bool(v) for v in tp2_hits[rs:]],
+        "tp3_hits":  [bool(v) for v in tp3_hits[rs:]],
+        "sl_hits":   [bool(v) for v in sl_hits[rs:]],
+        "current":   current,
+        "order_blocks": {"bull": bull_obs, "bear": bear_obs},
+        "fvgs":         {"bull": bull_fvgs, "bear": bear_fvgs},
+    }
+
 def read_json(path):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -1454,6 +1659,7 @@ def build(offline=False, use_jev=True, end=None, if_new=False, force_archive=Fal
                       low=[num(v) for v in recent.Low], close=[num(v) for v in recent.Close],
                       sma20=[num(v) for v in ohlc.Close.rolling(20).mean().iloc[-HISTORY:]], swings=swings,
                       appended_official_sessions=appended)
+    hhhl_chart["signals"] = compute_pine_signals(ohlc)
 
     hist = f[f.sidx > f.sidx.max() - HISTORY]
     vix_hist = []
