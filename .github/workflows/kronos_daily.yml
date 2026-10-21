@@ -5,6 +5,11 @@ on:
     - cron: '30 10 * * 1-5'   # 4pm IST weekdays (10:30 UTC)
   workflow_dispatch:           # manual trigger for testing
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   forecast:
     runs-on: ubuntu-latest
