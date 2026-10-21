@@ -1,0 +1,53 @@
+name: Kronos Daily Forecast
+
+on:
+  schedule:
+    - cron: '30 10 * * 1-5'   # 4pm IST weekdays (10:30 UTC)
+  workflow_dispatch:           # manual trigger for testing
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120       # 25 symbols × 100 paths on CPU ≈ 45-90 min
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-kronos-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: pip-kronos-${{ runner.os }}-
+
+      - name: Cache HuggingFace models (~500 MB, downloaded once)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-kronos-${{ hashFiles('kronos_forecast.py') }}
+          restore-keys: hf-kronos-
+
+      - name: Install PyTorch (CPU wheel — avoids 2 GB CUDA download)
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install remaining deps (PyPI)
+        run: pip install huggingface_hub safetensors einops tqdm numpy pandas
+
+      - name: Run Kronos forecast
+        run: python kronos_forecast.py --offline
+        env:
+          HF_HUB_DISABLE_PROGRESS_BARS: "1"
+
+      - name: Commit forecast JSON if updated
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/kronos_forecast.json
+          git diff --cached --quiet && echo "No change — skipping commit" || \
+            git commit -m "data: Kronos daily forecast $(date -u +%F)" && git push
