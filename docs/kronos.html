@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kronos Fan Forecast — NSE Value Lens</title>
+<link rel="stylesheet" href="home-nav.css">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#7d8590;--green:#3fb950;--red:#f85149;--amber:#d29922;--blue:#58a6ff;--purple:#bc8cff;--fan-green:rgba(63,185,80,0.07);--fan-red:rgba(248,81,73,0.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+.kro-shell{max-width:1400px;margin:0 auto;padding:16px 20px 60px}
+.kro-header{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.kro-header h1{font-size:20px;font-weight:700;color:var(--text)}
+.kro-header h1 span{color:var(--purple)}
+.kro-model-badge{font-size:11px;background:#21262d;border:1px solid var(--border);border-radius:20px;padding:3px 10px;color:var(--muted)}
+.kro-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.kro-select{background:#161b22;border:1px solid var(--border);color:var(--text);font-size:13px;padding:6px 10px;border-radius:6px;cursor:pointer;min-width:220px}
+.kro-select:focus{outline:none;border-color:var(--blue)}
+.kro-meta{font-size:12px;color:var(--muted)}
+/* Fan chart */
+.kronos-fan{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:block;overflow:visible}
+.kro-chart-wrap{position:relative;margin-bottom:16px}
+/* Regime badge */
+.kro-regime{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:6px;font-size:15px;font-weight:700;margin-bottom:14px}
+.kro-regime.trend-up{background:#1a3a2a;color:var(--green);border:1px solid var(--green)}
+.kro-regime.trend-dn{background:#3a1a1a;color:var(--red);border:1px solid var(--red)}
+.kro-regime.choppy{background:#2a2a1a;color:var(--amber);border:1px solid var(--amber)}
+.kro-regime.mixed{background:#1a1a2a;color:var(--blue);border:1px solid var(--blue)}
+/* Stats row */
+.kro-stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.kro-stat{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;min-width:120px}
+.kro-stat dt{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.kro-stat dd{font-size:16px;font-weight:700}
+.kro-stat dd.up{color:var(--green)}
+.kro-stat dd.dn{color:var(--red)}
+/* Disclaimer */
+.kro-disc{font-size:11.5px;color:var(--muted);padding:10px;background:#161b22;border:1px solid var(--border);border-radius:6px;margin-top:16px}
+/* Loading */
+.kro-loading{padding:60px;text-align:center;color:var(--muted);font-size:14px}
+/* Legend */
+.kro-legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.kro-legend span{display:flex;align-items:center;gap:5px}
+.kro-legend i{display:inline-block;width:24px;height:3px;border-radius:2px}
+.kro-legend i.green{background:var(--green)}
+.kro-legend i.red{background:var(--red)}
+.kro-legend i.median{background:#fff;height:2px}
+.kro-legend i.hist{background:var(--blue)}
+/* Path count display */
+#kro-path-count{font-size:12px;color:var(--muted);margin-left:auto}
+</style>
+</head>
+<body>
+<div class="kro-shell">
+
+  <div class="kro-header">
+    <h1>Kronos <span>100-Path Fan Forecast</span></h1>
+    <span class="kro-model-badge">NeoQuasar/Kronos-small · 24.7M params · AAAI 2026</span>
+    <a href="hhhl.html" class="kro-model-badge" style="text-decoration:none">← HH/HL Scanner</a>
+    <a href="nifty-chain.html" class="kro-model-badge" style="text-decoration:none">← Nifty Chain</a>
+  </div>
+
+  <div class="kro-controls">
+    <select id="kro-symbol" class="kro-select" aria-label="Select symbol">
+      <option value="">Loading symbols…</option>
+    </select>
+    <span class="kro-meta" id="kro-asof">—</span>
+    <span id="kro-path-count"></span>
+  </div>
+
+  <div id="kro-regime-wrap"></div>
+
+  <div class="kro-stats" id="kro-stats"></div>
+
+  <div class="kro-legend">
+    <span><i class="green"></i> Paths ending above last close</span>
+    <span><i class="red"></i> Paths ending below</span>
+    <span><i style="background:#fff8;height:2px;display:inline-block;width:24px;border-radius:2px;vertical-align:middle"></i> Median</span>
+    <span><i class="hist"></i> Historical candles</span>
+    <span style="color:var(--purple)">▒ 10–90th pct band</span>
+  </div>
+
+  <div class="kro-chart-wrap">
+    <svg id="kronos-chart" class="kronos-fan" viewBox="0 0 1200 440" role="img" aria-label="Kronos 100-path fan chart">
+      <text x="600" y="220" text-anchor="middle" fill="#7d8590" font-size="14">Loading Kronos forecast data…</text>
+    </svg>
+  </div>
+
+  <div class="kro-disc">
+    <strong>Research only · Not investment advice.</strong>
+    Kronos (NeoQuasar/Kronos-small) trained on 12 billion candles from 45 global exchanges.
+    Each of the 100 paths is one stochastic sample from the model (T=1.0, top_p=0.9).
+    The spread shows uncertainty, not a guaranteed range. Daily EOD data, no intraday.
+    Back-test walk-forward with real fees before trusting any path. Past training performance ≠ future returns.
+    REA (morluto/rea) maps the analysis framework; Kronos predicts the candles.
+  </div>
+
+</div>
+<script src="kronos.js" defer></script>
+</body>
+</html>
