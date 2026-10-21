@@ -194,7 +194,7 @@ def main():
             if count >= MAX_STOCKS:
                 break
             sym = row.get('symbol', '')
-            csv_p = PRICE_DIR / f'{sym}.csv'
+            csv_p = PRICE_DIR / f'{sym}.NS.csv'
             if not csv_p.exists():
                 continue
             print(f'Forecasting {sym} ({row.get("status","?")})...')
