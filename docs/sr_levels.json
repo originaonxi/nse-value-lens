@@ -44917,7 +44917,7 @@
         308.4,
         314.9,
         322.75,
-        339.49,
+        339.52,
         349.43
       ],
       "supports": [
@@ -44942,8 +44942,8 @@
         375.01,
         366.48,
         365.45,
-        381.34,
-        357.36
+        339.56,
+        381.34
       ],
       "swing_lows": [
         286.2,
@@ -45155,19 +45155,12 @@
           "strength": 0.11
         },
         "strongest_resistance": {
-          "price": 357.84,
+          "price": 358.14,
           "sources": [
-            "swing",
             "vp"
           ],
-          "n_sources": 2,
+          "n_sources": 1,
           "components": [
-            {
-              "source": "swing",
-              "label": "Swing high #5",
-              "price": 357.36,
-              "weight": 1.0
-            },
             {
               "source": "vp",
               "label": "Volume Profile POC",
@@ -45177,10 +45170,10 @@
           ],
           "vp_density": 1.0,
           "touches": 18,
-          "rejection_atr": 0.66,
+          "rejection_atr": 0.55,
           "has_avwap": false,
           "has_round": false,
-          "strength": 0.72
+          "strength": 0.71
         },
         "top_supports": [
           {
@@ -45221,19 +45214,12 @@
         ],
         "top_resistances": [
           {
-            "price": 357.84,
+            "price": 358.14,
             "sources": [
-              "swing",
               "vp"
             ],
-            "n_sources": 2,
+            "n_sources": 1,
             "components": [
-              {
-                "source": "swing",
-                "label": "Swing high #5",
-                "price": 357.36,
-                "weight": 1.0
-              },
               {
                 "source": "vp",
                 "label": "Volume Profile POC",
@@ -45243,10 +45229,10 @@
             ],
             "vp_density": 1.0,
             "touches": 18,
-            "rejection_atr": 0.66,
+            "rejection_atr": 0.55,
             "has_avwap": false,
             "has_round": false,
-            "strength": 0.72
+            "strength": 0.71
           },
           {
             "price": 303.98,
@@ -45426,7 +45412,7 @@
       "swing_structure": {
         "structure": "MIXED",
         "raw_structure": "MIXED",
-        "consec_hh": 2,
+        "consec_hh": 3,
         "consec_lh": 0,
         "consec_hl": 0,
         "consec_ll": 2,
@@ -45442,13 +45428,8 @@
         },
         "reversal_trigger": null,
         "reversal_invalidate": null,
-        "extended_warning": null,
+        "extended_warning": "3 consecutive HH \u2014 extended uptrend, watch for first LH",
         "sequence": [
-          {
-            "date": "2026-03-30",
-            "price": 299.26,
-            "label": "LL"
-          },
           {
             "date": "2026-04-21",
             "price": 381.34,
@@ -45460,6 +45441,11 @@
             "label": "HL"
           },
           {
+            "date": "2026-05-25",
+            "price": 339.56,
+            "label": "LH"
+          },
+          {
             "date": "2026-06-02",
             "price": 315.94,
             "label": "LL"
@@ -45467,7 +45453,7 @@
           {
             "date": "2026-06-23",
             "price": 365.45,
-            "label": "LH"
+            "label": "HH"
           },
           {
             "date": "2026-07-03",
