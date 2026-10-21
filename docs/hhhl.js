@@ -684,17 +684,18 @@
     if(!entry||!entry.paths?.length){card.hidden=true;return;}
     card.hidden=false;
     const paths=entry.paths,predLen=paths[0].length;
+    const cpaths=paths.map(p=>p.map(d=>d.c));
     const W=560,H=120,PL=6,PR=6,PT=22,PB=8,cW=W-PL-PR,cH=H-PT-PB;
-    const flat=paths.flat();
+    const flat=cpaths.flat();
     const yMin=Math.min(...flat),yMax=Math.max(...flat),yRange=(yMax-yMin)||1;
     const sy=v=>PT+cH-((v-yMin)/yRange)*cH;
     const sx=i=>PL+(i/(predLen-1))*cW;
-    const med=paths[0].map((_,i)=>{const c=paths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length/2)];});
-    const p10=paths[0].map((_,i)=>{const c=paths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.1)];});
-    const p90=paths[0].map((_,i)=>{const c=paths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.9)];});
-    const endMed=med[med.length-1],last=entry.last_close||paths[0][0];
+    const med=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length/2)];});
+    const p10=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.1)];});
+    const p90=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.9)];});
+    const endMed=med[med.length-1],last=entry.last_close||cpaths[0][0];
     const up=endMed>=last,col=up?'#22c55e':'#ef4444';
-    const spreads=paths.map(p=>Math.abs(p[p.length-1]-p[0]));
+    const spreads=cpaths.map(p=>Math.abs(p[p.length-1]-p[0]));
     const avgSp=spreads.reduce((a,b)=>a+b,0)/spreads.length;
     const regime=avgSp<yRange*0.18?'TRENDING \u2197':avgSp>yRange*0.42?'CHOPPY \u2194':'MIXED';
     const rc=regime.startsWith('TRENDING')?'#f59e0b':regime.startsWith('CHOPPY')?'#818cf8':'#94a3b8';
@@ -703,12 +704,12 @@
     s+='<rect width="'+W+'" height="'+H+'" fill="#0d1117" rx="5"/>';
     const bp=[...p90.map((v,i)=>sx(i)+','+sy(v)),...[...p10].reverse().map((v,i)=>sx(predLen-1-i)+','+sy(v))].join(' ');
     s+='<polygon points="'+bp+'" fill="'+col+'" opacity="0.10"/>';
-    for(const path of paths)s+='<polyline points="'+path.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="0.5" fill="none" opacity="0.18"/>';
+    for(const cpath of cpaths)s+='<polyline points="'+cpath.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="0.5" fill="none" opacity="0.18"/>';
     s+='<polyline points="'+med.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
     s+='<text x="'+PL+'" y="15" font-size="10.5" fill="#e6edf3" font-family="sans-serif" font-weight="600">KRONOS \u00b7 '+esc(sym)+' \u00b7 '+predLen+'-bar forecast</text>';
     s+='<text x="'+(W*0.55)+'" y="15" font-size="10" fill="'+col+'" font-family="sans-serif">median '+(up?'+':'')+pct+'%</text>';
     s+='<text x="'+(W-PR)+'" y="15" font-size="10" fill="'+rc+'" font-family="sans-serif" text-anchor="end">'+regime+'</text>';
-    s+='</svg><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+paths.length+' sampled paths \u00b7 AAAI 2026 model \u00b7 not investment advice</p>';
+    s+='</svg><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+cpaths.length+' sampled paths \u00b7 AAAI 2026 model \u00b7 not investment advice</p>';
     card.innerHTML=s;
   }
   setTimeout(()=>{const h=$('stock-chart');if(h)new MutationObserver(()=>{if(selected)renderKronosCard(selected);}).observe(h,{childList:true,subtree:true});},200);
