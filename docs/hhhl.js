@@ -679,6 +679,7 @@
       anchor.parentNode.insertBefore(card,anchor.nextSibling);
     }
     if(!kronosData){card.hidden=true;return;}
+    if(kronosData.model!=='NeoQuasar/Kronos-small'){card.hidden=true;return;}
     const key=sym==='NIFTY 50'?'NSEI':sym;
     const entry=kronosData.symbols?.[key];
     if(!entry||!entry.paths?.length){card.hidden=true;return;}

@@ -46,6 +46,13 @@
     if (asof) asof.textContent =
       `EOD ${dataset.as_of || ''} · ${dataset.n_paths || 100} paths · pred ${dataset.pred_len || 24} days`;
 
+    // Gate: only render genuine Kronos-small output
+    if (dataset.model !== 'NeoQuasar/Kronos-small') {
+      showError('Real Kronos inference running — fan chart will appear automatically once complete.');
+      if (asof) asof.textContent = 'Waiting for NeoQuasar/Kronos-small · inference in progress';
+      return;
+    }
+
     sel.innerHTML = symbols.map(sym => {
       const s = dataset.symbols[sym];
       const label = s.status ? `[${s.status}] ${sym} — ${s.name || sym}` : `${sym} — ${s.name || sym}`;
