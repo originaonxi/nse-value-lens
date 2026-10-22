@@ -47,13 +47,14 @@ def refresh_prices():
             cwd=Path(__file__).parent,
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=90  # covers kotak_live retries on transient TLS drops
         )
         if result.returncode != 0:
-            logger.error(f"Price refresh failed: {result.stderr}")
-            return False
-        
-        logger.info(f"Price refresh OK | {result.stdout.strip()}")
+            # Keep going: live_cards.py fetches its own live quotes (with retries), so one failed index
+            # refresh must not freeze the scenario cards on the website.
+            logger.error(f"Price refresh failed (continuing with cards): {result.stderr[-300:]}")
+        else:
+            logger.info(f"Price refresh OK | {result.stdout.strip()}")
 
         # Intraday Kronos (today's live Kotak bar appended) at most every 15 min; it takes ~60 s on CPU.
         global _last_kronos

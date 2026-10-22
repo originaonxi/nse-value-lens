@@ -11,7 +11,7 @@
   const signed = v => fin(v) ? (v >= 0 ? '+' : '\u2212') + inr(Math.abs(v)) : '—';
   const KRONOS_MODEL = 'NeoQuasar/Kronos-small';
   const PLAN_SESSIONS = 10;
-  const STALE_MIN = 20;
+  const STALE_MIN = 6;  // poller runs every 2 min; older than 6 min means updates have stopped
 
   const css = `
   .lc-wrap{display:grid;gap:12px}

@@ -21,6 +21,7 @@ import json
 import os
 import pathlib
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -71,17 +72,37 @@ def totp_now(secret=None):
     return pyotp.TOTP(secret).now()
 
 
+def _with_retry(fn, tries=4):
+    """Kotak's gateway intermittently drops TLS handshakes (SSL EOF) or times out. Retry with backoff;
+    HTTP 4xx errors (bad request / auth) are not retried."""
+    for i in range(tries):
+        try:
+            return fn()
+        except urllib.error.HTTPError as e:
+            if e.code < 500 or i == tries - 1:
+                raise
+        except OSError:  # URLError, SSL EOF, socket timeouts
+            if i == tries - 1:
+                raise
+        time.sleep(1.5 * (i + 1))
+
+
 def _post(url, headers, body):
     data = json.dumps(body).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers={**headers, "Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read().decode("utf-8"))
+
+    def call():
+        req = urllib.request.Request(url, data=data, headers={**headers, "Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read().decode("utf-8"))
+    return _with_retry(call)
 
 
 def _get(url, headers):
-    req = urllib.request.Request(url, headers=headers, method="GET")
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read().decode("utf-8"))
+    def call():
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read().decode("utf-8"))
+    return _with_retry(call)
 
 
 def login(force=False):
