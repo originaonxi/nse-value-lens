@@ -74,11 +74,13 @@
   }
 
   function previousBox(p) {
-    if (!p || !p.available) return '';
-    return `<div class="lc-banner"><b>Your earlier live card (published ${esc(p.published.slice(0, 10))})</b>: SELL 22600 PE / BUY 22150 PE, the put side of the iron condor.
-      Those live prices were for the ${esc(p.expiry)} monthly contract. Credit then ${inr(p.spread_then, 2)} → now ${inr(p.spread_now, 2)}
-      = <b>${fin(p.sell_22600_buy_22150_pct) ? (p.sell_22600_buy_22150_pct >= 0 ? '+' : '') + p.sell_22600_buy_22150_pct + '%' : '—'}</b> on premium for the seller
-      (${fin(p.buy_22600_sell_22150_pct) ? p.buy_22600_sell_22150_pct + '%' : '—'} if bought). One trade is one outcome, not evidence of an edge.</div>`;
+    if (!p || !p.available || !p.refs) return '';
+    const ref = (r, lbl) => r ? `${lbl}: debit ${inr(r.debit, 2)} → now ${inr(p.spread_now, 2)} = <b>${fin(r.return_pct) ? (r.return_pct >= 0 ? '+' : '') + r.return_pct + '%' : '—'}</b> (${signed(r.pnl_per_unit * 65)}/lot of 65; max ${inr(r.max_profit_per_unit * 65)}/lot)` : '';
+    return `<div class="lc-banner"><b>Your earlier card — ${esc(p.label)} (published ${esc(p.published)})</b>: <b>BUY 22600 PE / SELL 22150 PE</b>, expiry ${esc(p.expiry)}, plan exit by ${esc(p.exit_by)}.
+      Live now: 22600 PE ${inr(p.ltp_now?.['22600'], 2)}, 22150 PE ${inr(p.ltp_now?.['22150'], 2)}.<br>
+      ${ref(p.refs.eod_then, 'From the EOD card price')}<br>
+      ${ref(p.refs.live_then, 'From the live-repriced card price')}<br>
+      <span class="lc-small">Your actual fill decides your real return. One trade is one outcome, not evidence of an edge.</span></div>`;
   }
 
   function renderNifty(el, d) {

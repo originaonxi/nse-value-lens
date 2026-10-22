@@ -35,12 +35,13 @@ STOCK_HOLD = 10   # HH/HL plan holding window (hhhl_scan rules.holding_sessions)
 KRONOS_MODEL = "NeoQuasar/Kronos-small"
 NSE_CM = "https://lapi.kotaksecurities.com/wso2-scripmaster/v1/prod/{date}/transformed/nse_cm.csv"
 
-# The Oct-16 live card the user traded: Nifty 22600 PE / 22150 PE. That snapshot's prices
-# (docs/nifty_live.json @ e9153178) came from the old month-code resolver, i.e. the NOV monthly
-# contract (expiry 2026-11-23), so the comparison must use that same contract.
-PREVIOUS_CARD = dict(published="2026-10-16T20:19:33-07:00", expiry="2026-11-23",
-                     legs=[dict(strike=22600, option_type="PE", ltp_then=184.8),
-                           dict(strike=22150, option_type="PE", ltp_then=107.2)])
+# The card the user traded: "Bear put spread" — BUY 22600 PE / SELL 22150 PE, expiry 2026-10-27
+# (rules lhll_bear_put_spread + fii_short_bear_put_spread). Published in docs/nifty_chain.json
+# @ c710c6a4 (EOD 2026-10-15: 204.90 / 75.00, plan exit by 2026-10-22) and repriced live in
+# docs/nifty_live.json @ a2083bd6 (2026-10-16 07:07 PT: 47.90 / 16.85).
+PREVIOUS_CARD = dict(label="Bear put spread", published="2026-10-15", expiry="2026-10-27", exit_by="2026-10-22",
+                     legs=[dict(side="BUY", strike=22600, option_type="PE", eod_then=204.9, live_then=47.9),
+                           dict(side="SELL", strike=22150, option_type="PE", eod_then=75.0, live_then=16.85)])
 
 def _retrying(fn, tries=4):
     """Kotak's gateway drops TLS handshakes intermittently; retry read-only GETs with backoff."""
@@ -248,21 +249,25 @@ def nifty_cards(sess, chain, kronos, today, hol):
 
 
 def previous_card(sess, rows):
-    toks, infos = {}, []
+    """Live value of the bear put spread the user traded vs. both published reference entries."""
+    toks = {}
     for l in PREVIOUS_CARD["legs"]:
         info = kl.resolve_option("NIFTY", PREVIOUS_CARD["expiry"], l["strike"], l["option_type"], rows=rows)
         if info:
             toks[f"nse_fo|{info['pSymbol']}"] = l["strike"]
     now = quote_map(sess, toks) if toks else {}
-    hi, lo = PREVIOUS_CARD["legs"]
-    if hi["strike"] not in now or lo["strike"] not in now:
+    buy, sell = PREVIOUS_CARD["legs"]
+    if buy["strike"] not in now or sell["strike"] not in now:
         return dict(PREVIOUS_CARD, available=False)
-    then = hi["ltp_then"] - lo["ltp_then"]
-    cur = now[hi["strike"]] - now[lo["strike"]]
+    cur = now[buy["strike"]] - now[sell["strike"]]
+    width = buy["strike"] - sell["strike"]
+    refs = {}
+    for name in ("eod_then", "live_then"):
+        debit = buy[name] - sell[name]
+        refs[name] = dict(debit=rnd(debit), pnl_per_unit=rnd(cur - debit), return_pct=rnd((cur / debit - 1) * 100, 1),
+                          max_profit_per_unit=rnd(width - debit))
     return dict(PREVIOUS_CARD, available=True, ltp_now={str(k): v for k, v in now.items()},
-                spread_then=rnd(then), spread_now=rnd(cur),
-                buy_22600_sell_22150_pct=rnd((cur / then - 1) * 100, 1),
-                sell_22600_buy_22150_pct=rnd((then - cur) / then * 100, 1))
+                spread_now=rnd(cur), width=width, refs=refs)
 
 
 # ── HH/HL stock cards ───────────────────────────────────────────────────────
