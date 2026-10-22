@@ -569,13 +569,18 @@ def select_cards(evals, probs, n=CARD_COUNT):
     kinds = {}
     for e in picked:
         kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
-    for e in sorted(pool, key=lambda x: -x["score_risk"]):
+    ranked_pool = sorted(pool, key=lambda x: -x["score_risk"])
+    for e in ranked_pool:  # first pass: at most two cards per structure type, for variety
         if len(picked) >= n:
             break
         if e["name"] in names or kinds.get(e["kind"], 0) >= 2:
             continue
         add(e)
         kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
+    for e in ranked_pool:  # second pass: fill remaining slots if there are only a few structure types
+        if len(picked) >= n:
+            break
+        add(e)
     return picked
 
 
