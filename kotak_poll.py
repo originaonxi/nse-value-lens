@@ -89,6 +89,21 @@ def refresh_prices():
         return False
 
 
+def market_open(now=None):
+    """True on NSE trading days between 09:15 and 15:35 IST (5 min after close for the final print)."""
+    from datetime import timezone, timedelta
+    ist = (now or datetime.now(timezone.utc)).astimezone(timezone(timedelta(hours=5, minutes=30)))
+    try:
+        cal = json.loads((Path(__file__).parent / "data" / "hhhl_calendar.json").read_text(encoding="utf-8"))
+        holidays = set(cal.get("holidays", []))
+    except (OSError, ValueError):
+        holidays = set()
+    if ist.weekday() >= 5 or ist.date().isoformat() in holidays:
+        return False
+    minutes = ist.hour * 60 + ist.minute
+    return 9 * 60 + 15 <= minutes <= 15 * 60 + 35
+
+
 def polling_loop():
     """Main polling loop."""
     logger.info("=== Kotak polling service started ===")
@@ -100,6 +115,9 @@ def polling_loop():
     
     try:
         while True:
+            if not market_open():
+                logger.info("NSE market closed (outside 09:15-15:35 IST or holiday); stopping poller")
+                break
             t0 = time.time()
             refresh_prices()
             elapsed = time.time() - t0
