@@ -33,6 +33,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 POLL_INTERVAL = 120  # 2 minutes: each push redeploys GitHub Pages (~1 min), so faster only queues deploys
+KRONOS_EVERY = 15 * 60  # intraday Kronos re-run cadence (seconds); one run is ~60 s on CPU
+_last_kronos = 0.0
 PID_FILE = Path(__file__).parent / ".kotak_poll.pid"
 OUTPUT_FILE = Path(__file__).parent / "docs" / "nifty_live.json"
 
@@ -53,6 +55,17 @@ def refresh_prices():
         
         logger.info(f"Price refresh OK | {result.stdout.strip()}")
 
+        # Intraday Kronos (today's live Kotak bar appended) at most every 15 min; it takes ~60 s on CPU.
+        global _last_kronos
+        if time.time() - _last_kronos >= KRONOS_EVERY:
+            kr = subprocess.run(["py", "-3", "kronos_live.py", "--samples", "20"], cwd=Path(__file__).parent,
+                                capture_output=True, text=True, timeout=400)
+            if kr.returncode == 0:
+                _last_kronos = time.time()
+                logger.info(kr.stdout.strip().splitlines()[-1])
+            else:
+                logger.error(f"Live Kronos failed: {kr.stderr[-300:]}")
+
         # Live trade cards (Kotak legs + payoff maths + Kronos + backtest). Optional: index prices still publish.
         cards = subprocess.run(["py", "-3", "live_cards.py"], cwd=Path(__file__).parent,
                                capture_output=True, text=True, timeout=120)
@@ -63,9 +76,9 @@ def refresh_prices():
 
         # Commit and push to GitHub only if the live files actually changed (avoids identical commits)
         try:
-            subprocess.run(["git", "add", "docs/nifty_live.json", "docs/live_cards.json"],
+            subprocess.run(["git", "add", "docs/nifty_live.json", "docs/live_cards.json", "docs/kronos_live_nsei.json"],
                            cwd=Path(__file__).parent, capture_output=True, timeout=10, check=False)
-            changed = subprocess.run(["git", "diff", "--cached", "--quiet", "docs/nifty_live.json", "docs/live_cards.json"],
+            changed = subprocess.run(["git", "diff", "--cached", "--quiet", "docs/nifty_live.json", "docs/live_cards.json", "docs/kronos_live_nsei.json"],
                                      cwd=Path(__file__).parent, capture_output=True, timeout=10, check=False)
             if changed.returncode == 0:
                 logger.info("No price change; skip commit")

@@ -241,50 +241,62 @@
       const d2 = (Math.log(spot / K) - 0.5 * sig * sig * T) / (sig * Math.sqrt(T));
       return normCdf(d2);
     }
-    const ceMap = {};
+    const ceMap = {}, peMap = {};
     tradeExp.rows.forEach(r => {
       if (r.ce && finite(r.ce.close) && r.ce.close > 0.5 && finite(r.strike) && r.strike > 0)
         ceMap[r.strike] = r.ce;
+      if (r.pe && finite(r.pe.close) && r.pe.close > 0.5 && finite(r.strike) && r.strike > 0)
+        peMap[r.strike] = r.pe;
     });
-    const strikes = Object.keys(ceMap).map(Number).sort((a, b) => a - b);
     const out = [];
-    for (let i = 0; i < strikes.length; i++) {
-      const K1 = strikes[i];
-      if (K1 < spot * 0.99) continue;
-      const cb = ceMap[K1];
-      for (let j = i + 1; j < strikes.length; j++) {
-        const K2 = strikes[j], cs = ceMap[K2];
-        const deb = cb.close - cs.close;
-        if (deb <= 0) continue;
-        const width = K2 - K1, mpUnit = width - deb;
-        if (mpUnit <= 0) continue;
-        const ml = Math.round(deb * lot);
-        if (ml > maxL) continue;
-        const mp = Math.round(mpUnit * lot), rr = mp / ml;
-        const be = K1 + deb;
-        const pA = pAbove(be), pM = pAbove(K2);
-        const ev = Math.round(pM * mp + (pA - pM) * (mp * 0.5) - (1 - pA) * ml);
-        out.push({
-          K1, K2, P1: cb.close, P2: cs.close,
-          net_debit: Math.round(deb * 100) / 100,
-          width, lot, max_loss: ml, max_profit: mp, rr,
-          breakeven: Math.round(be * 10) / 10,
-          breakeven_pct: Math.round((be - spot) / spot * 1000) / 10,
-          max_profit_pct: Math.round((K2 - spot) / spot * 1000) / 10,
-          p_any_rv: Math.round(pA * 1000) / 10,
-          p_max_rv: Math.round(pM * 1000) / 10,
-          ev_per_lot: ev,
-          theta_net: finite(cb.theta) && finite(cs.theta) ? Math.round((cb.theta - cs.theta) * lot * 10) / 10 : null,
-          net_delta: finite(cb.delta) && finite(cs.delta) ? Math.round((cb.delta - cs.delta) * lot * 10) / 10 : null,
-          delta_buy: finite(cb.delta) ? cb.delta : null,
-          delta_sell: finite(cs.delta) ? cs.delta : null,
-          vrp: idx.vrp, atm_iv: idx.atm_iv, rv20,
-          as_of: data.as_of, expiry: tradeExp.expiry, dte,
-        });
-      }
+    // Same EV approximation both ways: full profit beyond the short strike, half profit between
+    // breakeven and short strike, full loss otherwise. Realised-vol lognormal, no drift view.
+    function push(dir, type, K1, K2, b, s) {
+      const deb = b.close - s.close;
+      if (deb <= 0) return;
+      const width = Math.abs(K2 - K1), mpUnit = width - deb;
+      if (mpUnit <= 0) return;
+      const ml = Math.round(deb * lot);
+      if (ml > maxL) return;
+      const mp = Math.round(mpUnit * lot), rr = mp / ml;
+      const be = dir === 'bull' ? K1 + deb : K1 - deb;
+      const pA = dir === 'bull' ? pAbove(be) : 1 - pAbove(be);
+      const pM = dir === 'bull' ? pAbove(K2) : 1 - pAbove(K2);
+      const ev = Math.round(pM * mp + (pA - pM) * (mp * 0.5) - (1 - pA) * ml);
+      out.push({
+        dir, type, K1, K2, P1: b.close, P2: s.close,
+        net_debit: Math.round(deb * 100) / 100,
+        width, lot, max_loss: ml, max_profit: mp, rr,
+        breakeven: Math.round(be * 10) / 10,
+        breakeven_pct: Math.round((be - spot) / spot * 1000) / 10,
+        max_profit_pct: Math.round((K2 - spot) / spot * 1000) / 10,
+        p_any_rv: Math.round(pA * 1000) / 10,
+        p_max_rv: Math.round(pM * 1000) / 10,
+        ev_per_lot: ev,
+        theta_net: finite(b.theta) && finite(s.theta) ? Math.round((b.theta - s.theta) * lot * 10) / 10 : null,
+        net_delta: finite(b.delta) && finite(s.delta) ? Math.round((b.delta - s.delta) * lot * 10) / 10 : null,
+        delta_buy: finite(b.delta) ? b.delta : null,
+        delta_sell: finite(s.delta) ? s.delta : null,
+        vrp: idx.vrp, atm_iv: idx.atm_iv, rv20,
+        as_of: data.as_of, expiry: tradeExp.expiry, dte,
+      });
+    }
+    const ceS = Object.keys(ceMap).map(Number).sort((a, b) => a - b);
+    for (let i = 0; i < ceS.length; i++) {          // bull call: BUY lower CE near spot, SELL higher CE
+      if (ceS[i] < spot * 0.99) continue;
+      for (let j = i + 1; j < ceS.length; j++) push('bull', 'CE', ceS[i], ceS[j], ceMap[ceS[i]], ceMap[ceS[j]]);
+    }
+    const peS = Object.keys(peMap).map(Number).sort((a, b) => b - a);
+    for (let i = 0; i < peS.length; i++) {          // bear put: BUY higher PE near spot, SELL lower PE
+      if (peS[i] > spot * 1.01) continue;
+      for (let j = i + 1; j < peS.length; j++) push('bear', 'PE', peS[i], peS[j], peMap[peS[i]], peMap[peS[j]]);
     }
     out.sort((a, b) => b.ev_per_lot - a.ev_per_lot);
-    return out.slice(0, maxR);
+    // Always show both directions: the best half from each side, then by EV.
+    const half = Math.ceil(maxR / 2);
+    const bull = out.filter(p => p.dir === 'bull').slice(0, half);
+    const bear = out.filter(p => p.dir === 'bear').slice(0, maxR - Math.min(half, bull.length));
+    return [...bull, ...bear].sort((a, b) => b.ev_per_lot - a.ev_per_lot).slice(0, maxR);
   }
   function buildHedgedMoveCard(data) {
     const xss=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

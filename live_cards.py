@@ -202,7 +202,9 @@ def nifty_cards(sess, chain, kronos, today, hol):
     atm = min({k for k, _ in want}, key=lambda k: abs(k - spot))
     ivs = [v for v in (implied_vol(ltp.get((atm, o)), spot, atm, t, o == "CE") for o in ("CE", "PE")) if v]
     sigma = sum(ivs) / len(ivs) if ivs else idx["atm_iv"] / 100.0
-    kentry = kronos_entry(kronos, "NSEI", chain["as_of"])
+    kentry, ksource = live_kronos(today), "live"
+    if not kentry:
+        kentry, ksource = kronos_entry(kronos, "NSEI", chain["as_of"]), "eod"
     rules = {r["id"]: r for r in chain["rules"]}
     cards = []
     for s in chain["setups"]:
@@ -245,7 +247,86 @@ def nifty_cards(sess, chain, kronos, today, hol):
     cards.sort(key=lambda c: (order[c["verdict"]], -(c["exit"]["exp_pnl_per_lot"] or -1e12)))
     return dict(spot=spot, bank_nifty=(live.get("bank_nifty") or {}).get("ltp"), expiry=expiry, lot=lot,
                 dte=dte, live_iv_pct=rnd(sigma * 100), eod_iv_pct=idx.get("atm_iv"), chain_as_of=chain["as_of"],
-                kronos_input=kentry["data_as_of"] if kentry else None, cards=cards), rows
+                kronos_input=kentry["data_as_of"] if kentry else None,
+                kronos_source=ksource if kentry else None,
+                kronos_generated_at=kentry.get("generated_at") if kentry else None,
+                direction=direction_evidence(chain, spot, kentry, exit_by.isoformat()), cards=cards), rows
+
+
+def live_kronos(today, max_age_min=120):
+    """Kronos run that includes today's provisional Kotak bar (kronos_live.py). None if absent or old."""
+    p = DOCS / "kronos_live_nsei.json"
+    if not p.exists():
+        return None
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+    except ValueError:
+        return None
+    prov = d.get("provenance") or {}
+    gen = dt.datetime.fromisoformat(d.get("generated_at", "1970-01-01T00:00:00+00:00"))
+    if (prov.get("kind") != "kronos-neural" or prov.get("model") != KRONOS_MODEL
+            or (d.get("live_bar") or {}).get("date") != today.isoformat()
+            or (dt.datetime.now(IST) - gen).total_seconds() > max_age_min * 60):
+        return None
+    paths = [q for q in d.get("paths") or [] if q and all(np.isfinite(b.get("c", np.nan)) and b["c"] > 0 for b in q)]
+    return dict(d, paths=paths) if paths and d.get("last_close") else None
+
+
+def direction_evidence(chain, spot, kentry, exit_iso):
+    """Every directional input we have, as votes. Nothing here is a forecast of its own."""
+    idx, h = chain["index"], chain.get("hhhl") or {}
+    closes = [c for c in h.get("close") or [] if isinstance(c, (int, float))] + [spot]
+    ema9 = None
+    if len(closes) >= 9:
+        ema9 = sum(closes[:9]) / 9
+        for c in closes[9:]:
+            ema9 = c * 0.2 + ema9 * 0.8
+    hs, ls, cs = (h.get(k) or [] for k in ("high", "low", "close"))
+    typ = [(a + b + c) / 3 for a, b, c in list(zip(hs, ls, cs))[-20:] if all(isinstance(v, (int, float)) for v in (a, b, c))]
+    vwap20 = sum(typ) / len(typ) if typ else None
+    jev = (chain.get("jev") or {}).get("index") or {}
+    jd, jp = jev.get("direction") or {}, jev.get("positioning") or {}
+    st = (idx.get("structure") or {})
+    votes = []
+
+    def vote(name, value, side, detail):
+        votes.append(dict(name=name, value=value, side=side, detail=detail))
+
+    prev = idx.get("close")
+    chg = (spot / prev - 1) * 100 if prev else None
+    vote("Live move today", f"{chg:+.2f}%" if chg is not None else "—",
+         "bear" if chg is not None and chg < -0.25 else "bull" if chg is not None and chg > 0.25 else "neutral",
+         f"Kotak {spot:,.2f} vs previous close {prev:,.2f}")
+    if ema9:
+        vote("Live price vs EMA 9", f"{spot - ema9:+.0f} pts", "bear" if spot < ema9 else "bull", f"EMA 9 incl. live price {ema9:,.0f}")
+    if vwap20:
+        vote("Live price vs 20-day VWAP", f"{spot - vwap20:+.0f} pts", "bear" if spot < vwap20 else "bull", f"VWAP-20 {vwap20:,.0f} (EOD bars)")
+    s = st.get("structure") or ""
+    vote("Swing structure", s or "—", "bear" if s.startswith("LH") and "LL" in s else "bull" if s.startswith("HH") else "neutral",
+         f"confirmed high {st.get('confirmed_high')}, confirmed low {st.get('confirmed_low')}")
+    if idx.get("fii_long_share") is not None:
+        f = idx["fii_long_share"]
+        vote("FII index-futures long share", f"{f}%", "bear" if f < 40 else "bull" if f > 60 else "neutral", "NSE participant OI (EOD)")
+    if jp.get("choice"):
+        vote("Jev positioning", f"{jp['choice']} ({round(100 * (jp.get('probabilities') or {}).get(jp['choice'], 0))}%)",
+             "bear" if "bearish" in jp["choice"] else "bull" if "bullish" in jp["choice"] else "neutral", "Jev reading of participant data")
+    if jd.get("choice"):
+        pr = jd.get("probabilities") or {}
+        vote("Jev direction", f"{jd['choice']} (bull {round(100 * pr.get('bullish', 0))}% / bear {round(100 * pr.get('bearish', 0))}%)",
+             "bear" if jd["choice"] == "bearish" else "bull" if jd["choice"] == "bullish" else "neutral", "low-confidence index assessment")
+    if kentry:
+        scale = spot / kentry["last_close"]
+        ends = sorted(b["c"] * scale for p in kentry["paths"] for b in p if b["d"] == exit_iso)
+        if ends:
+            up = sum(e > spot for e in ends)
+            med = ends[len(ends) // 2]
+            vote(f"Kronos paths on {exit_iso}", f"{up}/{len(ends)} above live, median {med:,.0f}",
+                 "bull" if up >= 0.65 * len(ends) else "bear" if up <= 0.35 * len(ends) else "neutral",
+                 f"range {ends[0]:,.0f}–{ends[-1]:,.0f}; input {kentry['data_as_of']}")
+    bull = sum(v["side"] == "bull" for v in votes)
+    bear = sum(v["side"] == "bear" for v in votes)
+    lean = "BEARISH" if bear >= bull + 2 else "BULLISH" if bull >= bear + 2 else "MIXED"
+    return dict(lean=lean, bull=bull, bear=bear, neutral=len(votes) - bull - bear, votes=votes)
 
 
 def previous_card(sess, rows):

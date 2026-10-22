@@ -742,26 +742,30 @@
   function buildEVCard(p,i){
     const spot=(dataset.index||{}).option_spot||(dataset.index||{}).close||0;
     const rank=i+1;
+    const bear=p.dir==='bear',ot=p.type||'CE';
     const bePct=p.breakeven_pct!==undefined?p.breakeven_pct:(p.breakeven_move_pct||0);
     const mpPct=p.max_profit_pct!==undefined?p.max_profit_pct:(spot?Math.round((p.K2-spot)/spot*1000)/10:0);
-    return '<div class="nc-ev-card" data-ev-rank="'+rank+'">'
-      +'<div class="nc-ev-rank-badge">#'+rank+' by EV</div>'
-      +'<div class="nc-ev-trade-name">BUY '+p.K1+' / SELL '+p.K2+' CE</div>'
+    const sgn=v=>(v>=0?'+':'')+Number(v).toFixed(1)+'%';
+    const lossAt=bear?'Nifty \u2265 '+p.K1+' at expiry':'Nifty \u2264 '+p.K1+' at expiry';
+    const winAt=bear?'Nifty \u2264 '+p.K2+' at expiry':'Nifty \u2265 '+p.K2+' at expiry';
+    return '<div class="nc-ev-card" data-ev-rank="'+rank+'" data-dir="'+(bear?'bear':'bull')+'">'
+      +'<div class="nc-ev-rank-badge">#'+rank+' by EV \u00b7 <span class="'+(bear?'neg':'pos')+'">'+(bear?'\u25bc BEARISH':'\u25b2 BULLISH')+'</span></div>'
+      +'<div class="nc-ev-trade-name">BUY '+p.K1+' / SELL '+p.K2+' '+ot+'</div>'
       +'<div class="nc-ev-expiry-row">'+esc(p.expiry||'')+(p.dte?' \u00b7 '+p.dte+'d':'')+' \u00b7 Lot '+p.lot+'</div>'
       +'<table class="nc-ev-legs-tbl"><thead><tr><th>Side</th><th>Strike</th><th>Premium</th><th>\u0394</th></tr></thead><tbody>'
-      +'<tr><td class="pos">BUY</td><td>'+p.K1+' CE</td><td>&#8377;'+Number(p.P1).toFixed(2)+'</td><td>'+(fin(p.delta_buy)?p.delta_buy.toFixed(3):'\u2014')+'</td></tr>'
-      +'<tr><td class="neg">SELL</td><td>'+p.K2+' CE</td><td>&#8377;'+Number(p.P2).toFixed(2)+'</td><td>'+(fin(p.delta_sell)?p.delta_sell.toFixed(3):'\u2014')+'</td></tr>'
+      +'<tr><td class="pos">BUY</td><td>'+p.K1+' '+ot+'</td><td>&#8377;'+Number(p.P1).toFixed(2)+'</td><td>'+(fin(p.delta_buy)?p.delta_buy.toFixed(3):'\u2014')+'</td></tr>'
+      +'<tr><td class="neg">SELL</td><td>'+p.K2+' '+ot+'</td><td>&#8377;'+Number(p.P2).toFixed(2)+'</td><td>'+(fin(p.delta_sell)?p.delta_sell.toFixed(3):'\u2014')+'</td></tr>'
       +'<tr class="nc-ev-debit-row"><td colspan="2">Net debit / unit</td><td><strong>&#8377;'+Number(p.net_debit).toFixed(2)+'</strong></td><td></td></tr>'
       +'</tbody></table>'
       +'<div class="nc-ev-pnl-row">'
-      +'<div class="nc-ev-stat neg"><div class="nc-ev-stat-lbl">MAX LOSS (gross)</div><div class="nc-ev-stat-val">&#8722;&#8377;'+Number(p.max_loss).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">Nifty \u2264 '+p.K1+' at expiry</div></div>'
-      +'<div class="nc-ev-stat pos"><div class="nc-ev-stat-lbl">COND. MAX PROFIT</div><div class="nc-ev-stat-val">+&#8377;'+Number(p.max_profit).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">Nifty \u2265 '+p.K2+' at expiry</div></div>'
-      +(fin(p.ev_per_lot)?'<div class="nc-ev-stat ev"><div class="nc-ev-stat-lbl">EV / LOT (realised vol)</div><div class="nc-ev-stat-val">+&#8377;'+Number(p.ev_per_lot).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">E[P&amp;L] using RV='+(fin(p.rv20)?p.rv20.toFixed(1):'?')+'% lognormal</div></div>':'')
+      +'<div class="nc-ev-stat neg"><div class="nc-ev-stat-lbl">MAX LOSS (gross)</div><div class="nc-ev-stat-val">&#8722;&#8377;'+Number(p.max_loss).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">'+lossAt+'</div></div>'
+      +'<div class="nc-ev-stat pos"><div class="nc-ev-stat-lbl">COND. MAX PROFIT</div><div class="nc-ev-stat-val">+&#8377;'+Number(p.max_profit).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">'+winAt+'</div></div>'
+      +(fin(p.ev_per_lot)?'<div class="nc-ev-stat ev"><div class="nc-ev-stat-lbl">EV / LOT (realised vol)</div><div class="nc-ev-stat-val">'+(p.ev_per_lot<0?'&#8722;':'+')+'&#8377;'+Math.abs(Number(p.ev_per_lot)).toLocaleString('en-IN')+'</div><div class="nc-ev-stat-note">E[P&amp;L] using RV='+(fin(p.rv20)?p.rv20.toFixed(1):'?')+'% lognormal</div></div>':'')
       +'</div>'
       +'<div class="nc-ev-chips">'
       +'<div class="nc-ev-chip"><span>R/R</span><strong>'+Number(p.rr).toFixed(2)+'&#215;</strong></div>'
-      +'<div class="nc-ev-chip"><span>Breakeven</span><strong>'+Number(p.breakeven).toFixed(0)+'</strong><span>+'+Number(bePct).toFixed(1)+'% from spot</span></div>'
-      +'<div class="nc-ev-chip"><span>Full profit at</span><strong>&#8805;'+p.K2+'</strong><span>+'+Number(mpPct).toFixed(1)+'% move</span></div>'
+      +'<div class="nc-ev-chip"><span>Breakeven</span><strong>'+Number(p.breakeven).toFixed(0)+'</strong><span>'+sgn(bePct)+' from spot</span></div>'
+      +'<div class="nc-ev-chip"><span>Full profit at</span><strong>'+(bear?'&#8804;':'&#8805;')+p.K2+'</strong><span>'+sgn(mpPct)+' move</span></div>'
       +(fin(p.p_any_rv)?'<div class="nc-ev-chip pos"><span>Prob. profit (RV)</span><strong>'+Number(p.p_any_rv).toFixed(1)+'%</strong><span>realised-vol lognormal</span></div>':'')
       +(fin(p.p_max_rv)?'<div class="nc-ev-chip"><span>Prob. full profit (RV)</span><strong>'+Number(p.p_max_rv).toFixed(1)+'%</strong></div>':'')
       +(fin(p.theta_net)?'<div class="nc-ev-chip neg"><span>Net \u03b8/day</span><strong>'+(p.theta_net<0?'&#8722;':'+')+'&#8377;'+Math.abs(p.theta_net).toFixed(0)+'</strong><span>time decay cost</span></div>':'')

@@ -55,8 +55,10 @@
     const stopLv = c.stop?.nifty_levels || {};
     const stopNifty = [fin(stopLv.below) ? 'Nifty below ' + num(stopLv.below, 0) : '', fin(stopLv.above) ? 'Nifty above ' + num(stopLv.above, 0) : ''].filter(Boolean).join(' or ');
     const bt = c.backtest || {};
-    return `<article class="lc-card" data-rule="${esc(c.rule)}">
-      <span class="lc-v lc-${esc(c.verdict)}">${esc(c.verdict)}</span> <span class="lc-small">${c.firing_today ? 'rule fired today' : 'rule not fired today'}${c.jev ? ' · Jev tier ' + esc(c.jev) : ''}</span>
+    const dir = /bear/.test(c.view || '') ? 'bear' : /bull/.test(c.view || '') ? 'bull' : 'neutral';
+    const dirTag = dir === 'bear' ? '<span class="lc-v lc-SELL">▼ BEARISH</span>' : dir === 'bull' ? '<span class="lc-v lc-BUY">▲ BULLISH</span>' : `<span class="lc-v lc-WATCH">◆ ${esc((c.view || 'neutral').toUpperCase())}</span>`;
+    return `<article class="lc-card" data-rule="${esc(c.rule)}" data-dir="${dir}">
+      <span class="lc-v lc-${esc(c.verdict)}">${esc(c.verdict)}</span> ${dirTag} <span class="lc-small">${c.firing_today ? 'rule fired today' : 'rule not fired today'}${c.jev ? ' · Jev tier ' + esc(c.jev) : ''}</span>
       <h3>${esc(c.label)}</h3>
       <table class="lc-legs">${legs}</table>
       <dl class="lc-kv">
@@ -83,25 +85,42 @@
       <span class="lc-small">Your actual fill decides your real return. One trade is one outcome, not evidence of an edge.</span></div>`;
   }
 
+  function directionPanel(n) {
+    const d = n.direction;
+    if (!d || !Array.isArray(d.votes)) return '';
+    const col = s => s === 'bear' ? '#f85149' : s === 'bull' ? '#3fb950' : '#9aa7b8';
+    const rows = d.votes.map(v => `<tr><td>${esc(v.name)}</td><td style="color:${col(v.side)};font-weight:700">${v.side === 'bear' ? '▼' : v.side === 'bull' ? '▲' : '◆'} ${esc(v.value)}</td><td class="lc-small">${esc(v.detail)}</td></tr>`).join('');
+    const leanCol = d.lean === 'BEARISH' ? '#f85149' : d.lean === 'BULLISH' ? '#3fb950' : '#e3b341';
+    return `<div class="lc-banner"><b>Direction right now: <span style="color:${leanCol}">${esc(d.lean)}</span></b> — ${d.bear} bearish · ${d.bull} bullish · ${d.neutral} neutral inputs.
+      <table class="lc-legs" style="margin-top:6px">${rows}</table>
+      <span class="lc-small">Kronos ${n.kronos_source === 'live' ? 'includes today\'s live Kotak bar (run ' + esc((n.kronos_generated_at || '').slice(11, 16)) + ' IST)' : 'uses the last completed EOD candle ' + esc(n.kronos_input || '')}. No single input is a forecast; this is the evidence each card is judged against.</span></div>`;
+  }
+
   function renderNifty(el, d) {
     injectCss();
     const n = d.nifty, cards = n.cards;
-    const cand = cards.filter(c => c.verdict === 'CANDIDATE');
-    const watch = cards.filter(c => c.verdict === 'WATCH');
-    const avoid = cards.filter(c => c.verdict === 'AVOID');
+    const lean = n.direction?.lean;
+    const fits = c => lean === 'BEARISH' ? /bear/.test(c.view || '') : lean === 'BULLISH' ? /bull/.test(c.view || '') : true;
+    const order = {CANDIDATE: 0, WATCH: 1, AVOID: 2};
+    // Cards that match today's live lean come first inside each verdict group.
+    const sorted = [...cards].sort((a, b) => order[a.verdict] - order[b.verdict] || (fits(b) - fits(a)) || ((b.exit?.exp_pnl_per_lot ?? -1e12) - (a.exit?.exp_pnl_per_lot ?? -1e12)));
+    const cand = sorted.filter(c => c.verdict === 'CANDIDATE');
+    const watch = sorted.filter(c => c.verdict === 'WATCH');
+    const bears = sorted.filter(c => c.verdict === 'AVOID' && /bear/.test(c.view || ''));
+    const avoid = sorted.filter(c => c.verdict === 'AVOID' && !/bear/.test(c.view || ''));
     const age = ageMin(d.generated_at);
     const stale = age > STALE_MIN;
     const banner = cand.length
       ? `<div class="lc-banner"><b>${cand.length} candidate${cand.length > 1 ? 's' : ''}</b>: model exit P&amp;L positive, at least 6 of 10 Kronos paths in profit at exit, and backtest not negative. Size so the max loss is acceptable.</div>`
-      : `<div class="lc-banner lc-warn"><b>No candidate right now.</b> No setup has positive model P&amp;L at exit, at least 6 of 10 Kronos paths in profit, and a non-negative backtest together. Staying flat is a position. WATCH cards show where the evidence disagrees.</div>`;
+      : `<div class="lc-banner lc-warn"><b>No candidate right now.</b> No setup has positive model P&amp;L at exit, Kronos paths mostly in profit, and a non-negative backtest together. Staying flat is a position. WATCH cards show where the evidence disagrees.</div>`;
     el.innerHTML = `<div class="lc-wrap">
       <div class="lc-head"><span>Kotak live · <strong>${esc(d.generated_at.replace('T', ' ').slice(0, 16))} IST</strong>${stale ? ' <b style="color:#e3b341">(' + Math.round(age) + ' min old)</b>' : ''}</span>
         <span>Nifty <strong>${num(n.spot)}</strong></span><span>Live ATM IV <strong>${num(n.live_iv_pct)}%</strong> (EOD ${num(n.eod_iv_pct)}%)</span>
-        <span>Expiry <strong>${esc(n.expiry)}</strong> · ${esc(n.dte)} days · lot ${esc(n.lot)}</span>
-        <span>Kronos input ${esc(n.kronos_input || 'unavailable')}</span></div>
-      ${banner}${previousBox(d.previous_card)}
+        <span>Expiry <strong>${esc(n.expiry)}</strong> · ${esc(n.dte)} days · lot ${esc(n.lot)}</span></div>
+      ${directionPanel(n)}${banner}${previousBox(d.previous_card)}
       <div class="lc-grid">${[...cand, ...watch].map(c => optionCard(c, n.lot)).join('')}</div>
-      <details class="lc-more"><summary>${avoid.length} AVOID setups (shown for transparency)</summary><div class="lc-grid">${avoid.map(c => optionCard(c, n.lot)).join('')}</div></details>
+      ${bears.length ? `<h3 style="margin:6px 0 0;color:#f85149;font-size:14px">▼ Bearish setups (${bears.length}) — priced live, marked AVOID for the reason on each card</h3><div class="lc-grid">${bears.map(c => optionCard(c, n.lot)).join('')}</div>` : ''}
+      <details class="lc-more"><summary>${avoid.length} other AVOID setups (shown for transparency)</summary><div class="lc-grid">${avoid.map(c => optionCard(c, n.lot)).join('')}</div></details>
       <p class="lc-small">${esc(d.disclaimer)} Entry at the live LTP shown; real fills differ by bid/ask. Model P&amp;L uses Black-Scholes at live IV with costs removed.</p>
     </div>`;
   }
