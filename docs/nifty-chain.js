@@ -8,7 +8,7 @@
   const fin = v => typeof v === 'number' && Number.isFinite(v);
   const fmt  = (v, d=2) => fin(v) ? v.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d}) : '\u2014';
   const iInt = v => fin(v) ? Math.round(v).toLocaleString('en-IN') : '\u2014';
-  const money = v => fin(v) ? '\u20b9'+fmt(v) : '\u2014';
+  const money = v => fin(v) ? (v<0?'\u2212':'')+'\u20b9'+fmt(Math.abs(v)) : '\u2014';
   const pct  = (v,d=1) => fin(v) ? (v>0?'+':'')+fmt(v,d)+'%' : '\u2014';
   const pctP = (v,d=1) => fin(v) ? fmt(v,d)+'%' : '\u2014';
   const cls  = v => fin(v) ? (v>0?'pos':v<0?'neg':'') : '';
@@ -776,7 +776,7 @@
 
   function renderMathPlay(){
     const host=$('mathplay-card');
-    if(!host) return;
+    if(!host||host.dataset.live==='1') return; // live Kotak ranking (live-cards.js) supersedes the EOD screen
     const jev=dataset.jev||{},idx=dataset.index||{};
     const jdir=((jev.index||{}).direction)||{},jvol=((jev.index||{}).volatility)||{};
     const spot=idx.option_spot||idx.close||0;

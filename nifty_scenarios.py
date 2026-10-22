@@ -606,6 +606,23 @@ def build(sess, chain, kentry, live, today, exit_by, rows):
     cards.sort(key=lambda c: -(c["regime_ev_per_risk"] or -1e9))
     for i, c in enumerate(cards, 1):
         c["rank"] = i
+    # Live replacement for the old EOD, direction-blind EV screen: every evaluated structure scored by
+    # probability-weighted P&L (full conditional per scenario, tails included) per rupee of max loss.
+    for e in evals:
+        e["regime_ev"] = sum(probs[s] * e["cond"][s] for s in SCEN)
+    top = sorted(evals, key=lambda e: -(e["regime_ev"] / -e["max_loss"]))
+    best_kind, rest = {}, []
+    for e in top:  # the best structure of every type (bull, bear and sideways types all appear), then the next best
+        (rest if e["kind"] in best_kind else best_kind.setdefault(e["kind"], [])).append(e)
+    chosen = sorted((v[0] for v in best_kind.values()), key=lambda e: -(e["regime_ev"] / -e["max_loss"]))
+    chosen += [e for e in rest if e["name"] not in {c["name"] for c in chosen}][:max(0, 10 - len(chosen))]
+    chosen.sort(key=lambda e: -(e["regime_ev"] / -e["max_loss"]))
+    ranked_all = [dict(name=e["name"], scenario=e["scenario"], kind=e["kind"], net=e["net"],
+                       max_profit=e["max_profit"], max_loss=e["max_loss"], breakevens=e["breakevens"],
+                       regime_ev=rnd(e["regime_ev"], 0), regime_ev_per_risk=rnd(e["regime_ev"] / -e["max_loss"] * 100, 2),
+                       cond={s: rnd(e["cond"][s], 0) for s in SCEN},
+                       legs=[dict(side=l["side"], strike=l["strike"], type=l["type"], fill=l["fill"]) for l in e["legs"]])
+                  for e in chosen]
     return dict(
         generated_at=dt.datetime.now(IST).isoformat(timespec="seconds"), spot=spot, change_pct=rnd((spot / live["close"] - 1) * 100, 2) if live.get("close") else None,
         today=dict(open=live.get("open"), high=live.get("high"), low=live.get("low")), expiry=expiry, dte=dte, lot=lot,
@@ -613,7 +630,7 @@ def build(sess, chain, kentry, live, today, exit_by, rows):
         last_completed_bar=last_completed, trend=a, triggers=trig,
         probabilities=dict(sources={k: ({kk: (rnd(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v.items()} if v else None) for k, v in sources.items()},
                            blended=probs),
-        cards=cards, no_structure=missing, chain_quotes=len(q), candidates=len(evals),
+        cards=cards, ranked_all=ranked_all, no_structure=missing, chain_quotes=len(q), candidates=len(evals),
         method=("Bull/bear = Nifty more than 1% above/below the live price on the exit date; sideways = within 1%. "
                 "Probabilities are the equal-weight average of the four sources shown. Each structure is valued at the exit date with "
                 "Black-Scholes at every leg's own live implied volatility, entered at live bid/ask, costs removed. "

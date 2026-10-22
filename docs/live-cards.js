@@ -6,7 +6,7 @@
 (function () {
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fin = v => typeof v === 'number' && Number.isFinite(v);
-  const inr = (v, d = 0) => fin(v) ? '\u20b9' + v.toLocaleString('en-IN', {maximumFractionDigits: d, minimumFractionDigits: d}) : '—';
+  const inr = (v, d = 0) => fin(v) ? (v < 0 ? '\u2212' : '') + '\u20b9' + Math.abs(v).toLocaleString('en-IN', {maximumFractionDigits: d, minimumFractionDigits: d}) : '—';
   const num = (v, d = 2) => fin(v) ? v.toLocaleString('en-IN', {maximumFractionDigits: d}) : '—';
   const signed = v => fin(v) ? (v >= 0 ? '+' : '\u2212') + inr(Math.abs(v)) : '—';
   const KRONOS_MODEL = 'NeoQuasar/Kronos-small';
@@ -123,8 +123,8 @@
     const age = ageMin(d.generated_at);
     const stale = age > STALE_MIN;
     const banner = cand.length
-      ? `<div class="lc-banner"><b>${cand.length} candidate${cand.length > 1 ? 's' : ''}</b>: model exit P&amp;L positive, at least 6 of 10 Kronos paths in profit at exit, and backtest not negative. Size so the max loss is acceptable.</div>`
-      : `<div class="lc-banner lc-warn"><b>No candidate right now.</b> No setup has positive model P&amp;L at exit, Kronos paths mostly in profit, and a non-negative backtest together. Staying flat is a position. WATCH cards show where the evidence disagrees.</div>`;
+      ? `<div class="lc-banner"><b>${cand.length} candidate${cand.length > 1 ? 's' : ''}</b>: model exit P&amp;L positive, at least 60% of Kronos paths in profit at exit, and backtest not negative. Size so the max loss is acceptable.</div>`
+      : `<div class="lc-banner lc-warn"><b>No candidate right now.</b> No setup has positive model P&amp;L at exit, at least 60% of Kronos paths in profit, and a non-negative backtest together. Staying flat is a position. WATCH cards show where the evidence disagrees.</div>`;
     el.innerHTML = `<div class="lc-wrap">
       <div class="lc-head"><span>Kotak live · <strong>${esc(d.generated_at.replace('T', ' ').slice(0, 16))} IST</strong>${stale ? ' <b style="color:#e3b341">(' + Math.round(age) + ' min old)</b>' : ''}</span>
         <span>Nifty <strong>${num(n.spot)}</strong></span><span>Live ATM IV <strong>${num(n.live_iv_pct)}%</strong> (EOD ${num(n.eod_iv_pct)}%)</span>
@@ -218,9 +218,9 @@
       <table class="lc-legs">${legs}</table>
       <dl class="lc-kv">
         <dt>Net ${esc(c.net?.type)} per lot (${s.lot})</dt><dd><b>${inr(c.net?.per_lot)}</b></dd>
-        <dt>Max profit / max loss (expiry ${esc(s.expiry)})</dt><dd><b class="sc-pos">${c.max_profit == null ? 'uncapped' : inr(c.max_profit)}</b> / <b class="sc-neg">${inr(c.max_loss)}</b></dd>
+        <dt>Max profit / max loss (expiry ${esc(s.expiry)})</dt><dd><b class="sc-pos">${c.max_profit == null ? 'uncapped' : inr(c.max_profit)}</b> / <b class="sc-neg">${signed(c.max_loss)}</b></dd>
         <dt>Breakeven at expiry</dt><dd>${(c.breakevens || []).map(b => num(b, 0)).join(' / ') || '—'}</dd>
-        <dt>If ${SC_NAME[c.scenario].slice(2).toLowerCase()} (1–${s.band_max_pct}% move)</dt><dd class="sc-pos"><b>${signed(ifs[c.scenario])}</b> · ${num(c.scenario_return_on_risk, 0)}% of max loss</dd>
+        <dt>If ${SC_NAME[c.scenario].slice(2).toLowerCase()} (${c.scenario === 'side' ? 'Nifty within ±' + s.band_pct + '%' : s.band_pct + '–' + s.band_max_pct + '% ' + (c.scenario === 'bull' ? 'up' : 'down')})</dt><dd class="sc-pos"><b>${signed(ifs[c.scenario])}</b> · ${num(c.scenario_return_on_risk, 0)}% of max loss</dd>
         <dt>If wrong</dt><dd>${['bull', 'side', 'bear'].filter(k => k !== c.scenario).map(k => SC_NAME[k].slice(2).toLowerCase() + ' ' + signed(ifs[k])).join(' · ')}</dd>
         <dt>Probability-weighted P&amp;L</dt><dd><b class="${c.regime_ev > 0 ? 'sc-pos' : 'sc-neg'}">${signed(c.regime_ev)}</b> (${num(c.regime_ev_per_risk, 1)}% of risk)</dd>
       </dl>
@@ -275,15 +275,44 @@
     </div>`;
   }
 
-  window.LiveCards = {load, renderNifty, renderScenarios, stockPlanHtml, kronosAgreement};
+  /* Live replacement for the EOD EV screen: all live structures ranked by probability-weighted P&L per rupee of risk. */
+  function renderLiveEV(host, d) {
+    const s = d.scenarios;
+    if (!host || !s || s.error || !Array.isArray(s.ranked_all) || !s.ranked_all.length) return false;
+    injectCss();
+    host.dataset.live = '1';
+    const h = document.getElementById('mathplay-title');
+    if (h) h.textContent = 'Live EV ranking — all structures, probability-weighted (research only)';
+    const b = s.probabilities.blended;
+    const rows = s.ranked_all.map((e, i) => `<tr data-dir="${esc(e.scenario)}">
+      <td>#${i + 1}</td><td style="color:${SC_COL[e.scenario]};font-weight:700">${SC_NAME[e.scenario]}</td>
+      <td>${esc(e.name)}<br><span class="lc-small">${e.legs.map(l => `${l.side} ${num(l.strike, 0)} ${l.type} @ ${inr(l.fill, 2)}`).join(' · ')}</span></td>
+      <td>${esc(e.net.type)} ${inr(e.net.per_lot)}</td><td class="sc-pos">${e.max_profit == null ? 'uncapped' : inr(e.max_profit)}</td><td class="sc-neg">${signed(e.max_loss)}</td>
+      <td>${(e.breakevens || []).map(x => num(x, 0)).join(' / ')}</td>
+      ${['bull', 'side', 'bear'].map(k => pnlCell(e.cond[k])).join('')}
+      <td><b class="${e.regime_ev > 0 ? 'sc-pos' : 'sc-neg'}">${signed(e.regime_ev)}</b><br><span class="lc-small">${num(e.regime_ev_per_risk, 1)}% of risk</span></td></tr>`).join('');
+    host.innerHTML = `<div class="lc-wrap">
+      <p class="lc-small" style="margin:0">LIVE PAYOFF SCREEN — RESEARCH ONLY · Kotak bid/ask ${esc(s.generated_at.slice(11, 16))} IST · Nifty ${num(s.spot)} · expiry ${esc(s.expiry)} · exit ${esc(s.exit_by)} · lot ${esc(s.lot)}.
+        Odds used: bull ${pct(b.bull)} · sideways ${pct(b.side)} · bear ${pct(b.bear)} (from the scenario section above).</p>
+      <div class="nc-table-scroll"><table class="lc-legs sc-moves"><tr><th>Rank</th><th>View</th><th>Structure</th><th>Net / lot</th><th>Max profit</th><th>Max loss</th><th>Breakeven</th>
+        <th>If bull</th><th>If sideways</th><th>If bear</th><th>Weighted P&amp;L</th></tr>${rows}</table></div>
+      <p class="lc-small">"If bull/sideways/bear" = average P&amp;L at the exit date across that whole scenario (tails included) at each leg's live implied vol, costs removed.
+        Ranked by weighted P&amp;L per rupee of max loss across ${esc(s.candidates)} live structures. Weighted P&amp;L near zero is normal for fairly priced options. Not investment advice.</p>
+    </div>`;
+    return true;
+  }
+
+  window.LiveCards = {load, renderNifty, renderScenarios, renderLiveEV, stockPlanHtml, kronosAgreement};
 
   function boot() {
     const el = document.getElementById('live-cards');
     const sc = document.getElementById('scenario-cards');
+    const ev = document.getElementById('mathplay-card');
     if (!el && !sc) return;
     const source = document.body.dataset.liveSource || '';
     const tick = () => load(source).then(d => {
       if (sc) renderScenarios(sc, d);
+      if (ev) renderLiveEV(ev, d);
       if (el) renderNifty(el, d);
     }).catch(e => {
       for (const x of [sc, el]) if (x && !x.querySelector('.lc-wrap')) x.innerHTML = '<p class="lc-small">Live cards unavailable (' + esc(e.message) + '). No live prices are being shown.</p>';
