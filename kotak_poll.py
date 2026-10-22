@@ -90,6 +90,10 @@ def refresh_prices():
                                cwd=Path(__file__).parent, capture_output=True, timeout=60, check=False)
                 pushed = subprocess.run(["git", "push", "origin", "HEAD:master"],
                                         cwd=Path(__file__).parent, capture_output=True, text=True, timeout=60, check=False)
+                if pushed.returncode != 0:
+                    # Port 22 to github.com times out intermittently on this network; GitHub also serves SSH on 443.
+                    pushed = subprocess.run(["git", "push", "ssh://git@ssh.github.com:443/originaonxi/nse-value-lens.git", "HEAD:master"],
+                                            cwd=Path(__file__).parent, capture_output=True, text=True, timeout=60, check=False)
                 if pushed.returncode == 0:
                     logger.info("Committed and pushed live prices + cards to GitHub")
                 else:

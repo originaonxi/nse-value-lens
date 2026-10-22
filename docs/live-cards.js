@@ -197,6 +197,7 @@
   const SC_NAME = {bull: '▲ BULLISH', bear: '▼ BEARISH', side: '◆ SIDEWAYS'};
   const SC_COL = {bull: '#3fb950', bear: '#f85149', side: '#e3b341'};
   const pct = v => fin(v) ? (v * 100).toFixed(0) + '%' : '—';
+  let lastTrend = null;  // previous snapshot's trend votes and levels, to show what changed between refreshes
   const pnlCell = v => `<td class="${v > 0 ? 'sc-pos' : v < 0 ? 'sc-neg' : ''}">${signed(v)}</td>`;
 
   function scenarioCard(c, s) {
@@ -210,11 +211,22 @@
     const stopN = [fin(ex.stop_nifty_below) ? 'Nifty below ' + num(ex.stop_nifty_below, 0) : '', fin(ex.stop_nifty_above) ? 'Nifty above ' + num(ex.stop_nifty_above, 0) : ''].filter(Boolean).join(' or ');
     const ifs = c.if_scenario || {};
     const alts = (c.alternatives || []).map(a => `<li>${esc(a.name)} · ${esc(a.net?.type)} ${inr(a.net?.per_lot)} · max loss ${inr(a.max_loss)} · if ${SC_NAME[c.scenario].slice(2).toLowerCase()} ${signed(a.if_scenario)} (${num(a.scenario_return_on_risk, 0)}% of risk)</li>`).join('');
-    return `<article class="sc-card sc-${esc(c.scenario)}" data-scenario="${esc(c.scenario)}">
+    const ss = c.scenario_stats || {};
+    const probs = s.probabilities?.blended || {};
+    const matrix = `<table class="sc-moves scenario-matrix"><tr><th>If Nifty ends…</th><th>Odds</th><th>Average</th><th>Best</th><th>Worst</th></tr>
+      ${['bull', 'side', 'bear'].map(k => `<tr${k === c.scenario ? ' style="background:#161b22;font-weight:700"' : ''}><th style="color:${SC_COL[k]};text-align:left">${SC_NAME[k]}</th>
+        <td>${pct(probs[k])}</td>${pnlCell(ss[k]?.avg)}${pnlCell(ss[k]?.best)}${pnlCell(ss[k]?.worst)}</tr>`).join('')}
+      <tr><th style="text-align:left">At expiry (any move)</th><td></td><td></td>${pnlCell(c.max_profit)}${pnlCell(c.max_loss)}</tr></table>`;
+    const j = c.jev;
+    const jCol = j ? {take: '#3fb950', watch: '#e3b341', avoid: '#f85149'}[j.choice] : '#7d8590';
+    const jev = j ? `<span class="lc-v" style="background:#161b22;color:${jCol};border:1px solid ${jCol}">Jev: ${esc(j.choice.toUpperCase())} ${pct(j.probabilities?.[j.choice])}</span>`
+      : `<span class="lc-v" style="background:#161b22;color:#7d8590;border:1px solid #30363d">Jev: ${esc(s.jev_cards && s.jev_cards.startsWith('pending') ? 'review pending' : 'no review')}</span>`;
+    return `<article class="sc-card sc-${esc(c.scenario)}" data-scenario="${esc(c.scenario)}" data-jev="${esc(j ? j.choice : 'none')}">
       <div class="sc-top"><span class="sc-rank">#${esc(c.rank)}</span><span style="color:${SC_COL[c.scenario]};font-weight:800;font-size:16px">${SC_NAME[c.scenario]}</span>
         <span class="sc-prob" style="color:${SC_COL[c.scenario]}">${pct(c.probability)}</span></div>
       <p class="lc-small" style="margin:0">Blended probability that Nifty is ${c.scenario === 'bull' ? 'more than ' + s.band_pct + '% above' : c.scenario === 'bear' ? 'more than ' + s.band_pct + '% below' : 'within ±' + s.band_pct + '% of'} ${num(s.spot)} on ${esc(c.exit_by)}</p>
       <h3 style="margin:8px 0 4px">${esc(c.name)}</h3>
+      <div>${jev} <span class="lc-small">${j ? `confidence ${pct(j.confidence)} · reviewed ${esc(j.age_min)} min ago` : ''}</span></div>
       <table class="lc-legs">${legs}</table>
       <dl class="lc-kv">
         <dt>Net ${esc(c.net?.type)} per lot (${s.lot})</dt><dd><b>${inr(c.net?.per_lot)}</b></dd>
@@ -224,6 +236,7 @@
         <dt>If wrong</dt><dd>${['bull', 'side', 'bear'].filter(k => k !== c.scenario).map(k => SC_NAME[k].slice(2).toLowerCase() + ' ' + signed(ifs[k])).join(' · ')}</dd>
         <dt>Probability-weighted P&amp;L</dt><dd><b class="${c.regime_ev > 0 ? 'sc-pos' : 'sc-neg'}">${signed(c.regime_ev)}</b> (${num(c.regime_ev_per_risk, 1)}% of risk)</dd>
       </dl>
+      ${matrix}
       ${moves}
       <dl class="lc-kv">
         <dt>Trigger</dt><dd style="text-align:left">${t.active ? '<b class="sc-pos">ACTIVE NOW</b> · ' : '<b style="color:#e3b341">WAIT</b> · '}${esc(t.text)}</dd>
@@ -248,8 +261,18 @@
     const src = Object.entries(p.sources).map(([k, v]) => v ? `<tr><td>${esc({implied: 'Options market (live IV)', kronos: 'Kronos', history: 'Historical analogs', jev: 'Jev'}[k] || k)}</td>
       <td class="sc-pos">${pct(v.bull)}</td><td style="color:#e3b341">${pct(v.side)}</td><td class="sc-neg">${pct(v.bear)}</td><td class="lc-small">${esc(v.note)}</td></tr>` : `<tr><td>${esc(k)}</td><td colspan="4" class="lc-small">unavailable</td></tr>`).join('');
     const bar = ['bear', 'side', 'bull'].map(k => `<span style="width:${(b[k] * 100).toFixed(1)}%;background:${SC_COL[k]}">${SC_NAME[k].slice(2)} ${pct(b[k])}</span>`).join('');
-    const votes = a.votes.map(v => `<tr><td>${esc(v.name)}</td><td style="color:${v.side === 'bear' ? '#f85149' : v.side === 'bull' ? '#3fb950' : '#9aa7b8'};font-weight:700">${v.side === 'bear' ? '▼' : v.side === 'bull' ? '▲' : '◆'} ${esc(v.value)}</td><td class="lc-small">${esc(v.detail)}</td></tr>`).join('');
-    const levels = [...a.levels].sort((x, y) => y.value - x.value).map(l => `<tr${l.kind === 'live' ? ' style="background:#1f2937;font-weight:700"' : ''}><td>${esc(l.name)}</td><td>${num(l.value, 0)}</td><td class="${l.dist_pct > 0 ? 'sc-pos' : l.dist_pct < 0 ? 'sc-neg' : ''}">${l.dist_pct > 0 ? '+' : ''}${num(l.dist_pct, 2)}%</td></tr>`).join('');
+    const prev = lastTrend;
+    const delta = (now, before, d = 0) => fin(now) && fin(before) && Math.abs(now - before) >= Math.pow(10, -d) / 2
+      ? ` <span class="lc-small" style="color:${now > before ? '#3fb950' : '#f85149'}">${now > before ? '▲' : '▼'}${Math.abs(now - before).toFixed(d)}</span>` : '';
+    const votes = a.votes.map(v => {
+      const was = prev?.votes?.[v.name];
+      const flip = was && was !== v.side ? ` <span class="lc-small" style="color:#e3b341">(was ${esc(was)})</span>` : '';
+      return `<tr><td>${esc(v.name)}</td><td style="color:${v.side === 'bear' ? '#f85149' : v.side === 'bull' ? '#3fb950' : '#9aa7b8'};font-weight:700">${v.side === 'bear' ? '▼' : v.side === 'bull' ? '▲' : '◆'} ${esc(v.value)}${flip}</td><td class="lc-small">${esc(v.detail)}</td></tr>`;
+    }).join('');
+    const levels = [...a.levels].sort((x, y) => y.value - x.value).map(l => `<tr${l.kind === 'live' ? ' style="background:#1f2937;font-weight:700"' : ''}><td>${esc(l.name)}</td><td>${num(l.value, 0)}${delta(l.value, prev?.levels?.[l.name], 0)}</td><td class="${l.dist_pct > 0 ? 'sc-pos' : l.dist_pct < 0 ? 'sc-neg' : ''}">${l.dist_pct > 0 ? '+' : ''}${num(l.dist_pct, 2)}%</td></tr>`).join('');
+    const sameSnap = prev && prev.at === s.generated_at;
+    if (!sameSnap) lastTrend = {at: s.generated_at, votes: Object.fromEntries(a.votes.map(v => [v.name, v.side])), levels: Object.fromEntries(a.levels.map(l => [l.name, l.value])), seenAt: Date.now()};
+    const changeNote = `<p class="lc-small" style="margin:0">Snapshot ${esc(s.generated_at.slice(11, 19))} IST · page checks for a new one every 60 s · ${prev && !sameSnap ? `changes since ${esc(prev.at.slice(11, 19))} shown with ▲▼` : sameSnap ? 'no new snapshot yet (the laptop updater publishes every ~2 min)' : 'first load'}</p>`;
     const st = a.stats;
     el.innerHTML = `<div class="lc-wrap">
       <div class="lc-head"><span>Kotak live · <strong>${esc(s.generated_at.replace('T', ' ').slice(0, 16))} IST</strong>${age > STALE_MIN ? ' <b style="color:#e3b341">(' + Math.round(age) + ' min old)</b>' : ''}</span>
@@ -262,10 +285,12 @@
         live PCR ${num(st.pcr_live, 2)} · 1σ move by exit ±${num(st.move_1sigma_exit_pts, 0)} pts (±${num(st.move_1sigma_exit_pct)}%).
         <div class="sc-bar">${bar}</div>
         <span class="lc-small">Scenario odds for ${esc(s.exit_by)} (${esc(s.sessions)} sessions): bull = Nifty above ${num(s.spot * (1 + s.band_pct / 100), 0)}, bear = below ${num(s.spot * (1 - s.band_pct / 100), 0)}, sideways = between.</span></div>
+      <p class="lc-small" style="margin:0">${s.cards.length} cards ranked by probability-weighted P&amp;L per rupee of max loss; every card makes money in its own scenario. Jev reviews each card live (refreshed every 10 min); cards Jev rates AVOID rank last. ${esc(s.jev_cards && !['live', 'cached'].includes(s.jev_cards) ? 'Jev card review: ' + s.jev_cards + '.' : '')}</p>
       <div class="sc-grid">${s.cards.map(c => scenarioCard(c, s)).join('')}</div>
+      ${changeNote}
       <div class="sc-trend">
-        <details class="lc-more" open><summary>Trend checks (HH/HL style)</summary><table class="lc-legs">${votes}</table></details>
-        <details class="lc-more" open><summary>Key levels from live price</summary><table class="lc-legs">${levels}</table></details>
+        <details class="lc-more" open><summary>Trend checks (HH/HL style) — live</summary><table class="lc-legs">${votes}</table></details>
+        <details class="lc-more" open><summary>Key levels from live price — ${num(s.spot)}</summary><table class="lc-legs">${levels}</table></details>
       </div>
       <details class="lc-more"><summary>How the scenario odds are calculated</summary>
         <table class="lc-legs"><tr><td></td><td class="sc-pos">Bull</td><td style="color:#e3b341">Side</td><td class="sc-neg">Bear</td><td></td></tr>${src}

@@ -87,3 +87,27 @@ def test_best_structures_requires_profit_in_its_scenario():
                center=-1, max_loss=-100)
     picked = ns.best_structures([good, bad], "bear", dict(bull=.3, side=.4, bear=.3))
     assert picked == [good] and good["score"] == pytest.approx(0.5)
+
+
+def _ev(name, scen, kind, own, risk=100):
+    cond = {s: (own if s == scen else -own / 2) for s in ("bull", "side", "bear")}
+    return dict(name=name, scenario=scen, kind=kind, if_=dict(cond), cond=dict(cond), center=own, max_loss=-risk)
+
+
+def test_select_cards_covers_all_views_and_caps_count():
+    evals = [_ev(f"b{i}", "bull", "Bull call spread", 10 + i) for i in range(5)]
+    evals += [_ev(f"r{i}", "bear", "Bear put spread", 20 + i) for i in range(5)]
+    evals += [_ev(f"s{i}", "side", "Iron condor", 5 + i) for i in range(5)]
+    evals += [_ev("loser", "bull", "Long call", -5)]
+    picked = ns.select_cards(evals, dict(bull=.3, side=.4, bear=.3), n=8)
+    names = [p["name"] for p in picked]
+    assert len(picked) == 8 and len(set(names)) == 8 and "loser" not in names
+    assert {p["scenario"] for p in picked} == {"bull", "side", "bear"}
+
+
+def test_scenario_stats_best_worst_avg():
+    pnl = np.where(ns.GRID < 0, -100.0, 200.0)
+    e = dict(_pnl_x=pnl, cond=dict(bull=200, side=50, bear=-100))
+    st = ns.scenario_stats(e)
+    assert st["bull"]["best"] == 200 and st["bear"]["worst"] == -100
+    assert st["side"]["best"] == 200 and st["side"]["worst"] == -100 and st["side"]["avg"] == 50

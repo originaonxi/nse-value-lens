@@ -532,6 +532,53 @@ def exits(e, ctx, scen):
                 target_rupees=rnd(target, 0), target_rule=rule, target_text=tgt_txt)
 
 
+CARD_COUNT = 8
+JEV_CARDS_CACHE = ROOT / ".cache" / "jev_cards.json"
+JEV_CARDS_EVERY = 10 * 60      # at most one Jev card review per 10 min
+JEV_CARDS_KEEP = 45 * 60       # reuse a card's verdict while that exact structure stays in the list
+
+
+def scenario_stats(e):
+    """Average (probability-weighted), best and worst P&L at the exit date inside each scenario (Nifty within +/-6%)."""
+    out = {}
+    for s, m in {"bull": GRID > BAND, "side": np.abs(GRID) <= BAND, "bear": GRID < -BAND}.items():
+        p = e["_pnl_x"][m]
+        out[s] = dict(avg=rnd(e["cond"][s], 0), best=rnd(float(p.max()), 0), worst=rnd(float(p.min()), 0))
+    return out
+
+
+def select_cards(evals, probs, n=CARD_COUNT):
+    """Up to n distinct structures: the best two per scenario, then the next best by probability-weighted
+    P&L per rupee of risk. Every pick must make money in its own scenario."""
+    for e in evals:
+        e["regime_ev"] = sum(probs[s] * e["cond"][s] for s in SCEN)
+        e["score_risk"] = e["regime_ev"] / -e["max_loss"]
+        e["score"] = e["if_"][e["scenario"]] / -e["max_loss"]
+    per = {s: best_structures(evals, s, probs, top=4) for s in SCEN}
+    picked, names = [], set()
+
+    def add(e):
+        if e["name"] not in names and len(picked) < n:
+            picked.append(e)
+            names.add(e["name"])
+    for s in SCEN:
+        for e in per[s][:2]:
+            add(e)
+    pool = [e for s in SCEN for e in per[s][2:]]
+    pool += [e for e in evals if e["if_"][e["scenario"]] > 0 and e["center"] > 0]
+    kinds = {}
+    for e in picked:
+        kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
+    for e in sorted(pool, key=lambda x: -x["score_risk"]):
+        if len(picked) >= n:
+            break
+        if e["name"] in names or kinds.get(e["kind"], 0) >= 2:
+            continue
+        add(e)
+        kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
+    return picked
+
+
 def card(e, ctx, scen, probs, trig, alts):
     pnl_moves = []
     moves = MOVES + ([round(ctx["B"], 4), -round(ctx["B"], 4)] if ctx["B"] > 0.0201 else [])
@@ -542,7 +589,7 @@ def card(e, ctx, scen, probs, trig, alts):
     t = trig[scen]
     return dict(scenario=scen, probability=probs[scen], structure=e["kind"], name=e["name"], legs=e["legs"],
                 net=e["net"], max_profit=e["max_profit"], max_loss=e["max_loss"], breakevens=e["breakevens"],
-                costs=e["costs"], pnl_moves=pnl_moves,
+                costs=e["costs"], pnl_moves=pnl_moves, scenario_stats=scenario_stats(e),
                 if_scenario={s: rnd(e["if_"][s], 0) for s in SCEN}, regime_ev=rnd(e["regime_ev"], 0),
                 regime_ev_per_risk=rnd(e["regime_ev"] / -e["max_loss"] * 100, 2),
                 scenario_return_on_risk=rnd(e["score"] * 100, 1), implied_ev=rnd(e["implied_ev"], 0),
@@ -550,6 +597,60 @@ def card(e, ctx, scen, probs, trig, alts):
                 alternatives=[dict(name=a["name"], net=a["net"], max_profit=a["max_profit"], max_loss=a["max_loss"],
                                    if_scenario=rnd(a["if_"][scen], 0), scenario_return_on_risk=rnd(a["score"] * 100, 1),
                                    regime_ev=rnd(a["regime_ev"], 0)) for a in alts])
+
+
+def card_brief(c):
+    return dict(structure=c["name"], view=c["scenario"],
+                legs=[f"{l['side']} {l['strike']:.0f} {l['type']} @ {l['fill']}" for l in c["legs"]],
+                net=c["net"], max_profit=c["max_profit"], max_loss=c["max_loss"], breakevens=c["breakevens"],
+                pnl_by_scenario=c["scenario_stats"], probability_weighted_pnl=c["regime_ev"],
+                trigger=c["trigger"]["text"], trigger_active=c["trigger"]["active"], exit_by=c["exit_by"])
+
+
+def jev_review_cards(cards, evidence, probs, exit_iso):
+    """Live Jev verdict (take / watch / avoid) on each card's exact structure and numbers. One request reviews
+    all cards; refreshed at most every 10 min; a verdict is reused while that structure stays listed."""
+    try:
+        cache = json.loads(JEV_CARDS_CACHE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cache = {"at": 0, "results": {}}
+    now = time.time()
+    res = {k: v for k, v in (cache.get("results") or {}).items() if now - v.get("at", 0) < JEV_CARDS_KEEP}
+    missing = [c for c in cards if c["name"] not in res]
+    status = "cached"
+    if missing and now - cache.get("at", 0) >= JEV_CARDS_EVERY:
+        key = _typesafe_key()
+        if not key:
+            status = "unavailable: TYPESAFE_API_KEY not configured"
+        else:
+            try:
+                import jev_client
+                qs = {f"c{i}": {"type": "choice", "criteria": {"take": None, "watch": None, "avoid": None},
+                                "instructions": (f"Card c{i} ({c['scenario']} view): {c['name']}. Using only the supplied Nifty evidence, "
+                                                 f"scenario odds and this card's own numbers, judge this exact option structure for an "
+                                                 f"exit by {exit_iso}. take = payoff, odds and trend agree and the max loss is justified; "
+                                                 f"watch = mixed or needs its trigger first; avoid = the evidence argues against it.")}
+                      for i, c in enumerate(cards)}
+                state = json.dumps(dict(market=evidence, scenario_odds=probs,
+                                        cards={f"c{i}": card_brief(c) for i, c in enumerate(cards)}), separators=(",", ":"), default=str)
+                ans = jev_client.Client(key).ask(state, qs)
+                for i, c in enumerate(cards):
+                    a = ans[f"c{i}"]
+                    res[c["name"]] = dict(choice=a["choice"], confidence=rnd(a["confidence"], 3),
+                                          probabilities={k: rnd(v, 3) for k, v in a["probabilities"].items()}, at=now)
+                JEV_CARDS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+                JEV_CARDS_CACHE.write_text(json.dumps({"at": now, "results": res}), encoding="utf-8")
+                status = "live"
+            except Exception as e:  # Jev review is advisory; never blocks the cards
+                status = f"failed: {str(e)[:120]}"
+                JEV_CARDS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+                JEV_CARDS_CACHE.write_text(json.dumps({"at": now, "results": res}), encoding="utf-8")
+    elif missing:
+        status = "pending: next Jev review within 10 min"
+    for c in cards:
+        r = res.get(c["name"])
+        c["jev"] = dict(r, age_min=round((now - r["at"]) / 60, 1)) if r else None
+    return status
 
 
 # ── 4. build ────────────────────────────────────────────────────────────────
@@ -596,14 +697,14 @@ def build(sess, chain, kentry, live, today, exit_by, rows):
                    jev=jev_probs(evidence, chain, spot, exit_by.isoformat(), sessions))
     probs = blend(sources)
     evals = [e for e in (evaluate(c, ctx) for c in candidates(q, spot)) if e]
-    cards, missing = [], []
-    for scen in SCEN:
-        picks = best_structures(evals, scen, probs)
-        if picks:
-            cards.append(card(picks[0], ctx, scen, probs, trig, picks[1:]))
-        else:
-            missing.append(scen)
-    cards.sort(key=lambda c: -(c["regime_ev_per_risk"] or -1e9))
+    picks = select_cards(evals, probs)
+    alts = {s: [e for e in best_structures(evals, s, probs, top=4) if e["name"] not in {p["name"] for p in picks}][:2] for s in SCEN}
+    cards = [card(e, ctx, e["scenario"], probs, trig, alts[e["scenario"]] if i < 3 else []) for i, e in enumerate(picks)]
+    missing = [s for s in SCEN if not any(c["scenario"] == s for c in cards)]
+    jev_status = jev_review_cards(cards, evidence, probs, exit_by.isoformat())
+    # Rank: probability-weighted P&L per rupee of max loss (odds already include Jev's scenario view);
+    # cards Jev reviews as "avoid" are ranked below all others.
+    cards.sort(key=lambda c: ((c.get("jev") or {}).get("choice") == "avoid", -(c["regime_ev_per_risk"] or -1e9)))
     for i, c in enumerate(cards, 1):
         c["rank"] = i
     # Live replacement for the old EOD, direction-blind EV screen: every evaluated structure scored by
@@ -630,7 +731,7 @@ def build(sess, chain, kentry, live, today, exit_by, rows):
         last_completed_bar=last_completed, trend=a, triggers=trig,
         probabilities=dict(sources={k: ({kk: (rnd(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v.items()} if v else None) for k, v in sources.items()},
                            blended=probs),
-        cards=cards, ranked_all=ranked_all, no_structure=missing, chain_quotes=len(q), candidates=len(evals),
+        cards=cards, jev_cards=jev_status, ranked_all=ranked_all, no_structure=missing, chain_quotes=len(q), candidates=len(evals),
         method=("Bull/bear = Nifty more than 1% above/below the live price on the exit date; sideways = within 1%. "
                 "Probabilities are the equal-weight average of the four sources shown. Each structure is valued at the exit date with "
                 "Black-Scholes at every leg's own live implied volatility, entered at live bid/ask, costs removed. "
