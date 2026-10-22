@@ -254,11 +254,11 @@
         if(bars[i].high<bars[i-2].low&&(bars[i-2].low-bars[i].high)>=mg){beFVGs.push({top:bars[i-2].low,bot:bars[i].high,bi:i-2});for(let j=beFVGs.length-1;j>=0;j--){if(bars[i].close>beFVGs[j].top)beFVGs.splice(j,1);}if(beFVGs.length>3)beFVGs.shift();}
       }
       // Draw OB boxes
-      const dbox=(ot,ob,bi,col,labTop)=>{const xt=x(bi),x2=plotRight;if(xt>=x2)return;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.12" stroke="'+col+'" stroke-width="0.5" rx="1"/><text x="'+(xt+3)+'" y="'+(labTop?y(ot)+10:y(ob)-2).toFixed(1)+'" font-size="8" fill="'+col+'" font-family="system-ui">'+(labTop?'Bear OB':'Bull OB')+'</text>';};
+      const dbox=(ot,ob,bi,col,labTop)=>{const xt=x(bi),x2=plotRight;if(xt>=x2)return;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.12" stroke="'+col+'" stroke-width="0.5" rx="1" pointer-events="none"/><text x="'+(xt+3)+'" y="'+(labTop?y(ot)+10:y(ob)-2).toFixed(1)+'" font-size="8" fill="'+col+'" font-family="system-ui" pointer-events="none">'+(labTop?'Bear OB':'Bull OB')+'</text>';};
       bOBs.forEach(ob=>dbox(ob.top,ob.bot,ob.bi,'#2962ff',false));
       beOBs.forEach(ob=>dbox(ob.top,ob.bot,ob.bi,'#e040fb',true));
       // Draw FVG zones
-      const dfvg=(ot,ob,bi,col)=>{const xt=x(bi),x2=plotRight;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.1" stroke="'+col+'" stroke-width="0.5"/>';};
+      const dfvg=(ot,ob,bi,col)=>{const xt=x(bi),x2=plotRight;svg+='<rect x="'+xt.toFixed(1)+'" width="'+Math.max(2,x2-xt).toFixed(1)+'" y="'+y(ot).toFixed(1)+'" height="'+Math.max(1,y(ob)-y(ot)).toFixed(1)+'" fill="'+col+'" opacity="0.1" stroke="'+col+'" stroke-width="0.5" pointer-events="none"/>';};
       bFVGs.forEach(f=>dfvg(f.top,f.bot,f.bi,'#00bcd4'));
       beFVGs.forEach(f=>dfvg(f.top,f.bot,f.bi,'#ff9800'));
       // EMA9 polyline (purple — same as emaCol in Pine)
@@ -607,11 +607,11 @@
       // Build date→index map
       const dIdx={};ds.forEach((d,i)=>{dIdx[d]=i;});
       // OB boxes
-      ((pine_signal.order_blocks||{}).bull||[]).forEach(ob=>{const xi=dIdx[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(ob.top),yh=yf(ob.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#2962ff" opacity="0.12" stroke="#2962ff" stroke-width="0.5" rx="1"/><text x="'+(rx+3)+'" y="'+(yt+yh+10).toFixed(1)+'" font-size="7" fill="#2962ff" font-family="system-ui">Bull OB</text>';});
-      ((pine_signal.order_blocks||{}).bear||[]).forEach(ob=>{const xi=dIdx[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(ob.top),yh=yf(ob.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#e040fb" opacity="0.12" stroke="#e040fb" stroke-width="0.5" rx="1"/><text x="'+(rx+3)+'" y="'+(yt+9).toFixed(1)+'" font-size="7" fill="#e040fb" font-family="system-ui">Bear OB</text>';});
+      ((pine_signal.order_blocks||{}).bull||[]).forEach(ob=>{const xi=dIdx[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(ob.top),yh=yf(ob.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#2962ff" opacity="0.12" stroke="#2962ff" stroke-width="0.5" rx="1" pointer-events="none"/><text x="'+(rx+3)+'" y="'+(yt+yh+10).toFixed(1)+'" font-size="7" fill="#2962ff" font-family="system-ui" pointer-events="none">Bull OB</text>';});
+      ((pine_signal.order_blocks||{}).bear||[]).forEach(ob=>{const xi=dIdx[ob.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(ob.top),yh=yf(ob.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#e040fb" opacity="0.12" stroke="#e040fb" stroke-width="0.5" rx="1" pointer-events="none"/><text x="'+(rx+3)+'" y="'+(yt+9).toFixed(1)+'" font-size="7" fill="#e040fb" font-family="system-ui" pointer-events="none">Bear OB</text>';});
       // FVG zones
-      ((pine_signal.fvgs||{}).bull||[]).forEach(fvg=>{const xi=dIdx[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(fvg.top),yh=yf(fvg.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#00bcd4" opacity="0.1" stroke="#00bcd4" stroke-width="0.5"/>';});
-      ((pine_signal.fvgs||{}).bear||[]).forEach(fvg=>{const xi=dIdx[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(fvg.top),yh=yf(fvg.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#ff9800" opacity="0.1" stroke="#ff9800" stroke-width="0.5"/>';});
+      ((pine_signal.fvgs||{}).bull||[]).forEach(fvg=>{const xi=dIdx[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(fvg.top),yh=yf(fvg.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#00bcd4" opacity="0.1" stroke="#00bcd4" stroke-width="0.5" pointer-events="none"/>';});
+      ((pine_signal.fvgs||{}).bear||[]).forEach(fvg=>{const xi=dIdx[fvg.date];if(xi===undefined)return;const rx=xf(xi),rw=Math.max(2,xf(n-1)+bw-rx),yt=yf(fvg.top),yh=yf(fvg.bot)-yt;svg+='<rect x="'+rx.toFixed(1)+'" width="'+rw.toFixed(1)+'" y="'+yt.toFixed(1)+'" height="'+Math.max(1,yh).toFixed(1)+'" fill="#ff9800" opacity="0.1" stroke="#ff9800" stroke-width="0.5" pointer-events="none"/>';});
       // Candlesticks
       for(let i=0;i<n;i++){const o=op[i],h2=hi[i],l2=lo[i],c2=cl[i];if(!numeric(o)||!numeric(c2))continue;const up=c2>=o,col=up?'#43d443':'#f44336';svg+='<line x1="'+xf(i).toFixed(1)+'" x2="'+xf(i).toFixed(1)+'" y1="'+yf(h2).toFixed(1)+'" y2="'+yf(l2).toFixed(1)+'" stroke="'+col+'" stroke-width="0.8"/><rect x="'+(xf(i)-bw/2).toFixed(1)+'" width="'+bw.toFixed(1)+'" y="'+yf(Math.max(o,c2)).toFixed(1)+'" height="'+Math.max(1,Math.abs(yf(o)-yf(c2))).toFixed(1)+'" fill="'+col+'" opacity="0.85"/>';}
       // SMA20 (amber dashed)
@@ -669,7 +669,7 @@
 
   // ── Kronos 24-bar fan overlay ────────────────────────────────────
   let kronosData=null;
-  (async()=>{try{const src=document.body.dataset.source||'';const r=await fetch(src+'kronos_forecast.json',{cache:'no-store'});if(r.ok)kronosData=await r.json();}catch{/*not generated yet — silent*/}})();
+  (async()=>{try{const src=document.body.dataset.source||'';const r=await fetch(src+'kronos_forecast.json',{cache:'no-store'});if(r.ok){kronosData=await r.json();if(typeof selected!=='undefined'&&selected)renderKronosCard(selected);}}catch{/*not generated yet — silent*/}})();
   function renderKronosCard(sym){
     let card=document.getElementById('kronos-stock-card');
     if(!card){
@@ -678,39 +678,43 @@
       const anchor=$('stock-chart');if(!anchor)return;
       anchor.parentNode.insertBefore(card,anchor.nextSibling);
     }
-    if(!kronosData){card.hidden=true;return;}
-    if(kronosData.model!=='NeoQuasar/Kronos-small'){card.hidden=true;return;}
+    const unavailable=reason=>{card.hidden=false;card.innerHTML='<p class="muted">Kronos forecast unavailable: '+esc(reason)+'. <a href="kronos.html?symbol='+encodeURIComponent(sym)+'">View recorded candles and structural context</a>.</p>';};
+    if(!kronosData){unavailable('data not loaded');return;}
+    if(kronosData.model!=='NeoQuasar/Kronos-small'||kronosData.provenance?.kind!=='kronos-neural'){unavailable('unverified model provenance');return;}
     const key=sym==='NIFTY 50'?'NSEI':sym;
     const entry=kronosData.symbols?.[key];
-    if(!entry||!entry.paths?.length){card.hidden=true;return;}
+    if(!entry){unavailable('no current model output');return;}
+    const prov=entry.provenance||{},row=dataset?.rows?.find(r=>r.symbol===sym);
+    if(prov.kind!=='kronos-neural'||prov.model!==kronosData.model){unavailable('unverified entry provenance');return;}
+    if(!entry.data_as_of||entry.input_stale||entry.data_as_of!==dataset?.as_of||entry.data_as_of!==row?.data_date){unavailable('stale or mismatched input date');return;}
+    const rawPaths=Array.isArray(entry.paths)?entry.paths:[];
+    const validPaths=rawPaths.filter(p=>Array.isArray(p)&&p.length===kronosData.pred_len&&p.every((bar,i)=>bar&&numeric(bar.c)&&bar.c>0&&/^\d{4}-\d{2}-\d{2}$/.test(bar.d)&&bar.d>(i?p[i-1].d:entry.data_as_of)));
+    if(!validPaths.length||validPaths.length!==rawPaths.length||validPaths.length!==entry.config?.n_samples||!numeric(entry.last_close)||entry.last_close<=0||validPaths.some(p=>p.some((b,i)=>b.d!==validPaths[0][i].d))){unavailable('invalid or incomplete model paths');return;}
     card.hidden=false;
-    const paths=entry.paths,predLen=paths[0].length;
-    const cpaths=paths.map(p=>p.map(d=>d.c));
+    const predLen=validPaths[0].length;
+    const cpaths=validPaths.map(p=>p.map(bar=>bar.c));
     const W=560,H=120,PL=6,PR=6,PT=22,PB=8,cW=W-PL-PR,cH=H-PT-PB;
-    const flat=cpaths.flat();
+    const flat=cpaths.flat().filter(Number.isFinite);
+    if(!flat.length){card.hidden=true;return;}
     const yMin=Math.min(...flat),yMax=Math.max(...flat),yRange=(yMax-yMin)||1;
     const sy=v=>PT+cH-((v-yMin)/yRange)*cH;
-    const sx=i=>PL+(i/(predLen-1))*cW;
-    const med=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length/2)];});
-    const p10=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.1)];});
-    const p90=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).sort((a,b)=>a-b);return c[Math.floor(c.length*0.9)];});
-    const endMed=med[med.length-1],last=entry.last_close||cpaths[0][0];
-    const up=endMed>=last,col=up?'#22c55e':'#ef4444';
-    const spreads=cpaths.map(p=>Math.abs(p[p.length-1]-p[0]));
-    const avgSp=spreads.reduce((a,b)=>a+b,0)/spreads.length;
-    const regime=avgSp<yRange*0.18?'TRENDING \u2197':avgSp>yRange*0.42?'CHOPPY \u2194':'MIXED';
-    const rc=regime.startsWith('TRENDING')?'#f59e0b':regime.startsWith('CHOPPY')?'#818cf8':'#94a3b8';
-    const pct=((endMed-last)/last*100).toFixed(1);
+    const sx=i=>PL+(i/(predLen-1||1))*cW;
+    const med=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).filter(Number.isFinite).sort((a,b)=>a-b);return (c[Math.floor((c.length-1)/2)]+c[Math.floor(c.length/2)])/2;});
+    const p10=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).filter(Number.isFinite).sort((a,b)=>a-b);return c[Math.floor(c.length*0.1)];});
+    const p90=cpaths[0].map((_,i)=>{const c=cpaths.map(p=>p[i]).filter(Number.isFinite).sort((a,b)=>a-b);return c[Math.floor(c.length*0.9)];});
+    const endMed=med[med.length-1],last=entry.last_close;
+    const up=typeof endMed==='number'&&typeof last==='number'&&endMed>=last,col=up?'#22c55e':'#ef4444';
+    const medPct=(typeof endMed==='number'&&typeof last==='number'&&last>0)?((endMed-last)/last*100).toFixed(1):null;
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block">';
     s+='<rect width="'+W+'" height="'+H+'" fill="#0d1117" rx="5"/>';
     const bp=[...p90.map((v,i)=>sx(i)+','+sy(v)),...[...p10].reverse().map((v,i)=>sx(predLen-1-i)+','+sy(v))].join(' ');
     s+='<polygon points="'+bp+'" fill="'+col+'" opacity="0.10"/>';
     for(const cpath of cpaths)s+='<polyline points="'+cpath.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="0.5" fill="none" opacity="0.18"/>';
     s+='<polyline points="'+med.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
-    s+='<text x="'+PL+'" y="15" font-size="10.5" fill="#e6edf3" font-family="sans-serif" font-weight="600">KRONOS \u00b7 '+esc(sym)+' \u00b7 '+predLen+'-bar forecast</text>';
-    s+='<text x="'+(W*0.55)+'" y="15" font-size="10" fill="'+col+'" font-family="sans-serif">median '+(up?'+':'')+pct+'%</text>';
-    s+='<text x="'+(W-PR)+'" y="15" font-size="10" fill="'+rc+'" font-family="sans-serif" text-anchor="end">'+regime+'</text>';
-    s+='</svg><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+cpaths.length+' sampled paths \u00b7 AAAI 2026 model \u00b7 not investment advice</p>';
+    s+='<text x="'+PL+'" y="15" font-size="10.5" fill="#e6edf3" font-family="sans-serif" font-weight="600">KRONOS \u00b7 '+esc(sym)+' \u00b7 '+predLen+'-bar close paths</text>';
+    s+=medPct!==null?'<text x="'+(W*0.55)+'" y="15" font-size="10" fill="'+col+'" font-family="sans-serif">median '+(up?'+':'')+medPct+'%<\/text>':'';
+    s+='<text x="'+(W-PR)+'" y="15" font-size="10" fill="#7d8590" font-family="sans-serif" text-anchor="end">'+validPaths.length+' paths<\/text>';
+    s+='<\/svg><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+validPaths.length+' model-generated close paths \u00b7 input '+esc(entry.data_as_of)+' \u00b7 not observed future candles \u00b7 small uncalibrated sample, not a profit probability \u00b7 not investment advice<\/p>';
     card.innerHTML=s;
   }
   setTimeout(()=>{const h=$('stock-chart');if(h)new MutationObserver(()=>{if(selected)renderKronosCard(selected);}).observe(h,{childList:true,subtree:true});},200);

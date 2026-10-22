@@ -1,23 +1,75 @@
 name: Kronos Daily Forecast
 
 on:
-  schedule:
-    - cron: '30 10 * * 1-5'   # 4pm IST weekdays (10:30 UTC)
-  workflow_dispatch:           # manual trigger for testing
+  workflow_run:
+    workflows: ['HHHL daily refresh']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: 'Paths per symbol — 10=daily default, 25=medium, 100=full'
+        required: true
+        default: '10'
+        type: choice
+        options: ['10', '25', '100']
+
+# Workflow-level concurrency: one full pipeline at a time.
+# cancel-in-progress: false so a running 20-shard set always completes.
+concurrency:
+  group: kronos-forecast
+  cancel-in-progress: false
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
-jobs:
-  forecast:
-    runs-on: ubuntu-latest
-    timeout-minutes: 120       # 25 symbols × 100 paths on CPU ≈ 45-90 min
+env:
+  SHARD_COUNT: '20'
 
+# ── 1. Pin source SHA ─────────────────────────────────────────────────────────
+# All shards and the merge job checkout this exact commit so every
+# shard uses the same candles, same hhhl_scan.json, and same code.
+jobs:
+  pin-source:
+    name: Pin source commit
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.pin.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: master
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Record source SHA
+        id: pin
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "[pin-source] Pinned to $SHA"
+
+# ── 2. Shard inference (20 parallel) ─────────────────────────────────────────
+  forecast-shards:
+    name: "Forecast shard ${{ matrix.shard }} / 20"
+    needs: pin-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+
+    steps:
+      # All shards checkout the same pinned commit
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
@@ -31,28 +83,412 @@ jobs:
           key: pip-kronos-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
           restore-keys: pip-kronos-${{ runner.os }}-
 
-      - name: Cache HuggingFace models (~500 MB, downloaded once)
+      # Cache key includes kronos_forecast.py so a pinned-revision bump
+      # invalidates the cache and forces a fresh model download.
+      - name: Cache HuggingFace models (~500 MB)
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
           key: hf-kronos-${{ hashFiles('kronos_forecast.py') }}
           restore-keys: hf-kronos-
 
-      - name: Install PyTorch (CPU wheel — avoids 2 GB CUDA download)
+      - name: Install PyTorch CPU wheel
         run: pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-      - name: Install remaining deps (PyPI)
+      - name: Install remaining deps
         run: pip install huggingface_hub safetensors einops tqdm numpy pandas
 
-      - name: Run Kronos forecast
-        run: python kronos_forecast.py --offline
+      - name: Resolve sample count
+        id: samples
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "n=${{ github.event.inputs.samples }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "n=10" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run forecast shard ${{ matrix.shard }} (${{ steps.samples.outputs.n }} samples)
         env:
           HF_HUB_DISABLE_PROGRESS_BARS: "1"
+          OMP_NUM_THREADS: "2"
+        run: |
+          SHARD=${{ matrix.shard }}
+          OUTFILE="/tmp/kronos_shard_${SHARD}.json"
+          python kronos_forecast.py \
+            --shard-index "$SHARD" \
+            --shard-count "${{ env.SHARD_COUNT }}" \
+            --samples     "${{ steps.samples.outputs.n }}" \
+            --output      "$OUTFILE"
+          EXIT_CODE=$?
+          # Guarantee a file exists for upload even on pre-checkpoint crash
+          if [ ! -f "$OUTFILE" ]; then
+            echo '{"error":"shard crashed before first checkpoint","expected_count":0,"actual_coverage":0,"symbols":{},"errors":{}}' \
+              > "$OUTFILE"
+          fi
+          exit $EXIT_CODE
 
-      - name: Commit forecast JSON if updated
+      - name: Upload shard artifact (if: always — checkpoint survives failure)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "kronos-shard-${{ matrix.shard }}"
+          path: "/tmp/kronos_shard_${{ matrix.shard }}.json"
+          if-no-files-found: error
+
+# ── 3. Merge, validate, commit, publish ───────────────────────────────────────
+  merge:
+    name: Merge, validate and publish
+    needs: [pin-source, forecast-shards]
+    if: >
+      always() && (
+        github.event_name == 'workflow_dispatch' ||
+        github.event.workflow_run.conclusion == 'success'
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      commit:  ${{ steps.commit.outputs.sha }}
+      changed: ${{ steps.commit.outputs.changed }}
+
+    steps:
+      # Merge job also checks out the same pinned SHA so CSVs on disk
+      # match what the shards hashed during inference.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install merge deps
+        run: pip install numpy
+
+      - name: Download all shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: kronos-shard-*
+          path: /tmp/shards
+
+      - name: Validate shards, merge, per-entry CSV/config/path-length check
+        run: |
+          python - << 'PYEOF'
+          import glob, json, sys, hashlib
+          from datetime import date
+          from pathlib import Path
+
+          SHARD_COUNT = 20
+          PRICE_DIR   = Path('data/hhhl_prices')
+          NSEI_CSV    = PRICE_DIR / 'NSEI.csv'
+          PROV_KIND   = 'kronos-neural'
+
+          def csv_for(sym: str) -> Path:
+              return NSEI_CSV if sym == 'NSEI' else PRICE_DIR / f'{sym}.NS.csv'
+
+          def sha256(p: Path) -> str:
+              return hashlib.sha256(p.read_bytes()).hexdigest()
+
+          # ── (A) All 20 shard files must exist ─────────────────────────────
+          shard_paths = {}
+          for s in range(SHARD_COUNT):
+              m = sorted(glob.glob(f'/tmp/shards/kronos-shard-{s}/*.json'))
+              if not m:
+                  print(f'FATAL: shard {s} artifact missing', file=sys.stderr)
+                  sys.exit(1)
+              shard_paths[s] = m[0]
+          print(f'Found all {SHARD_COUNT} shard files')
+
+          # ── (B) Parse, sanity-check each shard ────────────────────────────
+          shards = {}
+          for s, path in shard_paths.items():
+              try:
+                  doc = json.loads(Path(path).read_text())
+              except Exception as exc:
+                  print(f'FATAL: shard {s} not parseable: {exc}', file=sys.stderr)
+                  sys.exit(1)
+              if not doc.get('symbols') and doc.get('expected_count', 0) == 0:
+                  print(f'FATAL: shard {s} crashed before writing any output',
+                        file=sys.stderr)
+                  sys.exit(1)
+              shards[s] = doc
+              print(f'  shard {s:2d}: {len(doc.get("symbols",{}))} symbols  '
+                    f'coverage={doc.get("actual_coverage",0)}  '
+                    f'errors={doc.get("error_count",0)}  '
+                    f'stale={doc.get("stale_count",0)}')
+
+          proto = shards[0]
+
+          # ── (C) Config consistency: version + revisions + n_samples ───────
+          ref_ver = proto.get('config', {}).get('version')
+          ref_rev = proto.get('config', {}).get('model_revision')
+          ref_n   = proto.get('config', {}).get('n_samples')
+          ref_pl  = proto.get('config', {}).get('pred_len')
+          for s, doc in shards.items():
+              cfg = doc.get('config', {})
+              for field, ref, label in [
+                  ('version',        ref_ver, 'config.version'),
+                  ('model_revision', ref_rev, 'model_revision'),
+                  ('n_samples',      ref_n,   'n_samples'),
+                  ('pred_len',       ref_pl,  'pred_len'),
+              ]:
+                  if cfg.get(field) != ref:
+                      print(f'FATAL: shard {s} {label}={cfg.get(field)!r} '
+                            f'!= shard 0 {ref!r}', file=sys.stderr)
+                      sys.exit(1)
+
+          # ── (D) Exact symbol accounting: no gaps, no overlaps ─────────────
+          # Data model: every symbol (valid OR failed) is in shard['symbols'].
+          # shard['errors'] is a subset: same symbols with reason strings only.
+          # So len(all_syms) == total_expected; adding len(all_errs) would double-count.
+          # Cross-shard check covers both dicts: a symbol cannot be owned by two shards
+          # whether it appears in their symbols OR errors.
+          total_expected = sum(doc.get('expected_count', 0) for doc in shards.values())
+          ownership = {}   # sym -> shard index (first registration wins)
+          all_syms  = {}
+          all_errs  = {}
+          for s, doc in shards.items():
+              # Register symbols; same-shard errors re-register the same sym — allowed.
+              for sym in doc.get('symbols', {}):
+                  if sym in ownership and ownership[sym] != s:
+                      print(f'FATAL: {sym!r} in shard {ownership[sym]} symbols '
+                            f'AND shard {s} symbols (duplicate ownership)', file=sys.stderr)
+                      sys.exit(1)
+                  ownership[sym] = s
+              # Cross-check errors keys: may overlap with same shard's symbols (fine)
+              # but must NOT overlap with a different shard's symbols or errors.
+              for sym in doc.get('errors', {}):
+                  if sym in ownership and ownership[sym] != s:
+                      print(f'FATAL: {sym!r} in shard {s} errors '
+                            f'but owned by shard {ownership[sym]} '
+                            f'(cross-shard duplicate)', file=sys.stderr)
+                      sys.exit(1)
+                  ownership.setdefault(sym, s)   # don't overwrite existing registration
+              all_syms.update(doc.get('symbols', {}))
+              all_errs.update(doc.get('errors',  {}))
+
+          if len(all_syms) != total_expected:
+              print(f'FATAL: {len(all_syms)} entries in merged symbols '
+                    f'!= {total_expected} expected — symbol accounting gap',
+                    file=sys.stderr)
+              sys.exit(1)
+          print(f'\nSymbol accounting: {len(all_syms)}/{total_expected} — OK '
+                f'(errors subset: {len(all_errs)})')
+
+          # ── (E) Per-entry validation for all kronos-neural entries ─────────
+          validation_warns = 0
+          csv_stale = []
+          for sym, r in all_syms.items():
+              if r.get('provenance', {}).get('kind') != PROV_KIND:
+                  continue   # error/unavailable entries skipped
+              # Provenance fields
+              prov = r.get('provenance', {})
+              ec   = r.get('config', {})
+              for label, got, want in [
+                  ('provenance.model',           prov.get('model'),           proto.get('model')),
+                  ('provenance.model_revision',   prov.get('model_revision'),  ref_rev),
+                  ('provenance.tokenizer_revision', prov.get('tokenizer_revision'),
+                   proto.get('config', {}).get('tokenizer_revision')),
+                  ('provenance.script',           prov.get('script'),          ref_ver),
+                  ('config.version',              ec.get('version'),           ref_ver),
+                  ('config.n_samples',            ec.get('n_samples'),         ref_n),
+                  ('config.pred_len',             ec.get('pred_len'),          ref_pl),
+              ]:
+                  if got != want:
+                      print(f'  WARN [{sym}] {label}={got!r} != {want!r}')
+                      validation_warns += 1
+              # Path count and length
+              paths = r.get('paths', [])
+              if len(paths) != ref_n:
+                  print(f'  WARN [{sym}] paths={len(paths)} != n_samples={ref_n}')
+                  validation_warns += 1
+              elif paths and len(paths[0]) != ref_pl:
+                  print(f'  WARN [{sym}] path[0] length={len(paths[0])} != pred_len={ref_pl}')
+                  validation_warns += 1
+              # data_as_of present
+              if not r.get('data_as_of'):
+                  print(f'  WARN [{sym}] missing data_as_of')
+                  validation_warns += 1
+              # CSV SHA — validate against source tree (pinned checkout)
+              stored_sha = r.get('input_sha256', '')
+              if stored_sha:
+                  p = csv_for(sym)
+                  if not p.exists():
+                      csv_stale.append(sym)
+                      r['input_stale'] = True
+                      r['stale_reason'] = 'CSV absent at merge-time checkout'
+                  else:
+                      cur_sha = sha256(p)
+                      if cur_sha != stored_sha:
+                          csv_stale.append(sym)
+                          r['input_stale'] = True
+                          r['stale_reason'] = (
+                              f'CSV SHA changed: inferred on {stored_sha[:8]}, '
+                              f'source now {cur_sha[:8]}'
+                          )
+
+          if csv_stale:
+              print(f'  CSV-stale at pinned source: {csv_stale}')
+          if validation_warns:
+              print(f'  {validation_warns} per-entry validation warning(s)')
+
+          # ── (F) Compute final coverage ────────────────────────────────────
+          actual_coverage = sum(
+              1 for r in all_syms.values()
+              if r.get('provenance', {}).get('kind') == PROV_KIND
+              and not r.get('input_stale')
+          )
+          stale_count = sum(1 for r in all_syms.values() if r.get('input_stale'))
+          print(f'\nFinal: coverage={actual_coverage}  stale={stale_count}  '
+                f'errors={len(all_errs)}  warns={validation_warns}')
+
+          if actual_coverage == 0:
+              print('FATAL: 0 non-stale valid symbols — refusing to publish',
+                    file=sys.stderr)
+              sys.exit(1)
+
+          # ── (G) Write merged output ────────────────────────────────────────
+          out = {
+              **{k: proto[k] for k in
+                 ('model', 'model_revision', 'lookback', 'pred_len',
+                  'n_paths', 'config', 'provenance')
+                 if k in proto},
+              'as_of':           str(date.today()),
+              'source_sha':      '${{ needs.pin-source.outputs.sha }}',
+              'expected_count':  total_expected,
+              'actual_coverage': actual_coverage,
+              'error_count':     len(all_errs),
+              'stale_count':     stale_count,
+              'errors':          all_errs,
+              'symbols':         all_syms,
+          }
+          out_path = Path('docs/kronos_forecast.json')
+          tmp = out_path.with_suffix('.tmp.json')
+          tmp.write_text(
+              json.dumps(out, separators=(',', ':'), allow_nan=False,
+                         ensure_ascii=False),
+              encoding='utf-8',
+          )
+          tmp.replace(out_path)
+          print(f'Written → {out_path}  ({out_path.stat().st_size:,} bytes)')
+          PYEOF
+
+      - name: Commit with post-pull date revalidation
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/kronos_forecast.json
-          git diff --cached --quiet && echo "No change — skipping commit" || \
-            git commit -m "data: Kronos daily forecast $(date -u +%F)" && git push
+          if git diff --cached --quiet; then
+            echo "No change — skipping commit"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SAMPLES="${{ github.event.inputs.samples || '10' }}"
+          git commit -m "data: Kronos forecast $(date -u +%F) ${SAMPLES}s run ${GITHUB_RUN_ID}"
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin master
+
+            # ── Post-pull revalidation: candle CSVs and hhhl_scan date ─────
+            # After rebase, hhhl_scan.json and CSVs may differ from the
+            # pinned-source state.  Any newly stale entry is marked; if
+            # coverage drops to 0 we fail rather than publish stale output.
+            python - << 'REVALIDATE'
+          import json, hashlib, sys
+          from pathlib import Path
+
+          PROV_KIND = 'kronos-neural'
+          PRICE_DIR = Path('data/hhhl_prices')
+          NSEI_CSV  = PRICE_DIR / 'NSEI.csv'
+
+          def csv_for(sym): return NSEI_CSV if sym == 'NSEI' else PRICE_DIR / f'{sym}.NS.csv'
+          def sha256(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+
+          merged   = json.loads(Path('docs/kronos_forecast.json').read_text())
+          scan_doc = json.loads(Path('docs/hhhl_scan.json').read_text()) \
+                     if Path('docs/hhhl_scan.json').exists() else {}
+          new_date = scan_doc.get('as_of', '')
+
+          newly_stale = 0
+          for sym, r in merged.get('symbols', {}).items():
+              if r.get('provenance', {}).get('kind') != PROV_KIND:
+                  continue
+              if r.get('input_stale'):
+                  continue
+              # Re-check CSV SHA against current master (post-rebase)
+              p = csv_for(sym)
+              if p.exists():
+                  cur_sha = sha256(p)
+                  stored  = r.get('input_sha256', '')
+                  if stored and cur_sha != stored:
+                      r['input_stale'] = True
+                      r['stale_reason'] = (f'CSV SHA changed after pull: '
+                                           f'was {stored[:8]}, now {cur_sha[:8]}')
+                      newly_stale += 1
+                      continue
+              # Re-check scan date (strict equality)
+              if new_date and r.get('data_as_of', '') != new_date:
+                  r['input_stale'] = True
+                  r['stale_reason'] = (f'data_as_of {r["data_as_of"]!r} != '
+                                       f'post-pull scan {new_date!r}')
+                  newly_stale += 1
+
+          if newly_stale > 0:
+              cov   = sum(1 for r in merged['symbols'].values()
+                          if r.get('provenance', {}).get('kind') == PROV_KIND
+                          and not r.get('input_stale'))
+              stale = sum(1 for r in merged['symbols'].values() if r.get('input_stale'))
+              merged['actual_coverage'] = cov
+              merged['stale_count']     = stale
+              tmp = Path('docs/kronos_forecast.json.tmp')
+              tmp.write_text(json.dumps(merged, separators=(',',':'), allow_nan=False))
+              tmp.replace(Path('docs/kronos_forecast.json'))
+              print(f'Post-pull: {newly_stale} newly stale, coverage={cov}')
+              if cov == 0:
+                  print('FATAL: coverage=0 after revalidation — not publishing',
+                        file=sys.stderr)
+                  sys.exit(1)
+          else:
+              print('Post-pull revalidation: all entries still current')
+          REVALIDATE
+
+            # Amend the commit to capture any revalidation updates
+            git add docs/kronos_forecast.json
+            git commit --amend --no-edit
+
+            if git push origin HEAD:master; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$attempt" = "3" ]; then
+              echo "::error::Push failed after 3 attempts"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+
+# ── 4. Pages deployment (only when forecast changed) ─────────────────────────
+  publish:
+    needs: merge
+    if: needs.merge.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Use exact pushed commit — not latest master which may have moved
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.merge.outputs.commit }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publish GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
