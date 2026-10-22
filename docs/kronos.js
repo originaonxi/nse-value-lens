@@ -139,7 +139,8 @@
     const index = chainData.index, structure = index.structure || {};
     return {
       symbol: 'NSEI', name: 'Nifty 50', close: index.close, data_date: chainData.as_of,
-      structure: structure.structure, status: structure.structure || 'UNAVAILABLE',
+      structure: structure.structure,
+      status: structure.breakout ? 'BUY' : structure.rising ? 'WATCH' : structure.falling ? 'CAUTION' : 'FLAT',
       reason: chainData.best_setup?.reason || 'Confirmed Nifty structure; no validated trade recommendation.',
       entry_allowed: scanData?.market?.new_entries_allowed === true,
       fresh_breakout: structure.breakout,
@@ -250,13 +251,21 @@
       return;
     }
 
-    // Gate 2: provenance.kind
+    // Gate 2: top-level provenance, entry provenance kind, and model identity — distinct messages
     const prov = entry.provenance || {};
-    if (forecast.provenance?.kind !== 'kronos-neural' || prov.kind !== 'kronos-neural' || prov.model !== forecast.model) {
-      notice('Forecast unavailable — provenance.kind is not kronos-neural'
+    if (!forecast.provenance || forecast.provenance.kind !== 'kronos-neural') {
+      notice('Forecast unavailable — top-level provenance.kind is not kronos-neural'
+           + (forecast.provenance?.kind ? ` (got: ${forecast.provenance.kind})` : ' (field absent)') + '.');
+      renderHistoricalOnly(sym); return;
+    }
+    if (prov.kind !== 'kronos-neural') {
+      notice('Forecast unavailable — entry provenance.kind is not kronos-neural'
            + (prov.kind ? ` (got: ${prov.kind})` : ' (field absent)') + '.');
-      renderHistoricalOnly(sym);
-      return;
+      renderHistoricalOnly(sym); return;
+    }
+    if (prov.model !== forecast.model) {
+      notice(`Forecast unavailable — entry provenance.model ${prov.model || '(absent)'} does not match expected ${forecast.model}.`);
+      renderHistoricalOnly(sym); return;
     }
 
     // Gate 3: per-symbol data_as_of present and non-stale vs scanner

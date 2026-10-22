@@ -77,7 +77,7 @@ async function test(name,fn){await fn();passed++;console.log('PASS',name);}
   });
   await test('late scanner and chain arrival still renders correct context',async()=>{
     const s=await render({delays:{'hhhl_scan.json':30,'nifty_chain.json':50}});
-    assert.equal(s['kro-symbol'].options.length,201);assert.equal(html(s,'kro-forecast'),'');
+    assert.equal(s['kro-symbol'].options.length,scan.rows.length+1);assert.equal(html(s,'kro-forecast'),'');
     assert.ok(html(s,'kro-interp').includes(chain.index.structure.structure));
   });
   await test('all source failures show unavailability rather than job running',async()=>{
