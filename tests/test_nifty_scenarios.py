@@ -111,3 +111,17 @@ def test_scenario_stats_best_worst_avg():
     st = ns.scenario_stats(e)
     assert st["bull"]["best"] == 200 and st["bear"]["worst"] == -100
     assert st["side"]["best"] == 200 and st["side"]["worst"] == -100 and st["side"]["avg"] == 50
+
+
+def test_sticky_keeps_previous_card_unless_clearly_beaten():
+    base = [_ev(f"r{i}", "bear", "Bear put spread", 20) for i in range(3)]
+    base += [_ev(f"b{i}", "bull", "Bull call spread", 20) for i in range(3)]
+    base += [_ev(f"s{i}", "side", "Iron condor", 20) for i in range(3)]
+    a = _ev("a", "bear", "Long put", 30.0)
+    b = _ev("b", "bear", "Long put", 31.0)   # 3% better than a
+    c = _ev("c", "bear", "Long put", 40.0)   # 33% better than a
+    probs = dict(bull=.3, side=.4, bear=.3)
+    picked = ns.select_cards(base + [a, b], probs, n=7, prev={"a"})
+    assert "a" in [p["name"] for p in picked] and "b" not in [p["name"] for p in picked]
+    picked = ns.select_cards(base + [a, c], probs, n=7, prev={"a"})
+    assert "c" in [p["name"] for p in picked] and "a" not in [p["name"] for p in picked]

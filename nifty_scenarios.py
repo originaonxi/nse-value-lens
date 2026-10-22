@@ -483,7 +483,7 @@ def best_structures(evals, scen, probs, top=4):
         e["score"] = e["if_"][scen] / -e["max_loss"]
         # Probability-weighted P&L across all three scenarios, each with its full conditional (tails included).
         e["regime_ev"] = sum(probs[s] * e["cond"][s] for s in SCEN)
-    pool.sort(key=lambda e: (-e["score"], -e["regime_ev"]))
+    pool.sort(key=lambda e: (-(e["score"] + (e.get("_sticky", 1.0) - 1) * abs(e["score"])), -e["regime_ev"]))
     picked, kinds = [], set()
     for e in pool:  # best overall, then the best of each other structure type
         if not picked or e["kind"] not in kinds:
@@ -534,8 +534,18 @@ def exits(e, ctx, scen):
 
 CARD_COUNT = 8
 JEV_CARDS_CACHE = ROOT / ".cache" / "jev_cards.json"
-JEV_CARDS_EVERY = 10 * 60      # at most one Jev card review per 10 min
+JEV_CARDS_EVERY = 90           # review any unreviewed card on every 2-min poller cycle (one request for all)
 JEV_CARDS_KEEP = 45 * 60       # reuse a card's verdict while that exact structure stays in the list
+STICKY = 0.15                  # a structure already on the page keeps its slot unless a rival scores >15% better
+
+
+def previous_card_names():
+    """Structures shown in the last published snapshot (for STICKY selection)."""
+    try:
+        d = json.loads((ROOT / "docs" / "live_cards.json").read_text(encoding="utf-8"))
+        return {c["name"] for c in (d.get("scenarios") or {}).get("cards") or []}
+    except (OSError, ValueError, KeyError, TypeError):
+        return set()
 
 
 def scenario_stats(e):
@@ -547,13 +557,15 @@ def scenario_stats(e):
     return out
 
 
-def select_cards(evals, probs, n=CARD_COUNT):
+def select_cards(evals, probs, n=CARD_COUNT, prev=frozenset()):
     """Up to n distinct structures: the best two per scenario, then the next best by probability-weighted
-    P&L per rupee of risk. Every pick must make money in its own scenario."""
+    P&L per rupee of risk. Every pick must make money in its own scenario. Structures already on the page get
+    a STICKY edge so a few points of Nifty movement don't swap strikes (and discard their Jev review)."""
     for e in evals:
         e["regime_ev"] = sum(probs[s] * e["cond"][s] for s in SCEN)
         e["score_risk"] = e["regime_ev"] / -e["max_loss"]
         e["score"] = e["if_"][e["scenario"]] / -e["max_loss"]
+        e["_sticky"] = 1 + STICKY if e["name"] in prev else 1.0
     per = {s: best_structures(evals, s, probs, top=4) for s in SCEN}
     picked, names = [], set()
 
@@ -569,7 +581,7 @@ def select_cards(evals, probs, n=CARD_COUNT):
     kinds = {}
     for e in picked:
         kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
-    ranked_pool = sorted(pool, key=lambda x: -x["score_risk"])
+    ranked_pool = sorted(pool, key=lambda x: -(x["score_risk"] + (x["_sticky"] - 1) * abs(x["score_risk"])))
     for e in ranked_pool:  # first pass: at most two cards per structure type, for variety
         if len(picked) >= n:
             break
@@ -651,7 +663,7 @@ def jev_review_cards(cards, evidence, probs, exit_iso):
                 JEV_CARDS_CACHE.parent.mkdir(parents=True, exist_ok=True)
                 JEV_CARDS_CACHE.write_text(json.dumps({"at": now, "results": res}), encoding="utf-8")
     elif missing:
-        status = "pending: next Jev review within 10 min"
+        status = f"pending: next Jev review within {JEV_CARDS_EVERY // 60 + 1} min"
     for c in cards:
         r = res.get(c["name"])
         c["jev"] = dict(r, age_min=round((now - r["at"]) / 60, 1)) if r else None
@@ -702,7 +714,7 @@ def build(sess, chain, kentry, live, today, exit_by, rows):
                    jev=jev_probs(evidence, chain, spot, exit_by.isoformat(), sessions))
     probs = blend(sources)
     evals = [e for e in (evaluate(c, ctx) for c in candidates(q, spot)) if e]
-    picks = select_cards(evals, probs)
+    picks = select_cards(evals, probs, prev=previous_card_names())
     alts = {s: [e for e in best_structures(evals, s, probs, top=4) if e["name"] not in {p["name"] for p in picks}][:2] for s in SCEN}
     cards = [card(e, ctx, e["scenario"], probs, trig, alts[e["scenario"]] if i < 3 else []) for i, e in enumerate(picks)]
     missing = [s for s in SCEN if not any(c["scenario"] == s for c in cards)]
