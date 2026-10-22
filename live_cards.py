@@ -405,9 +405,16 @@ def main():
     sess = kl.login()
     chain, kronos, scan = load("nifty_chain.json"), load("kronos_forecast.json"), load("hhhl_scan.json")
     nifty, rows = nifty_cards(sess, chain, kronos, today, holidays())
+    try:
+        import nifty_scenarios as ns
+        exit_by = add_sessions(today, HOLD, holidays())
+        kentry = live_kronos(today) or kronos_entry(kronos, "NSEI", chain["as_of"])
+        scenarios = ns.build(sess, chain, kentry, kl.nifty_live(sess=sess).get("nifty50") or {}, today, exit_by, rows)
+    except Exception as e:  # scenario cards are additive; never block the rest of the live data
+        scenarios = dict(error=f"{type(e).__name__}: {str(e)[:200]}")
     doc = dict(version=1, generated_at=now.isoformat(timespec="seconds"),
                source="Kotak Neo live quotes (read-only) + nifty_chain maths + NeoQuasar/Kronos-small + Jev + rule backtests",
-               nifty=nifty, previous_card=previous_card(sess, rows), stocks=stock_cards(sess, scan, kronos, today),
+               nifty=nifty, scenarios=scenarios, previous_card=previous_card(sess, rows), stocks=stock_cards(sess, scan, kronos, today),
                disclaimer="Research output from live quotes and models. Not investment advice; fills, margin and slippage differ.")
     tmp = OUT.with_suffix(".tmp")
     tmp.write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False), encoding="utf-8")

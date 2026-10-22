@@ -35,7 +35,19 @@
   .lc-small{color:#7d8590;font-size:11.5px;margin:6px 0 0}
   .lc-plan{border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin:10px 0;background:#0d1117;color:#e6edf3;font-size:13px}
   .lc-plan .lc-act{font-size:15px;font-weight:700;margin:4px 0 8px}
-  details.lc-more summary{cursor:pointer;color:#9aa7b8;font-size:13px;margin:4px 0}`;
+  details.lc-more summary{cursor:pointer;color:#9aa7b8;font-size:13px;margin:4px 0}
+  .sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+  .sc-card{border:2px solid #30363d;border-radius:12px;padding:12px 14px;background:#0d1117;color:#e6edf3;font-size:13px;line-height:1.45}
+  .sc-bull{border-color:#238636}.sc-bear{border-color:#da3633}.sc-side{border-color:#9e6a03}
+  .sc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .sc-rank{font-size:22px;font-weight:800}.sc-prob{font-size:20px;font-weight:800}
+  .sc-moves{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;margin:6px 0}
+  .sc-moves td,.sc-moves th{padding:2px 4px;border-bottom:1px solid #21262d;text-align:right}
+  .sc-moves th{color:#9aa7b8;font-weight:600}
+  .sc-pos{color:#3fb950}.sc-neg{color:#f85149}
+  .sc-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:11.5px;font-weight:700;margin:6px 0}
+  .sc-bar span{display:flex;align-items:center;justify-content:center;color:#0d1117}
+  .sc-trend{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}`;
   function injectCss() {
     if (document.getElementById('lc-css')) return;
     const s = document.createElement('style'); s.id = 'lc-css'; s.textContent = css; document.head.appendChild(s);
@@ -182,14 +194,99 @@
     </div>`;
   }
 
-  window.LiveCards = {load, renderNifty, stockPlanHtml, kronosAgreement};
+  const SC_NAME = {bull: '▲ BULLISH', bear: '▼ BEARISH', side: '◆ SIDEWAYS'};
+  const SC_COL = {bull: '#3fb950', bear: '#f85149', side: '#e3b341'};
+  const pct = v => fin(v) ? (v * 100).toFixed(0) + '%' : '—';
+  const pnlCell = v => `<td class="${v > 0 ? 'sc-pos' : v < 0 ? 'sc-neg' : ''}">${signed(v)}</td>`;
+
+  function scenarioCard(c, s) {
+    const legs = c.legs.map(l => `<tr><td class="lc-side-${esc(l.side)}">${esc(l.side)}</td><td>${num(l.strike, 0)} ${esc(l.type)}</td>
+      <td class="lc-small">bid ${inr(l.bid, 2)} / ask ${inr(l.ask, 2)}</td><td>${inr(l.fill, 2)} <span class="lc-small">${esc(l.fill_basis)}</span></td></tr>`).join('');
+    const mv = c.pnl_moves || [];
+    const moves = `<table class="sc-moves"><tr><th>Nifty move by ${esc(c.exit_by)}</th>${mv.map(m => `<th>${m.move_pct > 0 ? '+' : ''}${m.move_pct}%</th>`).join('')}</tr>
+      <tr><th>Nifty</th>${mv.map(m => `<td>${num(m.nifty, 0)}</td>`).join('')}</tr>
+      <tr><th>P&amp;L / lot</th>${mv.map(m => pnlCell(m.pnl)).join('')}</tr></table>`;
+    const ex = c.exits || {}, t = c.trigger || {};
+    const stopN = [fin(ex.stop_nifty_below) ? 'Nifty below ' + num(ex.stop_nifty_below, 0) : '', fin(ex.stop_nifty_above) ? 'Nifty above ' + num(ex.stop_nifty_above, 0) : ''].filter(Boolean).join(' or ');
+    const ifs = c.if_scenario || {};
+    const alts = (c.alternatives || []).map(a => `<li>${esc(a.name)} · ${esc(a.net?.type)} ${inr(a.net?.per_lot)} · max loss ${inr(a.max_loss)} · if ${SC_NAME[c.scenario].slice(2).toLowerCase()} ${signed(a.if_scenario)} (${num(a.scenario_return_on_risk, 0)}% of risk)</li>`).join('');
+    return `<article class="sc-card sc-${esc(c.scenario)}" data-scenario="${esc(c.scenario)}">
+      <div class="sc-top"><span class="sc-rank">#${esc(c.rank)}</span><span style="color:${SC_COL[c.scenario]};font-weight:800;font-size:16px">${SC_NAME[c.scenario]}</span>
+        <span class="sc-prob" style="color:${SC_COL[c.scenario]}">${pct(c.probability)}</span></div>
+      <p class="lc-small" style="margin:0">Blended probability that Nifty is ${c.scenario === 'bull' ? 'more than ' + s.band_pct + '% above' : c.scenario === 'bear' ? 'more than ' + s.band_pct + '% below' : 'within ±' + s.band_pct + '% of'} ${num(s.spot)} on ${esc(c.exit_by)}</p>
+      <h3 style="margin:8px 0 4px">${esc(c.name)}</h3>
+      <table class="lc-legs">${legs}</table>
+      <dl class="lc-kv">
+        <dt>Net ${esc(c.net?.type)} per lot (${s.lot})</dt><dd><b>${inr(c.net?.per_lot)}</b></dd>
+        <dt>Max profit / max loss (expiry ${esc(s.expiry)})</dt><dd><b class="sc-pos">${c.max_profit == null ? 'uncapped' : inr(c.max_profit)}</b> / <b class="sc-neg">${inr(c.max_loss)}</b></dd>
+        <dt>Breakeven at expiry</dt><dd>${(c.breakevens || []).map(b => num(b, 0)).join(' / ') || '—'}</dd>
+        <dt>If ${SC_NAME[c.scenario].slice(2).toLowerCase()} (1–${s.band_max_pct}% move)</dt><dd class="sc-pos"><b>${signed(ifs[c.scenario])}</b> · ${num(c.scenario_return_on_risk, 0)}% of max loss</dd>
+        <dt>If wrong</dt><dd>${['bull', 'side', 'bear'].filter(k => k !== c.scenario).map(k => SC_NAME[k].slice(2).toLowerCase() + ' ' + signed(ifs[k])).join(' · ')}</dd>
+        <dt>Probability-weighted P&amp;L</dt><dd><b class="${c.regime_ev > 0 ? 'sc-pos' : 'sc-neg'}">${signed(c.regime_ev)}</b> (${num(c.regime_ev_per_risk, 1)}% of risk)</dd>
+      </dl>
+      ${moves}
+      <dl class="lc-kv">
+        <dt>Trigger</dt><dd style="text-align:left">${t.active ? '<b class="sc-pos">ACTIVE NOW</b> · ' : '<b style="color:#e3b341">WAIT</b> · '}${esc(t.text)}</dd>
+        <dt>Structure exit</dt><dd style="text-align:left">${esc(c.structure_exit)}</dd>
+        <dt>Stop</dt><dd style="text-align:left">${esc(ex.stop_rule)}: ${signed(ex.stop_rupees)}/lot${stopN ? ' ≈ ' + stopN + ' (next day)' : ''}</dd>
+        <dt>Target</dt><dd style="text-align:left">${esc(ex.target_rule)}: ${signed(ex.target_rupees)}/lot · ${esc(ex.target_text)}</dd>
+        <dt>Time exit</dt><dd style="text-align:left">by ${esc(c.exit_by)} (${esc(s.sessions)} sessions), before expiry ${esc(s.expiry)}</dd>
+      </dl>
+      ${alts ? `<details class="lc-more"><summary>Next best ${esc(SC_NAME[c.scenario].slice(2).toLowerCase())} structures</summary><ul class="lc-small">${alts}</ul></details>` : ''}
+    </article>`;
+  }
+
+  function renderScenarios(el, d) {
+    injectCss();
+    const s = d.scenarios;
+    if (!s || s.error || !Array.isArray(s.cards)) {
+      el.innerHTML = `<p class="lc-small">Scenario cards unavailable${s && s.error ? ' (' + esc(s.error) + ')' : ''}. No numbers are being invented.</p>`;
+      return;
+    }
+    const a = s.trend, p = s.probabilities, b = p.blended;
+    const age = ageMin(s.generated_at);
+    const src = Object.entries(p.sources).map(([k, v]) => v ? `<tr><td>${esc({implied: 'Options market (live IV)', kronos: 'Kronos', history: 'Historical analogs', jev: 'Jev'}[k] || k)}</td>
+      <td class="sc-pos">${pct(v.bull)}</td><td style="color:#e3b341">${pct(v.side)}</td><td class="sc-neg">${pct(v.bear)}</td><td class="lc-small">${esc(v.note)}</td></tr>` : `<tr><td>${esc(k)}</td><td colspan="4" class="lc-small">unavailable</td></tr>`).join('');
+    const bar = ['bear', 'side', 'bull'].map(k => `<span style="width:${(b[k] * 100).toFixed(1)}%;background:${SC_COL[k]}">${SC_NAME[k].slice(2)} ${pct(b[k])}</span>`).join('');
+    const votes = a.votes.map(v => `<tr><td>${esc(v.name)}</td><td style="color:${v.side === 'bear' ? '#f85149' : v.side === 'bull' ? '#3fb950' : '#9aa7b8'};font-weight:700">${v.side === 'bear' ? '▼' : v.side === 'bull' ? '▲' : '◆'} ${esc(v.value)}</td><td class="lc-small">${esc(v.detail)}</td></tr>`).join('');
+    const levels = [...a.levels].sort((x, y) => y.value - x.value).map(l => `<tr${l.kind === 'live' ? ' style="background:#1f2937;font-weight:700"' : ''}><td>${esc(l.name)}</td><td>${num(l.value, 0)}</td><td class="${l.dist_pct > 0 ? 'sc-pos' : l.dist_pct < 0 ? 'sc-neg' : ''}">${l.dist_pct > 0 ? '+' : ''}${num(l.dist_pct, 2)}%</td></tr>`).join('');
+    const st = a.stats;
+    el.innerHTML = `<div class="lc-wrap">
+      <div class="lc-head"><span>Kotak live · <strong>${esc(s.generated_at.replace('T', ' ').slice(0, 16))} IST</strong>${age > STALE_MIN ? ' <b style="color:#e3b341">(' + Math.round(age) + ' min old)</b>' : ''}</span>
+        <span>Nifty <strong>${num(s.spot)}</strong> (${s.change_pct > 0 ? '+' : ''}${num(s.change_pct)}%)</span>
+        <span>Today O ${num(s.today?.open, 0)} · H ${num(s.today?.high, 0)} · L ${num(s.today?.low, 0)}</span>
+        <span>Expiry <strong>${esc(s.expiry)}</strong> · ${esc(s.dte)} days · lot ${esc(s.lot)} · exit by <strong>${esc(s.exit_by)}</strong></span></div>
+      <div class="lc-banner"><b>Trend now: <span style="color:${a.label === 'BEARISH' ? '#f85149' : a.label === 'BULLISH' ? '#3fb950' : '#e3b341'}">${esc(a.label)}</span></b>
+        — ${a.bear} bearish · ${a.bull} bullish · ${a.neutral} neutral checks.
+        RSI ${num(st.rsi14, 1)} · ATR ${num(st.atr14, 0)} pts (${num(st.atr_pct, 2)}%) · live ATM IV ${num(st.live_atm_iv)}% (IV percentile ${num(st.iv_percentile, 0)}) ·
+        live PCR ${num(st.pcr_live, 2)} · 1σ move by exit ±${num(st.move_1sigma_exit_pts, 0)} pts (±${num(st.move_1sigma_exit_pct)}%).
+        <div class="sc-bar">${bar}</div>
+        <span class="lc-small">Scenario odds for ${esc(s.exit_by)} (${esc(s.sessions)} sessions): bull = Nifty above ${num(s.spot * (1 + s.band_pct / 100), 0)}, bear = below ${num(s.spot * (1 - s.band_pct / 100), 0)}, sideways = between.</span></div>
+      <div class="sc-grid">${s.cards.map(c => scenarioCard(c, s)).join('')}</div>
+      <div class="sc-trend">
+        <details class="lc-more" open><summary>Trend checks (HH/HL style)</summary><table class="lc-legs">${votes}</table></details>
+        <details class="lc-more" open><summary>Key levels from live price</summary><table class="lc-legs">${levels}</table></details>
+      </div>
+      <details class="lc-more"><summary>How the scenario odds are calculated</summary>
+        <table class="lc-legs"><tr><td></td><td class="sc-pos">Bull</td><td style="color:#e3b341">Side</td><td class="sc-neg">Bear</td><td></td></tr>${src}
+        <tr><td><b>Blended (equal weight)</b></td><td class="sc-pos"><b>${pct(b.bull)}</b></td><td style="color:#e3b341"><b>${pct(b.side)}</b></td><td class="sc-neg"><b>${pct(b.bear)}</b></td><td></td></tr></table>
+        <p class="lc-small">${esc(s.method)} ${esc(s.candidates)} live structures valued from ${esc(s.chain_quotes)} option quotes.</p></details>
+      <p class="lc-small">${esc(d.disclaimer)}</p>
+    </div>`;
+  }
+
+  window.LiveCards = {load, renderNifty, renderScenarios, stockPlanHtml, kronosAgreement};
 
   function boot() {
     const el = document.getElementById('live-cards');
-    if (!el) return;
+    const sc = document.getElementById('scenario-cards');
+    if (!el && !sc) return;
     const source = document.body.dataset.liveSource || '';
-    const tick = () => load(source).then(d => renderNifty(el, d)).catch(e => {
-      if (!el.querySelector('.lc-wrap')) el.innerHTML = '<p class="lc-small">Live cards unavailable (' + esc(e.message) + '). No live prices are being shown.</p>';
+    const tick = () => load(source).then(d => {
+      if (sc) renderScenarios(sc, d);
+      if (el) renderNifty(el, d);
+    }).catch(e => {
+      for (const x of [sc, el]) if (x && !x.querySelector('.lc-wrap')) x.innerHTML = '<p class="lc-small">Live cards unavailable (' + esc(e.message) + '). No live prices are being shown.</p>';
     });
     tick();
     setInterval(() => { if (document.visibilityState === 'visible') tick(); }, 60000);

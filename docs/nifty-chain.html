@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="nifty-chain.css?v=trader-2">
 <script src="nifty-math.js?v=trader-4-bear" defer></script>
 <script src="nifty-chain.js?v=trader-4-bear" defer></script>
-<script src="live-cards.js?v=2" defer></script>
+<script src="live-cards.js?v=3-scenarios" defer></script>
 </head>
 <body data-source="" data-ready="">
 <div class="shell nc-shell">
@@ -39,8 +39,14 @@
       <span id="coverage" class="nc-muted">—</span>
       <span id="next-session" class="nc-muted">—</span>
     </div>
-    <p class="nc-eod-badge">📅 <strong>Signals, Jev and setups use the official NSE end-of-day snapshot.</strong> Live Kotak repricing of the same setups is a separate section below the ranked setups. Reference quotes; actual fills will differ.</p>
+    <p class="nc-eod-badge">📅 <strong>Live scenario cards (top) use Kotak live prices, live Kronos and live Jev.</strong> Signals, Jev and setups below them use the official NSE end-of-day snapshot. Reference quotes; actual fills will differ.</p>
   </div>
+
+  <!-- Live scenario engine: trend (HH/HL style), triggers/exits, bull/bear/sideways odds, best live structures -->
+  <section class="nc-section" aria-labelledby="sc-title">
+    <h2 id="sc-title" class="nc-section-label">Live Nifty scenario cards — bull · sideways · bear</h2>
+    <div id="scenario-cards"><p class="nc-muted nc-loading-msg">Loading live analysis…</p></div>
+  </section>
 
   <!-- ③ Decision summary — above y=700 on desktop -->
   <section class="nc-section" aria-labelledby="ds-title">
