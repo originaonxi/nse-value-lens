@@ -127,7 +127,7 @@ jobs:
           fi
           exit $EXIT_CODE
 
-      - name: Upload shard artifact (if: always — checkpoint survives failure)
+      - name: "Upload shard artifact (always - checkpoint survives failure)"
         uses: actions/upload-artifact@v4
         if: always()
         with:
