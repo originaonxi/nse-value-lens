@@ -668,8 +668,11 @@
   setInterval(()=>{if(document.visibilityState==='visible') loadSnapshot();},300000);
 
   // ── Kronos 24-bar fan overlay ────────────────────────────────────
-  let kronosData=null;
+  let kronosData=null,liveCards=null;
   (async()=>{try{const src=document.body.dataset.source||'';const r=await fetch(src+'kronos_forecast.json',{cache:'no-store'});if(r.ok){kronosData=await r.json();if(typeof selected!=='undefined'&&selected)renderKronosCard(selected);}}catch{/*not generated yet — silent*/}})();
+  if(globalThis.LiveCards)globalThis.LiveCards.load(document.body.dataset.source||'').then(d=>{liveCards=d;if(typeof selected!=='undefined'&&selected)renderKronosCard(selected);}).catch(()=>{/*live prices optional; EOD levels still shown*/});
+  // Trade plan (action, trigger, stop, risk, Kronos agreement) — shown even when Kronos paths are unavailable.
+  const tradePlan=sym=>{const row=dataset?.rows?.find(r=>r.symbol===sym);const entry=kronosData?.model==='NeoQuasar/Kronos-small'&&kronosData?.provenance?.kind==='kronos-neural'?kronosData.symbols?.[sym]:null;return globalThis.LiveCards&&row?globalThis.LiveCards.stockPlanHtml(row,entry,liveCards,dataset):'';};
   function renderKronosCard(sym){
     let card=document.getElementById('kronos-stock-card');
     if(!card){
@@ -678,7 +681,7 @@
       const anchor=$('stock-chart');if(!anchor)return;
       anchor.parentNode.insertBefore(card,anchor.nextSibling);
     }
-    const unavailable=reason=>{card.hidden=false;card.innerHTML='<p class="muted">Kronos forecast unavailable: '+esc(reason)+'. <a href="kronos.html?symbol='+encodeURIComponent(sym)+'">View recorded candles and structural context</a>.</p>';};
+    const unavailable=reason=>{card.hidden=false;card.innerHTML=tradePlan(sym)+'<p class="muted">Kronos forecast unavailable: '+esc(reason)+'. <a href="kronos.html?symbol='+encodeURIComponent(sym)+'">View recorded candles and structural context</a>.</p>';};
     if(!kronosData){unavailable('data not loaded');return;}
     if(kronosData.model!=='NeoQuasar/Kronos-small'||kronosData.provenance?.kind!=='kronos-neural'){unavailable('unverified model provenance');return;}
     const key=sym==='NIFTY 50'?'NSEI':sym;
@@ -711,11 +714,12 @@
     s+='<polygon points="'+bp+'" fill="'+col+'" opacity="0.10"/>';
     for(const cpath of cpaths)s+='<polyline points="'+cpath.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="0.5" fill="none" opacity="0.18"/>';
     s+='<polyline points="'+med.map((v,i)=>sx(i)+','+sy(v)).join(' ')+'" stroke="'+col+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
-    s+='<text x="'+PL+'" y="15" font-size="10.5" fill="#e6edf3" font-family="sans-serif" font-weight="600">KRONOS \u00b7 '+esc(sym)+' \u00b7 '+predLen+'-bar close paths</text>';
+    s+='<text x="'+PL+'" y="15" font-size="10.5" fill="#e6edf3" font-family="sans-serif" font-weight="600">KRONOS \u00b7 '+esc(sym)+' \u00b7 predicted closes, next '+predLen+' sessions<\/text>';
     s+=medPct!==null?'<text x="'+(W*0.55)+'" y="15" font-size="10" fill="'+col+'" font-family="sans-serif">median '+(up?'+':'')+medPct+'%<\/text>':'';
     s+='<text x="'+(W-PR)+'" y="15" font-size="10" fill="#7d8590" font-family="sans-serif" text-anchor="end">'+validPaths.length+' paths<\/text>';
-    s+='<\/svg><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+validPaths.length+' model-generated close paths \u00b7 input '+esc(entry.data_as_of)+' \u00b7 not observed future candles \u00b7 small uncalibrated sample, not a profit probability \u00b7 not investment advice<\/p>';
-    card.innerHTML=s;
+    const zr=row?.zones||{},endsUp=cpaths.filter(p=>p[p.length-1]>last).length,hitStop=numeric(zr.structure_exit_below)?cpaths.filter(p=>p.some(c=>c<zr.structure_exit_below)).length:null,hitTrig=numeric(zr.breakout_above)?cpaths.filter(p=>p.some(c=>c>zr.breakout_above)).length:null;
+    s+='<\/svg><p style="margin:4px 0 0;font-size:12px;color:#e6edf3"><b>Kronos agreement:</b> '+endsUp+'/'+validPaths.length+' paths end above last close'+(hitTrig!==null?' \u00b7 '+hitTrig+'/'+validPaths.length+' close above trigger':'')+(hitStop!==null?' \u00b7 '+hitStop+'/'+validPaths.length+' close below stop':'')+' over '+predLen+' sessions<\/p><p style="margin:3px 0 0;font-size:10.5px;color:#6b7a91">'+validPaths.length+' model-generated close paths \u00b7 input '+esc(entry.data_as_of)+' \u00b7 not observed future candles \u00b7 small uncalibrated sample, not a profit probability \u00b7 not investment advice<\/p>';
+    card.innerHTML=tradePlan(sym)+s;
   }
   setTimeout(()=>{const h=$('stock-chart');if(h)new MutationObserver(()=>{if(selected)renderKronosCard(selected);}).observe(h,{childList:true,subtree:true});},200);
 })();

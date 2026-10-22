@@ -112,6 +112,9 @@ a.kro-model-badge:hover{color:var(--text)}
   <!-- Factual interpretation panel: status / reason / zones from hhhl_scan.json or nifty_chain.json -->
   <div id="kro-interp" class="kro-interp-panel" aria-label="Symbol interpretation"></div>
 
+  <!-- Live Nifty option trade cards (Kotak prices). Shown only when NSEI is selected. -->
+  <div id="live-cards" hidden></div>
+
   <!-- Forecast availability status (shown when gates block or data absent) -->
   <div id="kro-forecast" class="kro-forecast-section"></div>
 
@@ -150,6 +153,7 @@ a.kro-model-badge:hover{color:var(--text)}
   </div>
 
 </div>
-<script src="kronos.js" defer></script>
+<script src="live-cards.js?v=1" defer></script>
+<script src="kronos.js?v=2" defer></script>
 </body>
 </html>

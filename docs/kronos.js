@@ -24,6 +24,7 @@
   let scanData  = null;    // hhhl_scan.json
   let forecast  = null;    // kronos_forecast.json
   let chainData = null;    // nifty_chain.json — index context (spot, signal direction)
+  let liveCards = null;    // live_cards.json — Kotak live prices (optional)
 
   // ── URL query param ──────────────────────────────────────────────────────
   function urlSymbol() {
@@ -48,6 +49,12 @@
     // chain failure is silent — NSEI context simply shows "unavailable"
 
     populateSelector();
+    // Live Kotak prices are optional; when they arrive, re-render the current symbol's trade plan.
+    if (globalThis.LiveCards) globalThis.LiveCards.load('').then(d => {
+      liveCards = d;
+      const sel = $('kro-symbol');
+      if (sel && sel.value) renderSymbol(sel.value);
+    }).catch(() => { /* live prices unavailable: EOD levels remain */ });
   }
 
   // ── Selector: NSEI always first, then all scan rows ──────────────────────
@@ -131,6 +138,11 @@
 
     renderMarketGate();
     renderInterpPanel(row, sym);
+    const liveEl = $('live-cards');
+    if (liveEl) {
+      liveEl.hidden = sym !== 'NSEI' || !liveCards;
+      if (!liveEl.hidden && globalThis.LiveCards) globalThis.LiveCards.renderNifty(liveEl, liveCards);
+    }
     renderForecast(row, sym);
   }
 
@@ -207,6 +219,7 @@
         `<dl class="kro-fact"><dt>${lbl}</dt><dd>${val}</dd></dl>`
       ).join('')}</div>
       ${extWarning}
+      ${sym !== 'NSEI' && globalThis.LiveCards ? globalThis.LiveCards.stockPlanHtml(row, forecast && forecast.symbols ? forecast.symbols[sym] : null, liveCards, scanData) : ''}
       <div class="kro-interp-note">
         Breakout reference and structure exit are factual scanner reference levels — not guaranteed trade signals or price targets.
         extended_above is an overextension warning only, never a target.

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="nifty-chain.css?v=trader-2">
 <script src="nifty-math.js?v=trader-3" defer></script>
 <script src="nifty-chain.js?v=trader-3" defer></script>
+<script src="live-cards.js?v=1" defer></script>
 </head>
 <body data-source="" data-ready="">
 <div class="shell nc-shell">
@@ -40,6 +41,12 @@
     </div>
     <p class="nc-eod-badge">📅 <strong>EOD snapshot only</strong> — official NSE end-of-day files. No live prices, no intra-day repricing. Reference quotes; actual fills will differ.</p>
   </div>
+
+  <!-- Live trade cards: Kotak live prices + payoff maths + Kronos + Jev + backtest -->
+  <section class="nc-section" aria-labelledby="lc-title">
+    <h2 id="lc-title" class="nc-section-label">Live trade cards — Kotak prices now</h2>
+    <div id="live-cards"><p class="nc-muted nc-loading-msg">Loading live prices…</p></div>
+  </section>
 
   <!-- ③ Decision summary — above y=700 on desktop -->
   <section class="nc-section" aria-labelledby="ds-title">

@@ -185,22 +185,43 @@ def _scrip_master_rows(date_str=None):
     return rows
 
 
-def resolve_option(symbol_name, expiry_iso, strike, opt_type, rows=None):
-    """Find the Kotak pSymbol for a NIFTY option. Matches the monthly code (e.g. NIFTY26OCT22600PE).
+# Kotak scrip-master expiry epochs count seconds from 1980-01-01 00:00 IST, not 1970 UTC.
+KOTAK_EPOCH_OFFSET = 315513000
 
-    expiry_iso is the chain's trade expiry (YYYY-MM-DD); it maps to the Kotak monthly code for that month/year.
-    Returns dict(pSymbol, trd, lot) or None.
-    """
+
+def kotak_expiry_date(raw):
+    """Kotak lExpiryDate/pExpiryDate -> ISO date (IST). Verified: 1478183400 -> 2026-11-03."""
     import datetime
+    try:
+        secs = int(float(raw)) + KOTAK_EPOCH_OFFSET
+    except (TypeError, ValueError):
+        return None
+    ist = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+    return datetime.datetime.fromtimestamp(secs, ist).date().isoformat()
+
+
+def resolve_option(symbol_name, expiry_iso, strike, opt_type, rows=None):
+    """Find the Kotak pSymbol for an option on the EXACT expiry date and strike.
+
+    Matching by the monthly code (NIFTY26NOV...) silently picked the monthly contract when the
+    chain trades a weekly expiry, so every live price was the wrong contract. This matches the
+    scrip master's own expiry date and strike (dStrikePrice is in paise).
+    Returns dict(pSymbol, trd, lot, expiry) or None when that exact contract is not listed.
+    """
     rows = rows if rows is not None else _scrip_master_rows()
-    y, m, _d = (int(x) for x in expiry_iso.split("-"))
-    code = f"{symbol_name}{str(y)[-2:]}{MONTH_CODES[m]}"  # e.g. NIFTY26OCT
-    want = f"{code}{int(strike)}{opt_type}"               # e.g. NIFTY26OCT22600PE
+    want_strike = round(float(strike), 2)
     for r in rows:
         if r.get("pSymbolName") != symbol_name or r.get("pOptionType") != opt_type:
             continue
-        if r.get("pTrdSymbol") == want:
-            return dict(pSymbol=r.get("pSymbol"), trd=r.get("pTrdSymbol"), lot=_f(r.get("lLotSize")))
+        try:
+            k = round(float(r.get("dStrikePrice")) / 100.0, 2)
+        except (TypeError, ValueError):
+            continue
+        if k != want_strike:
+            continue
+        if kotak_expiry_date(r.get("lExpiryDate") or r.get("pExpiryDate")) == expiry_iso:
+            return dict(pSymbol=r.get("pSymbol"), trd=r.get("pTrdSymbol"), lot=_f(r.get("lLotSize")),
+                        expiry=expiry_iso)
     return None
 
 
