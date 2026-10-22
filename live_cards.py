@@ -43,24 +43,6 @@ PREVIOUS_CARD = dict(label="Bear put spread", published="2026-10-15", expiry="20
                      legs=[dict(side="BUY", strike=22600, option_type="PE", eod_then=204.9, live_then=47.9),
                            dict(side="SELL", strike=22150, option_type="PE", eod_then=75.0, live_then=16.85)])
 
-def _retrying(fn, tries=4):
-    """Kotak's gateway drops TLS handshakes intermittently; retry read-only GETs with backoff."""
-    import time
-
-    def wrapped(*a, **kw):
-        for i in range(tries):
-            try:
-                return fn(*a, **kw)
-            except OSError:  # URLError, SSL EOF, timeouts are OSError subclasses
-                if i == tries - 1:
-                    raise
-                time.sleep(2 * (i + 1))
-    return wrapped
-
-
-kl._get = _retrying(kl._get)
-
-
 def load(name):
     return json.loads((DOCS / name).read_text(encoding="utf-8"))
 
