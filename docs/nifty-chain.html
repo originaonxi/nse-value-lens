@@ -39,14 +39,8 @@
       <span id="coverage" class="nc-muted">—</span>
       <span id="next-session" class="nc-muted">—</span>
     </div>
-    <p class="nc-eod-badge">📅 <strong>EOD snapshot only</strong> — official NSE end-of-day files. No live prices, no intra-day repricing. Reference quotes; actual fills will differ.</p>
+    <p class="nc-eod-badge">📅 <strong>Signals, Jev and setups use the official NSE end-of-day snapshot.</strong> Live Kotak repricing of the same setups is a separate section below the ranked setups. Reference quotes; actual fills will differ.</p>
   </div>
-
-  <!-- Live trade cards: Kotak live prices + payoff maths + Kronos + Jev + backtest -->
-  <section class="nc-section" aria-labelledby="lc-title">
-    <h2 id="lc-title" class="nc-section-label">Live trade cards — Kotak prices now</h2>
-    <div id="live-cards"><p class="nc-muted nc-loading-msg">Loading live prices…</p></div>
-  </section>
 
   <!-- ③ Decision summary — above y=700 on desktop -->
   <section class="nc-section" aria-labelledby="ds-title">
@@ -104,6 +98,12 @@
 
     <!-- All setup cards always rendered into DOM; filter hides via CSS -->
     <div id="setup-cards" class="nc-setup-cards" aria-live="polite" aria-label="Ranked setups"></div>
+  </section>
+
+  <!-- Live trade cards: Kotak live prices + payoff maths + Kronos + Jev + backtest -->
+  <section class="nc-section" aria-labelledby="lc-title">
+    <h2 id="lc-title" class="nc-section-label">Live trade cards — Kotak prices now</h2>
+    <div id="live-cards"><p class="nc-muted nc-loading-msg">Loading live prices…</p></div>
   </section>
 
   <!-- ⑥ Collapsible: structure comparison -->
