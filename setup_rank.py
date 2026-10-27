@@ -204,7 +204,7 @@ def rank_all(stocks, bars_by_symbol):
             rk["words"] = (f"#{rk['chart_rank']} of {n} in {meta['label'].upper()} by chart: net {net:+.0f} (bull {rk['bull']:.0f} / bear {rk['bear']:.0f} of {MAX})"
                            + (f", leaning {lean}" if key == "watch" else "")
                            + ". Biggest contributors: " + "; ".join(f"{_name(f['key'])} {f['value']}" for f in top) + ". "
-                           + (f"Jev #{rk['jev_rank']} of {len(with_jev)} in this list. " if rk["jev_rank"] else "No Jev rank (not in Jev's 200). ")
+                           + (f"Jev #{rk['jev_rank']} of {len(with_jev)} in this list. " if rk["jev_rank"] else "No same-session Jev rank available. ")
                            + f"Combined #{rk['combined_rank']}.")
             rk["combined_score"] = round(rk["combined_score"], 1)
         block["lists"][key] = {**{k: v for k, v in meta.items()}, "count": n, "jev_count": len(with_jev),

@@ -4,6 +4,8 @@ import math
 import sys
 import unittest
 from pathlib import Path
+import tempfile
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import daily_setups as ds  # noqa: E402
@@ -149,6 +151,86 @@ class PublishedFile(unittest.TestCase):
             if h.get("available"):
                 self.assertTrue(s["fno"])
                 self.assertGreater(h["max_loss"], 0, s["symbol"])
+
+
+class SessionFreshness(unittest.TestCase):
+    session = "2026-10-26"
+
+    def sources(self, rank_date=None, brief_date=None, symbols=("TEST",)):
+        return ({"as_of": rank_date or self.session, "ranking": [
+            {"symbol": s, "rank": i + 1, "composite": 0.9, "direction_jev": "up"}
+            for i, s in enumerate(symbols)]},
+            {"as_of": brief_date or self.session, "rows": [
+                {"symbol": s, "judged": True, "context": "neutral"} for s in symbols]})
+
+    def test_current_and_partial_coverage(self):
+        jr, brief = self.sources()
+        j, b, f = ds.session_jev_sources(self.session, ["TEST"], jr, brief)
+        self.assertEqual(f["jev_rank"]["status"], "complete")
+        self.assertEqual(f["market_brief"]["status"], "complete")
+        self.assertEqual(ds.jev_view("TEST", j, b, "long")["composite"], 0.9)
+        j, b, f = ds.session_jev_sources(self.session, ["TEST", "MISSING"], jr, brief)
+        self.assertEqual(f["jev_rank"]["status"], "partial")
+        self.assertEqual(f["jev_rank"]["covered"], 1)
+        words = ds.jev_view("MISSING", j, b, "long", f)["words"]
+        self.assertIn("partial", words)
+        self.assertNotIn("extra F&O", words)
+
+    def test_stale_and_missing_are_excluded(self):
+        jr, brief = self.sources("2026-10-23", "2026-10-23")
+        j, b, f = ds.session_jev_sources(self.session, ["TEST"], jr, brief)
+        self.assertEqual((j, b), ({}, {}))
+        self.assertEqual(f["jev_rank"]["status"], "stale")
+        self.assertEqual(f["market_brief"]["as_of"], "2026-10-23")
+        self.assertFalse(ds.jev_view("TEST", j, b, "long", f)["available"])
+        self.assertIn("2026-10-23", ds.jev_view("TEST", j, b, "long", f)["words"])
+        j, b, f = ds.session_jev_sources(self.session, ["TEST"], {}, {})
+        self.assertEqual(f["jev_rank"]["status"], "missing")
+        self.assertEqual(f["market_brief"]["status"], "missing")
+
+    def test_row_dates_and_unjudged_brief_excluded(self):
+        jr, brief = self.sources(symbols=("TEST", "OTHER"))
+        jr["ranking"][0]["data_date"] = "2026-10-23"
+        brief["rows"][0]["as_of"] = "2026-10-23"
+        brief["rows"][1]["judged"] = False
+        j, b, f = ds.session_jev_sources(self.session, ["TEST", "OTHER"], jr, brief)
+        self.assertNotIn("TEST", j)
+        self.assertEqual(b, {})
+        self.assertEqual(f["jev_rank"]["status"], "partial")
+
+    def test_stale_price_has_no_plan_or_rank(self):
+        row = scan_row([100 + i * 0.2 for i in range(80)], data_date="2026-10-23")
+        s, _ = ds.build_stock(row, "Nifty 200", {}, {}, {}, {}, self.session)
+        self.assertEqual(s["category"], "data_check")
+        self.assertEqual(s["data_date"], "2026-10-23")
+        self.assertIsNone(s["plan"])
+        ds.rank.rank_all([s], {"TEST": row["chart"]})
+        self.assertIsNone(s["rank"])
+
+    def test_main_preserves_dates_and_rejects_stale_sources(self):
+        rows = [scan_row([100 + i * 0.2 for i in range(80)],
+                         symbol=f"S{n}", data_date=self.session) for n in range(150)]
+        rows[0]["data_date"] = "2026-10-23"
+        jr, brief = self.sources("2026-10-23", "2026-10-23", tuple(r["symbol"] for r in rows))
+        sources = {"hhhl_scan.json": {"as_of": self.session, "rows": rows,
+                   "market": {"close": 25000, "sma200": 24000, "new_entries_allowed": True}},
+                   "jev_rank.json": jr, "market_brief.json": brief}
+        with tempfile.TemporaryDirectory() as tmp:
+            docs = Path(tmp)
+            with patch.object(ds, "load", side_effect=lambda name: sources.get(name)), \
+                    patch.object(ds, "DOCS", docs), patch.object(ds, "OUT", docs / "daily_setups.json"), \
+                    patch.object(ds, "HISTORY", docs / "history"), patch.object(ds, "enrich"):
+                ds.main()
+            data = json.loads((docs / "daily_setups.json").read_text())
+        self.assertEqual(data["as_of"], self.session)
+        self.assertEqual(data["inputs"]["jev_rank"], "2026-10-23")
+        self.assertEqual(data["inputs"]["market_brief"], "2026-10-23")
+        self.assertEqual(data["freshness"]["jev_rank"]["status"], "stale")
+        self.assertTrue(all("composite" not in s["jev"] and "context" not in s["jev"] for s in data["stocks"]))
+        stale = next(s for s in data["stocks"] if s["symbol"] == "S0")
+        self.assertEqual(stale["data_date"], "2026-10-23")
+        self.assertIsNone(stale["rank"])
+        self.assertIsNone(stale["plan"])
 
 
 if __name__ == "__main__":

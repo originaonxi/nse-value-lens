@@ -8,15 +8,18 @@ on:
     types: [completed]
     branches: [master]
   schedule:
-    # Backup at 21:45 IST in case a trigger was missed.
-    - cron: '15 16 * * *'
+    # After-close fallbacks at 16:15, 19:45 and 21:45 IST.
+    # HHHL, F&O, S&R/Jev and options completion triggers also rebuild the list.
+    - cron: '45 10 * * *'
+    - cron: '15 14,16 * * *'
   workflow_dispatch:
 permissions:
   contents: write
   pages: write
   id-token: write
 concurrency:
-  group: daily-setups-refresh
+  # Serialize ranked-list writers with HHHL and S&R/Jev, avoiding output rebase conflicts.
+  group: market-data-refresh
   cancel-in-progress: false
 jobs:
   refresh:
@@ -34,9 +37,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test indicators, categories and plan maths
-        run: python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank -v
-      - name: Sort every Nifty 200 + F&O stock into one category
-        run: python daily_setups.py
+        run: python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank tests.test_daily_setups_automation -v
+      - name: Recalculate prices, indicators, chart ranks and same-session Jev ranks
+        run: |
+          python scripts/verify_daily_setups.py --inputs-only --require-jev
+          python daily_setups.py
+          python scripts/verify_daily_setups.py --require-jev
       - name: Commit the daily list
         id: commit
         run: |
@@ -48,13 +54,18 @@ jobs:
           else
             git commit -m "data: daily setups run ${GITHUB_RUN_ID}"
             for attempt in 1 2 3; do
-              if git pull --rebase origin master && git push origin HEAD:master; then break; fi
-              git rebase --abort 2>/dev/null || true
-              # Another job changed an input meanwhile: rebuild from the newest inputs and retry.
-              git reset --hard origin/master
-              python daily_setups.py
-              git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history
-              git diff --cached --quiet || git commit -m "data: daily setups run ${GITHUB_RUN_ID}"
+              INPUTS_BEFORE=$(git hash-object docs/hhhl_scan.json docs/hhhl_fno.json docs/jev_rank.json docs/market_brief.json docs/options_desk.json)
+              # Rebase conflicts fail visibly; never discard a runner's work with reset --hard.
+              git pull --rebase origin master
+              INPUTS_AFTER=$(git hash-object docs/hhhl_scan.json docs/hhhl_fno.json docs/jev_rank.json docs/market_brief.json docs/options_desk.json)
+              if [ "$INPUTS_BEFORE" != "$INPUTS_AFTER" ]; then
+                python scripts/verify_daily_setups.py --inputs-only --require-jev
+                python daily_setups.py
+                python scripts/verify_daily_setups.py --require-jev
+                git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history
+                git diff --cached --quiet || git commit -m "data: rebuild daily setups against updated inputs ${GITHUB_RUN_ID}"
+              fi
+              if git push origin HEAD:master; then break; fi
               if [ "$attempt" = 3 ]; then exit 1; fi
               sleep 5
             done
@@ -83,3 +94,18 @@ jobs:
           path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  verify:
+    needs: [refresh, publish]
+    if: ${{ !cancelled() && needs.refresh.result == 'success' && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify published daily date, prices, ranks and Jev provenance
+        run: python scripts/verify_daily_setups.py --url https://originaonxi.github.io/nse-value-lens/ --timeout 180 --require-jev

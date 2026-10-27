@@ -525,10 +525,36 @@ def load(name):
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
-def jev_view(sym, jev_map, brief_map, side):
+def session_jev_sources(as_of, symbols, jr, brief):
+    """Use only same-session views; preserve source dates even when rejected."""
+    expected = set(symbols)
+    maps, metadata = [], {}
+    for key, source, field in (("jev_rank", jr, "ranking"), ("market_brief", brief, "rows")):
+        source_date = source.get("as_of")
+        raw = source.get(field) or []
+        eligible = [r for r in raw if r.get("symbol")
+                    and (key != "market_brief" or r.get("judged"))
+                    and source_date == as_of and bool(as_of)
+                    and all(r.get(k) in (None, as_of) for k in ("as_of", "data_date"))]
+        mapping = {r["symbol"]: dict(r) for r in eligible}
+        covered = len(expected & mapping.keys())
+        status = ("missing" if not source else "stale" if source_date != as_of
+                  else "complete" if covered == len(expected) else "partial")
+        metadata[key] = {"as_of": source_date, "status": status, "covered": covered,
+                         "expected": len(expected), "source_rows": len(raw),
+                         "accepted_rows": len(mapping), "generated_at": source.get("generated_at")}
+        if key == "jev_rank":
+            mapping = {sym: {**r, "_of": len(raw)} for sym, r in mapping.items()}
+        maps.append(mapping)
+    return maps[0], maps[1], {"scan_as_of": as_of, **metadata}
+
+
+def jev_view(sym, jev_map, brief_map, side, freshness=None):
     j, b = jev_map.get(sym), brief_map.get(sym)
     if not j and not b:
-        return {"available": False, "words": "Not in Jev's 200-stock ranking (extra F&O name)."}
+        details = ("; ".join(f"{key}: {freshness[key]['status']} (source {freshness[key]['as_of'] or 'undated'})"
+                             for key in ("jev_rank", "market_brief")) if freshness else "no same-session view supplied")
+        return {"available": False, "words": f"Jev unavailable for {sym}: {details}. No Jev contribution to ranking."}
     out = {"available": True}
     if j:
         out.update(rank=j.get("rank"), of=j.get("_of"), composite=j.get("composite"), direction=j.get("direction_jev"),
@@ -546,6 +572,8 @@ def jev_view(sym, jev_map, brief_map, side):
         parts.append("Jev AGREES with this category." if agrees else "Jev does NOT agree with this category - lower conviction.")
     if b and b.get("context"):
         parts.append(f"US + India news context: {b['context']}" + (f", event risk {b['event_risk']}" if b.get("event_risk") else "") + ".")
+    if not j:
+        parts.append("Same-session Jev ranking unavailable for this stock; news context only, no Jev rank contribution.")
     out["words"] = " ".join(parts)
     return out
 
@@ -563,7 +591,7 @@ def conviction(cat, counts, jev):
     return round(score)
 
 
-def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map):
+def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map, as_of=None, freshness=None):
     bars = row["chart"]
     if len(bars) < 60:
         reads, counts, series = {}, {"bull": 0, "bear": 0, "neutral": 5}, {}
@@ -571,6 +599,8 @@ def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map):
     else:
         reads, counts, series = indicator_pack(bars)
         cat = classify(row, reads)
+    if as_of is not None and row.get("data_date") != as_of:
+        cat = "data_check"
     meta = CATEGORIES[cat]
     sym = row["symbol"]
     lot = member_lots.get(sym)
@@ -583,8 +613,10 @@ def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map):
         "volume_ratio": row.get("volume_ratio"), "indicators": reads, "indicator_counts": counts,
     }
     if cat == "data_check":
-        out.update(plan=None, hedge=None, jev=jev_view(sym, jev_map, brief_map, None), conviction=None,
-                   summary=f"{sym}: {meta['meaning']}")
+        out.update(plan=None, hedge=None, jev=jev_view(sym, jev_map, brief_map, None, freshness), conviction=None,
+                   summary=f"{sym}: {meta['meaning']}" + (
+                       f" Price session {row.get('data_date') or 'unavailable'} differs from scan {as_of}; no ranked plan."
+                       if as_of is not None and row.get("data_date") != as_of else ""))
         return out, series
     side = meta["side"]
     if meta["tone"] == "bull":
@@ -609,7 +641,7 @@ def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map):
                          f"({abs(targets[0] - entry) / risk:.1f}R)" + (f", then {', '.join(inr(t) for t in targets[1:])}" if len(targets) > 1 else "") + ".")
     else:
         plan["words"] = how
-    jev = jev_view(sym, jev_map, brief_map, side if side in ("long", "short") else None)
+    jev = jev_view(sym, jev_map, brief_map, side if side in ("long", "short") else None, freshness)
     out.update(plan=plan, jev=jev, hedge=hedge(row, cat, {"entry": entry, "stop": stop or entry, "targets": targets or [entry]},
                                                opt_map.get(sym), lot),
                conviction=conviction(cat, counts, jev))
@@ -720,9 +752,8 @@ def main():
     global OPTS_DATE
     jr, brief, opts = load("jev_rank.json") or {}, load("market_brief.json") or {}, load("options_desk.json") or {}
     OPTS_DATE = opts.get("as_of")
-    ranking = jr.get("ranking") or []
-    jev_map = {r["symbol"]: {**r, "_of": len(ranking)} for r in ranking}
-    brief_map = {r["symbol"]: r for r in brief.get("rows") or [] if r.get("judged")}
+    as_of = scan.get("as_of")
+    jev_map, brief_map, freshness = session_jev_sources(as_of, [r["symbol"] for r in scan["rows"]], jr, brief)
     opt_map = {r["symbol"]: r for r in opts.get("rows") or [] if r.get("kind") == "stock"}
     member_lots = {m["symbol"]: m.get("lot_size") for m in ((fno.get("membership") or {}).get("members") or [])}
 
@@ -735,7 +766,7 @@ def main():
             continue
         seen.add(row["symbol"])
         try:
-            s, ser = build_stock(row, uni, member_lots, opt_map, jev_map, brief_map)
+            s, ser = build_stock(row, uni, member_lots, opt_map, jev_map, brief_map, as_of, freshness)
             enrich(s, row, ser, published)
         except (KeyError, TypeError, ValueError, ZeroDivisionError, StopIteration) as exc:
             s, ser = {"symbol": row.get("symbol"), "name": row.get("name"), "universe": uni, "category": "data_check",
@@ -757,7 +788,10 @@ def main():
         return (CATEGORIES[s["category"]]["order"], -(s.get("conviction") or 0),
                 (s.get("jev") or {}).get("rank") or 999, s["symbol"])
     stocks.sort(key=sort_key)
-    ranking = rank.rank_all(stocks, {r["symbol"]: r["chart"] for r, _ in rows if len(r.get("chart") or []) >= 60})
+    rankable = {s["symbol"] for s in stocks if s["category"] != "data_check"}
+    ranking = rank.rank_all(stocks, {r["symbol"]: r["chart"] for r, _ in rows
+                                   if r["symbol"] in rankable and r.get("data_date") == as_of
+                                   and len(r.get("chart") or []) >= 60})
     counts = {k: sum(1 for s in stocks if s["category"] == k) for k in CATEGORIES}
     market = scan.get("market") or {}
     as_of = scan.get("as_of")
@@ -769,6 +803,7 @@ def main():
             "hhhl_scan": scan.get("as_of"), "hhhl_fno": fno.get("as_of"), "jev_rank": jr.get("as_of"),
             "market_brief": brief.get("as_of"), "options_desk": opts.get("as_of"),
         },
+        "freshness": freshness,
         "market": {
             "close": market.get("close"), "sma200": r2(market.get("sma200")), "gate_open": gate_open,
             "words": (f"Market gate OPEN: Nifty {market.get('close'):,.2f} is above its 200-day average {market.get('sma200'):,.2f}; long setups are allowed."

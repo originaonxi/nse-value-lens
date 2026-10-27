@@ -2,8 +2,8 @@ name: Daily S&R Refresh
 
 # Three staggered schedules guard against GitHub's unreliable cron scheduler.
 # Primary fires at 13:30 UTC (19:00 IST = 7 pm IST); backups at 14:30 and 15:30 UTC.
-# A lightweight `guard` job reads docs/sr_levels.json — if as_of is already
-# today (IST), the expensive refresh-sr job is skipped entirely (idempotent).
+# A lightweight guard skips only when BOTH prices and all Jev assessments are
+# current. A failed/partial Jev run must still get the scheduled fallback retries.
 # NSE closes 15:30 IST = 10:00 UTC; Bhavcopy available ~12:30 UTC (~18:00 IST).
 # 7pm IST gives bhavcopy a full hour to settle before the primary run fires.
 # workflow_dispatch always runs regardless of the idempotency check.
@@ -30,14 +30,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check if already refreshed today (IST)
+      - name: Check if prices AND Jev are complete for today (IST)
         id: check
         run: |
           TODAY=$(TZ=Asia/Kolkata date +%Y-%m-%d)
           AS_OF=$(jq -r '.as_of // empty' docs/sr_levels.json 2>/dev/null || echo "")
-          if [ "$AS_OF" = "$TODAY" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+          JEV_READY=false
+          JEV_DATE=$(jq -r '.as_of // empty' docs/jev_rank.json 2>/dev/null || echo "")
+          if [ "$JEV_DATE" = "$TODAY" ] && python scripts/verify_daily_setups.py --inputs-only --require-jev; then
+            JEV_READY=true
+          fi
+          if [ "$AS_OF" = "$TODAY" ] && [ "$JEV_READY" = "true" ] && [ "${{ github.event_name }}" = "schedule" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Already refreshed for $TODAY — skipping this scheduled run."
+            echo "Prices and all 200 Jev assessments already refreshed for $TODAY."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
             echo "Will refresh: as_of=${AS_OF:-missing} today=$TODAY event=${{ github.event_name }}"

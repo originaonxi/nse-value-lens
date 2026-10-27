@@ -65,12 +65,16 @@ jobs:
           else
             python market_brief.py
           fi
-      - name: Sort every Nifty 200 + F&O stock into a daily category with indicators, plan, Jev and hedge
+      - name: Rebuild ranked lists when same-session Jev is complete
         id: setups
-        continue-on-error: true
         run: |
-          python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank -v
-          python daily_setups.py
+          python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank tests.test_daily_setups_automation -v
+          if python scripts/verify_daily_setups.py --inputs-only --require-jev; then
+            python daily_setups.py
+            python scripts/verify_daily_setups.py --require-jev
+          else
+            echo "::notice::Daily rankings are waiting for same-session Jev. The previous ranked list keeps its original date; the S&R/Jev completion trigger retries automatically."
+          fi
       - name: Commit prices, scan and refresh status
         id: commit
         run: |
@@ -149,6 +153,11 @@ jobs:
         run: python tests/browser_vcp.py --url https://originaonxi.github.io/nse-value-lens/vcp.html --run-id "$GITHUB_RUN_ID"
       - name: Verify Jev briefing and 200 assessments on GitHub Pages
         run: python tests/browser_market_brief.py --url https://originaonxi.github.io/nse-value-lens/market-brief.html --run-id "$GITHUB_RUN_ID"
+      - name: Verify published daily rankings when inputs were ready
+        run: |
+          if python scripts/verify_daily_setups.py --inputs-only --require-jev; then
+            python scripts/verify_daily_setups.py --url https://originaonxi.github.io/nse-value-lens/ --timeout 180 --require-jev
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

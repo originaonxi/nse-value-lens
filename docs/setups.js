@@ -46,10 +46,14 @@
     g.className = 'su-gate ' + (data.market.gate_open ? 'open' : 'closed');
     g.textContent = data.market.words;
     const inp = data.inputs || {};
-    const stale = Object.entries(inp).filter(([, v]) => v && v !== data.as_of);
+    const stale = Object.entries(inp).filter(([, v]) => !v || v !== data.as_of);
+    const f = data.freshness || {}, j = f.jev_rank;
+    const generated = data.generated_at ? new Date(data.generated_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST' : '–';
+    const jevStatus = j ? ' · Jev ' + j.status + ': ' + j.covered + '/' + j.expected + ' core stocks' : '';
     $('su-inputs').textContent = 'Inputs: price scan ' + (inp.hhhl_scan || '–') + ' · F&O ' + (inp.hhhl_fno || '–') + ' · Jev rank ' + (inp.jev_rank || '–') +
       ' · Jev brief ' + (inp.market_brief || '–') + ' · options ' + (inp.options_desk || '–') +
-      (stale.length ? '. Older inputs keep their own date (' + stale.map(([k]) => k.replace('_', ' ')).join(', ') + ').' : '. All inputs match this session.');
+      (stale.length ? '. Missing/older inputs keep their own date (' + stale.map(([k]) => k.replaceAll('_', ' ')).join(', ') + ').' : '. All inputs match this session.') +
+      ' Rebuilt ' + generated + jevStatus + '. Automatic after-close refresh follows HHHL, F&O, Jev and options updates; the list keeps its actual price-session date.';
   }
   function renderCats() {
     $('su-cats').innerHTML = data.categories.map(c => {
