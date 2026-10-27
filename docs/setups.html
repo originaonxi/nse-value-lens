@@ -5,8 +5,8 @@
 <title>Daily setups: every Nifty 200 &amp; F&amp;O stock by category | NSE Value Lens</title>
 <meta name="description" content="After every NSE close: all Nifty 200 and F&O stocks sorted into breakout, ready, uptrend, sideways, structure-exit and downtrend lists with five indicators, auto Fibonacci, today's events, entry, stop, next target, Jev rank and an options hedge.">
 <link rel="stylesheet" href="swing.css">
-<link rel="stylesheet" href="setups.css?v=2">
-<script src="setups.js?v=2" defer></script>
+<link rel="stylesheet" href="setups.css?v=3">
+<script src="setups.js?v=3" defer></script>
 </head>
 <body>
 <div class="shell setups-shell">
@@ -17,6 +17,22 @@
 <div class="su-session">CLOSING SESSION<strong id="su-date">Loading…</strong><span id="su-count"></span></div></section>
 <div id="su-gate" class="su-gate" role="status">Loading the market gate…</div>
 <p id="su-inputs" class="su-inputs"></p>
+
+<section class="su-rank" aria-labelledby="rank-title">
+<div class="su-rank-head"><h2 id="rank-title" class="su-sub">Top ranked: Buy · Sell · Watch <small class="muted">every stock ranked from its chart only: HH/HL, trigger, 5 indicators, VWAP, Fibonacci, 20-day return, volume. Jev ranked separately.</small></h2></div>
+<div class="su-rank-tabs" role="tablist" id="rk-tabs"></div>
+<p id="rk-meaning" class="su-rank-meaning"></p>
+<div class="su-filters">
+<label>Rank by <select id="rk-by"><option value="chart">Chart score (facts on the chart)</option><option value="jev">Jev rank</option><option value="combined">Combined (chart + Jev)</option></select></label>
+<label>Show <select id="rk-limit"><option value="25">Top 25</option><option value="50">Top 50</option><option value="all">All</option></select></label>
+<label>Search <input id="rk-search" type="search" placeholder="Symbol" autocomplete="off"></label>
+<span id="rk-shown" class="muted"></span>
+</div>
+<div class="su-table-wrap"><table class="su-table rk-table"><thead><tr>
+<th title="Rank in this list by the selected method">#</th><th>Stock</th><th title="Bull points minus bear points, out of 100">Net score</th><th>HH/HL</th><th>Trigger / exit</th><th>Supertrend</th><th>ADX ±DI</th><th>RSI</th><th>%B</th><th>OBV</th><th>VWAP</th><th>20d</th><th>Fib</th><th>Vol</th><th title="Jev rank inside this list (Jev overall rank of 200)">Jev</th><th>Chart / Jev / Comb.</th>
+</tr></thead><tbody id="rk-rows"><tr><td colspan="16" class="su-empty">Loading ranks…</td></tr></tbody></table></div>
+<p class="muted" style="font-size:12px">Cell colour = which side that fact scores for (green bull, red bear, grey neutral); hover a cell for its points. Click a row for the full chart and the point-by-point breakdown.</p>
+</section>
 
 <section aria-labelledby="cat-title"><h2 id="cat-title" class="su-sub">1. Category <small class="muted">where each stock stands</small></h2>
 <div id="su-cats" class="su-cats" role="group" aria-label="Choose a category"></div>
@@ -39,6 +55,7 @@
 <section id="su-detail" class="su-detail" hidden aria-labelledby="su-dtitle">
 <div class="su-dhead"><div><h2 id="su-dtitle" tabindex="-1"></h2><div id="su-dsub" class="muted"></div></div><span id="su-dbadge" class="su-badge"></span></div>
 <p id="su-dsummary" class="su-summary"></p>
+<div id="su-rankwhy" class="su-panel su-rankwhy"></div>
 <div class="su-toggles" id="su-toggles">
 <label><input type="checkbox" data-layer="fib" checked><i style="background:var(--fib)"></i>Fibonacci</label>
 <label>Fib anchor <select id="su-fib-anchor"><option value="auto">Auto (best fit)</option><option value="leg">Last swing leg</option><option value="3m">3-month range</option><option value="6m">6-month range</option></select></label>

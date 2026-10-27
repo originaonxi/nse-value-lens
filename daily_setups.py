@@ -26,6 +26,7 @@ import math
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import setup_rank as rank
 import setup_signals as sig
 
 ROOT = Path(__file__).resolve().parent
@@ -756,6 +757,7 @@ def main():
         return (CATEGORIES[s["category"]]["order"], -(s.get("conviction") or 0),
                 (s.get("jev") or {}).get("rank") or 999, s["symbol"])
     stocks.sort(key=sort_key)
+    ranking = rank.rank_all(stocks, {r["symbol"]: r["chart"] for r, _ in rows if len(r.get("chart") or []) >= 60})
     counts = {k: sum(1 for s in stocks if s["category"] == k) for k in CATEGORIES}
     market = scan.get("market") or {}
     as_of = scan.get("as_of")
@@ -776,6 +778,7 @@ def main():
         },
         "categories": [{"key": k, **{kk: vv for kk, vv in v.items() if kk != "order"}, "count": counts[k]} for k, v in CATEGORIES.items()],
         "events": [{"key": k, **v, "count": sum(1 for s in stocks if k in (s.get("events") or []))} for k, v in sig.EVENTS.items()],
+        "ranking": ranking,
         "previous_list": published.get("_as_of") if published else None,
         "indicator_guide": INDICATORS,
         "method": {

@@ -87,3 +87,24 @@
 .su-empty{padding:18px;color:var(--muted)}
 @media(max-width:900px){.su-grid,.su-panels,.su-guide{grid-template-columns:1fr 1fr}.su-hero h1{font-size:34px}}
 @media(max-width:600px){.su-grid,.su-panels,.su-guide{grid-template-columns:1fr}.su-detail{padding:14px}.su-cats{grid-template-columns:repeat(2,1fr)}}
+
+/* ranked lists */
+.su-rank{margin:6px 0 26px}
+.su-rank-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
+.rk-tab{all:unset;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 16px;min-width:130px;border-top:4px solid var(--neutral)}
+.rk-tab[data-tone=bull]{border-top-color:var(--bull)}.rk-tab[data-tone=bear]{border-top-color:var(--bear)}.rk-tab[data-tone=neutral]{border-top-color:var(--fib)}
+.rk-tab strong{display:block;font:800 18px Manrope,sans-serif}.rk-tab small{color:var(--muted)}
+.rk-tab[aria-selected=true]{background:#182c24;color:#fff;border-color:#182c24}.rk-tab[aria-selected=true] small{color:#cfd8d2}
+.rk-tab:focus-visible{outline:2px solid var(--entry)}
+.su-rank-meaning{font-size:13px;margin:0 0 8px}
+.rk-table{min-width:1250px;font-size:12px}.rk-table td{padding:7px 8px}
+.rk-table td.f{white-space:nowrap;border-left:3px solid transparent}
+.rk-table td.f[data-s=bull]{background:#eef7f1;border-left-color:var(--bull)}.rk-table td.f[data-s=bear]{background:#fbf0ed;border-left-color:var(--bear)}
+.rk-table .rk-n{font:800 16px Manrope,sans-serif;text-align:center}
+.netbar{display:flex;align-items:center;gap:6px;white-space:nowrap}.netbar i{position:relative;display:block;width:70px;height:8px;background:#eef1ec;border-radius:4px}
+.netbar i b{position:absolute;top:0;height:100%;border-radius:4px}.netbar i:after{content:"";position:absolute;left:50%;top:-2px;height:12px;border-left:1px solid #9aa59f}
+.su-rankwhy{margin:6px 0 10px}.su-rankwhy table{width:100%;border-collapse:collapse;font-size:12px}.su-rankwhy td,.su-rankwhy th{padding:4px 6px;border-bottom:1px solid #eef1ec;text-align:left}
+.su-rankwhy td.num{text-align:right}.su-rankwhy .pb{color:var(--bull);font-weight:700}.su-rankwhy .pr{color:var(--bear);font-weight:700}
+.su-rankwhy{overflow-x:auto;max-width:100%}.su-rankwhy table{min-width:640px;max-width:100%;table-layout:fixed}
+.su-rankwhy th:nth-child(1){width:20%}.su-rankwhy th:nth-child(2){width:24%}.su-rankwhy th:nth-child(3),.su-rankwhy th:nth-child(4){width:8%}
+.su-rankwhy td{overflow-wrap:anywhere;vertical-align:top}

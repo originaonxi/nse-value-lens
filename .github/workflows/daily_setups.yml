@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test indicators, categories and plan maths
-        run: python -m unittest tests.test_daily_setups tests.test_setup_signals -v
+        run: python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank -v
       - name: Sort every Nifty 200 + F&O stock into one category
         run: python daily_setups.py
       - name: Commit the daily list
