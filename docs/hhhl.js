@@ -281,6 +281,7 @@
         svg+='<line x1="'+ex.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y1="'+y(tp3v).toFixed(1)+'" y2="'+y(slV2).toFixed(1)+'" stroke="#9e9e9e" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.5"/>';
       }
     }
+    if($('chart-indicators')?.checked&&window.HHHLSetups)svg+=window.HHHLSetups.overlay(row.symbol,bars,x,y,lo,hi);
     return svg+'</svg>';
   }
 
@@ -298,6 +299,7 @@
     $('candle-readout').textContent='';
     candleReadout(row,bars.length-1);
     $('chart-inspect').textContent='Active pivots: H1/H2 are the last two highs; L1/L2 are the last two lows. Tap a label or closing-signal triangle for its dates.';
+    if($('setup-panel'))$('setup-panel').innerHTML=window.HHHLSetups?window.HHHLSetups.panel(row.symbol):'';
   }
 
   function inspectSwing(event) {
@@ -524,7 +526,7 @@
   $('priority-list').addEventListener('click',event=>{const card=event.target.closest('button[data-symbol]');if(card)selectPriority(card.dataset.symbol);});
   $('stock-rows').addEventListener('click',event=>{const button=event.target.closest('button[data-symbol]');if(button) showDetail(button.dataset.symbol);});
   $('download-csv').addEventListener('click',exportCsv);
-    for(const id of ['chart-swings','chart-levels','chart-all-pivots','chart-events','chart-volume','chart-signals','chart-window']) $(id)?.addEventListener('change',()=>{
+    for(const id of ['chart-swings','chart-levels','chart-all-pivots','chart-events','chart-volume','chart-signals','chart-indicators','chart-window']) $(id)?.addEventListener('change',()=>{
     if(selected)renderChart(dataset.rows.find(r=>r.symbol===selected));
   });
   $('stock-chart').addEventListener('click',inspectSwing);
@@ -582,6 +584,8 @@
     for(const s of ['ALL',...statuses]) $('count-'+s).textContent='--';
   });
   }
+  // Daily setups layer (indicators on the chart + plan/Jev/hedge panel). Redraw the open stock once it arrives.
+  window.HHHLSetups?.load(document.body.dataset.source||'',()=>{if(selected&&dataset)renderChart(dataset.rows.find(r=>r.symbol===selected)||dataset.rows[0]);});
   function loadNiftySignal() {
     const host=$('pine-signal-nifty'); if(!host) return;
     const src=document.body.dataset.source||'';

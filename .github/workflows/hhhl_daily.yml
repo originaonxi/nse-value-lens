@@ -65,6 +65,12 @@ jobs:
           else
             python market_brief.py
           fi
+      - name: Sort every Nifty 200 + F&O stock into a daily category with indicators, plan, Jev and hedge
+        id: setups
+        continue-on-error: true
+        run: |
+          python -m unittest tests.test_daily_setups -v
+          python daily_setups.py
       - name: Commit prices, scan and refresh status
         id: commit
         run: |
@@ -74,6 +80,8 @@ jobs:
           git add screen_output/vcp*.json docs/vcp*.json public/data/vcp*.json
           git add screen_output/market_brief*.json docs/market_brief*.json public/data/market_brief*.json
           if [ -d data/market_brief_history ]; then git add data/market_brief_history; fi
+          git add docs/daily_setups.json docs/daily_setups_series.json 2>/dev/null || true
+          if [ -d data/daily_setups_history ]; then git add data/daily_setups_history; fi
           if [ -f data/hhhl_calendar.json ]; then git add data/hhhl_calendar.json; fi
           if ! git diff --cached --quiet; then
             git commit -m "data: scanners and US India brief run ${GITHUB_RUN_ID}"

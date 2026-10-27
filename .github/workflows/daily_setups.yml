@@ -1,0 +1,85 @@
+name: Daily setups refresh
+run-name: Daily setups after ${{ github.event.workflow_run.name || github.event.schedule || 'manual' }}
+on:
+  # Rebuild the category list whenever any of its inputs is republished:
+  # prices/structure (HHHL), extra F&O names, Jev rank (S&R), option IV / OI walls (options desk).
+  workflow_run:
+    workflows: ['HHHL daily refresh', 'F&O stock coverage refresh', 'Daily S&R Refresh', 'Options desk refresh']
+    types: [completed]
+    branches: [master]
+  schedule:
+    # Backup at 21:45 IST in case a trigger was missed.
+    - cron: '15 16 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: daily-setups-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test indicators, categories and plan maths
+        run: python -m unittest tests.test_daily_setups -v
+      - name: Sort every Nifty 200 + F&O stock into one category
+        run: python daily_setups.py
+      - name: Commit the daily list
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: daily setups run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3; do
+              if git pull --rebase origin master && git push origin HEAD:master; then break; fi
+              git rebase --abort 2>/dev/null || true
+              # Another job changed an input meanwhile: rebuild from the newest inputs and retry.
+              git reset --hard origin/master
+              python daily_setups.py
+              git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history
+              git diff --cached --quiet || git commit -m "data: daily setups run ${GITHUB_RUN_ID}"
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 5
+            done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.refresh.outputs.commit }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4
