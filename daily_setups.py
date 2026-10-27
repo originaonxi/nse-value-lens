@@ -558,7 +558,8 @@ def jev_view(sym, jev_map, brief_map, side, freshness=None):
     out = {"available": True}
     if j:
         out.update(rank=j.get("rank"), of=j.get("_of"), composite=j.get("composite"), direction=j.get("direction_jev"),
-                   regime=j.get("regime_jev"), confidence=j.get("confidence_gate"), signal=j.get("signal"))
+                   regime=j.get("regime_jev"), confidence=j.get("confidence_gate"), signal=j.get("signal"),
+                   setup_quality=j.get("setup_quality"), follow_through=j.get("follow_through"), risk_reward=j.get("risk_reward"))
     if b:
         out.update(context=b.get("context"), event_risk=b.get("event_risk"), driver=b.get("dominant_driver"))
     want = "up" if side == "long" else "down" if side == "short" else None

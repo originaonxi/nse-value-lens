@@ -83,8 +83,42 @@ def validate_snapshot(data, scan, fno, jev, series, require_jev=False):
         nets = [by_symbol[sym]["rank"]["net"] for sym in order]
         want = sorted(nets, reverse=True) if key == "buy" else sorted(nets) if key == "sell" else sorted(nets, key=abs, reverse=True)
         assert nets == want, f"{key}: chart order"
+        final = block.get("final_order")
+        if final is not None:  # Jev-first ranking (score out of 100)
+            assert sorted(final) == sorted(order), f"{key}: final order coverage"
+            scored = [sym for sym in final if by_symbol[sym]["rank"].get("jev")]
+            assert final[:len(scored)] == scored == block["jev_order"], f"{key}: Jev-scored stocks must lead, in Jev order"
+            assert final[len(scored):] == [sym for sym in order if sym not in set(scored)], f"{key}: unscored tail must follow chart order"
+            assert block.get("not_jev_count") == len(final) - len(scored), f"{key}: not-Jev count"
+            prev = None
+            for i, sym in enumerate(final, 1):
+                r = by_symbol[sym]["rank"]
+                assert r.get("final_rank") == i, f"{sym}: incorrect final_rank"
+                jb = r.get("jev")
+                if not jb:
+                    continue
+                j = by_symbol[sym]["jev"]
+                pts = jb.get("points") or []
+                assert [p["key"] for p in pts] == ["setup_quality", "follow_through", "risk_reward"] and sum(p["weight"] for p in pts) == 100, f"{sym}: Jev weights"
+                for p in pts:
+                    assert p["level"] == round(float(j[p["key"]]), 2) and 0 <= p["level"] <= p["max_level"] == 4, f"{sym}: Jev level {p['key']}"
+                    assert abs(p["points"] - p["weight"] * float(j[p["key"]]) / 4) <= 0.006, f"{sym}: Jev points {p['key']}"
+                assert abs(jb["score"] - sum(p["points"] for p in pts)) <= 0.051, f"{sym}: Jev score is not the sum of its points"
+                assert abs(jb["score"] - j["composite"] * 100) <= 0.1, f"{sym}: Jev score differs from Jev composite x 100"
+                assert 0 <= jb["score"] <= 100, f"{sym}: Jev score outside 0-100"
+                want_list = round(100 - jb["score"], 1) if key == "sell" else jb["score"]
+                assert abs(jb["list_score"] - want_list) <= 0.051, f"{sym}: Jev list score"
+                assert prev is None or jb["list_score"] <= prev + 1e-9, f"{key}: Jev order is not highest list score first"
+                prev = jb["list_score"]
+    acct = (data.get("ranking") or {}).get("accounting")
+    if acct is not None:
+        unranked = {u["symbol"] for u in acct["unranked"]}
+        assert unranked == set(by_symbol) - ranked, "Accounting: unranked stocks differ"
+        assert acct["total"] == len(stocks) == acct["ranked"] + len(unranked), "Accounting: totals do not add up"
+        assert acct["ranked"] == len(ranked) and acct["jev_scored"] == sum(b["jev_count"] for b in lists.values()), "Accounting: ranked / Jev counts"
+        assert sum(u["total"] for u in acct["by_universe"].values()) == len(stocks), "Accounting: universe totals"
     assert len(listed) == len(set(listed)) and set(listed) == ranked, "Ranked universe mismatch"
-    return f"daily setups verified: {day}, {len(stocks)} stocks, {len(ranked)} ranked; source dates, prices and Jev provenance match"
+    return f"daily setups verified: {day}, {len(stocks)} stocks, {len(ranked)} ranked; source dates, prices, Jev provenance and Jev /100 maths match"
 
 
 def main():

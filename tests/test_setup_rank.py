@@ -75,6 +75,50 @@ class Lists(unittest.TestCase):
         self.assertEqual(s["UP1"]["rank"]["all_buy_rank"], 1)
         self.assertEqual(s["DN1"]["rank"]["all_sell_rank"], 1)
 
+    def test_final_order_is_jev_first_then_unscored_by_chart(self):
+        st, block = self.build()
+        L = block["lists"]
+        self.assertEqual(L["buy"]["final_order"], ["UP2", "UP1"])        # Jev 80 beats Jev 40
+        self.assertEqual(L["sell"]["final_order"], ["DN1", "DN2"])       # sell score 100-10=90 beats 100-30=70
+        self.assertEqual(L["watch"]["final_order"], ["SW1"])            # unscored, follows by chart
+        self.assertEqual(L["watch"]["not_jev_count"], 1)
+        s = {x["symbol"]: x for x in st}
+        self.assertEqual(s["DN1"]["rank"]["jev"]["list_score"], 90.0)
+        self.assertEqual(s["UP2"]["rank"]["final_rank"], 1)
+        self.assertIsNone(s["SW1"]["rank"]["jev"])
+        self.assertIn("no Jev score", s["SW1"]["rank"]["words"])
+
+    def test_accounting_counts_every_stock_once(self):
+        st, block = self.build()
+        a = block["accounting"]
+        self.assertEqual((a["total"], a["ranked"], a["jev_scored"]), (6, 5, 4))
+        self.assertEqual([u["symbol"] for u in a["unranked"]], ["BAD"])
+        self.assertEqual(sum(v["count"] for v in a["by_list"].values()) + len(a["unranked"]), a["total"])
+        self.assertIn("6 stocks = 2 Buy + 2 Sell + 1 Watch + 1 not ranked", a["words"])
+
+
+class JevScore(unittest.TestCase):
+    def s(self, sq, ft, rr, comp):
+        return {"jev": {"composite": comp, "setup_quality": sq, "follow_through": ft, "risk_reward": rr,
+                        "direction": "up", "confidence": 0.7, "rank": 3, "of": 200}}
+
+    def test_points_sum_to_score_out_of_100(self):
+        b = rk.jev_breakdown(self.s(3.42, 3.61, 2.23, 0.7651), "buy")
+        self.assertEqual([p["weight"] for p in b["points"]], [35, 30, 35])
+        self.assertAlmostEqual(b["points"][0]["points"], 35 * 3.42 / 4, places=2)
+        self.assertAlmostEqual(b["points"][1]["points"], 30 * 3.61 / 4, places=2)
+        self.assertAlmostEqual(b["points"][2]["points"], 35 * 2.23 / 4, places=2)
+        self.assertAlmostEqual(b["score"], sum(p["points"] for p in b["points"]), places=1)
+        self.assertAlmostEqual(b["score"], 76.5, places=1)               # = Jev composite 0.7651 x 100
+        self.assertEqual(b["list_score"], b["score"])
+
+    def test_extremes_and_sell_inversion(self):
+        self.assertEqual(rk.jev_breakdown(self.s(4, 4, 4, 1.0), "buy")["score"], 100.0)
+        self.assertEqual(rk.jev_breakdown(self.s(0, 0, 0, 0.0), "buy")["score"], 0.0)
+        b = rk.jev_breakdown(self.s(0.41, 0.99, 0.47, 0.1512), "sell")
+        self.assertAlmostEqual(b["list_score"], round(100 - b["score"], 1), places=6)
+        self.assertIsNone(rk.jev_breakdown({"jev": {}}, "buy"))
+
 
 class PublishedRanking(unittest.TestCase):
     path = Path(__file__).resolve().parents[1] / "docs" / "daily_setups.json"

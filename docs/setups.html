@@ -19,19 +19,54 @@
 <p id="su-inputs" class="su-inputs"></p>
 
 <section class="su-rank" aria-labelledby="rank-title">
-<div class="su-rank-head"><h2 id="rank-title" class="su-sub">Top ranked: Buy · Sell · Watch <small class="muted">every stock ranked from its chart only: HH/HL, trigger, 5 indicators, VWAP, Fibonacci, 20-day return, volume. Jev ranked separately.</small></h2></div>
+<div class="su-rank-head"><h2 id="rank-title" class="su-sub">Top ranked: Buy · Sell · Watch <small class="muted">ranked by Jev, out of 100. The chart score (HH/HL, trigger, 5 indicators, VWAP, Fibonacci, 20-day return, volume) is shown next to it as the fact check.</small></h2></div>
 <div class="su-rank-tabs" role="tablist" id="rk-tabs"></div>
 <p id="rk-meaning" class="su-rank-meaning"></p>
+<p id="rk-accounting" class="su-rank-acct"></p>
 <div class="su-filters">
-<label>Rank by <select id="rk-by"><option value="chart">Chart score (facts on the chart)</option><option value="jev">Jev rank</option><option value="combined">Combined (chart + Jev)</option></select></label>
+<label>Rank by <select id="rk-by"><option value="jev" selected>Jev score /100</option><option value="chart">Chart score (facts on the chart)</option><option value="combined">Combined (Jev rank + chart rank)</option></select></label>
 <label>Show <select id="rk-limit"><option value="25">Top 25</option><option value="50">Top 50</option><option value="all">All</option></select></label>
 <label>Search <input id="rk-search" type="search" placeholder="Symbol" autocomplete="off"></label>
 <span id="rk-shown" class="muted"></span>
 </div>
-<div class="su-table-wrap"><table class="su-table rk-table"><thead><tr>
-<th title="Rank in this list by the selected method">#</th><th>Stock</th><th title="Bull points minus bear points, out of 100">Net score</th><th>HH/HL</th><th>Trigger / exit</th><th>Supertrend</th><th>ADX ±DI</th><th>RSI</th><th>%B</th><th>OBV</th><th>VWAP</th><th>20d</th><th>Fib</th><th>Vol</th><th title="Jev rank inside this list (Jev overall rank of 200)">Jev</th><th>Chart / Jev / Comb.</th>
+<div class="su-table-wrap rk-scroll" id="rk-scroll"><table class="su-table rk-table"><thead><tr>
+<th title="Position in this list by the selected method">#</th><th>Stock</th><th title="Jev score out of 100 = 35 x setup quality/4 + 30 x follow-through/4 + 35 x risk-reward/4. Sell list uses 100 - Jev score.">Jev /100</th><th title="Chart: bull points minus bear points, each out of 100">Chart net</th><th>HH/HL</th><th>Trigger / exit</th><th>Supertrend</th><th>ADX ±DI</th><th>RSI</th><th>%B</th><th>OBV</th><th>VWAP</th><th>20d</th><th>Fib</th><th>Vol</th><th title="Rank inside this list by Jev / by chart / combined">Jev / Chart / Comb.</th>
 </tr></thead><tbody id="rk-rows"><tr><td colspan="16" class="su-empty">Loading ranks…</td></tr></tbody></table></div>
-<p class="muted" style="font-size:12px">Cell colour = which side that fact scores for (green bull, red bear, grey neutral); hover a cell for its points. Click a row for the full chart and the point-by-point breakdown.</p>
+<p class="muted rk-keys" id="rk-keys"><strong>Keyboard:</strong> <kbd>↑</kbd>/<kbd>↓</kbd> (or <kbd>j</kbd>/<kbd>k</kbd>) move through the ranking and the chart below follows · <kbd>Enter</kbd> jumps into the chart · in the chart <kbd>←</kbd>/<kbd>→</kbd> step candle by candle, <kbd>↑</kbd>/<kbd>↓</kbd> (or <kbd>j</kbd>/<kbd>k</kbd>) next / previous ranked stock, <kbd>Esc</kbd> back to its row. Cell colour = which side that chart fact scores for (green bull, red bear, grey neutral).</p>
+</section>
+<section id="su-detail" class="su-detail" hidden aria-labelledby="su-dtitle">
+<div class="su-dhead"><div><h2 id="su-dtitle" tabindex="-1"></h2><div id="su-dsub" class="muted"></div></div><span id="su-dbadge" class="su-badge"></span></div>
+<p id="su-dsummary" class="su-summary"></p>
+<div id="su-rankwhy" class="su-panel su-rankwhy"></div>
+<div class="su-toggles" id="su-toggles">
+<label><input type="checkbox" data-layer="fib" checked><i style="background:var(--fib)"></i>Fibonacci</label>
+<label>Fib anchor <select id="su-fib-anchor"><option value="auto">Auto (best fit)</option><option value="leg">Last swing leg</option><option value="3m">3-month range</option><option value="6m">6-month range</option></select></label>
+<label><input type="checkbox" data-layer="supertrend" checked><i style="background:var(--st)"></i>Supertrend</label>
+<label><input type="checkbox" data-layer="bollinger"><i style="background:var(--bb)"></i>Bollinger</label>
+<label><input type="checkbox" data-layer="vwap" checked><i style="background:var(--vwap)"></i>VWAP-20</label>
+<label><input type="checkbox" data-layer="plan" checked><i style="background:var(--entry)"></i>Plan levels</label>
+<label><input type="checkbox" data-layer="swings" checked><i style="background:#3f5249"></i>HH/HL swings</label>
+<label><input type="checkbox" data-layer="events" checked><i style="background:#111827"></i>Today's events</label>
+<label><input type="checkbox" data-layer="volume" checked><i style="background:#9fb3a6"></i>Volume</label>
+<label><input type="checkbox" data-layer="rsi" checked><i style="background:var(--rsi)"></i>RSI panel</label>
+<label><input type="checkbox" data-layer="adx" checked><i style="background:var(--adx)"></i>ADX panel</label>
+<label><input type="checkbox" data-layer="obv" checked><i style="background:var(--obv)"></i>OBV panel</label>
+<label>View <select id="su-window"><option value="70" selected>70 sessions</option><option value="120">120 sessions</option></select></label>
+</div>
+<div id="su-chart" tabindex="0" aria-label="Price chart with indicators. Left and right arrows move through candles, up and down arrows change stock, Escape returns to the ranking"></div>
+<div id="su-readout" class="su-readout" aria-live="polite"></div>
+<div class="su-panels">
+<div class="su-panel" id="su-today"></div>
+<div class="su-panel" id="su-fib"></div>
+<div class="su-panel" id="su-learn"></div>
+</div>
+<div id="su-inds" class="su-grid"></div>
+<div class="su-panels">
+<div class="su-panel" id="su-plan"></div>
+<div class="su-panel" id="su-hedge"></div>
+<div class="su-panel" id="su-jev"></div>
+</div>
+<p class="muted" style="margin-top:12px"><a id="su-hhhl-link" href="hhhl.html">Open this stock on the HH/HL scanner →</a></p>
 </section>
 
 <section aria-labelledby="cat-title"><h2 id="cat-title" class="su-sub">1. Category <small class="muted">where each stock stands</small></h2>
@@ -52,40 +87,6 @@
 </tr></thead><tbody id="su-rows"><tr><td colspan="11" class="su-empty">Loading all stocks…</td></tr></tbody></table></div>
 </section>
 
-<section id="su-detail" class="su-detail" hidden aria-labelledby="su-dtitle">
-<div class="su-dhead"><div><h2 id="su-dtitle" tabindex="-1"></h2><div id="su-dsub" class="muted"></div></div><span id="su-dbadge" class="su-badge"></span></div>
-<p id="su-dsummary" class="su-summary"></p>
-<div id="su-rankwhy" class="su-panel su-rankwhy"></div>
-<div class="su-toggles" id="su-toggles">
-<label><input type="checkbox" data-layer="fib" checked><i style="background:var(--fib)"></i>Fibonacci</label>
-<label>Fib anchor <select id="su-fib-anchor"><option value="auto">Auto (best fit)</option><option value="leg">Last swing leg</option><option value="3m">3-month range</option><option value="6m">6-month range</option></select></label>
-<label><input type="checkbox" data-layer="supertrend" checked><i style="background:var(--st)"></i>Supertrend</label>
-<label><input type="checkbox" data-layer="bollinger"><i style="background:var(--bb)"></i>Bollinger</label>
-<label><input type="checkbox" data-layer="vwap" checked><i style="background:var(--vwap)"></i>VWAP-20</label>
-<label><input type="checkbox" data-layer="plan" checked><i style="background:var(--entry)"></i>Plan levels</label>
-<label><input type="checkbox" data-layer="swings" checked><i style="background:#3f5249"></i>HH/HL swings</label>
-<label><input type="checkbox" data-layer="events" checked><i style="background:#111827"></i>Today's events</label>
-<label><input type="checkbox" data-layer="volume" checked><i style="background:#9fb3a6"></i>Volume</label>
-<label><input type="checkbox" data-layer="rsi" checked><i style="background:var(--rsi)"></i>RSI panel</label>
-<label><input type="checkbox" data-layer="adx" checked><i style="background:var(--adx)"></i>ADX panel</label>
-<label><input type="checkbox" data-layer="obv" checked><i style="background:var(--obv)"></i>OBV panel</label>
-<label>View <select id="su-window"><option value="70" selected>70 sessions</option><option value="120">120 sessions</option></select></label>
-</div>
-<div id="su-chart" aria-label="Price chart with indicators"></div>
-<div id="su-readout" class="su-readout" aria-live="polite"></div>
-<div class="su-panels">
-<div class="su-panel" id="su-today"></div>
-<div class="su-panel" id="su-fib"></div>
-<div class="su-panel" id="su-learn"></div>
-</div>
-<div id="su-inds" class="su-grid"></div>
-<div class="su-panels">
-<div class="su-panel" id="su-plan"></div>
-<div class="su-panel" id="su-hedge"></div>
-<div class="su-panel" id="su-jev"></div>
-</div>
-<p class="muted" style="margin-top:12px"><a id="su-hhhl-link" href="hhhl.html">Open this stock on the HH/HL scanner →</a></p>
-</section>
 
 <section class="section" aria-labelledby="guide-title"><h2 id="guide-title">The indicators: what each one covers</h2>
 <p class="muted">Each answers a different question, so together they cover direction, strength, momentum, volatility, money flow and where a pullback usually stops. Each keeps one colour on every chart and card.</p>

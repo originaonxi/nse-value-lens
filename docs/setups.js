@@ -112,47 +112,67 @@
     const R = data.ranking;
     if (!R) { document.querySelector('.su-rank').hidden = true; return; }
     $('rk-tabs').innerHTML = Object.entries(R.lists).map(([k, v]) =>
-      '<button class="rk-tab" role="tab" type="button" data-list="' + esc(k) + '" data-tone="' + esc(v.tone) + '" aria-selected="' + (k === rkList) + '"><strong>' + esc(v.label) + ' · ' + esc(v.count) + '</strong><small>' + esc(v.jev_count) + ' with a Jev rank</small></button>').join('');
+      '<button class="rk-tab" role="tab" type="button" data-list="' + esc(k) + '" data-tone="' + esc(v.tone) + '" aria-selected="' + (k === rkList) + '"><strong>' + esc(v.label) + ' · ' + esc(v.count) + '</strong><small>' + esc(v.jev_count) + ' Jev-scored' + (v.not_jev_count ? ' · ' + esc(v.not_jev_count) + ' without Jev' : '') + '</small></button>').join('');
     $('rk-tabs').addEventListener('click', e => { const b = e.target.closest('[data-list]'); if (!b) return; rkList = b.dataset.list; syncRank(); });
     ['rk-by', 'rk-limit', 'rk-search'].forEach(id => $(id).addEventListener('input', renderRank));
     $('rk-rows').addEventListener('click', e => { const tr = e.target.closest('tr[data-sym]'); if (tr) openStock(tr.dataset.sym, true); });
-    $('rk-rows').addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const tr = e.target.closest('tr[data-sym]'); if (tr) { e.preventDefault(); openStock(tr.dataset.sym, true); } });
+    $('rk-rows').addEventListener('keydown', rankKeys);
+    const a = R.accounting, m = R.jev_method;
+    $('rk-accounting').innerHTML = a ? '<strong>Every stock accounted for:</strong> ' + esc(a.words) +
+      (m ? ' <strong>Jev maths:</strong> ' + esc(m.formula) + ' (each Jev answer is a level 0-' + esc(m.level_max) + '). ' + esc(m.sell) + '. ' + esc(m.not_scored) : '') : '';
   }
   function syncRank() {
     document.querySelectorAll('.rk-tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.list === rkList)));
     const u = new URL(location.href); u.searchParams.set('list', rkList); history.replaceState(null, '', u);
     renderRank();
   }
-  function rankRows() {
-    const L = data.ranking.lists[rkList], by = $('rk-by').value;
-    const order = by === 'jev' ? [...L.jev_order, ...L.chart_order.filter(x => !L.jev_order.includes(x))] : by === 'combined' ? L.combined_order : L.chart_order;
-    const map = new Map(data.stocks.map(s => [s.symbol, s]));
-    return order.map(sym => map.get(sym)).filter(Boolean);
+  function rankOrder(L, by) {
+    return by === 'jev' ? (L.final_order || [...L.jev_order, ...L.chart_order.filter(x => !L.jev_order.includes(x))])
+      : by === 'combined' ? L.combined_order : L.chart_order;
+  }
+  // Ranked stocks of the open tab in the selected order, search applied, no Top-N limit.
+  function rankVisible() {
+    const map = new Map(data.stocks.map(s => [s.symbol, s])), q = $('rk-search').value.trim().toLowerCase();
+    let rows = rankOrder(data.ranking.lists[rkList], $('rk-by').value).map(sym => map.get(sym)).filter(Boolean).map((s, i) => [i + 1, s]);
+    if (q) rows = rows.filter(([, s]) => s.symbol.toLowerCase().includes(q) || String(s.name || '').toLowerCase().includes(q));
+    return rows;
   }
   function netBar(net) {
     const w = Math.min(50, Math.abs(net) / 2), col = net >= 0 ? 'var(--bull)' : 'var(--bear)';
     return '<span class="netbar"><i><b style="' + (net >= 0 ? 'left:50%' : 'right:50%') + ';width:' + w + '%;background:' + col + '"></b></i><strong class="' + (net >= 0 ? 'up' : 'down') + '">' + (net > 0 ? '+' : '') + fmt(net, 0) + '</strong></span>';
+  }
+  function jevMaths(jb, lst) {
+    const parts = (jb.points || []).map(p => p.weight + ' × ' + fmt(p.level, 2) + '/' + p.max_level + ' = ' + fmt(p.points, 2)).join(' + ');
+    return (parts ? parts + ' = ' : '') + fmt(jb.score, 1) + '/100' + (lst === 'sell' ? '; sell score 100 − ' + fmt(jb.score, 1) + ' = ' + fmt(jb.list_score, 1) : '');
+  }
+  function jevCell(s) {
+    const jb = s.rank.jev;
+    if (!jb) return '<td class="rk-jev" data-none="1"><small class="muted">no Jev score<br>(outside Jev\'s 200)</small></td>';
+    const v = jb.list_score;
+    return '<td class="rk-jev" title="' + esc(jevMaths(jb, s.rank.list)) + '"><span class="jbar"><i><b style="width:' + Math.max(0, Math.min(100, v)) + '%"></b></i><strong>' + fmt(v, 1) + '</strong></span>' +
+      '<small class="muted">' + (s.rank.list === 'sell' ? '100 − ' + fmt(jb.score, 1) : esc(jb.direction || '–') + ' · conf ' + (isNum(jb.confidence) ? Math.round(jb.confidence * 100) + '%' : '–')) + '</small></td>';
   }
   function fcell(s, key, text) {
     const f = factorOf(s, key);
     return '<td class="f" data-s="' + fside(f) + '" title="' + esc((f?.value || '') + ' → ' + fpts(f)) + '">' + text + '</td>';
   }
   function renderRank() {
-    const L = data.ranking.lists[rkList], by = $('rk-by').value, q = $('rk-search').value.trim().toLowerCase();
+    const L = data.ranking.lists[rkList], by = $('rk-by').value;
     $('rk-meaning').innerHTML = '<strong>' + esc(L.label) + ' list (' + esc(L.count) + '):</strong> ' + esc(L.meaning) +
-      ' <span class="muted">Ranking now: ' + esc({ chart: 'chart score', jev: 'Jev rank (stocks without a Jev rank go last)', combined: 'average of chart rank and Jev rank' }[by]) + '.</span>';
-    let rows = rankRows().map((s, i) => [i + 1, s]);
-    if (q) rows = rows.filter(([, s]) => s.symbol.toLowerCase().includes(q) || String(s.name || '').toLowerCase().includes(q));
-    const lim = $('rk-limit').value, shown = lim === 'all' ? rows : rows.slice(0, Number(lim));
+      ' <span class="muted">Ranking now: ' + esc({
+        jev: 'Jev score out of 100' + (rkList === 'sell' ? ' turned into a sell score (100 − Jev score), weakest Jev setup first' : ', highest first') +
+          (L.not_jev_count ? '; the ' + L.not_jev_count + ' stocks Jev did not assess follow in chart-score order' : ''),
+        chart: 'chart score (bull points − bear points)', combined: 'average of Jev rank and chart rank' }[by]) + '.</span>';
+    const rows = rankVisible(), lim = $('rk-limit').value, shown = lim === 'all' ? rows : rows.slice(0, Number(lim));
     $('rk-shown').textContent = shown.length + ' of ' + L.count + ' shown';
     if (!shown.length) { $('rk-rows').innerHTML = '<tr><td colspan="16" class="su-empty">No stocks.</td></tr>'; return; }
     $('rk-rows').innerHTML = shown.map(([n, s]) => {
       const r = s.indicators || {}, rk = s.rank, c = catMeta[s.category] || {};
       const adx = r.adx || {}, st = r.supertrend || {}, f = factorOf(s, 'fib'), tr = factorOf(s, 'trigger'), vw = factorOf(s, 'vwap'), vol = factorOf(s, 'volume'), r20 = factorOf(s, 'ret20');
-      const j = s.jev || {};
       return '<tr data-sym="' + esc(s.symbol) + '" tabindex="0" aria-selected="' + (s.symbol === selected) + '">' +
         '<td class="rk-n">' + n + '</td>' +
         '<td class="su-sym"><strong>' + esc(s.symbol) + (s.fno ? '<span class="tag-f">F&amp;O</span>' : '') + '</strong><small>' + rs(s.close) + ' · <span class="su-badge" data-tone="' + esc(c.tone) + '" style="font-size:9px;padding:1px 6px">' + esc(c.label || s.category) + '</span></small></td>' +
+        jevCell(s) +
         '<td title="bull ' + rk.bull + ' / bear ' + rk.bear + ' of ' + data.ranking.max_points + '">' + netBar(rk.net) + '<small class="muted">' + fmt(rk.bull, 0) + ' / ' + fmt(rk.bear, 0) + '</small></td>' +
         fcell(s, 'structure', esc(s.structure || '–')) +
         fcell(s, 'trigger', esc((tr?.value || '–').replace(/^(broke out today above|closed below structure exit)/, m => m.startsWith('broke') ? 'Broke ↑' : 'Exit ↓'))) +
@@ -165,19 +185,82 @@
         fcell(s, 'ret20', esc(r20?.value || '–')) +
         fcell(s, 'fib', esc((f?.value || '–').replace(/ \((leg|3m|6m)\)$/, ''))) +
         fcell(s, 'volume', esc((vol?.value || '–').split(' avg')[0])) +
-        '<td class="num">' + (rk.jev_rank ? '#' + rk.jev_rank + '<br><small>' + esc(j.direction || '') + ' · ' + j.rank + '/' + j.of + '</small>' : '<small class="muted">no Jev</small>') + '</td>' +
-        '<td class="num"><small>' + rk.chart_rank + ' / ' + (rk.jev_rank || '–') + ' / ' + rk.combined_rank + '</small></td></tr>';
+        '<td class="num"><small>' + (rk.jev_rank ? '#' + rk.jev_rank : '–') + ' / ' + rk.chart_rank + ' / ' + rk.combined_rank + '</small></td></tr>';
     }).join('');
   }
   function rankWhy(s) {
     const rk = s.rank;
-    if (!rk) return '<h3>Rank</h3><p class="muted">Not ranked: ' + esc(catMeta[s.category]?.label || s.category) + '.</p>';
-    const L = data.ranking.lists[rk.list], defs = Object.fromEntries(data.ranking.factors.map(f => [f.key, f]));
+    if (!rk) return '<h3>Rank</h3><p class="muted">Not ranked: ' + esc(catMeta[s.category]?.label || s.category) +
+      (s.data_date && s.data_date !== data.as_of ? ' (price dated ' + esc(s.data_date) + ', session ' + esc(data.as_of) + ')' : '') + '.</p>';
+    const L = data.ranking.lists[rk.list], defs = Object.fromEntries(data.ranking.factors.map(f => [f.key, f])), jb = rk.jev;
+    const jevPart = jb ? '<table class="rk-jevmath"><thead><tr><th>Jev answer</th><th>Level</th><th>Weight</th><th>Maths</th><th>Points</th></tr></thead><tbody>' +
+      (jb.points || []).map(p => '<tr><td>' + esc(p.name) + '</td><td class="num">' + fmt(p.level, 2) + ' of ' + p.max_level + '</td><td class="num">' + p.weight + '</td><td>' + p.weight + ' × ' + fmt(p.level, 2) + ' / ' + p.max_level + '</td><td class="num pb">' + fmt(p.points, 2) + '</td></tr>').join('') +
+      '<tr><th colspan="4">Jev score (check: Jev composite ' + fmt(jb.composite_x100 / 100, 4) + ' × 100 = ' + fmt(jb.composite_x100, 2) + ')</th><th class="num">' + fmt(jb.score, 1) + ' / 100</th></tr>' +
+      (rk.list === 'sell' ? '<tr><th colspan="4">Sell score = 100 − ' + fmt(jb.score, 1) + ' (Jev scores setups, not shorts)</th><th class="num pr">' + fmt(jb.list_score, 1) + '</th></tr>' : '') + '</tbody></table>' +
+      '<p class="muted" style="font-size:12px">Jev also reads: direction ' + esc(jb.direction || '–') + ', regime ' + esc(String(jb.regime || '–').replace(/_/g, ' ')) + ', confidence ' +
+      (isNum(jb.confidence) ? Math.round(jb.confidence * 100) + '%' : '–') + ' (shown, not added to the score). Jev overall #' + esc(jb.overall_rank) + ' of ' + esc(jb.of) + '.</p>'
+      : '<p><strong>No Jev score:</strong> Jev assesses the Nifty 200 only, so this stock is placed after the ' + esc(L.jev_count) + ' Jev-scored stocks, in chart-score order.</p>';
     const rows = rk.factors.map(f => '<tr><td>' + esc(defs[f.key]?.name || f.key) + '</td><td>' + esc(f.value) + '</td><td class="num pb">' + (f.bull ? '+' + f.bull : '') + '</td><td class="num pr">' + (f.bear ? '+' + f.bear : '') + '</td><td class="muted">' + esc(defs[f.key]?.max) + ' max · ' + esc(defs[f.key]?.rule) + '</td></tr>').join('');
-    return '<h3>Why it ranks here: ' + esc(L.label.toUpperCase()) + ' #' + rk.chart_rank + ' of ' + rk.list_size + ' (chart) · Jev #' + (rk.jev_rank || '–') + ' · combined #' + rk.combined_rank + '</h3>' +
-      '<p>' + esc(rk.words) + ' Across all ' + data.stocks.filter(x => x.rank).length + ' ranked stocks it is #' + rk.all_buy_rank + ' most bullish and #' + rk.all_sell_rank + ' most bearish.</p>' +
-      '<table><thead><tr><th>Fact on the chart</th><th>Measured</th><th>Bull pts</th><th>Bear pts</th><th>Rule</th></tr></thead><tbody>' + rows +
+    return '<h3>Why it ranks here: ' + esc(L.label.toUpperCase()) + ' #' + esc(rk.final_rank ?? rk.chart_rank) + ' of ' + rk.list_size + ' by Jev · chart #' + rk.chart_rank + ' · combined #' + rk.combined_rank + '</h3>' +
+      '<p>' + esc(rk.words) + ' Across all ' + data.stocks.filter(x => x.rank).length + ' ranked stocks the chart puts it #' + rk.all_buy_rank + ' most bullish and #' + rk.all_sell_rank + ' most bearish.</p>' +
+      '<h4>1. Jev score out of 100 (decides the rank)</h4>' + jevPart +
+      '<h4>2. Chart score (fact check)</h4><table><thead><tr><th>Fact on the chart</th><th>Measured</th><th>Bull pts</th><th>Bear pts</th><th>Rule</th></tr></thead><tbody>' + rows +
       '<tr><th colspan="2">Total (net ' + (rk.net > 0 ? '+' : '') + rk.net + ')</th><th class="num pb">' + rk.bull + '</th><th class="num pr">' + rk.bear + '</th><th>of ' + data.ranking.max_points + '</th></tr></tbody></table>';
+  }
+
+  // ── keyboard: ranking ⇄ chart ──────────────────────────────────────────
+  function scrollRowIntoBox(row) {
+    const box = $('rk-scroll'), b = box.getBoundingClientRect(), r = row.getBoundingClientRect();
+    const head = box.querySelector('thead')?.getBoundingClientRect().height || 0;
+    if (r.top < b.top + head || r.bottom > b.bottom) box.scrollTop += r.top - b.top - head - (b.height - head - r.height) / 2;
+  }
+  function rowOf(sym) {
+    const find = () => $('rk-rows').querySelector('tr[data-sym="' + CSS.escape(sym) + '"]');
+    if (find()) return find();
+    const s = data.stocks.find(x => x.symbol === sym);
+    if (!s?.rank) return null;
+    rkList = s.rank.list; $('rk-search').value = ''; $('rk-limit').value = 'all'; syncRank();
+    return find();
+  }
+  function focusRow(sym) {
+    const tr = sym && rowOf(sym);
+    $('rk-scroll').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!tr) { $('rk-rows').querySelector('tr[data-sym]')?.focus({ preventScroll: true }); return; }
+    tr.focus({ preventScroll: true }); scrollRowIntoBox(tr);
+  }
+  function focusChart() { $('su-chart').focus({ preventScroll: true }); $('su-detail').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function rankKeys(e) {
+    const tr = e.target.closest('tr[data-sym]'); if (!tr || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openStock(tr.dataset.sym, false); focusChart(); return; }
+    const rows = [...$('rk-rows').querySelectorAll('tr[data-sym]')], at = rows.indexOf(tr);
+    const to = { ArrowDown: at + 1, j: at + 1, ArrowUp: at - 1, k: at - 1, Home: 0, End: rows.length - 1, PageDown: at + 10, PageUp: at - 10 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    const row = rows[Math.max(0, Math.min(rows.length - 1, to))];
+    row.focus({ preventScroll: true }); scrollRowIntoBox(row); openStock(row.dataset.sym, false);
+  }
+  function stepStock(dir) {
+    const cur = data.stocks.find(x => x.symbol === selected);
+    if (cur?.rank && cur.rank.list !== rkList) { rkList = cur.rank.list; syncRank(); }
+    const seq = rankVisible().map(([, s]) => s.symbol), i = seq.indexOf(selected);
+    const next = seq[i < 0 ? 0 : Math.max(0, Math.min(seq.length - 1, i + dir))];
+    if (!next || next === selected) return;
+    openStock(next, false);
+    const tr = rowOf(next); if (tr) scrollRowIntoBox(tr);
+  }
+  function chartKeys(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const c = $('su-chart'), n = Number(c.dataset.n) || 0, i = Number(c.dataset.i ?? n - 1);
+    const to = { ArrowLeft: i - 1, ArrowRight: i + 1, Home: 0, End: n - 1 }[e.key];
+    if (to !== undefined) { e.preventDefault(); c.hairAt?.(to); return; }
+    const dir = { ArrowDown: 1, j: 1, PageDown: 1, ArrowUp: -1, k: -1, PageUp: -1 }[e.key];
+    if (dir) { e.preventDefault(); stepStock(dir); return; }
+    if (e.key === 'Escape' || e.key === 'r') { e.preventDefault(); focusRow(selected); }
+  }
+  function globalKeys(e) {
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input,select,textarea,[contenteditable]')) return;
+    if (e.key === 'c') { e.preventDefault(); focusChart(); }
+    else if (e.key === 'r') { e.preventDefault(); focusRow(selected); }
   }
 
   // ── table ──────────────────────────────────────────────────────────────
@@ -382,16 +465,20 @@
     g += '<line id="su-hair" x1="0" x2="0" y1="' + price.top + '" y2="' + (H - 22) + '" stroke="#5d6b63" stroke-dasharray="3 3" opacity="0"/>';
     g += '<text x="' + left + '" y="18" font-size="11" fill="#5d6b63"><tspan fill="#b8860b" font-weight="700">━ Fibonacci</tspan> (shaded = golden zone)  <tspan fill="#7c3aed" font-weight="700">━ Supertrend</tspan> (purple up / orange down)  <tspan fill="#0d9488" font-weight="700">▒ Bollinger</tspan>  <tspan fill="#64748b" font-weight="700">┅ VWAP-20</tspan>  <tspan fill="#1d4ed8" font-weight="700">━ Buy</tspan> <tspan fill="#b91c1c" font-weight="700">┅ Stop</tspan> <tspan fill="#15803d" font-weight="700">┅ Targets</tspan>  <tspan fill="#111827" font-weight="700">● today</tspan></text>';
     $('su-chart').innerHTML = g + '</svg>';
-    $('su-chart').dataset.n = N;
-    readout(S, N - 1);
-    $('su-chart').onpointermove = ev => {
-      const svg = $('su-chart').querySelector('svg'); if (!svg) return;
-      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
-      const i = Math.max(0, Math.min(N - 1, Math.floor((px - left) / step)));
-      const h = $('su-hair'); h.setAttribute('x1', x(i)); h.setAttribute('x2', x(i)); h.setAttribute('opacity', '.6');
+    const c = $('su-chart');
+    c.dataset.n = N; c.dataset.i = N - 1;
+    c.hairAt = i => {
+      i = Math.max(0, Math.min(N - 1, i)); c.dataset.i = i;
+      const h = $('su-hair'); if (h) { h.setAttribute('x1', x(i)); h.setAttribute('x2', x(i)); h.setAttribute('opacity', '.6'); }
       readout(S, i);
     };
-    $('su-chart').onpointerleave = () => { $('su-hair')?.setAttribute('opacity', '0'); readout(S, N - 1); };
+    readout(S, N - 1);
+    c.onpointermove = ev => {
+      const svg = c.querySelector('svg'); if (!svg) return;
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      c.hairAt(Math.floor((px - left) / step));
+    };
+    c.onpointerleave = () => { $('su-hair')?.setAttribute('opacity', '0'); c.dataset.i = N - 1; readout(S, N - 1); };
   }
   function readout(S, i) {
     $('su-readout').textContent = S.dates[i] + '  O ' + fmt(S.o[i]) + '  H ' + fmt(S.h[i]) + '  L ' + fmt(S.l[i]) + '  C ' + fmt(S.c[i]) + '  Vol ' + big(S.v[i]) +
@@ -507,6 +594,8 @@
     rows.addEventListener('click', e => { const tr = e.target.closest('tr[data-sym]'); if (tr) openStock(tr.dataset.sym, true); });
     rows.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const tr = e.target.closest('tr[data-sym]'); if (tr) { e.preventDefault(); openStock(tr.dataset.sym, true); } });
     $('su-toggles').addEventListener('change', () => { if (selected && series?.[selected]) drawChart(data.stocks.find(x => x.symbol === selected), series[selected]); });
+    $('su-chart').addEventListener('keydown', chartKeys);
+    document.addEventListener('keydown', globalKeys);
   }
   fetch(bust('daily_setups.json')).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(d => {
     data = validate(d);
@@ -516,8 +605,9 @@
     cat = catMeta[q.get('cat')] ? q.get('cat') : null;
     ev = evMeta[q.get('event')] ? q.get('event') : null;
     syncFilters();
+    const L0 = data.ranking?.lists?.[rkList];
     const first = q.get('symbol') && data.stocks.some(s => s.symbol === q.get('symbol')) ? q.get('symbol')
-      : (data.ranking?.lists?.[rkList]?.chart_order?.[0] || (data.stocks.find(s => s.category === 'breakout_today') || data.stocks[0]).symbol);
+      : ((L0?.final_order || L0?.chart_order)?.[0] || (data.stocks.find(s => s.category === 'breakout_today') || data.stocks[0]).symbol);
     openStock(first, false);
   }).catch(err => {
     $('su-gate').className = 'su-gate closed';

@@ -108,3 +108,23 @@
 .su-rankwhy{overflow-x:auto;max-width:100%}.su-rankwhy table{min-width:640px;max-width:100%;table-layout:fixed}
 .su-rankwhy th:nth-child(1){width:20%}.su-rankwhy th:nth-child(2){width:24%}.su-rankwhy th:nth-child(3),.su-rankwhy th:nth-child(4){width:8%}
 .su-rankwhy td{overflow-wrap:anywhere;vertical-align:top}
+/* ranking sits right above the chart: compact scroll box with a sticky header */
+.su-rank{margin:6px 0 10px}
+.rk-scroll{max-height:min(46vh,430px);overflow:auto;overscroll-behavior:contain}
+.rk-scroll thead th{position:sticky;top:0;z-index:2}
+.rk-table td.rk-n,.rk-table td.su-sym{position:sticky;background:#fff;z-index:1}
+.rk-table td.rk-n,.rk-scroll thead th:nth-child(1){left:0;width:44px;min-width:44px;max-width:44px;box-sizing:border-box}
+.rk-table td.su-sym,.rk-scroll thead th:nth-child(2){left:44px}
+.rk-scroll thead th:nth-child(1),.rk-scroll thead th:nth-child(2){position:sticky;z-index:3;background:#fafbf8}
+.rk-table tr[aria-selected=true] td{background:#fff7e0 !important}
+.rk-table tr[data-sym]:focus{outline:none}.rk-table tr[data-sym]:focus td{box-shadow:inset 0 2px 0 var(--entry),inset 0 -2px 0 var(--entry)}
+.rk-jev{min-width:118px}.jbar{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.jbar i{display:block;width:60px;height:8px;background:#eef1ec;border-radius:4px;overflow:hidden}.jbar i b{display:block;height:100%;background:#4f46e5;border-radius:4px}
+.jbar strong{font:800 14px Manrope,sans-serif}
+.su-rank-acct{font-size:12px;margin:0 0 8px;padding:8px 10px;background:#f4f6fb;border-left:3px solid #4f46e5;border-radius:0 8px 8px 0}
+.rk-keys{font-size:12px;margin:6px 0 0}
+kbd{font:11px ui-monospace,Consolas,monospace;border:1px solid #c9d1cc;border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff}
+.su-detail{margin-top:10px;scroll-margin-top:8px}
+#su-chart:focus{outline:2px solid var(--entry);outline-offset:2px;border-radius:6px}
+.rk-jevmath{margin-bottom:6px}.su-rankwhy h4{margin:10px 0 4px;font-size:13px}
+@media(max-width:600px){.rk-scroll{max-height:52vh}.rk-table td.su-sym,.rk-scroll thead th:nth-child(2){position:static}}

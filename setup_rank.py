@@ -8,20 +8,23 @@ Lists follow the HH/HL structure category (a chart fact):
   BUY   = breakout today, ready to break, uptrend          ranked by net score, highest first
   SELL  = structure exit today, below structure, downtrend ranked by net score, lowest first
   WATCH = turning up, sideways                           ranked by |net| (closest to a decision), with its lean
-Jev ranks are shown separately and are not mixed into the chart score:
-  Jev BUY rank  = Jev composite, highest first;   Jev SELL rank = Jev composite, lowest first;
-  Jev WATCH rank = Jev composite, highest first (nearest to becoming a buy).
-Combined rank = average of chart rank and Jev rank inside the list (chart rank breaks ties).
+Final ranking inside every list is done by Jev, out of 100 (Jev's own maths, see JEV_POINTS):
+  Jev score = 35 x setup_quality/4 + 30 x follow_through/4 + 35 x risk_reward/4   (each answer is a level 0..4)
+  BUY and WATCH: Jev list score = Jev score, highest first.
+  SELL: Jev scores the setup it sees, it does not score shorts, so Jev list score = 100 - Jev score (weakest setup first).
+  Stocks Jev did not assess (F&O names outside Jev's Nifty 200 run) follow, in chart-score order, and are labelled so.
+The chart score is kept next to it as the fact check; Combined rank = average of chart rank and Jev rank.
+Ties on the Jev list score are broken by chart rank.
 """
 from __future__ import annotations
 
 LISTS = {
     "buy": {"label": "Buy", "tone": "bull", "categories": ["breakout_today", "ready_to_break", "uptrend"],
-            "meaning": "Rising structure (higher highs and higher lows). Ranked by net chart score, strongest first."},
+            "meaning": "Rising structure (higher highs and higher lows). Ranked by Jev score out of 100, highest first."},
     "sell": {"label": "Sell", "tone": "bear", "categories": ["exit_today", "below_structure", "downtrend"],
-             "meaning": "Broken or falling structure. Ranked by net chart score, weakest first. Sell = exit longs / bearish via F&O."},
+             "meaning": "Broken or falling structure. Ranked by Jev sell score = 100 - Jev score (weakest Jev setup first). Sell = exit longs / bearish via F&O."},
     "watch": {"label": "Watch", "tone": "neutral", "categories": ["turning_up", "sideways"],
-              "meaning": "No confirmed direction yet. Ranked by how far the chart already leans (|net score|), with the lean shown."},
+              "meaning": "No confirmed direction yet. Ranked by Jev score out of 100 (nearest to becoming a buy first); the chart lean is shown."},
 }
 
 FACTORS = [
@@ -40,6 +43,14 @@ FACTORS = [
     {"key": "volume", "name": "Volume", "max": 5, "rule": "Volume >= 1.5x its 20-session average: 5 to the side of today's candle."},
 ]
 MAX = sum(f["max"] for f in FACTORS)   # 100
+
+JEV_POINTS = [  # weight in points out of 100; each Jev answer is a level 0..JEV_LEVEL_MAX
+    {"key": "setup_quality", "name": "Setup quality", "points": 35},
+    {"key": "follow_through", "name": "Follow-through odds", "points": 30},
+    {"key": "risk_reward", "name": "Risk / reward", "points": 35},
+]
+JEV_LEVEL_MAX = 4
+assert sum(p["points"] for p in JEV_POINTS) == 100
 
 
 def _pts(side, n):
@@ -145,10 +156,31 @@ def chart_factors(s, bars):
 
 
 def jev_list_score(s, lst):
+    """Jev list score as a 0..1 fraction (kept for callers); see jev_breakdown for the /100 maths."""
     c = (s.get("jev") or {}).get("composite")
     if c is None:
         return None
     return 1 - c if lst == "sell" else c
+
+
+def jev_breakdown(s, lst):
+    """Jev score out of 100 with every point traced to one Jev answer. None when Jev has no view."""
+    j = s.get("jev") or {}
+    if j.get("composite") is None:
+        return None
+    parts, levels_known = [], all(isinstance(j.get(p["key"]), (int, float)) for p in JEV_POINTS)
+    if levels_known:
+        for p in JEV_POINTS:
+            lv = float(j[p["key"]])
+            parts.append({"key": p["key"], "name": p["name"], "level": round(lv, 2), "max_level": JEV_LEVEL_MAX,
+                          "weight": p["points"], "points": round(p["points"] * lv / JEV_LEVEL_MAX, 2)})
+        score = round(sum(x["points"] for x in parts), 1)
+    else:
+        score = round(j["composite"] * 100, 1)
+    list_score = round(100 - score, 1) if lst == "sell" else score
+    return {"score": score, "list_score": list_score, "points": parts, "composite_x100": round(j["composite"] * 100, 2),
+            "direction": j.get("direction"), "confidence": j.get("confidence"), "regime": j.get("regime"),
+            "overall_rank": j.get("rank"), "of": j.get("of")}
 
 
 def _ret20(bars):
@@ -166,7 +198,7 @@ def rank_all(stocks, bars_by_symbol):
         fs = chart_factors(s, bars_by_symbol[s["symbol"]])
         bull, bear = sum(f["bull"] for f in fs), sum(f["bear"] for f in fs)
         s["rank"] = {"list": lst, "bull": round(bull, 1), "bear": round(bear, 1), "net": round(bull - bear, 1), "factors": fs,
-                     "ret20": _ret20(bars_by_symbol[s["symbol"]])}
+                     "ret20": _ret20(bars_by_symbol[s["symbol"]]), "jev": jev_breakdown(s, lst)}
 
     ranked = [s for s in stocks if s.get("rank")]
     # whole-universe ranks (every stock is ranked for both sides)
@@ -175,7 +207,10 @@ def rank_all(stocks, bars_by_symbol):
     for i, s in enumerate(sorted(ranked, key=lambda s: (s["rank"]["net"], s["rank"]["ret20"], s["symbol"])), 1):
         s["rank"]["all_sell_rank"] = i
 
-    block = {"factors": FACTORS, "max_points": MAX, "lists": {}}
+    block = {"factors": FACTORS, "max_points": MAX, "lists": {},
+             "jev_method": {"points": JEV_POINTS, "level_max": JEV_LEVEL_MAX,
+                            "formula": "Jev score = " + " + ".join(f"{p['points']} x {p['key']}/{JEV_LEVEL_MAX}" for p in JEV_POINTS),
+                            "sell": "Jev sell score = 100 - Jev score", "not_scored": "Stocks Jev did not assess follow in chart-score order."}}
     for key, meta in LISTS.items():
         members = [s for s in ranked if s["rank"]["list"] == key]
         # Ties on net score are broken by the 20-session return (stronger for BUY, weaker for SELL), then symbol.
@@ -185,9 +220,14 @@ def rank_all(stocks, bars_by_symbol):
         by_chart = sorted(members, key=chart_key)
         for i, s in enumerate(by_chart, 1):
             s["rank"]["chart_rank"] = i
-        with_jev = [s for s in members if jev_list_score(s, key) is not None]
-        for i, s in enumerate(sorted(with_jev, key=lambda s: (-jev_list_score(s, key), s["symbol"])), 1):
+        with_jev = sorted([s for s in members if s["rank"]["jev"]],
+                          key=lambda s: (-s["rank"]["jev"]["list_score"], s["rank"]["chart_rank"], s["symbol"]))
+        for i, s in enumerate(with_jev, 1):
             s["rank"]["jev_rank"] = i
+        without = [s for s in by_chart if not s["rank"]["jev"]]
+        final = with_jev + without
+        for i, s in enumerate(final, 1):
+            s["rank"]["final_rank"] = i
         for s in members:
             s["rank"].setdefault("jev_rank", None)
             j = s["rank"]["jev_rank"]
@@ -197,21 +237,54 @@ def rank_all(stocks, bars_by_symbol):
             s["rank"]["combined_rank"] = i
         n = len(members)
         for s in members:
-            rk, net = s["rank"], s["rank"]["net"]
+            rk, net, jb = s["rank"], s["rank"]["net"], s["rank"]["jev"]
             lean = "bullish" if net > 0 else "bearish" if net < 0 else "flat"
             top = sorted(rk["factors"], key=lambda f: -(f["bull"] if (key == "buy" or (key == "watch" and net >= 0)) else f["bear"]))[:3]
             rk["list_size"] = n
-            rk["words"] = (f"#{rk['chart_rank']} of {n} in {meta['label'].upper()} by chart: net {net:+.0f} (bull {rk['bull']:.0f} / bear {rk['bear']:.0f} of {MAX})"
+            jev_words = (f"#{rk['final_rank']} of {n} in {meta['label'].upper()} by Jev: Jev score {jb['score']:.1f}/100"
+                         + (f", sell score 100 - {jb['score']:.1f} = {jb['list_score']:.1f}" if key == "sell" else "")
+                         + f" (#{rk['jev_rank']} of {len(with_jev)} Jev-scored in this list; Jev overall #{jb['overall_rank']} of {jb['of']}). "
+                         if jb else
+                         f"#{rk['final_rank']} of {n} in {meta['label'].upper()}: no Jev score (Jev assesses the Nifty 200 only), "
+                         f"so it follows the {len(with_jev)} Jev-scored stocks in chart-score order. ")
+            rk["words"] = (jev_words
+                           + f"Chart check: #{rk['chart_rank']} by chart, net {net:+.0f} (bull {rk['bull']:.0f} / bear {rk['bear']:.0f} of {MAX})"
                            + (f", leaning {lean}" if key == "watch" else "")
-                           + ". Biggest contributors: " + "; ".join(f"{_name(f['key'])} {f['value']}" for f in top) + ". "
-                           + (f"Jev #{rk['jev_rank']} of {len(with_jev)} in this list. " if rk["jev_rank"] else "No same-session Jev rank available. ")
+                           + ". Biggest chart contributors: " + "; ".join(f"{_name(f['key'])} {f['value']}" for f in top) + ". "
                            + f"Combined #{rk['combined_rank']}.")
             rk["combined_score"] = round(rk["combined_score"], 1)
         block["lists"][key] = {**{k: v for k, v in meta.items()}, "count": n, "jev_count": len(with_jev),
+                               "not_jev_count": len(without),
+                               "final_order": [s["symbol"] for s in final],
                                "chart_order": [s["symbol"] for s in by_chart],
-                               "jev_order": [s["symbol"] for s in sorted(with_jev, key=lambda s: s["rank"]["jev_rank"])],
+                               "jev_order": [s["symbol"] for s in with_jev],
                                "combined_order": [s["symbol"] for s in by_comb]}
+    block["accounting"] = accounting(stocks, block["lists"])
     return block
+
+
+def accounting(stocks, lists):
+    """Every stock is counted exactly once: in one list, or as not ranked with its reason."""
+    unranked = [{"symbol": s["symbol"], "category": s.get("category"), "universe": s.get("universe"),
+                 "data_date": s.get("data_date"), "why": s.get("summary") or s.get("category")}
+                for s in stocks if not s.get("rank")]
+    jev_scored = sum(v["jev_count"] for v in lists.values())
+    by_universe = {}
+    for s in stocks:
+        u = by_universe.setdefault(s.get("universe") or "?", {"total": 0, "jev_scored": 0, "ranked": 0})
+        u["total"] += 1
+        u["ranked"] += bool(s.get("rank"))
+        u["jev_scored"] += bool(s.get("rank") and s["rank"].get("jev"))
+    total = len(stocks)
+    ranked = sum(v["count"] for v in lists.values())
+    assert ranked + len(unranked) == total
+    words = (f"{total} stocks = " + " + ".join(f"{v['count']} {v['label']}" for v in lists.values())
+             + f" + {len(unranked)} not ranked" + (" (" + ", ".join(f"{u['symbol']}: {u['category']}, price date {u['data_date']}" for u in unranked) + ")" if unranked else "")
+             + f". Jev-scored: {jev_scored} = " + " + ".join(f"{v['jev_count']} {v['label']}" for v in lists.values())
+             + ". Without a Jev score: " + ", ".join(f"{k} {u['total'] - u['jev_scored']} of {u['total']}" for k, u in by_universe.items()) + ".")
+    return {"total": total, "ranked": ranked, "jev_scored": jev_scored, "unranked": unranked,
+            "by_list": {k: {"count": v["count"], "jev_scored": v["jev_count"], "not_jev_scored": v["not_jev_count"]} for k, v in lists.items()},
+            "by_universe": by_universe, "words": words}
 
 
 def _name(key):
