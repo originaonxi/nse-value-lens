@@ -1,5 +1,21 @@
 /* Daily setups page. Builds on swing.css tokens. Each indicator has one fixed colour everywhere. */
-:root{--st:#7c3aed;--adx:#d97706;--rsi:#2563eb;--bb:#0d9488;--obv:#db2777;--vwap:#64748b;--bull:#1f7a52;--bear:#b4473c;--neutral:#7a8580;--entry:#1d4ed8;--stop:#b91c1c;--tgt:#15803d}
+:root{--st:#7c3aed;--adx:#d97706;--rsi:#2563eb;--bb:#0d9488;--obv:#db2777;--vwap:#64748b;--fib:#b8860b;--bull:#1f7a52;--bear:#b4473c;--neutral:#7a8580;--entry:#1d4ed8;--stop:#b91c1c;--tgt:#15803d}
+.su-sub{font:800 16px Manrope,sans-serif;margin:18px 0 8px}.su-sub small{font:500 12px 'DM Sans',sans-serif;margin-left:8px}
+.su-events{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.su-ev{all:unset;cursor:pointer;font-size:12px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center;border-left:4px solid var(--neutral)}
+.su-ev[data-tone=bull]{border-left-color:var(--bull)}.su-ev[data-tone=bear]{border-left-color:var(--bear)}.su-ev[data-tone=neutral]{border-left-color:var(--fib)}
+.su-ev b{font-variant-numeric:tabular-nums;background:#eef1ec;border-radius:999px;padding:0 7px}
+.su-ev[aria-pressed=true]{background:#182c24;color:#fff;border-color:#182c24}.su-ev[aria-pressed=true] b{background:#fff;color:#182c24}
+.su-ev[data-count="0"]{opacity:.45}
+.su-ev:focus-visible{outline:2px solid var(--entry)}
+.evb{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px;margin:1px 2px 1px 0;white-space:nowrap;background:#eef1ec;color:#3b4a42}
+.evb[data-tone=bull]{background:#dcefe3;color:var(--bull)}.evb[data-tone=bear]{background:#f6e1dc;color:var(--bear)}.evb[data-tone=neutral]{background:#f6eedb;color:#7a5a12}
+.fibcell small{display:block;color:var(--muted)}.fibcell b[data-golden=true]{color:var(--fib)}
+.su-clear{font:inherit;font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.su-evlist{list-style:none;padding:0;margin:6px 0;font-size:13px}.su-evlist li{margin:5px 0;padding-left:8px;border-left:3px solid var(--neutral)}
+.su-evlist li[data-tone=bull]{border-left-color:var(--bull)}.su-evlist li[data-tone=bear]{border-left-color:var(--bear)}.su-evlist li[data-tone=neutral]{border-left-color:var(--fib)}
+.su-fibtable{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}.su-fibtable td{padding:2px 6px;border-bottom:1px solid #f0f2ee}
+.su-fibtable tr[data-near=true]{background:#fbf3df;font-weight:700}.su-fibtable tr[data-golden=true] td:first-child{color:var(--fib);font-weight:700}
 .setups-shell main{padding-top:28px}
 .su-hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 .su-hero h1{font:800 44px/1.05 Manrope,sans-serif;letter-spacing:-1.5px;margin:0}

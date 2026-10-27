@@ -3,52 +3,64 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daily setups: every Nifty 200 &amp; F&amp;O stock by category | NSE Value Lens</title>
-<meta name="description" content="After every NSE close: all Nifty 200 and F&O stocks sorted into breakout, ready, uptrend, sideways, structure-exit and downtrend lists with five indicators, entry, stop, next target, Jev rank and an options hedge.">
+<meta name="description" content="After every NSE close: all Nifty 200 and F&O stocks sorted into breakout, ready, uptrend, sideways, structure-exit and downtrend lists with five indicators, auto Fibonacci, today's events, entry, stop, next target, Jev rank and an options hedge.">
 <link rel="stylesheet" href="swing.css">
-<link rel="stylesheet" href="setups.css?v=1">
-<script src="setups.js?v=1" defer></script>
+<link rel="stylesheet" href="setups.css?v=2">
+<script src="setups.js?v=2" defer></script>
 </head>
 <body>
 <div class="shell setups-shell">
 <header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="setups.html" aria-current="page"><strong>Daily setups</strong></a><a href="hhhl.html">HH/HL</a><a href="vcp.html">VCP</a><a href="options.html">Options desk</a><a href="nifty-chain.html">Nifty chain</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a></nav></header>
 <main>
 <section class="su-hero"><div><h1>Daily setups.<br><span>Every stock, one category.</span></h1>
-<p>After each NSE close, all Nifty 200 and F&amp;O stocks are sorted by what price actually did, then checked by five indicators, Jev, and an options hedge. Every number is explained in words.</p></div>
+<p>After each NSE close, all Nifty 200 and F&amp;O stocks are sorted by what price actually did, then checked by five indicators, an auto-fitted Fibonacci, Jev, and an options hedge. Every number is explained in words.</p></div>
 <div class="su-session">CLOSING SESSION<strong id="su-date">Loading…</strong><span id="su-count"></span></div></section>
 <div id="su-gate" class="su-gate" role="status">Loading the market gate…</div>
 <p id="su-inputs" class="su-inputs"></p>
 
-<section aria-labelledby="cat-title"><h2 id="cat-title" class="visually-hidden" style="position:absolute;left:-9999px">Categories</h2>
+<section aria-labelledby="cat-title"><h2 id="cat-title" class="su-sub">1. Category <small class="muted">where each stock stands</small></h2>
 <div id="su-cats" class="su-cats" role="group" aria-label="Choose a category"></div>
+<h2 class="su-sub">2. What happened today <small id="su-prev-note" class="muted"></small></h2>
+<div id="su-events" class="su-events" role="group" aria-label="Filter by today's event"></div>
 <div id="su-meaning" class="su-meaning" aria-live="polite"></div>
 <div class="su-filters">
 <label>Search <input id="su-search" type="search" placeholder="Symbol or name" autocomplete="off"></label>
 <label>Universe <select id="su-universe"><option value="all">All stocks</option><option value="fno">F&amp;O only (hedge available)</option><option value="n200">Nifty 200 only</option></select></label>
-<label>Sort <select id="su-sort"><option value="conviction">Conviction (indicators + Jev)</option><option value="jev">Jev rank</option><option value="rr">Reward / risk to T2</option><option value="symbol">Symbol A-Z</option></select></label>
+<label>Fib zone <select id="su-fibzone"><option value="all">Any</option><option value="golden">Golden zone 50-61.8%</option><option value="shallow">Shallow &lt; 38.2%</option><option value="deep">Deep 61.8-100%</option><option value="beyond">Beyond the leg (new extreme)</option><option value="failed">Leg failed &gt; 100%</option></select></label>
+<label>Sort <select id="su-sort"><option value="conviction">Conviction (indicators + Jev)</option><option value="events">Most events today</option><option value="jev">Jev rank</option><option value="rr">Reward / risk to T2</option><option value="symbol">Symbol A-Z</option></select></label>
+<button id="su-clear" type="button" class="su-clear">Clear filters</button>
 <span id="su-shown" class="muted"></span>
 </div>
 <div class="su-table-wrap"><table class="su-table"><thead><tr>
-<th>Stock</th><th>Close</th><th>Plan: buy / sell level</th><th>Stop loss</th><th>Next target</th><th title="Supertrend · ADX · RSI · Bollinger · OBV">5 indicators</th><th>Jev</th><th>Conviction</th><th>Hedge</th>
-</tr></thead><tbody id="su-rows"><tr><td colspan="9" class="su-empty">Loading all stocks…</td></tr></tbody></table></div>
+<th>Stock</th><th>Close</th><th>Today</th><th>Plan: buy / sell level</th><th>Stop loss</th><th>Next target</th><th title="Supertrend · ADX · RSI · Bollinger · OBV">5 indicators</th><th>Fib</th><th>Jev</th><th>Conviction</th><th>Hedge</th>
+</tr></thead><tbody id="su-rows"><tr><td colspan="11" class="su-empty">Loading all stocks…</td></tr></tbody></table></div>
 </section>
 
 <section id="su-detail" class="su-detail" hidden aria-labelledby="su-dtitle">
 <div class="su-dhead"><div><h2 id="su-dtitle" tabindex="-1"></h2><div id="su-dsub" class="muted"></div></div><span id="su-dbadge" class="su-badge"></span></div>
 <p id="su-dsummary" class="su-summary"></p>
 <div class="su-toggles" id="su-toggles">
+<label><input type="checkbox" data-layer="fib" checked><i style="background:var(--fib)"></i>Fibonacci</label>
+<label>Fib anchor <select id="su-fib-anchor"><option value="auto">Auto (best fit)</option><option value="leg">Last swing leg</option><option value="3m">3-month range</option><option value="6m">6-month range</option></select></label>
 <label><input type="checkbox" data-layer="supertrend" checked><i style="background:var(--st)"></i>Supertrend</label>
-<label><input type="checkbox" data-layer="bollinger" checked><i style="background:var(--bb)"></i>Bollinger</label>
+<label><input type="checkbox" data-layer="bollinger"><i style="background:var(--bb)"></i>Bollinger</label>
 <label><input type="checkbox" data-layer="vwap" checked><i style="background:var(--vwap)"></i>VWAP-20</label>
 <label><input type="checkbox" data-layer="plan" checked><i style="background:var(--entry)"></i>Plan levels</label>
 <label><input type="checkbox" data-layer="swings" checked><i style="background:#3f5249"></i>HH/HL swings</label>
+<label><input type="checkbox" data-layer="events" checked><i style="background:#111827"></i>Today's events</label>
 <label><input type="checkbox" data-layer="volume" checked><i style="background:#9fb3a6"></i>Volume</label>
 <label><input type="checkbox" data-layer="rsi" checked><i style="background:var(--rsi)"></i>RSI panel</label>
 <label><input type="checkbox" data-layer="adx" checked><i style="background:var(--adx)"></i>ADX panel</label>
 <label><input type="checkbox" data-layer="obv" checked><i style="background:var(--obv)"></i>OBV panel</label>
-<label>View <select id="su-window"><option value="70" selected>70 sessions</option><option value="110">110 sessions</option></select></label>
+<label>View <select id="su-window"><option value="70" selected>70 sessions</option><option value="120">120 sessions</option></select></label>
 </div>
 <div id="su-chart" aria-label="Price chart with indicators"></div>
 <div id="su-readout" class="su-readout" aria-live="polite"></div>
+<div class="su-panels">
+<div class="su-panel" id="su-today"></div>
+<div class="su-panel" id="su-fib"></div>
+<div class="su-panel" id="su-learn"></div>
+</div>
 <div id="su-inds" class="su-grid"></div>
 <div class="su-panels">
 <div class="su-panel" id="su-plan"></div>
@@ -58,10 +70,10 @@
 <p class="muted" style="margin-top:12px"><a id="su-hhhl-link" href="hhhl.html">Open this stock on the HH/HL scanner →</a></p>
 </section>
 
-<section class="section" aria-labelledby="guide-title"><h2 id="guide-title">The five indicators: what each one covers</h2>
-<p class="muted">Each answers a different question, so together they cover direction, strength, momentum, volatility and money flow. Each keeps one colour on every chart and card.</p>
+<section class="section" aria-labelledby="guide-title"><h2 id="guide-title">The indicators: what each one covers</h2>
+<p class="muted">Each answers a different question, so together they cover direction, strength, momentum, volatility, money flow and where a pullback usually stops. Each keeps one colour on every chart and card.</p>
 <div id="su-guide" class="su-guide"></div>
-<h3>How the plan is built</h3><ul id="su-method" class="muted"></ul>
+<h3>How the plan, Fibonacci and events are built</h3><ul id="su-method" class="muted"></ul>
 <h3>Limits</h3><ul id="su-limits" class="su-limits"></ul></section>
 </main>
 <footer><span>NSE VALUE LENS / DAILY SETUPS</span><p>End-of-day research. Not SEBI-registered investment advice. No automatic orders.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>

@@ -13,8 +13,11 @@
   const COLOR = { supertrend: '#7c3aed', adx: '#d97706', rsi: '#2563eb', bollinger: '#0d9488', obv: '#db2777', vwap20: '#64748b' };
   const SHORT = { supertrend: 'ST', adx: 'ADX', rsi: 'RSI', bollinger: 'BB', obv: 'OBV' };
 
-  let data = null, series = null, seriesPromise = null, cat = null, selected = null;
-  const catMeta = {};
+  let data = null, series = null, seriesPromise = null, cat = null, ev = null, selected = null;
+  const catMeta = {}, evMeta = {};
+  // An anchor missing from the list measured the same swing as another one (deduplicated in daily_setups.py): fall back to auto.
+  const fibOf = (s, m) => { const f = s.fib; if (!f) return null; const want = m && m !== 'auto' ? m : f.auto; return f.anchors.find(a => a.method === want) || f.anchors.find(a => a.method === f.auto) || null; };
+  const fibZone = p => !isNum(p) ? null : p < 0 ? 'beyond' : p < 38.2 ? 'shallow' : p < 50 ? 'mid' : p <= 61.8 ? 'golden' : p <= 100 ? 'deep' : 'failed';
 
   // ── load ──────────────────────────────────────────────────────────────
   function bust(url) { return url + '?t=' + Math.floor(Date.now() / 300000); }
@@ -58,16 +61,35 @@
       setCat(b.dataset.cat === cat ? null : b.dataset.cat);
     });
   }
-  function setCat(key) {
-    cat = key;
-    document.querySelectorAll('.su-cat').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === key)));
-    const m = key && catMeta[key];
-    $('su-meaning').innerHTML = m ? '<strong>' + esc(m.label) + ' (' + esc(m.count) + '):</strong> ' + esc(m.meaning)
-      : '<strong>All categories.</strong> Click a category to filter. Rows are ordered bullish → bearish, then by conviction. Click any row to open its chart, indicators, plan and hedge.';
+  function setCat(key) { cat = key; syncFilters(); }
+  function setEv(key) { ev = key; syncFilters(); }
+  function syncFilters() {
+    document.querySelectorAll('.su-cat').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === cat)));
+    document.querySelectorAll('.su-ev').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ev === ev)));
+    const m = cat && catMeta[cat], e = ev && evMeta[ev];
+    const parts = [];
+    if (m) parts.push('<strong>' + esc(m.label) + ' (' + esc(m.count) + '):</strong> ' + esc(m.meaning));
+    if (e) parts.push('<strong>Today: ' + esc(e.label) + ' (' + esc(e.count) + '):</strong> ' + esc(e.meaning));
+    $('su-meaning').innerHTML = parts.length ? parts.join('<br>') :
+      '<strong>All stocks.</strong> Pick a category (where a stock stands) and/or a today-event (what it just did); both filters combine. Click any row for its chart, Fibonacci, events, plan and hedge.';
     const u = new URL(location.href);
-    if (key) u.searchParams.set('cat', key); else u.searchParams.delete('cat');
+    cat ? u.searchParams.set('cat', cat) : u.searchParams.delete('cat');
+    ev ? u.searchParams.set('event', ev) : u.searchParams.delete('event');
     history.replaceState(null, '', u);
     renderRows();
+  }
+  function renderEvents() {
+    const prevNote = data.previous_list ? 'compared with the published list of ' + data.previous_list
+      : 'compared with yesterday\'s plan rebuilt from the levels known at yesterday\'s close';
+    $('su-prev-note').textContent = prevNote + ' · click to filter';
+    $('su-events').innerHTML = (data.events || []).map(e => {
+      evMeta[e.key] = e;
+      return '<button class="su-ev" type="button" data-ev="' + esc(e.key) + '" data-tone="' + esc(e.tone) + '" data-count="' + esc(e.count) + '" aria-pressed="false" title="' + esc(e.meaning) + '">' + esc(e.label) + ' <b>' + esc(e.count) + '</b></button>';
+    }).join('');
+    $('su-events').addEventListener('click', e => {
+      const b = e.target.closest('[data-ev]'); if (!b) return;
+      setEv(b.dataset.ev === ev ? null : b.dataset.ev);
+    });
   }
   function renderGuide() {
     const g = data.indicator_guide || {};
@@ -85,23 +107,38 @@
   }
   function rr2(s) { const r = s.plan?.reward_risk; return Array.isArray(r) && isNum(r[1]) ? r[1] : -1; }
   function filtered() {
-    const q = $('su-search').value.trim().toLowerCase(), uni = $('su-universe').value, sort = $('su-sort').value;
-    let rows = data.stocks.filter(s => (!cat || s.category === cat) &&
+    const q = $('su-search').value.trim().toLowerCase(), uni = $('su-universe').value, sort = $('su-sort').value, fz = $('su-fibzone').value;
+    let rows = data.stocks.filter(s => (!cat || s.category === cat) && (!ev || (s.events || []).includes(ev)) &&
       (uni === 'all' || (uni === 'fno' ? s.fno : s.universe === 'Nifty 200')) &&
+      (fz === 'all' || fibZone(fibOf(s)?.retrace_pct) === fz) &&
       (!q || s.symbol.toLowerCase().includes(q) || String(s.name || '').toLowerCase().includes(q)));
     const order = Object.fromEntries(data.categories.map((c, i) => [c.key, i]));
     const by = {
       conviction: (a, b) => (order[a.category] - order[b.category]) || ((b.conviction ?? -1) - (a.conviction ?? -1)),
+      events: (a, b) => (b.events || []).length - (a.events || []).length,
       jev: (a, b) => (a.jev?.rank ?? 999) - (b.jev?.rank ?? 999),
       rr: (a, b) => rr2(b) - rr2(a),
       symbol: (a, b) => a.symbol.localeCompare(b.symbol),
     }[sort];
     return rows.sort((a, b) => by(a, b) || a.symbol.localeCompare(b.symbol));
   }
+  function evBadges(s, max) {
+    const evs = s.events || [];
+    const pri = ['target_hit', 'stop_hit', 'breakout', 'structure_exit', 'st_flip_up', 'st_flip_down', 'upgraded', 'downgraded', 'fib_break', 'fib_golden', 'fib_target'];
+    const sorted = [...evs].sort((a, b) => ((pri.indexOf(a) + 1) || 99) - ((pri.indexOf(b) + 1) || 99));
+    const shown = sorted.slice(0, max).map(k => '<span class="evb" data-tone="' + esc(evMeta[k]?.tone) + '" title="' + esc(s.event_words?.[k] || evMeta[k]?.meaning || '') + '">' + esc(evMeta[k]?.label || k) + '</span>').join('');
+    return (shown || '<small class="muted">–</small>') + (sorted.length > max ? '<small class="muted"> +' + (sorted.length - max) + '</small>' : '');
+  }
+  function fibCell(s) {
+    const a = fibOf(s);
+    if (!a) return '–';
+    const z = fibZone(a.retrace_pct);
+    return '<span class="fibcell"><b data-golden="' + (z === 'golden') + '">' + (a.retrace_pct < 0 ? 'new ' + (a.dir === 'up' ? 'high' : 'low') : fmt(a.retrace_pct, 0) + '%') + '</b><small>' + esc(a.dir === 'up' ? 'of up-leg' : 'of down-leg') + '</small></span>';
+  }
   function renderRows() {
     const rows = filtered();
-    $('su-shown').textContent = rows.length + ' shown';
-    if (!rows.length) { $('su-rows').innerHTML = '<tr><td colspan="9" class="su-empty">No stocks match.</td></tr>'; return; }
+    $('su-shown').textContent = rows.length + ' of ' + data.stocks.length + ' shown';
+    if (!rows.length) { $('su-rows').innerHTML = '<tr><td colspan="11" class="su-empty">No stocks match these filters today.</td></tr>'; return; }
     $('su-rows').innerHTML = rows.map(s => {
       const p = s.plan || {}, c = catMeta[s.category] || {}, tone = c.tone;
       const level = !p.stop ? '<span class="muted">No trade</span>' :
@@ -112,10 +149,11 @@
       return '<tr data-sym="' + esc(s.symbol) + '" tabindex="0" aria-selected="' + (s.symbol === selected) + '">' +
         '<td class="su-sym"><strong>' + esc(s.symbol) + (s.fno ? '<span class="tag-f">F&amp;O</span>' : '') + '</strong><small><span class="su-badge" data-tone="' + esc(tone) + '" style="font-size:9px;padding:1px 6px">' + esc(c.label || s.category) + '</span> ' + esc(s.structure || '') + '</small></td>' +
         '<td class="num">' + rs(s.close) + '<br>' + ch + '</td>' +
+        '<td style="max-width:190px">' + evBadges(s, 3) + '</td>' +
         '<td>' + level + '</td>' +
         '<td class="num" style="color:var(--stop)">' + (p.stop ? rs(p.stop) + '<br><small>' + fmt(p.risk_pct, 1) + '% risk</small>' : '–') + '</td>' +
         '<td class="num" style="color:var(--tgt)">' + (p.next_target ? rs(p.next_target) + '<br><small>' + fmt(p.reward_risk?.[0], 1) + 'R</small>' : '–') + '</td>' +
-        '<td>' + dots(s) + '</td><td class="num">' + esc(jev) + '</td><td>' + conv + '</td>' +
+        '<td>' + dots(s) + '</td><td>' + fibCell(s) + '</td><td class="num">' + esc(jev) + '</td><td>' + conv + '</td>' +
         '<td><small>' + esc(s.hedge?.available ? s.hedge.name : (s.fno ? 'Data incomplete' : 'Stop = hedge')) + '</small></td></tr>';
     }).join('');
   }
@@ -146,7 +184,9 @@
     const step = (plotR - left) / N, x = i => left + step * (i + .5);
     const p = s.plan || {};
     const lv = [p.entry, p.stop, ...(p.targets || [])].filter(isNum);
-    const pool = [...S.h, ...S.l, ...(L.plan ? lv : []), ...(L.bollinger ? [...S.bb_upper, ...S.bb_lower] : []), ...(L.supertrend ? S.supertrend : [])].filter(isNum);
+    const fa = L.fib ? fibOf(s, $('su-fib-anchor').value) : null;
+    const fibIn = fa ? fa.levels.map(l => l.price).filter(v => v >= Math.min(...S.l) * 0.93 && v <= Math.max(...S.h) * 1.07) : [];
+    const pool = [...S.h, ...S.l, ...fibIn, ...(L.plan ? lv : []), ...(L.bollinger ? [...S.bb_upper, ...S.bb_lower] : []), ...(L.supertrend ? S.supertrend : [])].filter(isNum);
     let lo = Math.min(...pool), hi = Math.max(...pool); const pad = (hi - lo) * .06 || 1; lo -= pad; hi += pad;
     const y = v => price.top + (hi - v) / (hi - lo) * (price.bot - price.top);
     let g = '<svg viewBox="0 0 ' + W + ' ' + H + '" data-left="' + left + '" data-step="' + step + '" data-w="' + W + '" role="img" aria-label="' + esc(s.symbol) + ' chart with Supertrend, Bollinger, VWAP, RSI, ADX and OBV"><rect width="' + W + '" height="' + H + '" fill="#fff"/>';
@@ -175,6 +215,41 @@
         run.push(x(i).toFixed(1) + ',' + y(v).toFixed(1));
       });
       flush();
+    }
+    if (L.fib) {
+      const a = fibOf(s, $('su-fib-anchor').value);
+      if (a) {
+        const inView = v => v >= lo && v <= hi, gold = '#b8860b';
+        const lvls = [...a.levels.map(l => ({ ...l, ext: false })), ...a.extensions.map(l => ({ ...l, ext: true }))];
+        const lvl = r => a.levels.find(l => l.r === r)?.price;
+        const g5 = lvl(0.5), g6 = lvl(0.618);
+        if (isNum(g5) && isNum(g6)) {
+          const t = Math.min(Math.max(g5, g6), hi), b2 = Math.max(Math.min(g5, g6), lo);
+          if (t > b2) g += '<rect class="fib-golden" x="' + left + '" width="' + (plotR - left) + '" y="' + y(t) + '" height="' + (y(b2) - y(t)) + '" fill="' + gold + '" opacity=".09"><title>Golden zone 50–61.8%</title></rect>';
+        }
+        const off = { up: [], down: [] };
+        lvls.forEach(l => {
+          const name = (l.r * 100).toFixed(1).replace('.0', '') + '%';
+          if (!inView(l.price)) { off[l.price > hi ? 'up' : 'down'].push(name + ' ' + fmt(l.price, l.price > 999 ? 0 : 1)); return; }
+          const key = [0.382, 0.5, 0.618].includes(l.r);
+          g += '<line class="fib-level" x1="' + left + '" x2="' + plotR + '" y1="' + y(l.price) + '" y2="' + y(l.price) + '" stroke="' + gold + '" stroke-width="' + (key ? 1.3 : .8) + '" stroke-dasharray="' + (l.ext ? '2 4' : key ? '0' : '5 4') + '" opacity="' + (key ? .9 : .6) + '"/>' +
+            '<text x="' + (plotR - 4) + '" y="' + (y(l.price) - 3) + '" font-size="9.5" font-weight="700" text-anchor="end" fill="' + gold + '">' + (l.ext ? 'EXT ' : 'FIB ') + name + ' ' + fmt(l.price, l.price > 999 ? 0 : 1) + '</text>';
+        });
+        if (off.up.length) g += '<text x="' + (plotR - 4) + '" y="' + (price.top + 10) + '" font-size="9" text-anchor="end" fill="' + gold + '">▲ ' + esc(off.up.join(' · ')) + '</text>';
+        if (off.down.length) g += '<text x="' + (plotR - 4) + '" y="' + (price.bot - 4) + '" font-size="9" text-anchor="end" fill="' + gold + '">▼ ' + esc(off.down.join(' · ')) + '</text>';
+        [[a.from, 'FIB START'], [a.to, 'FIB END']].forEach(([pt, lab]) => {
+          const i = S.dates.indexOf(pt.date);
+          if (i >= 0 && inView(pt.price)) g += '<circle cx="' + x(i) + '" cy="' + y(pt.price) + '" r="5" fill="none" stroke="' + gold + '" stroke-width="2"><title>' + esc(lab + ' ' + pt.date + ' ' + fmt(pt.price)) + '</title></circle>';
+        });
+      }
+    }
+    if (L.events && (s.events || []).length) {
+      const i = N - 1, pv = s.prev || {};
+      const seg = (v, col, lab) => { if (!isNum(v) || v < lo || v > hi) return; g += '<line x1="' + x(Math.max(0, i - 3)) + '" x2="' + x(i) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="2 2"/><text x="' + x(Math.max(0, i - 3)) + '" y="' + (y(v) - 3) + '" font-size="9" font-weight="700" fill="' + col + '">' + lab + '</text>'; };
+      if (s.events.includes('target_hit')) seg(pv.next_target, '#15803d', 'YDAY TARGET HIT');
+      if (s.events.includes('stop_hit')) seg(pv.stop, '#b91c1c', 'YDAY STOP HIT');
+      const labels = s.events.map(k => evMeta[k]?.label || k);
+      g += '<g class="event-dot"><title>' + esc('Today: ' + labels.join(' · ')) + '</title><circle cx="' + x(i) + '" cy="' + (price.top + 8) + '" r="8" fill="#111827"/><text x="' + x(i) + '" y="' + (price.top + 11.5) + '" font-size="10" font-weight="800" text-anchor="middle" fill="#fff">' + s.events.length + '</text></g>';
     }
     if (L.swings) (S.swings || []).forEach(sw => {
       const i = S.dates.indexOf(sw.d); if (i < 0) return;
@@ -224,7 +299,7 @@
     }
     [0, Math.floor(N / 3), Math.floor(2 * N / 3), N - 1].forEach((i, n) => g += '<text x="' + x(i) + '" y="' + (H - 8) + '" font-size="10" fill="#7a857f" text-anchor="' + (n === 0 ? 'start' : n === 3 ? 'end' : 'middle') + '">' + esc(S.dates[i]) + '</text>');
     g += '<line id="su-hair" x1="0" x2="0" y1="' + price.top + '" y2="' + (H - 22) + '" stroke="#5d6b63" stroke-dasharray="3 3" opacity="0"/>';
-    g += '<text x="' + left + '" y="18" font-size="11" fill="#5d6b63"><tspan fill="#7c3aed" font-weight="700">━ Supertrend</tspan> (purple = up, orange = down)   <tspan fill="#0d9488" font-weight="700">▒ Bollinger 20,2</tspan>   <tspan fill="#64748b" font-weight="700">┅ VWAP-20</tspan>   <tspan fill="#1d4ed8" font-weight="700">━ Buy</tspan> <tspan fill="#b91c1c" font-weight="700">┅ Stop</tspan> <tspan fill="#15803d" font-weight="700">┅ Targets</tspan></text>';
+    g += '<text x="' + left + '" y="18" font-size="11" fill="#5d6b63"><tspan fill="#b8860b" font-weight="700">━ Fibonacci</tspan> (shaded = golden zone)  <tspan fill="#7c3aed" font-weight="700">━ Supertrend</tspan> (purple up / orange down)  <tspan fill="#0d9488" font-weight="700">▒ Bollinger</tspan>  <tspan fill="#64748b" font-weight="700">┅ VWAP-20</tspan>  <tspan fill="#1d4ed8" font-weight="700">━ Buy</tspan> <tspan fill="#b91c1c" font-weight="700">┅ Stop</tspan> <tspan fill="#15803d" font-weight="700">┅ Targets</tspan>  <tspan fill="#111827" font-weight="700">● today</tspan></text>';
     $('su-chart').innerHTML = g + '</svg>';
     $('su-chart').dataset.n = N;
     readout(S, N - 1);
@@ -288,6 +363,31 @@
     return '<h3>Jev ranking &amp; agreement</h3><div class="su-kv">' + kv.map(([k, v]) => '<span>' + esc(k) + ' <b>' + esc(v) + '</b></span>').join('') + '</div>' + verdict + '<p>' + esc(j.words) + '</p>' +
       '<p><strong>Indicators:</strong> ' + (c.bull ?? 0) + ' bullish · ' + (c.bear ?? 0) + ' bearish · ' + (c.neutral ?? 0) + ' neutral. <strong>Conviction ' + esc(s.conviction ?? '–') + '/100.</strong></p>';
   }
+  function todayPanel(s) {
+    const evs = s.events || [], pv = s.prev;
+    const src = !pv ? 'No previous session to compare.' : (pv.source === 'published' ? 'Compared with the published list of ' : 'Compared with yesterday\'s plan rebuilt from levels known on ') + (pv.date || '') +
+      ': it was "' + (catMeta[pv.category]?.label || pv.category) + '"' + (isNum(pv.stop) ? ', stop ' + rs(pv.stop) + ', next target ' + rs(pv.next_target) : ', no trade') + '.';
+    if (!evs.length) return '<h3>What happened today</h3><p>Nothing notable: no breakout, exit, target, stop, trend flip or Fib cross today.</p><p class="muted">' + esc(src) + '</p>';
+    return '<h3>What happened today (' + evs.length + ')</h3><ul class="su-evlist">' +
+      evs.map(k => '<li data-tone="' + esc(evMeta[k]?.tone) + '"><strong>' + esc(evMeta[k]?.label || k) + '.</strong> ' + esc(s.event_words?.[k] || evMeta[k]?.meaning || '') + '</li>').join('') + '</ul><p class="muted">' + esc(src) + '</p>';
+  }
+  function fibPanel(s) {
+    const f = s.fib, a = fibOf(s, $('su-fib-anchor').value);
+    if (!a) return '<h3>Fibonacci</h3><p>Not enough history to fit a leg.</p>';
+    const all = [...a.levels.map(l => ({ ...l, ext: false })), ...a.extensions.map(l => ({ ...l, ext: true }))].sort((p, q) => q.price - p.price);
+    const near = all.reduce((b, l) => Math.abs(l.price - s.close) < Math.abs(b.price - s.close) ? l : b, all[0]);
+    const rows = all.map(l => '<tr data-near="' + (l === near) + '" data-golden="' + (l.r === 0.5 || l.r === 0.618) + '"><td>' + (l.ext ? 'Ext ' : '') + (l.r * 100).toFixed(1) + '%</td><td class="num">' + rs(l.price) + '</td><td class="num">' + (l.price >= s.close ? '+' : '') + fmt((l.price / s.close - 1) * 100, 1) + '% from close</td></tr>').join('');
+    const scores = f.anchors.map(c => c.method + ' ' + c.score + (c.method === f.auto ? ' ✓' : '')).join(' · ');
+    return '<h3>Fibonacci · ' + esc(a.label) + (a.method === f.auto ? ' (auto pick)' : '') + '</h3><p>' + esc(a.words) + '</p>' +
+      '<table class="su-fibtable"><tbody>' + rows + '</tbody></table>' +
+      '<p class="muted" style="font-size:12px"><strong>Why this anchor:</strong> ' + esc(f.why) + ' Scores: ' + esc(scores) + '. Highlighted row = level nearest today\'s close.</p>';
+  }
+  function learnPanel(s) {
+    const h = s.history;
+    if (!h) return '<h3>What this stock taught us</h3><p class="muted">Not enough history.</p>';
+    const row = (k, lab) => { const v = h[k]; return v.count ? '<span>' + lab + ' <b>' + v.count + '</b> · avg <b class="' + (v.avg_pct >= 0 ? 'up' : 'down') + '">' + (v.avg_pct >= 0 ? '+' : '') + fmt(v.avg_pct, 1) + '%</b> · best ' + fmt(v.best_pct, 1) + '% · worst ' + fmt(v.worst_pct, 1) + '%</span>' : '<span>' + lab + ' <b>0</b></span>'; };
+    return '<h3>What this stock taught us</h3><div class="su-kv" style="flex-direction:column;gap:4px">' + row('breakouts', 'Past breakouts') + row('exits', 'Past structure exits') + '</div><p>' + esc(h.words) + '</p><p class="muted" style="font-size:12px">Measured ' + esc(h.horizon) + ' sessions after each event inside this chart\'s ~6 months.</p>';
+  }
   function openStock(sym, scroll) {
     const s = data.stocks.find(x => x.symbol === sym); if (!s) return;
     selected = sym;
@@ -299,6 +399,10 @@
     const b = $('su-dbadge'); b.textContent = c.label || s.category; b.dataset.tone = c.tone || 'neutral';
     $('su-dsummary').textContent = s.summary;
     $('su-inds').innerHTML = indicatorCards(s);
+    const have = new Set((s.fib?.anchors || []).map(a => a.method));
+    [...$('su-fib-anchor').options].forEach(o => { if (o.value === 'auto') return; o.disabled = !have.has(o.value); o.textContent = o.textContent.replace(/ \(same swing\)$/, '') + (have.has(o.value) ? '' : ' (same swing)'); });
+    if ($('su-fib-anchor').selectedOptions[0]?.disabled) $('su-fib-anchor').value = 'auto';
+    $('su-today').innerHTML = todayPanel(s); $('su-fib').innerHTML = fibPanel(s); $('su-learn').innerHTML = learnPanel(s);
     $('su-plan').innerHTML = planPanel(s); $('su-hedge').innerHTML = hedgePanel(s); $('su-jev').innerHTML = jevPanel(s);
     $('su-hhhl-link').href = 'hhhl.html?symbol=' + encodeURIComponent(s.symbol);
     $('su-chart').innerHTML = '<p class="muted">Loading chart…</p>';
@@ -310,7 +414,13 @@
 
   // ── wiring ─────────────────────────────────────────────────────────────
   function wire() {
-    ['su-search', 'su-universe', 'su-sort'].forEach(id => $(id).addEventListener('input', renderRows));
+    ['su-search', 'su-universe', 'su-sort', 'su-fibzone'].forEach(id => $(id).addEventListener('input', renderRows));
+    $('su-clear').addEventListener('click', () => { $('su-search').value = ''; $('su-universe').value = 'all'; $('su-fibzone').value = 'all'; cat = null; ev = null; syncFilters(); });
+    $('su-fib-anchor').addEventListener('change', () => {
+      const s = data.stocks.find(x => x.symbol === selected); if (!s) return;
+      $('su-fib').innerHTML = fibPanel(s);
+      if (series?.[selected]) drawChart(s, series[selected]);
+    });
     const rows = $('su-rows');
     rows.addEventListener('click', e => { const tr = e.target.closest('tr[data-sym]'); if (tr) openStock(tr.dataset.sym, true); });
     rows.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const tr = e.target.closest('tr[data-sym]'); if (tr) { e.preventDefault(); openStock(tr.dataset.sym, true); } });
@@ -318,15 +428,17 @@
   }
   fetch(bust('daily_setups.json')).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(d => {
     data = validate(d);
-    renderHeader(); renderCats(); renderGuide(); wire();
+    renderHeader(); renderCats(); renderEvents(); renderGuide(); wire();
     const q = new URLSearchParams(location.search);
-    setCat(catMeta[q.get('cat')] ? q.get('cat') : null);
+    cat = catMeta[q.get('cat')] ? q.get('cat') : null;
+    ev = evMeta[q.get('event')] ? q.get('event') : null;
+    syncFilters();
     const first = q.get('symbol') && data.stocks.some(s => s.symbol === q.get('symbol')) ? q.get('symbol')
       : (data.stocks.find(s => s.category === 'breakout_today') || data.stocks.find(s => s.category === 'ready_to_break') || data.stocks[0]).symbol;
     openStock(first, false);
   }).catch(err => {
     $('su-gate').className = 'su-gate closed';
     $('su-gate').textContent = 'Daily setups unavailable: ' + err.message + '. Nothing is shown rather than an old or partial list.';
-    $('su-rows').innerHTML = '<tr><td colspan="9" class="su-empty">No data.</td></tr>';
+    $('su-rows').innerHTML = '<tr><td colspan="11" class="su-empty">No data.</td></tr>';
   });
 })();

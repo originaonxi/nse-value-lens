@@ -26,6 +26,8 @@ import math
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import setup_signals as sig
+
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT / "docs"
 OUT = DOCS / "daily_setups.json"
@@ -33,6 +35,7 @@ HISTORY = ROOT / "data" / "daily_setups_history"
 VERSION = 1
 RISK_FREE = 0.065
 OPTS_DATE = None             # set in main(): date of the options desk file used for IV / strikes
+SERIES_BARS = 120           # chart file keeps the last 120 sessions (the page shows up to 110)
 CAPITAL = 1_000_000          # sizing example: Rs 10 lakh
 RISK_PCT = 0.5               # repo rule: 0.5% risk per position
 MAX_POSITION_PCT = 20        # repo rule: max 20% of capital per position
@@ -237,7 +240,9 @@ def bs_price(spot, strike, years, vol, kind, r=RISK_FREE):
 
 
 def r2(v, d=2):
-    return None if v is None or (isinstance(v, float) and not math.isfinite(v)) else round(float(v), d)
+    if v is None or (isinstance(v, float) and not math.isfinite(v)):
+        return None
+    return int(round(float(v))) if d == 0 else round(float(v), d)
 
 
 def inr(v):
@@ -615,6 +620,98 @@ def build_stock(row, universe, member_lots, opt_map, jev_map, brief_map):
     return out, series
 
 
+def previous_published(as_of):
+    """Latest published compact list strictly before `as_of` (data/daily_setups_history/<date>.json)."""
+    if not HISTORY.exists():
+        return None
+    days = sorted(p.stem for p in HISTORY.glob("*.json") if p.stem < (as_of or ""))
+    if not days:
+        return None
+    d = json.loads((HISTORY / f"{days[-1]}.json").read_text(encoding="utf-8"))
+    out = {s["symbol"]: s for s in d.get("stocks") or []}
+    out["_as_of"] = d.get("as_of") or days[-1]
+    return out
+
+
+def rebuilt_prev(row):
+    """Yesterday's category and plan, rebuilt only from levels known at yesterday's close."""
+    pr = sig.prior_view(row)
+    if not pr:
+        return None
+    reads = indicator_pack(pr["chart"])[0]
+    cat = classify(pr, reads)
+    tone = CATEGORIES[cat]["tone"]
+    if tone == "bull":
+        entry, stop, targets, _ = long_plan(pr, cat, reads)
+    elif tone == "bear":
+        entry, stop, targets, _ = short_plan(pr, cat, reads)
+    else:
+        return {"category": cat, "side": CATEGORIES[cat]["side"], "entry": None, "stop": None, "next_target": None,
+                "date": pr["data_date"], "source": "rebuilt"}
+    return {"category": cat, "side": CATEGORIES[cat]["side"], "entry": r2(entry), "stop": r2(stop),
+            "next_target": r2(targets[0]) if targets else None, "date": pr["data_date"], "source": "rebuilt"}
+
+
+def event_words(key, bars, ser, fib, prev, crossed, s):
+    t, y = bars[-1], bars[-2]
+    lab = lambda c: CATEGORIES.get(c, {}).get("label", c)
+    src = "yesterday's published list" if (prev or {}).get("source") == "published" else "yesterday's plan (rebuilt)"
+    a = next((x for x in fib["anchors"] if x["method"] == fib["auto"]), None) if fib else None
+    lv = lambda r: next((l["price"] for l in a["levels"] if l["r"] == r), None) if a else None
+    rsi, st, up, lo = ser.get("rsi") or [], ser.get("supertrend") or [], ser.get("bb_upper") or [], ser.get("bb_lower") or []
+    trig = y.get("confirmed_high") or t.get("confirmed_high")
+    floor = y.get("confirmed_low") or t.get("confirmed_low")
+    w = {
+        "breakout": f"Closed {inr(t['close'])} above the closing trigger {inr(trig)}.",
+        "structure_exit": f"Closed {inr(t['close'])} below the last swing low {inr(floor)}.",
+        "target_hit": (f"Today's {'high' if (prev or {}).get('side') == 'long' else 'low'} "
+                       f"{inr(t['high'] if (prev or {}).get('side') == 'long' else t['low'])} reached the next target {inr((prev or {}).get('next_target'))} from {src}."),
+        "stop_hit": (f"Today's {'low' if (prev or {}).get('side') == 'long' else 'high'} "
+                     f"{inr(t['low'] if (prev or {}).get('side') == 'long' else t['high'])} touched the stop {inr((prev or {}).get('stop'))} from {src}."),
+        "upgraded": f"{lab((prev or {}).get('category'))} -> {lab(s['category'])}.",
+        "downgraded": f"{lab((prev or {}).get('category'))} -> {lab(s['category'])}.",
+        "st_flip_up": f"Supertrend turned up; its line is now {inr(st[-1] if st else None)} under the price.",
+        "st_flip_down": f"Supertrend turned down; its line is now {inr(st[-1] if st else None)} above the price.",
+        "momentum_up": f"RSI {rsi[-2]:.0f} -> {rsi[-1]:.0f}." if len(rsi) > 1 and rsi[-1] is not None and rsi[-2] is not None else "",
+        "momentum_down": f"RSI {rsi[-2]:.0f} -> {rsi[-1]:.0f}." if len(rsi) > 1 and rsi[-1] is not None and rsi[-2] is not None else "",
+        "bb_break_up": f"Close {inr(t['close'])} above the upper band {inr(up[-1] if up else None)}.",
+        "bb_break_down": f"Close {inr(t['close'])} below the lower band {inr(lo[-1] if lo else None)}.",
+        "squeeze": f"Band width {s['indicators'].get('bollinger', {}).get('width_pct')}% of price.",
+        "volume_spike": (f"Volume {(t.get('volume') or 0) / t['volume_average20']:.1f}x the 20-session average."
+                         if t.get("volume_average20") else ""),
+        "high_20d": f"Close {inr(t['close'])} above the prior 20-session high {inr(max(b['high'] for b in bars[-21:-1]))}.",
+        "low_20d": f"Close {inr(t['close'])} below the prior 20-session low {inr(min(b['low'] for b in bars[-21:-1]))}.",
+        "fib_golden": (f"{a['retrace_pct']:.0f}% retraced; golden zone {inr(lv(0.618) if a and a['dir'] == 'up' else lv(0.5))}"
+                       f" to {inr(lv(0.5) if a and a['dir'] == 'up' else lv(0.618))}." if a else ""),
+        "fib_break": "; ".join(f"Closed {c['dir']} through {c['r'] * 100:.1f}% ({inr(c['price'])})" for c in crossed) + "." if crossed else "",
+        "fib_target": ("Today's range reached the " + " / ".join(f"{e['r'] * 100:.1f}% extension {inr(e['price'])}" for e in a["extensions"]
+                                                           if t["low"] <= e["price"] <= t["high"]) + "." if a else ""),
+    }
+    return w.get(key, "")
+
+
+def enrich(s, row, ser, published):
+    """Fibonacci, today's events (vs the previous session) and this stock's own breakout / exit history."""
+    bars = row["chart"]
+    s.update(fib=None, events=[], event_words={}, prev=None, history=None)
+    if len(bars) < 62 or not ser:
+        return
+    s["fib"] = sig.fibonacci(bars, row["close"], inr)
+    s["history"] = sig.history_stats(bars)
+    pub = (published or {}).get(s["symbol"])
+    if pub and pub.get("category"):
+        prev = {"category": pub["category"], "side": pub.get("side") or CATEGORIES.get(pub["category"], {}).get("side"),
+                "entry": pub.get("entry"), "stop": pub.get("stop"), "next_target": pub.get("next_target"),
+                "date": published.get("_as_of"), "source": "published"}
+    else:
+        prev = rebuilt_prev(row)
+    s["prev"] = prev
+    order = {k: v["order"] for k, v in CATEGORIES.items()}
+    events, crossed = sig.detect_events(bars, ser, s.get("indicators") or {}, s["fib"], s["category"], prev, order)
+    s["events"] = events
+    s["event_words"] = {k: event_words(k, bars, ser, s["fib"], prev, crossed, s) for k in events}
+
+
 def main():
     scan, fno = load("hhhl_scan.json"), load("hhhl_fno.json") or {}
     if not scan or len(scan.get("rows") or []) < 150:
@@ -628,6 +725,7 @@ def main():
     opt_map = {r["symbol"]: r for r in opts.get("rows") or [] if r.get("kind") == "stock"}
     member_lots = {m["symbol"]: m.get("lot_size") for m in ((fno.get("membership") or {}).get("members") or [])}
 
+    published = previous_published(scan.get("as_of"))
     stocks, series = [], {}
     rows = [(r, "Nifty 200") for r in scan["rows"]] + [(r, "F&O extra") for r in fno.get("rows") or []]
     seen = set()
@@ -637,20 +735,22 @@ def main():
         seen.add(row["symbol"])
         try:
             s, ser = build_stock(row, uni, member_lots, opt_map, jev_map, brief_map)
-        except (KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
+            enrich(s, row, ser, published)
+        except (KeyError, TypeError, ValueError, ZeroDivisionError, StopIteration) as exc:
             s, ser = {"symbol": row.get("symbol"), "name": row.get("name"), "universe": uni, "category": "data_check",
                       "close": row.get("close"), "data_date": row.get("data_date"), "plan": None, "hedge": None,
-                      "jev": {"available": False}, "indicators": {}, "summary": f"Could not compute: {exc}"}, {}
+                      "jev": {"available": False}, "indicators": {}, "events": [], "summary": f"Could not compute: {exc}"}, {}
         stocks.append(s)
         if ser:
-            ch = row["chart"]
+            ch = row["chart"][-SERIES_BARS:]
+            cut = len(row["chart"]) - len(ch)
             series[s["symbol"]] = {
                 "dates": [b["date"] for b in ch], "o": [r2(b["open"]) for b in ch], "h": [r2(b["high"]) for b in ch],
                 "l": [r2(b["low"]) for b in ch], "c": [r2(b["close"]) for b in ch],
                 "v": [int(b.get("volume") or 0) for b in ch],
                 "swings": [{"d": p["pivot_date"], "p": r2(p["price"]), "k": p["kind"], "t": p.get("label")}
                            for p in (row.get("chart_swings") or [])[-14:]],
-                **ser}
+                **{k: v[cut:] for k, v in ser.items()}}
 
     def sort_key(s):
         return (CATEGORIES[s["category"]]["order"], -(s.get("conviction") or 0),
@@ -675,6 +775,8 @@ def main():
                       f"The strategy rule blocks NEW longs - bullish plans below are paper-only until Nifty closes back above it."),
         },
         "categories": [{"key": k, **{kk: vv for kk, vv in v.items() if kk != "order"}, "count": counts[k]} for k, v in CATEGORIES.items()],
+        "events": [{"key": k, **v, "count": sum(1 for s in stocks if k in (s.get("events") or []))} for k, v in sig.EVENTS.items()],
+        "previous_list": published.get("_as_of") if published else None,
         "indicator_guide": INDICATORS,
         "method": {
             "conviction": "Directional setups only: (indicators agreeing with the category / 5) x 60 + Jev composite x 40 "
@@ -682,6 +784,10 @@ def main():
             "long_stop": "Higher of the structure exit and entry - 2 x ATR14 (scanner rule).",
             "targets": "T1 = nearest confirmed swing high above entry (or 1.5R if none within 2R), T2 = 2R, T3 = 3R. Bearish setups mirror this with swing lows.",
             "hedges": "F&O names only. Premiums are Black-Scholes estimates from end-of-day ATM IV and the official lot size.",
+            "fibonacci": "Three anchors per stock (last 3 x ATR zigzag leg, 3-month range, 6-month range). Each is scored by how often price "
+                         "reacted at its 38.2-78.6% levels after the leg ended; the best fit is 'auto'. Daily candles only - there is no intraday data.",
+            "events": "Compared with the previous session: yesterday's published list when it exists, otherwise yesterday's plan rebuilt "
+                      "from the levels known at yesterday's close. Target / stop hits use today's high and low.",
         },
         "limitations": [
             "End-of-day research, not live quotes and not investment advice. No strategy here is validated as profitable.",
@@ -698,8 +804,8 @@ def main():
     HISTORY.mkdir(parents=True, exist_ok=True)
     compact = {"as_of": as_of, "generated_at": payload["generated_at"], "stocks": [
         {"symbol": s["symbol"], "category": s["category"], "close": s.get("close"),
-         **({k: s["plan"].get(k) for k in ("entry", "stop", "next_target")} if s.get("plan") else {}),
-         "conviction": s.get("conviction")} for s in stocks]}
+         **({k: s["plan"].get(k) for k in ("side", "entry", "stop", "next_target")} if s.get("plan") else {}),
+         "events": s.get("events") or [], "conviction": s.get("conviction")} for s in stocks]}
     (HISTORY / f"{as_of}.json").write_text(json.dumps(compact, separators=(",", ":")), encoding="utf-8")
     print(f"daily_setups {as_of}: {len(stocks)} stocks | " + ", ".join(f"{k}={v}" for k, v in counts.items() if v))
 
