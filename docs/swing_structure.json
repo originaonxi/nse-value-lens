@@ -1,6 +1,6 @@
 {
  "as_of": "2026-10-28",
- "universe": "Nifty 200 (200 stocks)",
+ "universe": "Nifty 200 (199 stocks)",
  "method": "Dow HH/HL/LH/LL on 5-bar fractals + BOS/CHoCH labels + Wyckoff volume phase. Informational \u2014 not action-changing until calibrated.",
  "counts": {
   "REVERSAL_UP": 5,
@@ -8,7 +8,7 @@
   "UPTREND_BROKEN": 5,
   "DOWNTREND_BROKEN": 9,
   "UPTREND": 16,
-  "DOWNTREND": 119,
+  "DOWNTREND": 118,
   "MIXED": 26
  },
  "second_ll": [
@@ -17,7 +17,6 @@
   "360ONE",
   "ADANIPOWER",
   "AMBUJACEM",
-  "APLAPOLLO",
   "ASTRAL",
   "BAJFINANCE",
   "BDL",
@@ -6663,102 +6662,6 @@
     }
    ],
    "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b9422.8 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 24.9L vs bounce highs 27.4L. Real sellers driving down.",
-   "at_second_ll": true,
-   "at_second_hh": false
-  },
-  {
-   "symbol": "APLAPOLLO",
-   "name": "APL Apollo Tubes Ltd.",
-   "close": 2165.3,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 2188.7,
-    "date": "2026-10-13"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 2026.2,
-    "date": "2026-10-09"
-   },
-   "consec_hh": 0,
-   "consec_ll": 2,
-   "consec_lh": 3,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": null,
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "HIGH",
-    "vol_at_last_high": 305085,
-    "vol_at_last_low": 397189,
-    "note": "MARKDOWN \u2014 breakdown lows on 4.0L vs bounce highs 3.1L. Real sellers driving down."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "HIGH",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 4.0L vs bounce highs 3.1L. Real sellers driving down.",
-   "sequence": [
-    {
-     "date": "2026-07-01",
-     "price": 1743.38,
-     "label": "HL"
-    },
-    {
-     "date": "2026-07-10",
-     "price": 1834.93,
-     "label": "LH"
-    },
-    {
-     "date": "2026-07-17",
-     "price": 1782.33,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-03",
-     "price": 2128.3,
-     "label": "HL"
-    },
-    {
-     "date": "2026-09-04",
-     "price": 2272.25,
-     "label": "HH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 2041.3,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-18",
-     "price": 2270.1,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-30",
-     "price": 2224.5,
-     "label": "LH"
-    },
-    {
-     "date": "2026-10-09",
-     "price": 2026.2,
-     "label": "LL"
-    },
-    {
-     "date": "2026-10-13",
-     "price": 2188.7,
-     "label": "LH"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b92188.7 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 4.0L vs bounce highs 3.1L. Real sellers driving down.",
    "at_second_ll": true,
    "at_second_hh": false
   },
