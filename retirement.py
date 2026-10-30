@@ -124,7 +124,7 @@ def action_for(s, score):
     """Map signal state to a hold/trim/exit decision for a long-term satellite position."""
     cat = (s.get("category") or "").lower()
     jev = s.get("jev") or {}
-    if cat in ("downtrend", "structure_exit") or jev.get("direction") == "down" and score < 45:
+    if cat in ("downtrend", "structure_exit") or (jev.get("direction") == "down" and score < 45):
         return "EXIT"
     if cat == "sideways" or score < 50:
         return "TRIM"
