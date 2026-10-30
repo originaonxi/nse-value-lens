@@ -37,6 +37,8 @@ MODEL       = "jev-latest"
 TIMEOUT     = 30
 MAX_WORKERS = 8
 RETRIES     = 3
+RECOVERY_ROUNDS = 3
+RECOVERY_BUDGET_S = 600  # max seconds spent re-asking stocks that failed the parallel pass
 
 # ── 6-question battery (paper §V) ─────────────────────────────────────────────
 # Rule: arithmetic stays in code; judgment goes to Jev.
@@ -239,42 +241,67 @@ def main():
     stocks = [s for s in sr["stocks"] if "error" not in s]
     results = []
 
+    def judge(s, resp):
+        """Return (row, None) on success or (None, reason) when Jev gave no usable answer."""
+        if not resp.get("ok", True) and "reason" in resp:
+            return None, f"JEV failed: {resp['reason']}"
+        parsed = parse_answers(resp.get("answers") or {})
+        composite = score_from_parsed(parsed)
+        if composite is None:
+            return None, f"JEV incomplete scores: {parsed}"
+        return (s, parsed, composite), None
+
+    judged, failed = [], []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
         futs = {pool.submit(ask, compact_state(s), key): s for s in stocks}
         for fut in as_completed(futs):
-            s    = futs[fut]
-            resp = fut.result()
-            if not resp.get("ok", True) and "reason" in resp:
-                print(f"warn: {s['symbol']} JEV failed: {resp['reason']}", file=sys.stderr)
+            row, why = judge(futs[fut], fut.result())
+            if row:
+                judged.append(row)
+            else:
+                failed.append(futs[fut])
+                print(f"warn: {futs[fut]['symbol']} {why}; will retry", file=sys.stderr)
+
+    # Recovery passes: parallel bursts hit transient API errors/rate limits. Retry the
+    # misses one at a time with a pause so a few failures never drop stocks silently.
+    # A wall-clock budget keeps a real Jev outage from holding the shared workflow lock.
+    deadline = time.monotonic() + RECOVERY_BUDGET_S
+    for rnd in range(1, RECOVERY_ROUNDS + 1):
+        if not failed or time.monotonic() >= deadline:
+            break
+        time.sleep(5 * rnd)
+        still = []
+        for s in failed:
+            if time.monotonic() >= deadline:
+                still.append(s)
                 continue
-            answers = resp.get("answers") or {}
-            parsed  = parse_answers(answers)
+            row, why = judge(s, ask(compact_state(s), key))
+            if row:
+                judged.append(row)
+            else:
+                still.append(s)
+                print(f"warn: {s['symbol']} {why} (recovery round {rnd})", file=sys.stderr)
+        failed = still
+    if failed:
+        print(f"warn: {len(failed)} stocks still unjudged: {', '.join(s['symbol'] for s in failed)}", file=sys.stderr)
 
-            composite = score_from_parsed(parsed)
-            if composite is None:
-                print(f"warn: {s['symbol']} JEV incomplete scores: {parsed}", file=sys.stderr)
-                continue
-
-            # Normalise score dimensions for display (0-4 scale for UI back-compat)
-            max_lvl = {d: len(DIMENSIONS[d]["criteria"]) - 1
-                       for d in SCORE_WEIGHTS if DIMENSIONS[d]["type"] == "score"}
-
-            results.append({
-                "symbol":           s["symbol"],
-                "name":             s.get("name"),
-                "signal":           s["signal"],
-                "sr_score":         s.get("score"),
-                "close":            s["close"],
-                "composite":        composite,
-                # Scored dimensions (raw 0-based index)
-                "setup_quality":    parsed.get("setup_quality"),
-                "follow_through":   parsed.get("follow_through"),
-                "risk_reward":      parsed.get("risk_reward"),
-                # New: choice & noul answers
-                "regime_jev":       parsed.get("regime"),
-                "direction_jev":    parsed.get("direction"),
-                "confidence_gate":  parsed.get("confidence_gate"),
-            })
+    for s, parsed, composite in judged:
+        results.append({
+            "symbol":           s["symbol"],
+            "name":             s.get("name"),
+            "signal":           s["signal"],
+            "sr_score":         s.get("score"),
+            "close":            s["close"],
+            "composite":        composite,
+            # Scored dimensions (raw 0-based index)
+            "setup_quality":    parsed.get("setup_quality"),
+            "follow_through":   parsed.get("follow_through"),
+            "risk_reward":      parsed.get("risk_reward"),
+            # Choice & noul answers
+            "regime_jev":       parsed.get("regime"),
+            "direction_jev":    parsed.get("direction"),
+            "confidence_gate":  parsed.get("confidence_gate"),
+        })
 
     results.sort(key=lambda r: -r["composite"])
     for i, r in enumerate(results, 1):
