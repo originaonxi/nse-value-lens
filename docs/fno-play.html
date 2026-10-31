@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>F&amp;O ₹1 Play Desk — top 50 F&amp;O scalp signals | NSE Value Lens</title>
+<meta name="description" content="Daily EOD signal for every top-50 NSE F&O stock: BUY / SELL / WAIT signal, ADR vs ₹1, pivot support-resistance levels, and backtested win rate. Updated every evening after NSE close.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="fno-play.css">
+<script src="fno-play.js" defer></script>
+</head>
+<body>
+<div class="shell fno-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="fund.html">Our Fund</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="dma.html">DMA</a><a href="fno-play.html" aria-current="page"><strong>₹1 Play</strong></a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="retirement.html">Opus</a><a href="indicator-lab.html">Lab</a></nav></header>
+
+<main>
+<section class="fno-hero">
+  <div>
+    <h1>F&amp;O ₹1 Play Desk<br><span>Top 50 NSE F&amp;O stocks — daily scalp signal.</span></h1>
+    <p>Every evening after NSE close, each F&amp;O stock gets a directional bias — BUY or SELL — based on trend, range position, day momentum and volume. The goal: catch a ₹1 move in the next session. ADR shows how many ₹1 moves the stock averages per day. Backtest win rate shows how reliably this signal has fired historically.</p>
+    <p class="fd-note" style="margin-top:.5rem">⚠ EOD signals only. Confirm with your broker's live chart and the 15-min opening range before entering. Set stops. Futures margin is real capital at risk.</p>
+  </div>
+  <div class="fno-stat-bar">
+    <div class="fno-stat" id="st-vix"><span class="lab">India VIX</span><strong id="vix-val">—</strong></div>
+    <div class="fno-stat" id="st-buy"><span class="lab">BUY signals</span><strong id="buy-n">—</strong></div>
+    <div class="fno-stat" id="st-sell"><span class="lab">SELL signals</span><strong id="sell-n">—</strong></div>
+    <div class="fno-stat" id="st-wait"><span class="lab">Wait/Watch</span><strong id="wait-n">—</strong></div>
+    <div class="fno-stat" id="st-avoid"><span class="lab">Avoid</span><strong id="avoid-n">—</strong></div>
+    <div class="fno-stat" id="st-cov"><span class="lab">Stocks covered</span><strong id="cov-n">—</strong></div>
+  </div>
+</section>
+
+<div id="fno-banner" class="fd-banner" role="status">Loading ₹1 play data…</div>
+
+<h2 class="fd-h2">1. Top picks for tomorrow <small id="picks-sub"></small></h2>
+<p class="fd-note">Highest-conviction BUY and SELL signals sorted by ADR. Wait for the 15-min ORB to confirm direction before entering.</p>
+<div class="fd-wrap">
+<table class="fd-table fno-picks-table" id="picks-table">
+  <thead><tr>
+    <th>#</th><th>Stock</th><th>Signal</th>
+    <th class="num" title="Average daily range in ₹ (20-day). Shows how easily ₹1 moves happen.">ADR ₹</th>
+    <th class="num" title="How many ₹1 moves happen per day on average">ADR / ₹1</th>
+    <th class="num">Close ₹</th>
+    <th class="num" title="₹1 profit per futures lot">₹1 / lot</th>
+    <th class="num" title="Historical win rate: on BUY/SELL signal days, how often did next session hit ₹1?">BT win%</th>
+    <th class="num">BT trades</th>
+    <th>Entry · Target · Stop</th>
+  </tr></thead>
+  <tbody id="picks-body"></tbody>
+</table>
+</div>
+
+<h2 class="fd-h2" style="margin-top:2rem">2. Capital calculator</h2>
+<p class="fd-note">How many lots and what daily P&amp;L for ₹1 on your capital. Margin ~15-20% of contract value. Always use a stop loss.</p>
+<div class="fno-calc" id="calc-panel">
+  <label><strong>Your capital (₹)</strong></label>
+  <input id="cap-input" type="number" min="100000" step="100000" value="1000000">
+  <span class="chips">
+    <button data-cap="500000">₹5L</button>
+    <button data-cap="1000000">₹10L</button>
+    <button data-cap="2000000">₹20L</button>
+    <button data-cap="5000000">₹50L</button>
+  </span>
+  <div id="calc-out" class="fno-calc-out"></div>
+</div>
+
+<h2 class="fd-h2" style="margin-top:2rem">3. All F&amp;O stocks <small id="all-sub"></small></h2>
+<p class="fd-note">Click any row for pivot S&amp;R levels, backtest breakdown and full signal reasons.</p>
+<div class="dma-filters" id="fno-filters">
+  <button class="dma-filter active" data-filter="">All</button>
+  <button class="dma-filter" data-filter="buy_strong,buy">🟢 BUY</button>
+  <button class="dma-filter" data-filter="sell_strong,sell">🔴 SELL</button>
+  <button class="dma-filter" data-filter="watch_buy,watch_sell">👀 Watch</button>
+  <button class="dma-filter" data-filter="wait">🟡 Wait</button>
+  <button class="dma-filter" data-filter="avoid">⛔ Avoid</button>
+</div>
+<div class="fd-wrap">
+<table class="fd-table dma-all-table" id="all-table">
+  <thead><tr>
+    <th>#</th><th>Stock</th><th>Signal</th>
+    <th class="num">Score</th>
+    <th class="num" title="Avg daily range — how many Rs1 moves per day">ADR / ₹1</th>
+    <th class="num">Close</th>
+    <th class="num">Change%</th>
+    <th class="num" title="Rs1 profit per lot">₹1/lot</th>
+    <th class="num" title="Backtest win rate for this signal direction">BT win%</th>
+    <th class="num">Pivot</th>
+    <th class="num">R1</th>
+    <th class="num">S1</th>
+  </tr></thead>
+  <tbody id="all-body"></tbody>
+</table>
+</div>
+
+<aside id="fno-detail" class="dma-detail" hidden>
+  <div class="dma-detail-inner">
+    <button id="fd-close" class="dma-detail-close" aria-label="Close">✕</button>
+    <h3 id="fd-title">—</h3>
+    <p id="fd-name" class="fd-note" style="margin:0 0 .5rem"></p>
+    <div id="fd-signal-row" class="dma-detail-cross"></div>
+
+    <div class="dma-bt-block" id="fd-action">
+      <h4>Action for tomorrow's session</h4>
+      <p id="fd-action-text" style="font-size:.9rem;line-height:1.5"></p>
+    </div>
+
+    <div class="dma-sr-block" id="fd-sr">
+      <h4>Pivot Support &amp; Resistance levels</h4>
+      <div id="fd-sr-body"></div>
+    </div>
+
+    <div class="dma-bt-block" id="fd-bt">
+      <h4 id="fd-bt-title">Backtest</h4>
+    </div>
+
+    <div class="dma-score-block" id="fd-reasons">
+      <h4>Signal reasons</h4>
+      <div id="fd-reasons-body"></div>
+    </div>
+  </div>
+</aside>
+
+<section class="fd-rules" style="margin-top:2.5rem">
+  <h2 class="fd-h2">How the signal works</h2>
+  <div id="method-list"></div>
+  <h2 class="fd-h2" style="margin-top:1.5rem">Trading rules</h2>
+  <div id="rules-list"></div>
+  <h2 class="fd-h2" style="margin-top:1.5rem">Honest limits</h2>
+  <div id="limits-list"></div>
+</section>
+</main>
+
+<footer><span>NSE VALUE LENS / F&O ₹1 PLAY DESK</span><p>Paper research. Not SEBI-registered advice. Futures trading involves unlimited loss risk. No orders placed by this website. <a href="https://github.com/originaonxi/nse-value-lens">Source code</a></p></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+name: F&O ₹1 Play Desk refresh
+run-name: FnO play after ${{ github.event.workflow_run.name || github.event.schedule || 'manual' }}
+on:
+  workflow_run:
+    workflows: ['HHHL daily refresh']
+    types: [completed]
+    branches: [master]
+  schedule:
+    - cron: '30 11 * * *'   # 17:00 IST — after NSE close + HHHL
+    - cron: '0 17  * * *'   # 22:30 IST — evening fallback
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: fno-play
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run F&O ₹1 Play engine
+        run: python fno_play.py
+      - name: Verify output
+        run: |
+          python -c "
+          import json,sys
+          d=json.load(open('docs/fno-play.json'))
+          n=len(d['rows'])
+          buys=sum(1 for r in d['rows'] if 'buy' in r['signal'])
+          sells=sum(1 for r in d['rows'] if 'sell' in r['signal'])
+          assert n>=10, f'Too few rows: {n}'
+          print(f'FnO play: {n} stocks | BUY {buys} | SELL {sells} | VIX {d[\"vix\"]} | top picks: {len(d[\"top_picks\"])}')
+          "
+      - name: Commit data
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/fno-play.json public/data/fno-play.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: F&O ₹1 play desk ${{ github.run_id }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.commit.outputs.changed == 'true'
+        name: Push
+        run: |
+          for i in 1 2 3; do
+            git pull --rebase origin master && git push origin HEAD:master && break || sleep 15
+          done
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+      - id: deployment
+        uses: actions/deploy-pages@v4

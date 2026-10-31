@@ -1,0 +1,49 @@
+/* F&O ₹1 Play Desk — extends fund.css + dma.css */
+
+.fno-hero { background: var(--bg2); border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start; }
+.fno-hero h1 { font-size: 1.6rem; font-weight: 800; line-height: 1.2; margin: 0 0 .5rem; }
+.fno-hero h1 span { font-size: 1rem; font-weight: 500; color: var(--sub); display: block; margin-top: .25rem; }
+.fno-hero p { margin: 0; color: var(--sub); font-size: .88rem; max-width: 60ch; }
+
+.fno-stat-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; min-width: 260px; }
+.fno-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .6rem .8rem; }
+.fno-stat .lab { display: block; font-size: .7rem; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
+.fno-stat strong { font-size: 1.5rem; font-weight: 800; }
+
+/* Signal badges */
+.sig-badge { display: inline-flex; align-items: center; gap: .2em; padding: .15em .55em; border-radius: 20px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.sig-buy-strong, .sig-buy   { background: #16a34a22; color: #16a34a; border: 1px solid #16a34a55; }
+.sig-sell-strong,.sig-sell  { background: #dc262622; color: #dc2626; border: 1px solid #dc262655; }
+.sig-watch-buy,.sig-watch-sell { background: #0ea5e922; color: #0369a1; border: 1px solid #0ea5e955; }
+.sig-wait   { background: #eab30822; color: #92400e; border: 1px solid #eab30855; }
+.sig-avoid  { background: #6b728022; color: #374151; border: 1px solid #6b728055; }
+
+/* Conviction */
+.conv-high   { color: #16a34a; font-weight: 700; }
+.conv-medium { color: #d97706; font-weight: 700; }
+.conv-low, .conv-unproven { color: var(--sub); }
+
+/* Capital calculator */
+.fno-calc { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; padding: 1rem; background: var(--bg2); border-radius: 8px; margin-bottom: 1rem; }
+.fno-calc label { font-size: .88rem; }
+.fno-calc input { width: 14ch; padding: .4rem .6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-size: .9rem; }
+.fno-calc-out { width: 100%; margin-top: .5rem; }
+.fno-calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .5rem; }
+.fno-calc-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .7rem .9rem; font-size: .82rem; }
+.fno-calc-card strong { display: block; font-size: 1rem; font-weight: 800; }
+.fno-calc-card span { color: var(--sub); }
+
+/* Picks table */
+.fno-picks-table td, .fno-picks-table th { padding: .45rem .5rem; font-size: .82rem; }
+
+/* Inline S&R in detail panel */
+.fno-sr-r { color: #dc2626; }
+.fno-sr-s { color: #16a34a; }
+.fno-sr-p { color: var(--accent); font-weight: 700; }
+
+.fno-shell { max-width: 1400px; }
+
+@media (max-width: 800px) {
+  .fno-hero { grid-template-columns: 1fr; }
+  .fno-stat-bar { grid-template-columns: repeat(2, 1fr); }
+}
