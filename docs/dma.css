@@ -1,0 +1,94 @@
+/* DMA Intelligence Desk ─ extends fund.css */
+
+/* Hero ─────────────────────────────────────────────────── */
+.dma-hero { background: var(--bg2); border-radius: 12px; padding: 2rem 2rem 1.5rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start; }
+.dma-hero h1 { font-size: 1.6rem; font-weight: 800; line-height: 1.2; margin: 0 0 .5rem; }
+.dma-hero h1 span { font-size: 1rem; font-weight: 500; color: var(--sub); display: block; margin-top: .25rem; }
+.dma-hero p { margin: 0; color: var(--sub); font-size: .88rem; max-width: 55ch; }
+
+/* Crossover summary tiles */
+.dma-cross-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; min-width: 300px; }
+.dma-cross-tile { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .6rem .8rem; display: flex; flex-direction: column; gap: .15rem; cursor: pointer; }
+.dma-cross-tile strong { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.dma-cross-tile small { font-size: .72rem; color: var(--sub); }
+.dma-cross-tile:hover { background: var(--bg2); }
+
+/* Crossover badges */
+.dma-badge { display: inline-flex; align-items: center; gap: .2em; padding: .15em .55em; border-radius: 20px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.dma-platinum { background: #ffd70022; color: #b8860b; border: 1px solid #ffd70066; }
+.dma-golden   { background: #ffb30022; color: #cc7700; border: 1px solid #ffb30055; }
+.dma-silver   { background: #c0c0c022; color: #707070; border: 1px solid #c0c0c066; }
+.dma-bronze   { background: #cd7f3222; color: #8b4513; border: 1px solid #cd7f3255; }
+.dma-watch    { background: #0ea5e922; color: #0369a1; border: 1px solid #0ea5e955; }
+.dma-neutral  { background: var(--bg2); color: var(--sub); border: 1px solid var(--border); }
+.dma-bear     { background: #f9731622; color: #c2410c; border: 1px solid #f9731655; }
+.dma-death    { background: #ef444422; color: #b91c1c; border: 1px solid #ef444466; }
+
+/* DMA alignment bar — 4 coloured dots in a table cell */
+.dma-bar { display: inline-flex; gap: 3px; align-items: center; }
+.dma-dot { display: inline-flex; align-items: center; justify-content: center;
+           width: 22px; height: 16px; border-radius: 3px; font-size: .6rem;
+           font-weight: 700; letter-spacing: -.02em; }
+.dma-dot.on  { background: #16a34a22; color: #16a34a; border: 1px solid #16a34a55; }
+.dma-dot.off { background: #dc262622; color: #dc2626; border: 1px solid #dc262655; }
+
+/* Filters */
+.dma-filters { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .75rem; }
+.dma-filter { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
+              padding: .25em .8em; font-size: .82rem; cursor: pointer; transition: .15s; }
+.dma-filter:hover, .dma-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* All-stocks table — compact */
+.dma-all-table td, .dma-all-table th { padding: .35rem .5rem; font-size: .8rem; }
+.dma-all-table tr { cursor: pointer; }
+.dma-all-table tr:hover td { background: var(--bg2); }
+.dma-all-table tr[aria-selected="true"] td { background: #2563eb15; }
+
+/* Detail panel ─────────────────────────────────────────── */
+.dma-detail { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px, 100vw);
+              background: var(--bg); border-left: 2px solid var(--border);
+              box-shadow: -4px 0 24px #0002; z-index: 200; overflow-y: auto;
+              transform: translateX(100%); transition: transform .25s ease; }
+.dma-detail:not([hidden]) { transform: translateX(0); display: block; }
+.dma-detail-inner { padding: 1.5rem; }
+.dma-detail-close { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px;
+                    border-radius: 50%; border: 1px solid var(--border); background: var(--bg2);
+                    cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+.dma-detail h3 { font-size: 1.2rem; font-weight: 800; margin: 0 0 .2rem; }
+.dma-detail-cross { margin: .5rem 0 1rem; }
+
+/* S&R block */
+.dma-sr-block { background: var(--bg2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.dma-sr-block h4 { margin: 0 0 .75rem; font-size: .82rem; color: var(--sub); text-transform: uppercase; letter-spacing: .05em; }
+.dma-sr-close { text-align: center; padding: .4rem 0; border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); margin: .5rem 0; font-weight: 800; font-size: 1rem; }
+.dma-sr-row { display: flex; justify-content: space-between; align-items: center; padding: .3rem 0; font-size: .85rem; border-bottom: 1px solid var(--border); }
+.dma-sr-row:last-child { border-bottom: none; }
+.dma-sr-label { color: var(--sub); }
+.dma-sr-val { font-weight: 700; }
+.dma-sr-pct { font-size: .75rem; padding: .1em .4em; border-radius: 4px; }
+.dma-sr-pct.sup { background: #16a34a22; color: #16a34a; }
+.dma-sr-pct.res { background: #dc262622; color: #dc2626; }
+
+/* Backtest block */
+.dma-bt-block { background: var(--bg2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.dma-bt-block h4 { margin: 0 0 .6rem; font-size: .82rem; color: var(--sub); text-transform: uppercase; letter-spacing: .05em; }
+.dma-bt-row { display: flex; gap: 1rem; font-size: .85rem; margin-bottom: .3rem; }
+.dma-bt-row b { font-weight: 800; }
+
+/* Score breakdown */
+.dma-score-block { background: var(--bg2); border-radius: 8px; padding: 1rem; }
+.dma-score-block h4 { margin: 0 0 .6rem; font-size: .82rem; color: var(--sub); text-transform: uppercase; letter-spacing: .05em; }
+.dma-score-row { display: flex; justify-content: space-between; font-size: .82rem; padding: .2rem 0; }
+.dma-score-row b { font-weight: 800; }
+
+/* Shell */
+.dma-shell { max-width: 1400px; }
+
+/* Rules list */
+.fd-rules ol, .fd-rules ul { padding-left: 1.4rem; color: var(--sub); font-size: .85rem; line-height: 1.8; }
+
+@media (max-width: 800px) {
+  .dma-hero { grid-template-columns: 1fr; }
+  .dma-cross-summary { grid-template-columns: repeat(2, 1fr); }
+  .dma-detail { width: 100vw; }
+}

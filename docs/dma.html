@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DMA Intelligence Desk — Nifty 500 crossovers, support &amp; resistance | NSE Value Lens</title>
+<meta name="description" content="Every Nifty 500 stock ranked by 20/50/100/200-DMA alignment, HHHL trend, and backtested golden-crossover win rate. DMA levels as live support and resistance. Platinum, Golden, Silver, Bronze crossover taxonomy.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="dma.css">
+<script src="dma.js" defer></script>
+</head>
+<body>
+<div class="shell dma-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="fund.html">Our Fund</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="dma.html" aria-current="page"><strong>DMA</strong></a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="retirement.html">Opus</a><a href="indicator-lab.html">Lab</a></nav></header>
+
+<main>
+<section class="dma-hero">
+  <div>
+    <h1>DMA Intelligence Desk<br><span>Nifty 500 — all four moving averages.</span></h1>
+    <p>Every stock ranked by DMA stack alignment (20 · 50 · 100 · 200), HHHL trend confirmation, and backtested golden-crossover win rate. DMAs below the close = support. DMAs above = resistance. Click any stock to see the exact levels.</p>
+  </div>
+  <div class="dma-cross-summary" id="cross-summary">
+    <div class="dma-cross-tile" id="ct-platinum"><span class="dma-badge dma-platinum">🏆 Platinum</span><strong id="cn-platinum">—</strong><small>Perfect stack</small></div>
+    <div class="dma-cross-tile" id="ct-golden"><span class="dma-badge dma-golden">🥇 Golden</span><strong id="cn-golden">—</strong><small>50 crossed 200</small></div>
+    <div class="dma-cross-tile" id="ct-silver"><span class="dma-badge dma-silver">🥈 Silver</span><strong id="cn-silver">—</strong><small>20 crossed 50</small></div>
+    <div class="dma-cross-tile" id="ct-bronze"><span class="dma-badge dma-bronze">🥉 Bronze</span><strong id="cn-bronze">—</strong><small>Price crossed 200</small></div>
+    <div class="dma-cross-tile" id="ct-watch"><span class="dma-badge dma-watch">👀 Watch</span><strong id="cn-watch">—</strong><small>50 &gt; 200, sustained</small></div>
+    <div class="dma-cross-tile" id="ct-bear"><span class="dma-badge dma-bear">📉 Bear</span><strong id="cn-bear">—</strong><small>Death cross zone</small></div>
+  </div>
+</section>
+
+<div id="dma-banner" class="fd-banner" role="status">Loading DMA data…</div>
+
+<h2 class="fd-h2">1. DMA Portfolio <small id="p-sub"></small></h2>
+<p class="fd-note">Top 30 Nifty 500 stocks by DMA score, weighted by score ÷ volatility. 200-DMA exit daily. Monthly rebalance.</p>
+<div class="fd-sip">
+  <label for="sip-amt"><strong>Amount to invest (₹)</strong></label>
+  <input id="sip-amt" type="number" min="0" step="10000" value="1000000">
+  <span class="chips">
+    <button data-amt="500000">₹5L</button>
+    <button data-amt="1000000">₹10L</button>
+    <button data-amt="5000000">₹50L</button>
+    <button data-amt="10000000">₹1 cr</button>
+  </span>
+</div>
+<div class="fd-wrap">
+<table class="fd-table" id="port-table">
+  <thead><tr>
+    <th>#</th><th>Stock</th><th>Cross</th><th class="num">Score</th>
+    <th class="num">Weight</th><th class="num">₹ Invest</th><th class="num">Shares</th>
+    <th class="num">Close ₹</th><th class="num" title="Distance from 200-DMA">vs 200</th>
+    <th class="num" title="3-month backtest win rate">BT 3M</th>
+    <th>HHHL</th><th>DMA alignment</th>
+  </tr></thead>
+  <tbody id="port-body"></tbody>
+</table>
+</div>
+
+<h2 class="fd-h2" style="margin-top:2rem">2. All Nifty 500 Stocks <small id="all-sub"></small></h2>
+<p class="fd-note">Click any row for DMA support/resistance levels and backtest details. Filter by crossover type.</p>
+<div class="dma-filters" id="dma-filters">
+  <button class="dma-filter active" data-filter="">All</button>
+  <button class="dma-filter" data-filter="platinum">🏆 Platinum</button>
+  <button class="dma-filter" data-filter="golden">🥇 Golden</button>
+  <button class="dma-filter" data-filter="silver">🥈 Silver</button>
+  <button class="dma-filter" data-filter="bronze">🥉 Bronze</button>
+  <button class="dma-filter" data-filter="watch">👀 Watch</button>
+  <button class="dma-filter" data-filter="bear,death">📉 Bear/Death</button>
+</div>
+<div class="fd-wrap">
+<table class="fd-table dma-all-table" id="all-table">
+  <thead><tr>
+    <th>#</th><th>Stock</th><th>Sector</th><th>Cross</th>
+    <th class="num" title="Combined DMA+HHHL+backtest score">Score</th>
+    <th class="num" title="DMA alignment score (0–35)">Align</th>
+    <th class="num">Close</th>
+    <th class="num">vs 200DMA</th>
+    <th class="num" title="3-month backtest win rate (golden cross)">BT 3M%</th>
+    <th class="num" title="Number of historical golden crosses in backtest">Events</th>
+    <th>HHHL</th><th>DMA stack</th>
+  </tr></thead>
+  <tbody id="all-body"></tbody>
+</table>
+</div>
+
+<aside id="dma-detail" class="dma-detail" hidden>
+  <div class="dma-detail-inner">
+    <button id="d-close" class="dma-detail-close" aria-label="Close">✕</button>
+    <h3 id="d-title">—</h3>
+    <p id="d-sector" class="fd-note" style="margin:0 0 .5rem"></p>
+    <div id="d-cross-row" class="dma-detail-cross"></div>
+    <div class="dma-sr-block" id="d-sr"></div>
+    <div class="dma-bt-block" id="d-bt"></div>
+    <div class="dma-score-block" id="d-score"></div>
+  </div>
+</aside>
+
+<section class="fd-rules" aria-label="How the score is built" style="margin-top:2.5rem">
+  <h2 class="fd-h2">How the score works</h2>
+  <div id="score-method"></div>
+  <h2 class="fd-h2" style="margin-top:1.5rem">Portfolio rules</h2>
+  <div id="rules-list"></div>
+  <h2 class="fd-h2" style="margin-top:1.5rem">Honest limits</h2>
+  <div id="limits-list"></div>
+</section>
+</main>
+
+<footer><span>NSE VALUE LENS / DMA DESK</span><p>Paper research. Not SEBI-registered advice. No orders are placed by this website. <a href="https://github.com/originaonxi/nse-value-lens">Source code</a></p></footer>
+</div>
+</body>
+</html>

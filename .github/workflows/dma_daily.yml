@@ -1,0 +1,69 @@
+name: DMA Intelligence Desk refresh
+run-name: DMA desk after ${{ github.event.workflow_run.name || github.event.schedule || 'manual' }}
+on:
+  # Rebuild after HHHL (which refreshes prices for Nifty 200 cache)
+  workflow_run:
+    workflows: ['HHHL daily refresh']
+    types: [completed]
+    branches: [master]
+  schedule:
+    # After-close fallbacks: 16:30 and 22:30 IST
+    - cron: '0 11 * * *'
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: dma-desk
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run DMA desk
+        run: python dma_desk.py
+      - name: Verify output
+        run: |
+          python -c "
+          import json, sys
+          d=json.load(open('docs/dma.json'))
+          assert d['covered']>=50, f'Too few stocks: {d[\"covered\"]}'
+          cs=d['crossover_summary']
+          total=sum(cs.values())
+          assert total>=50, f'Too few crossover rows: {total}'
+          print(f'DMA desk: {d[\"covered\"]} stocks, {total} classified, '
+                f'platinum={cs[\"platinum\"]}, golden={cs[\"golden\"]}, '
+                f'silver={cs[\"silver\"]}, holdings={d[\"portfolio\"][\"holdings_count\"]}')
+          "
+      - name: Commit data
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/dma.json public/data/dma.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: DMA Intelligence Desk ${{ github.run_id }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.commit.outputs.changed == 'true'
+        name: Push
+        run: |
+          for i in 1 2 3; do
+            git pull --rebase origin master && git push origin HEAD:master && break || sleep 15
+          done
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+      - id: deployment
+        uses: actions/deploy-pages@v4
