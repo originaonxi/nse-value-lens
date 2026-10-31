@@ -38,20 +38,21 @@ jobs:
           python-version: '3.12'
       - name: Install pandas and numpy for the fund engine
         run: pip install -r requirements.txt
-      - name: Test indicators, categories, plan maths and the fund engine
-        run: python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank tests.test_daily_setups_automation tests.test_fund -v
+      - name: Test indicators, categories, plan maths, the fund and dividend engines
+        run: python -m unittest tests.test_daily_setups tests.test_setup_signals tests.test_setup_rank tests.test_daily_setups_automation tests.test_fund tests.test_dividends -v
       - name: Recalculate prices, indicators, chart ranks and same-session Jev ranks
         run: |
           python scripts/verify_daily_setups.py --inputs-only --require-jev
           python daily_setups.py
           python scripts/verify_daily_setups.py --require-jev
           python fund.py
+          python dividends.py
       - name: Commit the daily list
         id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history docs/fund.json public/data/fund.json nifty100.csv
+          git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history docs/fund.json public/data/fund.json docs/dividends.json public/data/dividends.json data/dividends_cache.json nifty100.csv
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -66,7 +67,8 @@ jobs:
                 python daily_setups.py
                 python scripts/verify_daily_setups.py --require-jev
                 python fund.py
-                git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history docs/fund.json public/data/fund.json nifty100.csv
+                python dividends.py
+                git add docs/daily_setups.json docs/daily_setups_series.json data/daily_setups_history docs/fund.json public/data/fund.json docs/dividends.json public/data/dividends.json data/dividends_cache.json nifty100.csv
                 git diff --cached --quiet || git commit -m "data: rebuild daily setups against updated inputs ${GITHUB_RUN_ID}"
               fi
               if git push origin HEAD:master; then break; fi

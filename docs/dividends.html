@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dividend Desk: best dividend stocks in the Nifty 200, 10-year yields | NSE Value Lens</title>
+<meta name="description" content="Monthly dividend report for the Nifty 200: every stock's 10-year dividend record, current and average yield, consistency, special-dividend flags, an income score, and a sample 6-lakh income portfolio.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="dividends.css?v=1">
+<script src="dividends.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell fund-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="fund.html">Our Fund</a><a href="dividends.html" aria-current="page"><strong>Dividends</strong></a><a href="setups.html">Daily setups</a><a href="hhhl.html">HH/HL</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a></nav></header>
+<main>
+<section class="fd-hero"><div><h1>Dividend Desk.<br><span>Who really pays income in the Nifty 200.</span></h1>
+<p>Every Nifty 200 stock's dividend record over the last 10 years: current yield, 10-year average yield, how many years it actually paid, and whether the yield is real or a one-off special dividend. Published every month-end.</p></div>
+<div class="fd-session">REPORT<strong id="d-month">…</strong><span id="d-asof">Loading…</span></div></section>
+
+<div id="d-banner" class="fd-banner" role="status">Loading dividend data…</div>
+
+<section class="fd-kpis" aria-label="At a glance">
+<div><span class="lab">Nifty 200 covered</span><strong id="k-cov">—</strong><small>stocks with dividend data</small></div>
+<div><span class="lab">Steady payers</span><strong id="k-steady">—</strong><small id="k-steady-sub">paid 8+ of 10 years</small></div>
+<div><span class="lab">Best steady yield</span><strong id="k-best">—</strong><small>no special-dividend tricks</small></div>
+<div><span class="lab">6-lakh book yield</span><strong id="k-yield">—</strong><small id="k-yield-sub">this month's sample</small></div>
+</section>
+
+<h2 class="fd-h2">1. Your ₹6 lakh income portfolio — October <small>the steadiest high-yield names · buy Monday</small></h2>
+<p class="fd-note" id="p-note"></p>
+<div class="fd-wrap"><table class="fd-table"><thead><tr>
+<th>#</th><th>Stock</th><th class="num">Weight</th><th class="num">Price ₹</th><th class="num">Shares</th><th class="num">Cost ₹</th><th class="num">Yield</th><th class="num">Div/share ₹</th><th class="num">Annual income ₹</th><th class="num">Score</th>
+</tr></thead><tbody id="p-rows"></tbody><tfoot id="p-foot"></tfoot></table></div>
+
+<h2 class="fd-h2">2. Can any stock pay 20% a year? <small>the honest answer</small></h2>
+<div class="fd-card" id="d-answer"></div>
+
+<h2 class="fd-h2">3. All Nifty 200 ranked by income <small>click a stock for its 10-year dividend history</small></h2>
+<div class="fd-filters" id="d-filters"></div>
+<div class="fd-wrap"><table class="fd-table fd-all"><thead><tr>
+<th>#</th><th>Stock</th><th>Sector</th><th class="num" title="Last 12 months' dividend / price">Current yield</th><th class="num" title="Average of each year's yield over 10 years">10-yr avg yield</th><th class="num" title="Highest single-year yield in 10 years">Peak yr</th><th class="num" title="Years with a dividend out of the last 10">Years paid</th><th class="num" title="Total dividend per share over 10 years, as % of today's price">10-yr payback</th><th class="num">Div growth</th><th>Note</th><th class="num">Score</th>
+</tr></thead><tbody id="d-rows"></tbody></table></div>
+
+<section id="d-detail" class="fd-detail" hidden>
+<div class="fd-dhead"><div><h3 id="x-title"></h3><div id="x-sub" class="fd-note" style="margin:2px 0 0"></div></div><span id="x-score" class="fd-pill in"></span></div>
+<div class="dv-bars" id="x-bars"></div>
+<p class="fd-summary" id="x-summary"></p>
+</section>
+
+<section class="section"><h2 class="fd-h2">How the income score works</h2><ol class="fd-rules" id="d-method"></ol>
+<h3>Limits: read before investing</h3><ul class="fd-limits" id="d-limits"></ul></section>
+</main>
+<footer><span>NSE VALUE LENS / DIVIDEND DESK</span><p>Monthly dividend research. Yields are not total return and dividends can be cut. Not SEBI-registered advice. No orders are placed by this website.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>

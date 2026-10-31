@@ -1,0 +1,10 @@
+/* Dividend Desk — adds to swing.css + fund.css tokens. */
+.dv-bars{display:flex;align-items:flex-end;gap:8px;height:160px;margin:10px 0 4px;padding:8px 2px;border:1px solid var(--line);border-radius:10px;background:#fcfdfb}
+.dv-bars .col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1;height:100%}
+.dv-bars .bar{width:70%;background:linear-gradient(180deg,#2fb87a,#1d5a3c);border-radius:4px 4px 0 0;min-height:1px}
+.dv-bars .bar.special{background:linear-gradient(180deg,#d8a43a,#8a6212)}
+.dv-bars .v{font-size:10px;color:var(--ink);margin-bottom:3px;font-variant-numeric:tabular-nums}
+.dv-bars .yr{font-size:10px;color:var(--muted);margin-top:4px}
+.dv-flag{font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px;background:#f6eedb;color:#7a5a12;white-space:nowrap}
+.dv-steady{font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px;background:#dcefe3;color:var(--bull);white-space:nowrap}
+.fd-yield{font-weight:800}
