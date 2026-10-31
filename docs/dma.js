@@ -292,6 +292,9 @@
       sc2.appendChild(d2);
     });
 
+    var chartCont = $("d-chart"); if (chartCont) renderDmaChart(r, chartCont);
+    var btCont = $("d-bt-full"); if (btCont) renderBtByType(r, btCont);
+    var allocCont = $("d-alloc"); if (allocCont) renderAlloc(r, allocCont);
     var det = $("dma-detail");
     det.removeAttribute("hidden");
     det.scrollTop = 0;
@@ -340,6 +343,135 @@
         b.className = "fd-banner open";
         b.textContent = "Failed to load DMA data: " + e;
       });
+  }
+
+
+  /* ── SVG price + DMA chart ──────────────────────────────── */
+  function renderDmaChart(r, container) {
+    container.textContent = "";
+    var hist = r.history;
+    if (!hist || !hist.closes || hist.closes.length < 5) {
+      container.textContent = "No price history."; return;
+    }
+    var W=600,H=280,PL=55,PR=10,PT=20,PB=55;
+    var CW=W-PL-PR, CH=H-PT-PB, n=hist.closes.length;
+    var allV = hist.closes.concat(hist.dma200||[]).filter(function(v){return v!=null;});
+    var minP = Math.min.apply(null,allV)*0.995, maxP = Math.max.apply(null,allV)*1.005;
+    function xp(i){return PL+CW*i/(n-1);}
+    function yp(v){return PT+CH*(1-(v-minP)/(maxP-minP));}
+    function mkPath(arr,col,w,op){
+      if(!arr||!arr.length)return'';
+      var d='',m=true;
+      for(var i=0;i<arr.length;i++){
+        if(arr[i]==null){m=true;continue;}
+        d+=(m?'M':'L')+xp(i).toFixed(1)+','+yp(arr[i]).toFixed(1)+' '; m=false;
+      }
+      return d?'<path d="'+d+'" stroke="'+col+'" fill="none" stroke-width="'+w+'" opacity="'+(op||0.9)+'"/>':'';
+    }
+    /* Crossover markers */
+    var MC={platinum:'#FFD700',golden:'#F59E0B',silver:'#9CA3AF',bronze:'#CD7F32',death:'#EF4444',bear:'#EF4444'};
+    var mks='';
+    (r.crossover_events||[]).forEach(function(ev){
+      var di=hist.dates.indexOf(ev.date); if(di<0)return;
+      var cx=xp(di),cy=yp(ev.close),col=MC[ev.type]||'#6B7280';
+      var down=(ev.type==='death'||ev.type==='bear');
+      if(down) mks+='<polygon points="'+cx+','+(cy-2)+' '+(cx-6)+','+(cy-14)+' '+(cx+6)+','+(cy-14)+'" fill="'+col+'" opacity="0.9"><title>'+ev.type+' @ '+ev.close+' on '+ev.date+'</title></polygon>';
+      else     mks+='<polygon points="'+cx+','+(cy+2)+' '+(cx-6)+','+(cy+14)+' '+(cx+6)+','+(cy+14)+'" fill="'+col+'" opacity="0.9"><title>'+ev.type+' @ '+ev.close+' on '+ev.date+'</title></polygon>';
+    });
+    /* Grid + Y labels */
+    var grid=''; var NT=5;
+    for(var t=0;t<=NT;t++){
+      var v=minP+(maxP-minP)*t/NT, yy=yp(v);
+      grid+='<line x1="'+PL+'" y1="'+yy.toFixed(1)+'" x2="'+(PL+CW)+'" y2="'+yy.toFixed(1)+'" stroke="#E5E7EB" stroke-width="0.5"/>';
+      var lbl=v>=100000?(v/100000).toFixed(1)+'L':v>=1000?(v/1000).toFixed(1)+'k':Math.round(v).toString();
+      grid+='<text x="'+(PL-5)+'" y="'+(yy+4).toFixed(1)+'" text-anchor="end" font-size="10" fill="#6B7280">'+lbl+'</text>';
+    }
+    /* X labels */
+    var xl=''; var step=Math.max(1,Math.ceil(n/6));
+    for(var i=0;i<n;i+=step){
+      var d=hist.dates[i]; if(!d)continue;
+      xl+='<text x="'+xp(i).toFixed(1)+'" y="'+(H-PB+14)+'" text-anchor="middle" font-size="9" fill="#6B7280">'+d.slice(5)+'</text>';
+    }
+    /* Legend */
+    var legs=[['Close','#1E293B',2],['20','#3B82F6',1.5],['50','#F59E0B',1.5],['100','#8B5CF6',1.5],['200','#EF4444',2]];
+    var lsvg=''; var lx=PL;
+    legs.forEach(function(l){
+      lsvg+='<line x1="'+lx+'" y1="'+(H-PB+30)+'" x2="'+(lx+16)+'" y2="'+(H-PB+30)+'" stroke="'+l[1]+'" stroke-width="'+l[2]+'"/>';
+      lsvg+='<text x="'+(lx+20)+'" y="'+(H-PB+34)+'" font-size="9" fill="#6B7280">'+l[0]+'</text>';
+      lx+=60;
+    });
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px;display:block">'+
+            grid+mkPath(hist.closes,'#1E293B',2)+mkPath(hist.dma20,'#3B82F6',1.5)+
+            mkPath(hist.dma50,'#F59E0B',1.5)+mkPath(hist.dma100,'#8B5CF6',1.5)+
+            mkPath(hist.dma200,'#EF4444',2)+mks+xl+lsvg+'</svg>';
+    container.innerHTML = svg;
+  }
+
+  /* ── Backtest-by-type table ──────────────────────────────── */
+  function renderBtByType(r, container) {
+    container.textContent = "";
+    var bt = r.bt_by_type || {};
+    if (!Object.keys(bt).length) { container.textContent = "No backtest data."; return; }
+    var tbl = el("table","fd-table"); tbl.style.fontSize=".78rem"; tbl.style.width="100%";
+    var thead=el("thead"); var hr=el("tr");
+    ["Type","#","1M win","1M avg","3M win","3M avg","6M win","6M avg","1Y win","1Y avg"].forEach(function(h){
+      var th=el("th"); th.textContent=h; hr.appendChild(th);
+    });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    var tbody=el("tbody");
+    var ORDER=["platinum","golden","silver","bronze","death"];
+    ORDER.forEach(function(ct){
+      var d=bt[ct]; if(!d)return;
+      var tr=el("tr"); 
+      var bc=el("td"); bc.appendChild(crossBadge(ct,null)); tr.appendChild(bc);
+      [d.n,
+       d.win_1m!=null?d.win_1m+'%':'—', d.avg_1m!=null?(d.avg_1m>0?'+':'')+d.avg_1m+'%':'—',
+       d.win_3m!=null?d.win_3m+'%':'—', d.avg_3m!=null?(d.avg_3m>0?'+':'')+d.avg_3m+'%':'—',
+       d.win_6m!=null?d.win_6m+'%':'—', d.avg_6m!=null?(d.avg_6m>0?'+':'')+d.avg_6m+'%':'—',
+       d.win_1y!=null?d.win_1y+'%':'—', d.avg_1y!=null?(d.avg_1y>0?'+':'')+d.avg_1y+'%':'—',
+      ].forEach(function(v,i){
+        var td2=el("td","num"); td2.textContent=String(v);
+        if(i>0&&String(v).charAt(0)==='+') td2.className='num bull';
+        if(i>0&&String(v).charAt(0)==='-') td2.className='num bear';
+        tr.appendChild(td2);
+      });
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody); container.appendChild(tbl);
+  }
+
+  /* ── Rs10L DMA fund allocation ──────────────────────────── */
+  function renderAlloc(r, container) {
+    container.textContent = "";
+    var alloc = {platinum:0.30, golden:0.25, silver:0.15, bronze:0.10, watch:0.05, neutral:0, bear:0, death:0};
+    var pct = alloc[r.crossover_type] || 0;
+    if (!pct) { container.textContent = "No allocation — not an investable signal today."; return; }
+    var sip = 1000000;
+    var amt = sip * pct;
+    var lot = r.lot_size || 1;
+    var close = r.close || 1;
+    var lot_val = lot * close;
+    var margin = Math.round(lot_val * 0.175);
+    var max_lots = margin > 0 ? Math.floor(amt / margin) : 0;
+    var rows2 = [
+      ["Signal type", r.crossover_type + " → " + (pct*100).toFixed(0) + "% of ₹10L"],
+      ["Amount to deploy", "₹" + Math.round(amt).toLocaleString("en-IN")],
+      ["NSE lot size", lot + " shares"],
+      ["Margin per lot (≈17.5%)", "₹" + margin.toLocaleString("en-IN")],
+      ["Max lots with this amount", max_lots],
+      ["₹1 P&L at max lots", "₹" + (max_lots * lot).toLocaleString("en-IN")],
+    ];
+    var optAmt = Math.round(close * lot * 0.015);
+    if (r.crossover_type !== 'death' && r.crossover_type !== 'bear') {
+      rows2.push(["OPTIONS alt: ATM Call (1 lot est.)", "₹" + optAmt.toLocaleString("en-IN") + " premium"]);
+      rows2.push(["Option upside if +5% move", "₹" + Math.round(optAmt * 2.5).toLocaleString("en-IN")]);
+    }
+    rows2.forEach(function(row2){
+      var d2=el("div","dma-score-row");
+      d2.appendChild(el("span",null,row2[0]));
+      d2.appendChild(el("b",null,String(row2[1])));
+      container.appendChild(d2);
+    });
   }
 
   if (document.readyState === "loading") {

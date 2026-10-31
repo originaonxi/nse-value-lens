@@ -92,3 +92,12 @@
   .dma-cross-summary { grid-template-columns: repeat(2, 1fr); }
   .dma-detail { width: 100vw; }
 }
+
+/* Chart container */
+.dma-chart-container { margin: .75rem 0 1rem; border-radius: 8px; background: #F8FAFC; padding: .75rem; overflow: hidden; }
+.dma-chart-container svg text { font-family: inherit; }
+[data-theme="dark"] .dma-chart-container { background: #1a1a1a; }
+
+/* Backtest by type table inside detail */
+#d-bt-full .fd-table { font-size: .72rem; }
+#d-bt-full .fd-table th, #d-bt-full .fd-table td { padding: .25rem .4rem; }

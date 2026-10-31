@@ -319,6 +319,112 @@ def bt_score(bt):
     return round(min(20, bt["win_rate_3m"] / 100 * 20))
 
 
+# ── History + comprehensive crossover backtest ────────────────────────────────
+
+def compute_history(sym, px_col, dmas, n=150):
+    """Last n trading days of close + 4 DMA values for chart rendering."""
+    try:
+        s = px_col.dropna().iloc[-n:]
+        idx = s.index
+        def dma_arr(w):
+            if sym not in dmas[w].columns:
+                return [None] * len(idx)
+            v = dmas[w][sym].reindex(idx)
+            return [round(float(x), 2) if not np.isnan(float(x)) else None for x in v]
+        return {
+            "dates":  [str(d.date()) for d in idx],
+            "closes": [round(float(x), 2) for x in s],
+            "dma20":  dma_arr(20),
+            "dma50":  dma_arr(50),
+            "dma100": dma_arr(100),
+            "dma200": dma_arr(200),
+        }
+    except Exception:
+        return None
+
+
+def find_crossover_events(sym, series, dmas):
+    """All DMA crossover events in price history: golden/death/silver/bronze/platinum."""
+    events = []
+    try:
+        s = series.dropna()
+        if len(s) < 220:
+            return events
+        d50  = dmas[50][sym].dropna()  if sym in dmas[50].columns  else pd.Series(dtype=float)
+        d200 = dmas[200][sym].dropna() if sym in dmas[200].columns else pd.Series(dtype=float)
+        if len(d50) < 210 or len(d200) < 210:
+            return events
+        idx = s.index.intersection(d50.index).intersection(d200.index)
+        sa, a50, a200 = s.reindex(idx), d50.reindex(idx), d200.reindex(idx)
+        def _add(mask, ctype):
+            for dt in idx[mask.fillna(False).to_numpy(bool)]:
+                p = idx.get_loc(dt)
+                events.append({"date": str(dt.date()), "type": ctype,
+                               "close": round(float(sa.iloc[p]), 2)})
+        _add((a50 > a200) & (a50.shift(1) <= a200.shift(1)), "golden")
+        _add((a50 < a200) & (a50.shift(1) >= a200.shift(1)), "death")
+        if sym in dmas[20].columns:
+            a20 = dmas[20][sym].dropna().reindex(idx)
+            _add((a20 > a50) & (a20.shift(1) <= a50.shift(1)), "silver")
+            if sym in dmas[100].columns:
+                a100 = dmas[100][sym].dropna().reindex(idx)
+                plat = (sa > a20) & (a20 > a50) & (a50 > a100) & (a100 > a200)
+                _add(plat & ~plat.shift(1).fillna(False), "platinum")
+        _add((sa > a200) & (sa.shift(1) <= a200.shift(1)), "bronze")
+        events.sort(key=lambda e: e["date"])
+    except Exception:
+        pass
+    return events
+
+
+def backtest_by_crossover_type(sym, series, dmas):
+    """1M/3M/6M/1Y forward returns after each crossover type. Used for the chart backtest table."""
+    result = {}
+    try:
+        s = series.dropna()
+        if len(s) < 300:
+            return result
+        d50  = dmas[50][sym].dropna()  if sym in dmas[50].columns  else pd.Series(dtype=float)
+        d200 = dmas[200][sym].dropna() if sym in dmas[200].columns else pd.Series(dtype=float)
+        if len(d50) < 250 or len(d200) < 250:
+            return result
+        idx = s.index.intersection(d50.index).intersection(d200.index)
+        sa, a50, a200 = s.reindex(idx), d50.reindex(idx), d200.reindex(idx)
+
+        def _measure(mask):
+            rets = {20: [], 60: [], 120: [], 250: []}
+            n_events = int(mask.fillna(False).sum())
+            for dt in idx[mask.fillna(False).to_numpy(bool)]:
+                p = idx.get_loc(dt)
+                ep = float(sa.iloc[p])
+                if ep <= 0:
+                    continue
+                for fwd, lst in rets.items():
+                    if p + fwd < len(sa):
+                        lst.append(float(sa.iloc[p + fwd]) / ep - 1)
+            def _s(lst):
+                if len(lst) < 2:
+                    return None, None
+                w = sum(1 for r in lst if r > 0)
+                return round(w / len(lst) * 100, 1), round(float(np.mean(lst)) * 100, 1)
+            out = {"n": n_events}
+            for fwd, label in [(20,"1m"), (60,"3m"), (120,"6m"), (250,"1y")]:
+                w, a = _s(rets[fwd])
+                out[f"win_{label}"] = w
+                out[f"avg_{label}"] = a
+            return out
+
+        result["golden"] = _measure((a50 > a200) & (a50.shift(1) <= a200.shift(1)))
+        result["death"]  = _measure((a50 < a200) & (a50.shift(1) >= a200.shift(1)))
+        if sym in dmas[20].columns:
+            a20 = dmas[20][sym].dropna().reindex(idx)
+            result["silver"] = _measure((a20 > a50) & (a20.shift(1) <= a50.shift(1)))
+        result["bronze"] = _measure((sa > a200) & (sa.shift(1) <= a200.shift(1)))
+    except Exception:
+        pass
+    return result
+
+
 # ── HHHL integration ──────────────────────────────────────────────────────────
 
 HHHL_SCORE_MAP = {
@@ -366,6 +472,12 @@ def score_universe(px, dmas, hhhl_data, meta):
         vol = float(vol_series.std(ddof=0) * math.sqrt(252)) if len(vol_series) > 10 else None
 
         d200 = dv.get(200)
+
+        # Chart history, crossover events, comprehensive backtest per type
+        hist   = compute_history(sym, series, dmas, n=150)
+        events = find_crossover_events(sym, series, dmas)
+        bt_full = backtest_by_crossover_type(sym, series, dmas)
+
         rows.append({
             "symbol": sym,
             "name": meta.get(sym, {}).get("name", sym),
@@ -391,6 +503,9 @@ def score_universe(px, dmas, hhhl_data, meta):
             "bt_avg_ret_3m": bt["avg_ret_3m"],
             "bt_win_rate_6m": bt["win_rate_6m"],
             "bt_avg_ret_6m": bt["avg_ret_6m"],
+            "history": hist,
+            "crossover_events": events[-30:],
+            "bt_by_type": bt_full,
         })
 
     rows.sort(key=lambda r: -r["total_score"])
