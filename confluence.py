@@ -117,7 +117,8 @@ def ohlc_history(sym, n=150):
                         v = df[name]
                         return [round(float(x), 2) if not (isinstance(x, float) and math.isnan(x)) else default for x in v]
                     return [default] * len(idx)
-                closes = col("Close") or col("Adj Close")
+                cl_col = "Close" if "Close" in df.columns else ("Adj Close" if "Adj Close" in df.columns else None)
+                closes = col(cl_col) if cl_col else None
                 if not closes:
                     return None
                 cs = pd.Series(closes, dtype=float)
@@ -129,9 +130,9 @@ def ohlc_history(sym, n=150):
                     return [round(x, 2) if x is not None and not (isinstance(x, float) and math.isnan(x)) else None for x in lst]
                 return {
                     "dates":  [str(d.date()) for d in idx],
-                    "opens":  col("Open", closes[i] if i < len(closes) else None),
-                    "highs":  col("High", closes[i] if i < len(closes) else None),
-                    "lows":   col("Low",  closes[i] if i < len(closes) else None),
+                    "opens":  col("Open"),
+                    "highs":  col("High"),
+                    "lows":   col("Low"),
                     "closes": closes,
                     "dma20":  rnd(d20),
                     "dma50":  rnd(d50),
