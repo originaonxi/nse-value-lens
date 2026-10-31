@@ -163,13 +163,35 @@ def exit_signals(px, high, low):
     return {"none": None, "below_200dma": px < dma200, "st_and_50dma": (st == -1) & (px < dma50)}, st
 
 
+def load_div_bonus():
+    """Dividend-quality bonus per symbol (0–0.25 z-score addend), applied only to the live
+    portfolio decision — not to the backtest, which has no historical dividend data.
+    Nifty 200 only; stocks paying dividends 2+ years with a steady 1.5–9% yield get a lift."""
+    try:
+        divs = json.loads((DOCS / "dividends.json").read_text(encoding="utf-8"))
+        data, bonus = {}, {}
+        for r in divs.get("rows", []):
+            data[r["symbol"]] = r
+            yrs = r.get("years_paid", 0)
+            yld = r.get("current_yield", 0)
+            if yrs >= 2 and 1.5 <= yld <= 9.0 and not r.get("special_heavy", False):
+                years_f = min(yrs / 10.0, 1.0)
+                yield_f = min(yld / 5.0, 1.0) if yld <= 5.0 else max(0.0, 1.0 - (yld - 5.0) / 4.0)
+                bonus[r["symbol"]] = round(0.25 * years_f * yield_f, 4)
+        return data, bonus
+    except Exception:
+        return {}, {}
+
+
+
+
 # ── Selection & weights ──────────────────────────────────────────────────────────────────
 def zscore(x):
     sd = x.std(ddof=0)
     return (x - x.mean()) / sd if sd and np.isfinite(sd) else x * 0
 
 
-def score_universe(px, i):
+def score_universe(px, i, div_bonus=None):
     """Risk-adjusted momentum of every eligible stock, using rows 0..i only."""
     w = px.iloc[: i + 1]
     elig = w.columns[w.notna().sum() >= LONG + 1]
@@ -184,6 +206,9 @@ def score_universe(px, i):
     if df.empty:
         return df
     df["z"] = 0.5 * zscore(df.r6 / df.vol) + 0.5 * zscore(df.r12 / df.vol)
+    if div_bonus:
+        bns = pd.Series(div_bonus).reindex(df.index).fillna(0)
+        df["z"] = df["z"] + bns
     df["score"] = np.where(df.z >= 0, 1 + df.z, 1 / (1 - df.z))
     return df.sort_values("score", ascending=False)
 
@@ -490,7 +515,8 @@ def build():
     stock_now = now.drop("CASH", errors="ignore")
 
     setups, setups_asof = load_setups()
-    ranked = score_universe(px, last)
+    div_data, div_bonus = load_div_bonus()
+    ranked = score_universe(px, last, div_bonus=div_bonus)
     mom_rank = {s: i + 1 for i, s in enumerate(ranked.index)}
     dma200_today = px.iloc[-DMA:].mean()
 
@@ -511,6 +537,9 @@ def build():
             "category": s.get("category"), "structure": s.get("structure"),
             "structure_exit": s.get("structure_exit"), "stop": plan.get("stop"), "plan_side": plan.get("side"),
             "next_target": plan.get("next_target"), "summary": s.get("summary"),
+            "div_yield": div_data.get(sym, {}).get("current_yield", 0),
+            "div_years": div_data.get(sym, {}).get("years_paid", 0),
+            "div_bonus": round(div_bonus.get(sym, 0), 4),
             **jev_fields(s),
         })
 
@@ -540,7 +569,10 @@ def build():
                        "momentum_rank": mom_rank.get(sym), "jev_rank100": jev_rank100.get(sym),
                        "close": round(float(px[sym].dropna().iloc[-1]), 2), "returns": stock_returns(px[sym]),
                        "above_200dma": bool(px[sym].iloc[-1] > dma200_today[sym]),
-                       "supertrend_up": bool(st[sym].iloc[-1] == 1), "category": s.get("category"), **jev_fields(s)})
+                       "supertrend_up": bool(st[sym].iloc[-1] == 1), "category": s.get("category"),
+                       "div_yield": div_data.get(sym, {}).get("current_yield", 0),
+                       "div_years": div_data.get(sym, {}).get("years_paid", 0),
+                       **jev_fields(s)})
     all100.sort(key=lambda r: (r["momentum_rank"] is None, r["momentum_rank"] or 999, -(r["jev_score"] or 0)))
     for i, r in enumerate(all100, 1):
         r["position"] = i

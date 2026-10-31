@@ -92,6 +92,7 @@
       td(tr, inr(rupees), "num");
       td(tr, String(shares), "num");
       td(tr, h.close.toLocaleString("en-IN"), "num");
+      td(tr, (h.div_yield && h.div_yield > 0) ? h.div_yield.toFixed(1) + "%" : "—", "num");
       ["6M", "1Y", "3Y", "5Y"].forEach(function (k) { var v = h.returns[k]; td(tr, pc(v, 0), "num " + tone(v)); });
       jevScoreCell(tr, h.jev_score);
       td(tr, h.jev_rank ? "#" + h.jev_rank + "/" + (h.jev_of || 200) : "—", "num");
