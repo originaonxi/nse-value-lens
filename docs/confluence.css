@@ -1,0 +1,66 @@
+/* Confluence Top Picks */
+
+.cf-shell { max-width: 1400px; }
+
+/* Hero */
+.cf-hero { background: var(--bg2); border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start; }
+.cf-hero h1 { font-size: 1.7rem; font-weight: 800; line-height: 1.2; margin: 0 0 .6rem; }
+.cf-hero h1 span { font-size: 1rem; font-weight: 500; color: var(--sub); display: block; }
+.cf-hero p { max-width: 64ch; color: var(--sub); font-size: .87rem; margin: 0; }
+
+.cf-stat-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: .4rem; min-width: 340px; }
+.cf-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; }
+.cf-stat .lab { display: block; font-size: .68rem; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
+.cf-stat strong { font-size: 1.25rem; font-weight: 800; }
+
+/* Section */
+.cf-section h2 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .5rem; }
+.cf-section h2 small { font-size: .82rem; font-weight: 400; color: var(--sub); }
+.cf-list { display: flex; flex-direction: column; gap: 2.5rem; margin-top: 1rem; }
+
+/* Stock card */
+.cf-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.cf-card-head { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 1.2rem .8rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.cf-vote { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 58px; height: 58px; border-radius: 10px; font-weight: 800; }
+.cf-vote-num { font-size: 1.5rem; line-height: 1; }
+.cf-vote-den { font-size: .72rem; color: inherit; opacity: .8; }
+.cf-vote.bull { background: #16a34a22; color: #16a34a; border: 2px solid #16a34a55; }
+.cf-vote.bear { background: #dc262622; color: #dc2626; border: 2px solid #dc262655; }
+.cf-card-title { flex: 1; }
+.cf-card-title h3 { font-size: 1.25rem; font-weight: 800; margin: 0 0 .1rem; }
+.cf-card-title .cf-name { font-size: .85rem; color: var(--sub); }
+.cf-card-meta { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .3rem; }
+.cf-pill { font-size: .76rem; padding: .15em .6em; border-radius: 20px; font-weight: 600; }
+.cf-pill-buy  { background: #16a34a20; color: #16a34a; border: 1px solid #16a34a44; }
+.cf-pill-sell { background: #dc262620; color: #dc2626; border: 1px solid #dc262644; }
+.cf-pill-neu  { background: var(--bg2); color: var(--sub); border: 1px solid var(--border); }
+.cf-close-price { font-size: 1.5rem; font-weight: 800; white-space: nowrap; }
+
+/* Chart area — full width within card */
+.cf-chart-area { padding: .75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg); }
+.cf-chart-area svg { display: block; width: 100%; }
+
+/* Signal grid */
+.cf-signals { padding: .9rem 1.2rem; border-bottom: 1px solid var(--border); }
+.cf-signals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .35rem; }
+.cf-sig-row { display: flex; align-items: baseline; gap: .5rem; font-size: .81rem; padding: .22rem .4rem; border-radius: 5px; }
+.cf-sig-row.bull { background: #16a34a10; }
+.cf-sig-row.bear { background: #dc262610; }
+.cf-sig-row.neut { background: var(--bg2); }
+.cf-sig-icon { font-size: .9rem; flex-shrink: 0; }
+.cf-sig-name { font-weight: 700; flex-shrink: 0; }
+.cf-sig-detail { color: var(--sub); font-size: .75rem; }
+
+/* Action bar */
+.cf-action { padding: .75rem 1.2rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center; background: var(--bg2); font-size: .83rem; }
+.cf-action strong { font-weight: 800; }
+.cf-action .cf-why { color: var(--sub); font-size: .78rem; flex: 1 1 100%; margin-top: .1rem; }
+
+/* Method list */
+.cf-method ol { padding-left: 1.4rem; color: var(--sub); font-size: .85rem; line-height: 1.9; }
+
+@media (max-width: 800px) {
+  .cf-hero { grid-template-columns: 1fr; }
+  .cf-stat-bar { grid-template-columns: repeat(3, 1fr); }
+  .cf-card-head { flex-direction: column; }
+}
