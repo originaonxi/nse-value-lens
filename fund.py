@@ -45,7 +45,7 @@ UNIVERSE_CSV = ROOT / "nifty100.csv"
 NIFTY100_URL = "https://www.niftyindices.com/IndexConstituent/ind_nifty100list.csv"
 
 FUND_NAME = "Value Lens Nifty 100 Momentum Fund"
-HOLDINGS = 50
+HOLDINGS = 30
 MAX_WEIGHT = 0.06
 MAX_SECTOR = 0.30
 CASH_GUARD = 0.50
