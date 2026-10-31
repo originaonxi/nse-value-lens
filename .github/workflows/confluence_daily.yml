@@ -1,0 +1,71 @@
+name: Confluence daily refresh
+run-name: Confluence after ${{ github.event.workflow_run.name || github.event.schedule || 'manual' }}
+on:
+  # Rebuild after daily setups (which runs after HHHL + Jev — all signals fresh)
+  workflow_run:
+    workflows: ['Daily setups refresh']
+    types: [completed]
+    branches: [master]
+  schedule:
+    # After-close fallback: 17:00 IST (all setups/Jev/HHHL will have run by then)
+    - cron: '30 11 * * 1-5'
+    # Evening recalc: 22:00 IST
+    - cron: '30 16 * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: confluence-daily
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Confluence engine
+        run: python confluence.py
+      - name: Verify output
+        run: |
+          python -c "
+          import json, sys
+          d = json.load(open('docs/confluence.json'))
+          buy  = [s for s in d['stocks'] if s['side']=='buy']
+          sell = [s for s in d['stocks'] if s['side']=='sell']
+          assert len(buy)==10 and len(sell)==10, f'Expected 10+10, got {len(buy)}+{len(sell)}'
+          assert all(len((s.get('history') or {}).get('closes',[])) >= 50 for s in d['stocks']), 'Missing chart history'
+          print(f'Confluence {d[\"as_of\"]}: {len(d[\"stocks\"])} stocks | '
+                f'bull {d[\"unanimous_bull\"]} unanimous | bear {d[\"unanimous_bear\"]} unanimous | '
+                f'top buy: {buy[0][\"symbol\"]} {buy[0][\"net\"]:+d}/{buy[0][\"n_sys\"]} | '
+                f'top sell: {sell[0][\"symbol\"]} {sell[0][\"net\"]:+d}/{sell[0][\"n_sys\"]}')
+          "
+      - name: Commit data
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/confluence.json public/data/confluence.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: Confluence daily refresh ${{ github.run_id }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.commit.outputs.changed == 'true'
+        name: Push
+        run: |
+          for i in 1 2 3; do
+            git pull --rebase origin master && git push origin HEAD:master && break || sleep 15
+          done
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+      - id: deployment
+        uses: actions/deploy-pages@v4
