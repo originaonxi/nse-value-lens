@@ -175,49 +175,19 @@
   function renderZoneChart(r, container) {
     container.textContent = "";
     var h = r.history;
-    if (!h || !h.closes || h.closes.length < 5) { container.textContent = "No price history."; return; }
-    var W = 600, H = 300, PL = 58, PR = 90, PT = 15, PB = 40;
-    var CW = W - PL - PR, CH = H - PT - PB, n = h.closes.length;
-    var allV = h.closes.concat(h.dma20 || [], h.dma50 || []).filter(function (v) { return v != null; });
-    // include zone prices in range
-    (r.buy_zones || []).concat(r.sell_zones || []).forEach(function (z) { allV.push(z.price); });
-    var minP = Math.min.apply(null, allV) * 0.998, maxP = Math.max.apply(null, allV) * 1.002;
-    function xp(i) { return PL + CW * i / (n - 1); }
-    function yp(v) { return PT + CH * (1 - (v - minP) / (maxP - minP)); }
-    function line(arr, col, w) {
-      if (!arr) return "";
-      var d = "", m = true;
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i] == null) { m = true; continue; }
-        d += (m ? "M" : "L") + xp(i).toFixed(1) + "," + yp(arr[i]).toFixed(1) + " "; m = false;
-      }
-      return d ? '<path d="' + d + '" stroke="' + col + '" fill="none" stroke-width="' + w + '"/>' : "";
-    }
-    // Zone bands (full width)
-    function band(z, color, label) {
-      var y = yp(z.price);
-      var zh = 7; // visual band thickness
-      return '<rect x="' + PL + '" y="' + (y - zh / 2).toFixed(1) + '" width="' + CW + '" height="' + zh + '" fill="' + color + '" opacity="0.18"/>' +
-             '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (PL + CW) + '" y2="' + y.toFixed(1) + '" stroke="' + color + '" stroke-width="1" stroke-dasharray="4,3" opacity="0.8"/>' +
-             '<text x="' + (PL + CW + 4) + '" y="' + (y + 3).toFixed(1) + '" font-size="9" fill="' + color + '">' + label + ' ₹' + z.price + (z.strength > 1 ? " ×" + z.strength : "") + '</text>';
-    }
-    var bands = "";
-    (r.buy_zones || []).forEach(function (z) { bands += band(z, "#16a34a", "BUY"); });
-    (r.sell_zones || []).forEach(function (z) { bands += band(z, "#dc2626", "SELL"); });
-    // grid + y labels
-    var grid = "";
-    for (var t = 0; t <= 4; t++) {
-      var v = minP + (maxP - minP) * t / 4, yy = yp(v);
-      grid += '<line x1="' + PL + '" y1="' + yy.toFixed(1) + '" x2="' + (PL + CW) + '" y2="' + yy.toFixed(1) + '" stroke="#E5E7EB" stroke-width="0.5"/>';
-      grid += '<text x="' + (PL - 5) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="#6B7280">' + (v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v)) + '</text>';
-    }
-    // legend
-    var leg = '<line x1="' + PL + '" y1="' + (H - 8) + '" x2="' + (PL + 16) + '" y2="' + (H - 8) + '" stroke="#1E293B" stroke-width="2"/><text x="' + (PL + 20) + '" y="' + (H - 5) + '" font-size="9" fill="#6B7280">Close</text>' +
-              '<line x1="' + (PL + 70) + '" y1="' + (H - 8) + '" x2="' + (PL + 86) + '" y2="' + (H - 8) + '" stroke="#3B82F6" stroke-width="1.5"/><text x="' + (PL + 90) + '" y="' + (H - 5) + '" font-size="9" fill="#6B7280">20-DMA</text>' +
-              '<line x1="' + (PL + 150) + '" y1="' + (H - 8) + '" x2="' + (PL + 166) + '" y2="' + (H - 8) + '" stroke="#F59E0B" stroke-width="1.5"/><text x="' + (PL + 170) + '" y="' + (H - 5) + '" font-size="9" fill="#6B7280">50-DMA</text>';
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:' + W + 'px">' +
-              grid + bands + line(h.dma50, "#F59E0B", 1.3) + line(h.dma20, "#3B82F6", 1.3) + line(h.closes, "#1E293B", 1.8) + leg + '</svg>';
-    container.innerHTML = svg;
+    if (!h || !h.closes || h.closes.length < 5 || typeof VLChart === "undefined") { container.textContent = "No price history."; return; }
+    var zones = [];
+    (r.buy_zones || []).forEach(function (z) { zones.push({price: z.price, color: "#16a34a", label: "BUY ₹" + z.price + (z.strength > 1 ? " ×" + z.strength : "")}); });
+    (r.sell_zones || []).forEach(function (z) { zones.push({price: z.price, color: "#dc2626", label: "SELL ₹" + z.price + (z.strength > 1 ? " ×" + z.strength : "")}); });
+    VLChart.render(container, {
+      title: r.symbol + " daily candles + ₹1 Zones",
+      bars: VLChart.barsFromArrays(h),
+      overlays: [
+        {values: h.dma20, color: "#3B82F6", width: 1.3, label: "20"},
+        {values: h.dma50, color: "#F59E0B", width: 1.3, label: "50"}
+      ],
+      zones: zones
+    });
   }
 
   /* ── Detail panel ────────────────────────────────────── */

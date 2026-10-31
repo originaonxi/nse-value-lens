@@ -321,11 +321,30 @@ def bt_score(bt):
 
 # ── History + comprehensive crossover backtest ────────────────────────────────
 
-def compute_history(sym, px_col, dmas, n=150):
-    """Last n trading days of close + 4 DMA values for chart rendering."""
+def _load_ohlc(sym):
+    for suffix in (".NS.csv", ".csv"):
+        p = PRICES / f"{sym}{suffix}"
+        if p.exists():
+            try:
+                df = pd.read_csv(p, index_col=0, parse_dates=True)
+                df.columns = [c.strip() for c in df.columns]
+                return df
+            except Exception:
+                return None
+    return None
+
+
+def compute_history(sym, px_col, dmas, n=120):
+    """Last n trading days of OHLC + 4 DMA values for the candlestick chart."""
     try:
         s = px_col.dropna().iloc[-n:]
         idx = s.index
+        ohlc = _load_ohlc(sym)
+        def ocol(name):
+            if ohlc is not None and name in ohlc.columns:
+                v = ohlc[name].reindex(idx)
+                return [round(float(x), 2) if not np.isnan(float(x)) else None for x in v]
+            return [round(float(x), 2) for x in s]
         def dma_arr(w):
             if sym not in dmas[w].columns:
                 return [None] * len(idx)
@@ -333,6 +352,7 @@ def compute_history(sym, px_col, dmas, n=150):
             return [round(float(x), 2) if not np.isnan(float(x)) else None for x in v]
         return {
             "dates":  [str(d.date()) for d in idx],
+            "opens":  ocol("Open"), "highs": ocol("High"), "lows": ocol("Low"),
             "closes": [round(float(x), 2) for x in s],
             "dma20":  dma_arr(20),
             "dma50":  dma_arr(50),

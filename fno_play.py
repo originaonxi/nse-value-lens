@@ -448,14 +448,21 @@ def twenty_signals(df, close):
 
 
 def chart_history(df, close, n=120):
-    """Last n sessions of close + 20/50-DMA for the mini chart."""
+    """Last n sessions of OHLC + 20/50-DMA for the candlestick chart."""
     try:
         s = close.dropna().iloc[-n:]
         idx = s.index
         d20 = close.rolling(20).mean().reindex(idx)
         d50 = close.rolling(50).mean().reindex(idx)
+        def col(name):
+            if name in df.columns:
+                return [round(float(x), 2) if not np.isnan(float(x)) else None for x in df[name].reindex(idx)]
+            return [round(float(x), 2) for x in s]
         return {
             "dates":  [str(d.date()) for d in idx],
+            "opens":  col("Open"),
+            "highs":  col("High"),
+            "lows":   col("Low"),
             "closes": [round(float(x), 2) for x in s],
             "dma20":  [round(float(x), 2) if not np.isnan(float(x)) else None for x in d20],
             "dma50":  [round(float(x), 2) if not np.isnan(float(x)) else None for x in d50],
