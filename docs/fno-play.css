@@ -47,3 +47,21 @@
   .fno-hero { grid-template-columns: 1fr; }
   .fno-stat-bar { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ₹6L plan cards */
+.plan-summary { margin: .5rem 0 1rem; font-size: .9rem; }
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.plan-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid #16a34a; border-radius: 8px; padding: .8rem 1rem; }
+.plan-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .1rem; }
+.plan-card-head strong { font-size: 1.05rem; font-weight: 800; }
+.plan-card-name { font-size: .78rem; color: var(--sub); margin-bottom: .5rem; }
+.plan-row { display: flex; justify-content: space-between; font-size: .82rem; padding: .18rem 0; border-bottom: 1px solid var(--border); }
+.plan-row:last-of-type { border-bottom: none; }
+.plan-row b { font-weight: 700; }
+.plan-why { margin-top: .5rem; font-size: .74rem; color: var(--sub); font-style: italic; }
+
+/* 20-signal chips */
+.fno-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .25rem; }
+.fno-sig-chip { font-size: .72rem; padding: .18em .4em; border-radius: 4px; }
+.fno-sig-chip.on  { background: #16a34a18; color: #16a34a; }
+.fno-sig-chip.off { background: #dc262610; color: #9ca3af; }

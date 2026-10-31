@@ -332,6 +332,137 @@ def backtest_rs1(df, n_short=5, n_long=20):
     }
 
 
+# ── RSI · Fibonacci · ₹1 Zones · 20-signal composite ──────────────────────────
+
+def rsi_series(close, n=14):
+    delta = close.diff()
+    gain = delta.clip(lower=0).ewm(alpha=1 / n, adjust=False).mean()
+    loss = (-delta.clip(upper=0)).ewm(alpha=1 / n, adjust=False).mean()
+    rs = gain / loss.replace(0, np.nan)
+    return (100 - 100 / (1 + rs)).fillna(50)
+
+
+def compute_zones(df, close, lookback=60):
+    """₹1 BUY and SELL zones from confluence of Fib + DMA + pivot levels."""
+    c = float(close.iloc[-1])
+    hi = df["High"] if "High" in df.columns else close
+    lo = df["Low"]  if "Low"  in df.columns else close
+    swing_hi = float(hi.iloc[-lookback:].max())
+    swing_lo = float(lo.iloc[-lookback:].min())
+    diff = swing_hi - swing_lo
+    levels = []
+    if diff > 0:
+        for ratio in (0.236, 0.382, 0.5, 0.618, 0.786):
+            levels.append(("Fib " + str(ratio), swing_lo + ratio * diff))
+    for w in (20, 50, 100, 200):
+        if len(close) >= w:
+            levels.append((str(w) + "-DMA", float(close.iloc[-w:].mean())))
+    h1 = float(hi.iloc[-1]); l1 = float(lo.iloc[-1]); piv = (h1 + l1 + c) / 3
+    levels += [("Pivot", piv), ("R1", 2 * piv - l1), ("S1", 2 * piv - h1),
+               ("R2", piv + (h1 - l1)), ("S2", piv - (h1 - l1))]
+    levels = [(n, v) for n, v in levels if v > 0]
+    levels.sort(key=lambda x: x[1])
+    if not levels:
+        return [], [], round(swing_hi, 2), round(swing_lo, 2)
+    # Cluster within 0.4% of price
+    clusters, cur = [], [levels[0]]
+    for n, v in levels[1:]:
+        if abs(v - cur[-1][1]) / c <= 0.004:
+            cur.append((n, v))
+        else:
+            clusters.append(cur); cur = [(n, v)]
+    clusters.append(cur)
+    zones = []
+    for cl in clusters:
+        avg = sum(v for _, v in cl) / len(cl)
+        zones.append({"price": round(avg, 2), "strength": len(cl),
+                      "levels": [n for n, _ in cl], "dist_pct": round((avg / c - 1) * 100, 2)})
+    buy_zones  = sorted([z for z in zones if z["price"] <= c * 1.002], key=lambda z: -z["price"])[:3]
+    sell_zones = sorted([z for z in zones if z["price"] >  c * 0.998], key=lambda z: z["price"])[:3]
+    return buy_zones, sell_zones, round(swing_hi, 2), round(swing_lo, 2)
+
+
+def backtest_zones(df, close, lookback=252):
+    """1-year: price in a support zone (lower third + RSI≤45) → ₹1 bounce within 2 sessions?
+    Resistance zone (upper third + RSI≥55) → ₹1 drop? Returns win rates and sample sizes."""
+    if len(close) < lookback + 25:
+        return {"buy_wr": None, "buy_n": 0, "sell_wr": None, "sell_n": 0}
+    hi = df["High"] if "High" in df.columns else close
+    lo = df["Low"]  if "Low"  in df.columns else close
+    rsi = rsi_series(close)
+    buy_n = buy_w = sell_n = sell_w = 0
+    start = max(60, len(close) - lookback)
+    for i in range(start, len(close) - 2):
+        c = float(close.iloc[i])
+        win_hi = float(hi.iloc[i - 20:i + 1].max())
+        win_lo = float(lo.iloc[i - 20:i + 1].min())
+        rng = win_hi - win_lo
+        if rng < 0.01:
+            continue
+        pos = (c - win_lo) / rng
+        r = float(rsi.iloc[i])
+        if pos <= 0.35 and r <= 45:
+            buy_n += 1
+            if float(hi.iloc[i + 1]) >= c + 1.0 or float(hi.iloc[i + 2]) >= c + 1.0:
+                buy_w += 1
+        elif pos >= 0.65 and r >= 55:
+            sell_n += 1
+            if float(lo.iloc[i + 1]) <= c - 1.0 or float(lo.iloc[i + 2]) <= c - 1.0:
+                sell_w += 1
+    return {"buy_wr":  round(buy_w / buy_n * 100, 1)  if buy_n  >= 10 else None, "buy_n":  buy_n,
+            "sell_wr": round(sell_w / sell_n * 100, 1) if sell_n >= 10 else None, "sell_n": sell_n}
+
+
+def twenty_signals(df, close):
+    """20 bullish/bearish signals → composite score (0-20) + list + current RSI."""
+    c  = float(close.iloc[-1])
+    pc = float(close.iloc[-2]) if len(close) > 1 else c
+    o  = float(df["Open"].iloc[-1]) if "Open" in df.columns else c
+    h  = float(df["High"].iloc[-1]) if "High" in df.columns else c
+    l  = float(df["Low"].iloc[-1])  if "Low"  in df.columns else c
+    r  = float(rsi_series(close).iloc[-1])
+    def dma(w): return float(close.iloc[-w:].mean()) if len(close) >= w else c
+    d5, d20, d50, d100, d200 = dma(5), dma(20), dma(50), dma(100), dma(200)
+    rng = h - l; rp = (c - l) / rng if rng > 0.01 else 0.5
+    vol_ok = False
+    if "Volume" in df.columns and len(df) > 21:
+        av = float(df["Volume"].iloc[-21:-1].mean())
+        vol_ok = float(df["Volume"].iloc[-1]) > av if av > 0 else False
+    piv = (h + l + c) / 3
+    def mom(k): return c > float(close.iloc[-k]) if len(close) > k else False
+    mid60 = ((float(close.iloc[-60:].max()) + float(close.iloc[-60:].min())) / 2) if len(close) > 60 else c
+    sigs = [
+        ("Close > 5-DMA", c > d5), ("Close > 20-DMA", c > d20),
+        ("Close > 50-DMA", c > d50), ("Close > 100-DMA", c > d100),
+        ("Close > 200-DMA", c > d200), ("5-DMA > 20-DMA", d5 > d20),
+        ("20-DMA > 50-DMA", d20 > d50), ("50-DMA > 100-DMA", d50 > d100),
+        ("RSI > 50", r > 50), ("RSI not overbought (<70)", r < 70),
+        ("Closed upper half of day", rp > 0.5), ("Green candle", c > o),
+        ("Above pivot", c > piv), ("Close > prev close", c > pc),
+        ("Volume above 20-day avg", vol_ok), ("3-day momentum +", mom(4)),
+        ("5-day momentum +", mom(6)), ("20-day momentum +", mom(21)),
+        ("50-day momentum +", mom(51)), ("Above 60-day midpoint", c > mid60),
+    ]
+    score = sum(1 for _, b in sigs if b)
+    return score, [[n, bool(b)] for n, b in sigs], round(r, 1)
+
+
+def chart_history(df, close, n=120):
+    """Last n sessions of close + 20/50-DMA for the mini chart."""
+    try:
+        s = close.dropna().iloc[-n:]
+        idx = s.index
+        d20 = close.rolling(20).mean().reindex(idx)
+        d50 = close.rolling(50).mean().reindex(idx)
+        return {
+            "dates":  [str(d.date()) for d in idx],
+            "closes": [round(float(x), 2) for x in s],
+            "dma20":  [round(float(x), 2) if not np.isnan(float(x)) else None for x in d20],
+            "dma50":  [round(float(x), 2) if not np.isnan(float(x)) else None for x in d50],
+        }
+    except Exception:
+        return None
+
 # ── Main build ────────────────────────────────────────────────────────────────
 
 def rs1_action(m, signal_key, lot_size):
@@ -382,6 +513,13 @@ def build():
                       "medium" if wr is not None and wr >= 60 else
                       "low"    if wr is not None else "unproven")
 
+        # ₹1 Zones, 20-signal composite, 1-year zone backtest, chart history
+        close_s = df["Close"].dropna()
+        buy_zones, sell_zones, swing_hi, swing_lo = compute_zones(df, close_s)
+        zbt = backtest_zones(df, close_s)
+        t_score, t_sigs, rsi_now = twenty_signals(df, close_s)
+        hist = chart_history(df, close_s)
+
         rows.append({
             "symbol":      sym,
             "name":        STOCK_NAMES.get(sym, sym),
@@ -412,17 +550,54 @@ def build():
             "bt_short_wr": bt["short_wr"],
             "bt_long_n":   bt["long_n"],
             "bt_short_n":  bt["short_n"],
+            "twenty_score": t_score,
+            "twenty_signals": t_sigs,
+            "rsi": rsi_now,
+            "buy_zones": buy_zones,
+            "sell_zones": sell_zones,
+            "swing_hi": swing_hi,
+            "swing_lo": swing_lo,
+            "zone_buy_wr": zbt["buy_wr"],
+            "zone_buy_n": zbt["buy_n"],
+            "zone_sell_wr": zbt["sell_wr"],
+            "zone_sell_n": zbt["sell_n"],
+            "history": hist,
         })
 
-    # Sort: actionable signals first (buy_strong, sell_strong, buy, sell), then conviction, then ADR
+    # Rank: actionable first, then by 20-signal composite, then by zone backtest win rate, then ADR
     order = {"buy_strong":0,"sell_strong":0,"buy":1,"sell":1,"watch_buy":2,"watch_sell":2,"wait":3,"avoid":4}
-    rows.sort(key=lambda r: (order.get(r["signal"],5), -r["adr20"]))
+    def _rankkey(r):
+        wr = r.get("zone_buy_wr") if "buy" in r["signal"] else (r.get("zone_sell_wr") if "sell" in r["signal"] else None)
+        return (order.get(r["signal"], 5), -(r.get("twenty_score") or 0), -(wr or 0), -r["adr20"])
+    rows.sort(key=_rankkey)
     for i, r in enumerate(rows, 1):
         r["rank"] = i
 
-    # Top picks: highest conviction actionable signals
+    # Top picks: actionable signals, ADR ≥ ₹10, sorted by composite
     top_picks = [r for r in rows if r["signal"] in ("buy_strong","sell_strong","buy","sell")
-                 and r["adr20"] >= 10][:10]
+                 and r["adr20"] >= 10][:12]
+
+    # ₹6-lakh Monday plan: deploy across the best BUY picks, sized for ₹1 scalps
+    SIP = 600000
+    buy_picks = [r for r in top_picks if "buy" in r["signal"]][:6]
+    plan = []
+    if buy_picks:
+        per = SIP / len(buy_picks)
+        for r in buy_picks:
+            margin = round(r["close"] * r["lot_size"] * 0.175)
+            lots = max(1, int(per / margin)) if margin > 0 else 0
+            bz = r["buy_zones"][0] if r.get("buy_zones") else None
+            entry = bz["price"] if bz else r["close"]
+            plan.append({
+                "symbol": r["symbol"], "name": r["name"], "signal": r["signal_label"],
+                "lot_size": r["lot_size"], "lots": lots,
+                "entry_zone": entry, "target": round(entry + 1, 2), "stop": round(entry - 1, 2),
+                "margin_per_lot": margin, "capital": margin * lots,
+                "rs1_pnl": lots * r["lot_size"],
+                "zone_buy_wr": r.get("zone_buy_wr"), "zone_buy_n": r.get("zone_buy_n"),
+                "twenty_score": r.get("twenty_score"), "rsi": r.get("rsi"),
+                "why": (bz["levels"] if bz else []),
+            })
 
     # Count signals
     sig_counts = {}
@@ -430,22 +605,23 @@ def build():
         sig_counts[r["signal"]] = sig_counts.get(r["signal"], 0) + 1
 
     payload = {
-        "version": 1,
+        "version": 2,
         "name": "F&O ₹1 Play Desk",
         "as_of": today,
         "vix": vix,
         "covered": len(rows),
         "missing": missing,
         "top_picks": top_picks,
+        "rs6l_plan": plan,
         "signal_counts": sig_counts,
         "rows": rows,
         "method": [
-            "Trend (40%): close above/below 5-DMA and 20-DMA.",
-            "Range position (30%): where in today's High-Low did the price close?",
-            "Day momentum (20%): was today's candle green or red (close vs open)?",
-            "Volume (10%): above-average volume confirms the direction.",
-            "ADR (avg daily range ₹): must be > ₹5 for a ₹1 play to be feasible.",
-            "Backtest: on historical BUY-signal days, what % of the time did next-day High ≥ prev_close + ₹1?",
+            "20-signal composite (0-20): 5 DMA trends + 3 DMA crossovers + RSI (2) + range/candle/pivot/prev-close + volume + 4 momentum windows + 60-day midpoint.",
+            "₹1 Zones: confluence of Fibonacci retracement, 20/50/100/200-DMA and pivot levels clustered within 0.4%. BUY zones = support below price; SELL zones = resistance above.",
+            "RSI(14): oversold (<45) near a support zone = bounce setup; overbought (>55) near resistance = fade setup.",
+            "Zone backtest (1 year): when price sat in a support zone, how often did it bounce ₹1 within 2 sessions? Shown with sample size.",
+            "ADR (avg daily range ₹): must be > ₹5 for a ₹1 play. Higher ADR = ₹1 is a smaller fraction of the day's move.",
+            "Signal backtest: on historical BUY-signal days, how often did next-day High ≥ prev_close + ₹1?",
         ],
         "rules": [
             "Wait for the first 15-minute opening range (ORB) to form before entering.",
