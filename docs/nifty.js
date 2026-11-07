@@ -2,8 +2,8 @@
    One chart, one EMA line, ▲/▼ on every close that switches sides. All text via textContent. */
 (function () {
   "use strict";
-  var D = null, chart = null, candles = null, line = null;
-  var state = { tf: null, win: 140 };
+  var D = null, C = null, chart = null, candles = null, line = null;
+  var state = { tf: null, win: 140, mode: "combo" };
   var TF_NAME = { "5m": "5 min", "15m": "15 min", "30m": "30 min", "75m": "75 min", "1h": "1 hour", "2h": "2 hour", "1D": "Daily" };
 
   function $(id) { return document.getElementById(id); }
@@ -122,15 +122,38 @@
     c.bars.forEach(function (b, i) { if (c.ema_values[i] != null) ld.push({ time: b[0], value: c.ema_values[i] }); });
     line.setData(ld);
     line.applyOptions({ title: "EMA " + c.ema });
-    var first = c.bars.length ? c.bars[0][0] : null;
-    candles.setMarkers(c.markers.filter(function (m) { return first == null || m[0] >= first; }).map(function (m) {
-      var up = m[1] > 0;
-      return { time: m[0], position: up ? "belowBar" : "aboveBar", color: up ? "#16a34a" : "#dc2626",
-               shape: up ? "arrowUp" : "arrowDown", size: 0.6 };
-    }));
     $("nf-title").textContent = "NIFTY 50 · " + TF_NAME[tf] + " candles · EMA " + c.ema + " (the winner)";
+    applyMarkers();
     setWindow(state.win);
     legend(null);
+  }
+
+  var EXIT_TXT = { top: "TOP", cross: "EXIT", st: "EXIT", trail: "EXIT", target: "TARGET" };
+  function applyMarkers() {
+    var c = D.charts[state.tf], first = c.bars.length ? c.bars[0][0] : null, note = $("nf-chart-note");
+    var useCombo = state.mode === "combo" && C && C.chart && state.tf === C.tf;
+    var mk;
+    if (useCombo) {
+      mk = C.chart.markers.filter(function (m) { return first == null || m[0] >= first; }).map(function (m) {
+        var buy = m[1] === "buy", sell = m[1] === "sell";
+        if (buy) return { time: m[0], position: "belowBar", color: "#16a34a", shape: "arrowUp", size: 1.1, text: "BUY" };
+        if (sell) return { time: m[0], position: "aboveBar", color: "#dc2626", shape: "arrowDown", size: 1.1, text: "SELL" };
+        return { time: m[0], position: "aboveBar", color: m[1] === "top" ? "#f59e0b" : "#64748b", shape: "circle", size: 0.9,
+                 text: (EXIT_TXT[m[1]] || "EXIT") + " " + signed(m[3], 0) };
+      });
+      note.textContent = "BUY = close above EMA 105 with " + C.winner.filters.join(" + ") +
+        " all agreeing. TOP = " + C.exits[C.winner.exit].replace(/the level/, String(C.winner.p)) +
+        " (sell the long, then wait for price to come back near EMA 105). EXIT = close back below EMA 105. Numbers = points after costs.";
+    } else {
+      mk = c.markers.filter(function (m) { return first == null || m[0] >= first; }).map(function (m) {
+        var up = m[1] > 0;
+        return { time: m[0], position: up ? "belowBar" : "aboveBar", color: up ? "#16a34a" : "#dc2626",
+                 shape: up ? "arrowUp" : "arrowDown", size: 0.6 };
+      });
+      note.textContent = "EMA 105 only. ▲ = a candle closed above it (view turns up). ▼ = a candle closed below it (view turns down).";
+    }
+    candles.setMarkers(mk);
+    Array.prototype.forEach.call($("nf-mode").children, function (b) { b.classList.toggle("on", b.dataset.mode === state.mode); });
   }
 
   function setWindow(n) {
@@ -153,6 +176,9 @@
   function renderControls() {
     Array.prototype.forEach.call($("nf-win").children, function (b) {
       b.addEventListener("click", function () { setWindow(+b.dataset.win); });
+    });
+    Array.prototype.forEach.call($("nf-mode").children, function (b) {
+      b.addEventListener("click", function () { state.mode = b.dataset.mode; applyMarkers(); });
     });
   }
 
@@ -224,18 +250,130 @@
     var ul = $("nf-limits"); ul.textContent = "";
     (D.limits || []).forEach(function (t) { ul.appendChild(el("li", null, t)); });
   }
+  /* ── combination research (nifty_combo.json) ─────────────────────────── */
+  function sline(s) { return s && s.n ? s.n + " trades · " + pct(s.win) + " win · PF " + num(s.pf, 2) + " · " + signed(s.net, 0) + " pts" : "—"; }
+  function statCells(tr, s) {
+    cell(tr, s && s.n ? String(s.n) : "0", "num");
+    cell(tr, pct(s && s.win), "num");
+    cell(tr, s && s.pf != null ? num(s.pf, 2) : "—", "num");
+    cell(tr, signed(s && s.net, 0), tone(s && s.net));
+    cell(tr, s && s.dd != null ? num(s.dd, 0) : "—", "num");
+  }
+  var STAT_COLS = [["Trades", "num"], ["Win %", "num"], ["PF", "num", "winning points ÷ losing points"], ["Net pts", "num", "after costs"], ["Worst DD", "num", "worst drawdown in points"]];
+
+  function renderCombo() {
+    var w = C.winner, now = C.now, box = $("cb-now");
+    box.textContent = "";
+    box.className = "nf-combo-now " + (now.state.indexOf("BUY") >= 0 ? "long" : "wait");
+    box.appendChild(el("small", null, "EMA 105 + CONFIRMATIONS · " + C.as_of));
+    box.appendChild(el("b", null, now.state));
+    box.appendChild(el("p", null, now.note));
+    var ul = el("ul", "nf-checks");
+    now.checks.forEach(function (ch) {
+      var li = el("li", ch.ok ? "ok" : "no");
+      li.appendChild(el("span", null, ch.ok ? "✓ " : "✗ "));
+      li.appendChild(document.createTextNode(ch.name + " — " + ch.value));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    box.appendChild(el("p", "fd-note", "RSI now " + num(now.rsi, 1) + " · price " + num(now.atr_from_ema, 1) + " ATR above EMA 105."));
+
+    $("cb-period").textContent = "(" + C.period.from + " → " + C.period.to + ", 2-hour candles, long only, after costs)";
+    var tb = head($("cb-cmp"), [["Rule"]].concat(STAT_COLS));
+    [["EMA 105 alone (close above = buy, close below = exit)", C.base.long_only.all],
+     ["EMA 105 + " + w.filters.join(" + ") + " + RSI-" + w.p + " top exit", w.all],
+     ["… same, unseen part only (" + C.period.split + " →)", w.os]].forEach(function (row, i) {
+      var tr = el("tr", i === 1 ? "nf-chosen" : null); cell(tr, row[0]); statCells(tr, row[1]); tb.appendChild(tr);
+    });
+    var b = C.base.long_only.all;
+    $("cb-cmp-note").textContent = "Win rate " + pct(b.win) + " → " + pct(w.all.win) + ", profit factor " + num(b.pf, 2) + " → " +
+      num(w.all.pf, 2) + ", net " + signed(b.net, 0) + " → " + signed(w.all.net, 0) + " points with " + w.all.n + " instead of " + b.n +
+      " trades. Tested " + num(C.tested) + " combinations; " + num(C.robust_count) + " made money in both the tested and the unseen part.";
+
+    $("cb-fin-note").textContent = "Ranked by the WEAKER of the two parts (tested " + C.period.from + " → " + C.period.split +
+      ", unseen " + C.period.split + " → " + C.period.to + "). Final = 60% numbers + 40% Jev (" + (C.jev.model || "—") + ", " + C.jev.status + ").";
+    tb = head($("cb-fin"), [["#"], ["Indicators"], ["Exit"], ["Tested part", null], ["Unseen part", null], ["Whole period", null], ["Jev"], ["Final", "num"]]);
+    C.finalists.forEach(function (r, i) {
+      var tr = el("tr", i === 0 ? "nf-chosen" : null), j = r.jev || {};
+      cell(tr, String(i + 1)); cell(tr, "EMA 105 + " + r.filters.join(" + "));
+      cell(tr, r.exit + (r.p != null ? " " + r.p : "")); cell(tr, sline(r.is)); cell(tr, sline(r.os)); cell(tr, sline(r.all));
+      cell(tr, j.reliability ? j.reliability + " · overfit " + j.overfit : (j.error ? "error" : "—"));
+      cell(tr, num(r.final, 1), "num"); tb.appendChild(tr);
+    });
+
+    var best = 0;
+    (C.top_robust || []).forEach(function (r) { if (r.all.n >= 20 && r.all.win > best) best = r.all.win; });
+    $("cb-trap-note").textContent = "Highest win rate of any robust combination with 20+ trades: " + pct(best) +
+      ". Rules that showed 74-76% in the tested part fell to 44-50% on unseen data and LOST money. The ones below are the highest tested-part win rates - look at the unseen column.";
+    tb = head($("cb-trap"), [["Rule"], ["Tested part"], ["Unseen part"]]);
+    C.trap.slice(0, 6).forEach(function (r) {
+      var tr = el("tr"); cell(tr, r.label); cell(tr, sline(r.is), "up"); cell(tr, sline(r.os), tone(r.os.net)); tb.appendChild(tr);
+    });
+
+    var tv = C.top_reversion;
+    $("cb-top-note").textContent = tv.n + " TOP signals. Within the next 10 candles (≈ 2.5 sessions) Nifty fell at least 1 ATR after " +
+      pct(tv.fell_1atr_pct) + " of them and went all the way back to EMA 105 after " + pct(tv.reached_ema_pct) +
+      ". Median move back toward EMA 105: " + pct(tv.median_pct_back) + " of the gap.";
+    tb = head($("cb-top"), [["TOP at"], ["Close", "num"], ["ATR above EMA", "num"], ["Fell (pts, 10 bars)", "num"], ["% of gap to EMA", "num"]]);
+    tv.tops.slice().reverse().forEach(function (t) {
+      var tr = el("tr"); cell(tr, t.date); cell(tr, num(t.close, 2), "num"); cell(tr, num(t.atr_above_ema, 1), "num");
+      cell(tr, num(t.drop_10bars, 0), "num"); cell(tr, pct(t.pct_back_to_ema), t.pct_back_to_ema >= 100 ? "num up" : "num"); tb.appendChild(tr);
+    });
+
+    var bl = C.base.long_short.all;
+    $("cb-short-note").textContent = "Selling every close below EMA 105 lost money in the tested part and made money only in the unseen part - not consistent. " +
+      "Long + short together: " + sline(bl) + ". The page therefore shows BUY signals plus TOP/EXIT; a close below EMA 105 means stay out.";
+    tb = head($("cb-short"), [["Sell rule"], ["Tested part"], ["Unseen part"], ["Whole period"]]);
+    C.short_side.slice(0, 9).forEach(function (r) {
+      var tr = el("tr"); cell(tr, r.label); cell(tr, sline(r.is), tone(r.is.net)); cell(tr, sline(r.os), tone(r.os.net)); cell(tr, sline(r.all), tone(r.all.net)); tb.appendChild(tr);
+    });
+
+    var levels = [], adxs = [];
+    C.sensitivity.forEach(function (s) { if (levels.indexOf(s.rsi_top) < 0) levels.push(s.rsi_top); if (adxs.indexOf(s.adx) < 0) adxs.push(s.adx); });
+    tb = head($("cb-sens"), [["ADX above"]].concat(levels.map(function (l) { return ["RSI top " + l, "num"]; })));
+    adxs.forEach(function (a) {
+      var tr = el("tr"); cell(tr, String(a));
+      levels.forEach(function (l) {
+        var s = C.sensitivity.filter(function (x) { return x.adx === a && x.rsi_top === l; })[0];
+        var td = cell(tr, s ? pct(s.win) + " (" + num(s.pf, 2) + ")" : "—", "num");
+        if (s && a === 20 && l === w.p) td.className = "num nf-hit";
+      });
+      tb.appendChild(tr);
+    });
+
+    var dc = C.daily_check;
+    tb = head($("cb-daily"), [["Rule (" + dc.from + " → " + dc.to + ")"]].concat(STAT_COLS));
+    [["Daily EMA 26 alone", dc.ema_only], ["+ ADX>20 + Supertrend + trend gate, RSI-70 top exit", dc.combo_rsi_top],
+     ["+ ADX>20 + Supertrend + trend gate, exit on close below", dc.combo_cross_exit]].forEach(function (row) {
+      var tr = el("tr"); cell(tr, row[0]); statCells(tr, row[1]); tb.appendChild(tr);
+    });
+    $("cb-daily-note").textContent = dc.note + " Years the 2-hour test never saw. The confirmations roughly double the win rate here too (" +
+      pct(dc.ema_only.win) + " → " + pct(dc.combo_cross_exit.win) + ") and cut the drawdown, but the total points are lower because fewer trades are taken.";
+
+    tb = head($("cb-trades"), [["Buy at"], ["Price", "num"], ["Exit at"], ["Price", "num"], ["Why"], ["Points", "num"]]);
+    C.trades.slice().reverse().forEach(function (t) {
+      var tr = el("tr"); cell(tr, t[0]); cell(tr, num(t[2], 2), "num"); cell(tr, t[6] === "open" ? "open" : t[3]);
+      cell(tr, num(t[4], 2), "num"); cell(tr, t[6] === "open" ? "still holding" : t[6]); cell(tr, signed(t[5], 0), tone(t[5])); tb.appendChild(tr);
+    });
+  }
+
 
   function boot() {
-    fetch("nifty.json?v=" + Date.now(), { cache: "no-store" })
-      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function (d) {
-        D = d;
+    var get = function (f) {
+      return fetch(f + "?v=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { if (!r.ok) throw new Error(f + " HTTP " + r.status); return r.json(); });
+    };
+    Promise.all([get("nifty.json"), get("nifty_combo.json").catch(function () { return null; })])
+      .then(function (res) {
+        D = res[0]; C = res[1];
+        if (!C) { state.mode = "ema"; $("nf-combo").textContent = "Combination research not available yet."; }
         renderHead(); renderFinalists(); renderAsked(); renderSignals(); renderMethod(); renderControls();
+        if (C) renderCombo();
         if (typeof LightweightCharts === "undefined") { $("chart-main").textContent = "Chart library failed to load."; return; }
         buildChart();
         showWinner();
       })
-      .catch(function (e) { $("nf-asof").textContent = "Failed to load nifty.json: " + e.message; });
+      .catch(function (e) { $("nf-asof").textContent = "Failed to load: " + e.message; });
   }
   document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", boot) : boot();
 })();

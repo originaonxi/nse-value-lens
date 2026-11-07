@@ -6,9 +6,9 @@
 <meta name="description" content="Which single EMA, on which candle timeframe, best tells Nifty 50's direction? Every EMA from 3 to 200 tested on 5m, 15m, 30m, 75m, 1h, 2h and daily candles, ranked by the numbers and by Jev, updated every trading day.">
 <link rel="stylesheet" href="swing.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="nifty.css?v=3">
+<link rel="stylesheet" href="nifty.css?v=4">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="nifty.js?v=3" defer></script>
+<script src="nifty.js?v=4" defer></script>
 </head>
 <body>
 <div class="shell nf-shell">
@@ -28,14 +28,61 @@
 <section class="nf-chartbox">
   <div class="nf-toolbar">
     <strong class="nf-title" id="nf-title"></strong>
+    <div class="nf-group" id="nf-mode" aria-label="Signals shown">
+      <button type="button" data-mode="combo" class="on">EMA 105 + confirmations</button><button type="button" data-mode="ema">EMA 105 only</button>
+    </div>
     <div class="nf-group" id="nf-win" aria-label="Sessions shown">
       <button type="button" data-win="35">35</button><button type="button" data-win="70">70</button><button type="button" data-win="140" class="on">140 sessions</button>
     </div>
   </div>
   <div class="nf-legend" id="nf-legend"></div>
   <div id="chart-main" class="nf-chart"></div>
-  <p class="fd-note">Candles + the winning EMA only. <span class="up">▲</span> = a candle closed above it (view turns up). <span class="dn">▼</span> = a candle closed below it (view turns down).</p>
+  <p class="fd-note" id="nf-chart-note"></p>
 </section>
+
+<section class="nf-combo" id="nf-combo" aria-label="Confirmations">
+  <div class="nf-combo-now" id="cb-now"></div>
+  <div class="nf-combo-cmp"><h2 class="fd-h2">What the confirmations add <small id="cb-period"></small></h2>
+    <div class="fd-wrap"><table class="fd-table" id="cb-cmp"></table></div>
+    <p class="fd-note" id="cb-cmp-note"></p></div>
+</section>
+
+<details class="section nf-details" open>
+<summary>The research: every combination, the 80% question, tops, sells and checks</summary>
+<section class="section">
+  <h2 class="fd-h2">Best combinations <small>(must make money on both the tested and the unseen part)</small></h2>
+  <p class="fd-note" id="cb-fin-note"></p>
+  <div class="fd-wrap"><table class="fd-table" id="cb-fin"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">Can it reach 80%?</h2>
+  <p class="fd-note" id="cb-trap-note"></p>
+  <div class="fd-wrap"><table class="fd-table" id="cb-trap"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">After a TOP: does Nifty move back toward EMA 105?</h2>
+  <p class="fd-note" id="cb-top-note"></p>
+  <div class="fd-wrap nf-scroll"><table class="fd-table" id="cb-top"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">Sell signals (close below EMA 105)</h2>
+  <p class="fd-note" id="cb-short-note"></p>
+  <div class="fd-wrap"><table class="fd-table" id="cb-short"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">How sensitive is it? <small>win rate % (profit factor) by ADX level × RSI top level</small></h2>
+  <div class="fd-wrap"><table class="fd-table" id="cb-sens"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">Independent check: 2017–2023 daily candles</h2>
+  <div class="fd-wrap"><table class="fd-table" id="cb-daily"></table></div>
+  <p class="fd-note" id="cb-daily-note"></p>
+</section>
+<section class="section">
+  <h2 class="fd-h2">Every trade of the winning combination</h2>
+  <div class="fd-wrap nf-scroll"><table class="fd-table" id="cb-trades"></table></div>
+</section>
+</details>
 
 <details class="section nf-details">
 <summary>Backtest details: every timeframe, your EMAs, every signal</summary>

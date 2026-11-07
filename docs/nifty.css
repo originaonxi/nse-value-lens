@@ -38,3 +38,17 @@ td.up, td.dn { font-weight: 600; }
 .nf-title { font-size: .95rem; font-weight: 800; align-self: center; margin-right: auto; }
 .nf-details { margin-top: 1.5rem; }
 .nf-details > summary { cursor: pointer; font-weight: 700; padding: .6rem .9rem; background: var(--bg2, #f1f5f9); border-radius: 8px; }
+
+/* EMA 105 + confirmations */
+.nf-combo { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 1rem; margin: 1rem 0; align-items: start; }
+.nf-combo-now { border-radius: 12px; padding: .9rem 1rem; border: 1px solid var(--border, #e2e8f0); background: #fff; }
+.nf-combo-now.long { background: #16a34a10; border-color: #16a34a66; }
+.nf-combo-now.wait { background: #f59e0b10; border-color: #f59e0b66; }
+.nf-combo-now small { display: block; font-size: .7rem; letter-spacing: .05em; color: var(--sub, #64748b); }
+.nf-combo-now b { display: block; font-size: 1.6rem; font-weight: 800; margin: .1rem 0; }
+.nf-combo-now p { margin: .3rem 0; font-size: .85rem; line-height: 1.45; }
+.nf-checks { list-style: none; padding: 0; margin: .5rem 0; font-size: .82rem; }
+.nf-checks li { padding: .2rem 0; }
+.nf-checks li.ok span { color: #15803d; font-weight: 800; } .nf-checks li.no span { color: #b91c1c; font-weight: 800; }
+td.nf-hit { background: #2563eb18; font-weight: 800; }
+@media (max-width: 900px) { .nf-combo { grid-template-columns: 1fr; } }
