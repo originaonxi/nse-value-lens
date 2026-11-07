@@ -6,9 +6,9 @@
 <meta name="description" content="Which single EMA, on which candle timeframe, best tells Nifty 50's direction? Every EMA from 3 to 200 tested on 5m, 15m, 30m, 75m, 1h, 2h and daily candles, ranked by the numbers and by Jev, updated every trading day.">
 <link rel="stylesheet" href="swing.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="nifty.css?v=2">
+<link rel="stylesheet" href="nifty.css?v=3">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="nifty.js?v=2" defer></script>
+<script src="nifty.js?v=3" defer></script>
 </head>
 <body>
 <div class="shell nf-shell">
@@ -27,22 +27,21 @@
 
 <section class="nf-chartbox">
   <div class="nf-toolbar">
-    <div class="nf-group" id="nf-tf" aria-label="Candle timeframe"></div>
+    <strong class="nf-title" id="nf-title"></strong>
     <div class="nf-group" id="nf-win" aria-label="Sessions shown">
       <button type="button" data-win="35">35</button><button type="button" data-win="70">70</button><button type="button" data-win="140" class="on">140 sessions</button>
-    </div>
-    <div class="nf-group">
-      <button type="button" id="nf-draw" title="Click, then click the chart to place a horizontal line">✎ Line</button>
-      <button type="button" id="nf-clear" title="Remove your lines">Clear lines</button>
     </div>
   </div>
   <div class="nf-legend" id="nf-legend"></div>
   <div id="chart-main" class="nf-chart"></div>
-  <p class="fd-note">Candles + <b>one</b> EMA line. <span class="up">▲</span> = a candle closed above the EMA (view turns up). <span class="dn">▼</span> = a candle closed below it (view turns down). The dashed line is today's flip level.</p>
+  <p class="fd-note">Candles + the winning EMA only. <span class="up">▲</span> = a candle closed above it (view turns up). <span class="dn">▼</span> = a candle closed below it (view turns down).</p>
 </section>
 
+<details class="section nf-details">
+<summary>Backtest details: every timeframe, your EMAs, every signal</summary>
+
 <section class="section">
-  <h2 class="fd-h2">Best EMA on every timeframe <small>(click a row to see its chart)</small></h2>
+  <h2 class="fd-h2">Best EMA on every timeframe</h2>
   <p class="fd-note" id="t-fin-note"></p>
   <div class="fd-wrap"><table class="fd-table" id="t-fin"></table></div>
 </section>
@@ -57,6 +56,7 @@
   <h2 class="fd-h2">Every signal of the chosen EMA <small id="t-sig-sub"></small></h2>
   <div class="fd-wrap nf-scroll"><table class="fd-table" id="t-sig"></table></div>
 </section>
+</details>
 
 <section class="section">
   <h2 class="fd-h2">How it is tested</h2>

@@ -2,9 +2,8 @@
    One chart, one EMA line, ▲/▼ on every close that switches sides. All text via textContent. */
 (function () {
   "use strict";
-  var D = null, chart = null, candles = null, line = null, flipLine = null, userLines = [];
-  var state = { tf: null, win: 140, drawing: false };
-  var LS_KEY = "nifty-one-ema-lines";
+  var D = null, chart = null, candles = null, line = null;
+  var state = { tf: null, win: 140 };
   var TF_NAME = { "5m": "5 min", "15m": "15 min", "30m": "30 min", "75m": "75 min", "1h": "1 hour", "2h": "2 hour", "1D": "Daily" };
 
   function $(id) { return document.getElementById(id); }
@@ -68,7 +67,7 @@
     kpi("Close-below signals", signed(m.down_net, 0) + " pts", m.down_n + " signals, " + pct(m.down_hit) + " went down", m.down_net > 0 ? "up" : "dn");
     kpi("Profit factor", num(m.pf, 2), "winning pts ÷ losing pts");
     kpi("Worst drawdown", num(m.max_dd, 0) + " pts", "");
-    kpi("Last " + D.recent + " sessions", signed(c.recent.net, 0) + " pts", c.recent.trades + " signals", c.recent.net > 0 ? "up" : "dn");
+    kpi("Last " + D.recent + " sessions", signed(c.recent.net, 0) + " pts", c.recent.trades + (c.recent.trades === 1 ? " signal" : " signals"), c.recent.net > 0 ? "up" : "dn");
     if (c.full && c.full.sessions > m.sessions)
       kpi("Longer history", signed(c.full.net, 0) + " pts", c.full.sessions + " sessions, PF " + num(c.full.pf, 2), c.full.net > 0 ? "up" : "dn");
     kpi("Jev", j.reliability ? j.reliability.toUpperCase() : "—",
@@ -99,14 +98,6 @@
     });
     line = chart.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, lastValueVisible: true });
     chart.subscribeCrosshairMove(legend);
-    chart.subscribeClick(function (p) {
-      if (!state.drawing || !p || !p.point) return;
-      var price = candles.coordinateToPrice(p.point.y);
-      if (price == null) return;
-      var saved = loadLines(); saved.push(Math.round(price * 100) / 100); saveLines(saved);
-      state.drawing = false; $("nf-draw").classList.remove("on");
-      drawUserLines();
-    });
   }
 
   function legend(p) {
@@ -122,7 +113,8 @@
       (ev != null ? (bar[4] > ev ? "  ▲ close above" : "  ▼ close below") : "");
   }
 
-  function showTf(tf) {
+  function showWinner() {
+    var tf = D.chosen.tf;
     state.tf = tf;
     var c = D.charts[tf];
     candles.setData(c.bars.map(function (b) { return { time: b[0], open: b[1], high: b[2], low: b[3], close: b[4] }; }));
@@ -136,11 +128,7 @@
       return { time: m[0], position: up ? "belowBar" : "aboveBar", color: up ? "#16a34a" : "#dc2626",
                shape: up ? "arrowUp" : "arrowDown", size: 0.6 };
     }));
-    if (flipLine) candles.removePriceLine(flipLine);
-    flipLine = candles.createPriceLine({ price: c.ema_now, color: "#2563eb", lineWidth: 1, lineStyle: 2,
-      axisLabelVisible: true, title: "flip " + num(c.ema_now, 0) });
-    drawUserLines();
-    Array.prototype.forEach.call($("nf-tf").children, function (b) { b.classList.toggle("on", b.dataset.tf === tf); });
+    $("nf-title").textContent = "NIFTY 50 · " + TF_NAME[tf] + " candles · EMA " + c.ema + " (the winner)";
     setWindow(state.win);
     legend(null);
   }
@@ -161,31 +149,11 @@
     Array.prototype.forEach.call($("nf-win").children, function (b) { b.classList.toggle("on", +b.dataset.win === n); });
   }
 
-  function loadLines() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } }
-  function saveLines(a) { try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch (e) { /* private mode */ } }
-  function drawUserLines() {
-    userLines.forEach(function (l) { candles.removePriceLine(l); });
-    userLines = loadLines().map(function (p) {
-      return candles.createPriceLine({ price: p, color: "#f59e0b", lineWidth: 1, lineStyle: 0, axisLabelVisible: true, title: "" });
-    });
-  }
 
   function renderControls() {
-    var g = $("nf-tf"); g.textContent = "";
-    D.tested.timeframes.forEach(function (tf) {
-      if (!D.charts[tf]) return;
-      var b = el("button", null, TF_NAME[tf] + " · EMA " + D.charts[tf].ema);
-      b.type = "button"; b.dataset.tf = tf;
-      b.addEventListener("click", function () { showTf(tf); });
-      g.appendChild(b);
-    });
     Array.prototype.forEach.call($("nf-win").children, function (b) {
       b.addEventListener("click", function () { setWindow(+b.dataset.win); });
     });
-    $("nf-draw").addEventListener("click", function () {
-      state.drawing = !state.drawing; this.classList.toggle("on", state.drawing);
-    });
-    $("nf-clear").addEventListener("click", function () { saveLines([]); drawUserLines(); });
   }
 
   /* ── tables ──────────────────────────────────────────────────────────── */
@@ -207,9 +175,6 @@
       cell(tr, j.reliability ? j.reliability + " / " + j.recent_edge : (j.error ? "error" : "—"));
       cell(tr, num(r.final, 1), "num");
       tr.style.cursor = "pointer";
-      tr.addEventListener("click", function () {
-        if (D.charts[r.tf] && D.charts[r.tf].ema === r.ema) { showTf(r.tf); $("chart-main").scrollIntoView({ behavior: "smooth", block: "center" }); }
-      });
       tb.appendChild(tr);
     });
   }
@@ -268,7 +233,7 @@
         renderHead(); renderFinalists(); renderAsked(); renderSignals(); renderMethod(); renderControls();
         if (typeof LightweightCharts === "undefined") { $("chart-main").textContent = "Chart library failed to load."; return; }
         buildChart();
-        showTf(D.chosen.tf);
+        showWinner();
       })
       .catch(function (e) { $("nf-asof").textContent = "Failed to load nifty.json: " + e.message; });
   }
