@@ -52,3 +52,12 @@ td.up, td.dn { font-weight: 600; }
 .nf-checks li.ok span { color: #15803d; font-weight: 800; } .nf-checks li.no span { color: #b91c1c; font-weight: 800; }
 td.nf-hit { background: #2563eb18; font-weight: 800; }
 @media (max-width: 900px) { .nf-combo { grid-template-columns: 1fr; } }
+
+/* points made under the main chart + day vs night chart */
+.nf-pts { margin: .5rem 0 .2rem; font-size: .9rem; }
+.nf-pts b { font-size: 1.25rem; font-weight: 800; margin-right: .35rem; }
+.nf-pts.up b { color: #15803d; } .nf-pts.dn b { color: #b91c1c; }
+.nf-pts.up, .nf-pts.dn { color: var(--sub, #475569); }
+.nf-dn { margin-top: 1rem; }
+.nf-chart-dn { height: 420px; }
+.nf-dn .fd-h2 { margin-top: 1.2rem; }

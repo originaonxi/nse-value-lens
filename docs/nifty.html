@@ -6,9 +6,9 @@
 <meta name="description" content="Which single EMA, on which candle timeframe, best tells Nifty 50's direction? Every EMA from 3 to 200 tested on 5m, 15m, 30m, 75m, 1h, 2h and daily candles, ranked by the numbers and by Jev, updated every trading day.">
 <link rel="stylesheet" href="swing.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="nifty.css?v=4">
+<link rel="stylesheet" href="nifty.css?v=5">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="nifty.js?v=4" defer></script>
+<script src="nifty.js?v=5" defer></script>
 </head>
 <body>
 <div class="shell nf-shell">
@@ -29,7 +29,7 @@
   <div class="nf-toolbar">
     <strong class="nf-title" id="nf-title"></strong>
     <div class="nf-group" id="nf-mode" aria-label="Signals shown">
-      <button type="button" data-mode="combo" class="on">EMA 105 + confirmations</button><button type="button" data-mode="ema">EMA 105 only</button>
+      <button type="button" data-mode="ema" class="on">EMA 105</button><button type="button" data-mode="combo">EMA 105 + confirmations</button>
     </div>
     <div class="nf-group" id="nf-win" aria-label="Sessions shown">
       <button type="button" data-win="35">35</button><button type="button" data-win="70">70</button><button type="button" data-win="140" class="on">140 sessions</button>
@@ -37,7 +37,31 @@
   </div>
   <div class="nf-legend" id="nf-legend"></div>
   <div id="chart-main" class="nf-chart"></div>
+  <p class="nf-pts" id="nf-pts" role="status"></p>
   <p class="fd-note" id="nf-chart-note"></p>
+</section>
+
+<section class="nf-chartbox nf-dn" id="nf-dn" aria-label="Day versus night">
+  <div class="nf-toolbar">
+    <strong class="nf-title">NIFTY 50 · DAY vs NIGHT · last <span id="dn-n">200</span> sessions</strong>
+    <div class="nf-group" id="dn-view" aria-label="What to plot">
+      <button type="button" data-v="split" class="on">Day vs night points</button><button type="button" data-v="bars">Each session</button>
+    </div>
+  </div>
+  <div class="nf-legend" id="dn-legend"></div>
+  <div id="chart-dn" class="nf-chart nf-chart-dn"></div>
+  <p class="fd-note" id="dn-note"></p>
+  <div class="nf-kpis" id="dn-kpis"></div>
+  <h2 class="fd-h2">Where the EMA 105 trades made their points</h2>
+  <div class="fd-wrap"><table class="fd-table" id="dn-ema"></table></div>
+  <h2 class="fd-h2">11 ideas, each as a BUY and a SELL <small id="dn-sub"></small></h2>
+  <p class="fd-note" id="dn-rules-note"></p>
+  <div class="fd-wrap nf-scroll"><table class="fd-table" id="dn-rules"></table></div>
+  <h2 class="fd-h2">Opening-range breakout, checked twice</h2>
+  <div class="fd-wrap"><table class="fd-table" id="dn-orb"></table></div>
+  <h2 class="fd-h2">Ten years: night vs day by year</h2>
+  <div class="fd-wrap"><table class="fd-table" id="dn-years"></table></div>
+  <p class="fd-note" id="dn-checks"></p>
 </section>
 
 <section class="nf-combo" id="nf-combo" aria-label="Confirmations">

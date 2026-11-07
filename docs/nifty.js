@@ -3,7 +3,8 @@
 (function () {
   "use strict";
   var D = null, C = null, chart = null, candles = null, line = null;
-  var state = { tf: null, win: 140, mode: "combo" };
+  var state = { tf: null, win: 140, mode: "ema" };
+  var pnl = null;
   var TF_NAME = { "5m": "5 min", "15m": "15 min", "30m": "30 min", "75m": "75 min", "1h": "1 hour", "2h": "2 hour", "1D": "Daily" };
 
   function $(id) { return document.getElementById(id); }
@@ -96,21 +97,54 @@
       upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626",
       wickUpColor: "#16a34a", wickDownColor: "#dc2626"
     });
+    candles.priceScale().applyOptions({ scaleMargins: { top: 0.05, bottom: 0.3 } });
     line = chart.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, lastValueVisible: true });
+    pnl = chart.addBaselineSeries({
+      priceScaleId: "pts", baseValue: { type: "price", price: 0 }, lineWidth: 2, priceLineVisible: false,
+      topLineColor: "#16a34a", topFillColor1: "#16a34a33", topFillColor2: "#16a34a08",
+      bottomLineColor: "#dc2626", bottomFillColor1: "#dc262608", bottomFillColor2: "#dc262633",
+      title: "points made", priceFormat: { type: "price", precision: 0, minMove: 1 }
+    });
+    chart.priceScale("pts").applyOptions({ scaleMargins: { top: 0.75, bottom: 0.02 } });
     chart.subscribeCrosshairMove(legend);
+  }
+
+  /* Running points of a set of trades, marked to market on every candle of the chart (after costs). */
+  function toTime(s) { return Math.floor(Date.parse(s.replace(" ", "T") + ":00Z") / 1000); }
+  function equity(bars, trades, cost) {
+    var idx = {}; bars.forEach(function (b, i) { idx[b[0]] = i; });
+    var step = new Array(bars.length).fill(0), total = 0, n = 0, wins = 0;
+    trades.forEach(function (t) {
+      var a = idx[toTime(t[0])], z = t[6] === "open" || t[6] === false ? bars.length - 1 : idx[toTime(t[3])];
+      if (a == null) return;                      // trade started before the chart window
+      if (z == null) z = bars.length - 1;
+      step[a] -= cost * bars[a][4];
+      for (var k = a + 1; k <= z; k++) step[k] += t[1] * (bars[k][4] - bars[k - 1][4]);
+      n++; if (t[5] > 0) wins++;
+    });
+    var out = [];
+    bars.forEach(function (b, i) { total += step[i]; out.push({ time: b[0], value: Math.round(total * 10) / 10 }); });
+    return { data: out, total: total, n: n, wins: wins };
+  }
+  function currentTrades() {
+    var useCombo = state.mode === "combo" && C && C.chart && state.tf === C.tf;
+    if (useCombo) return C.trades;
+    return D.chosen.signals.map(function (s) { return [s[0], s[1], s[2], s[3], s[4], s[5], s[6] ? "closed" : "open"]; });
   }
 
   function legend(p) {
     var c = D.charts[state.tf], lg = $("nf-legend");
-    var bar = null, ev = null;
+    var bar = null, ev = null, pv = null, i;
     if (p && p.time != null) {
-      for (var i = c.bars.length - 1; i >= 0; i--) if (c.bars[i][0] === p.time) { bar = c.bars[i]; ev = c.ema_values[i]; break; }
+      for (i = c.bars.length - 1; i >= 0; i--) if (c.bars[i][0] === p.time) { bar = c.bars[i]; ev = c.ema_values[i]; break; }
     }
-    if (!bar) { bar = c.bars[c.bars.length - 1]; ev = c.ema_values[c.ema_values.length - 1]; }
+    if (!bar) { i = c.bars.length - 1; bar = c.bars[i]; ev = c.ema_values[i]; }
+    if (state.eq && state.eq.data[i]) pv = state.eq.data[i].value;
     var t = typeof bar[0] === "string" ? bar[0] : new Date(bar[0] * 1000).toISOString().slice(0, 16).replace("T", " ");
     lg.textContent = TF_NAME[state.tf] + " " + t + "  O " + num(bar[1], 2) + "  H " + num(bar[2], 2) + "  L " +
       num(bar[3], 2) + "  C " + num(bar[4], 2) + "   EMA " + c.ema + ": " + num(ev, 2) +
-      (ev != null ? (bar[4] > ev ? "  ▲ close above" : "  ▼ close below") : "");
+      (ev != null ? (bar[4] > ev ? "  ▲ close above" : "  ▼ close below") : "") +
+      (pv != null ? "   ·  points made so far: " + signed(pv, 0) : "");
   }
 
   function showWinner() {
@@ -153,7 +187,18 @@
       note.textContent = "EMA 105 only. ▲ = a candle closed above it (view turns up). ▼ = a candle closed below it (view turns down).";
     }
     candles.setMarkers(mk);
+    var cost = (C && C.cost_pct != null ? C.cost_pct : D.cost_pct) / 100;
+    state.eq = equity(c.bars, currentTrades(), cost);
+    pnl.setData(state.eq.data);
+    var e = state.eq, sum = $("nf-pts");
+    sum.textContent = "";
+    sum.className = "nf-pts " + (e.total >= 0 ? "up" : "dn");
+    sum.appendChild(el("b", null, signed(e.total, 0) + " points"));
+    sum.appendChild(document.createTextNode(" made by " + (useCombo ? "EMA 105 + confirmations (buy only)" : "EMA 105 (buy above, sell below)") +
+      " over the last " + D.window + " sessions, after costs · " + e.n + " trades, " + e.wins + " winners · ≈ ₹" +
+      num(Math.round(e.total * 75), 0) + " per Nifty lot of 75"));
     Array.prototype.forEach.call($("nf-mode").children, function (b) { b.classList.toggle("on", b.dataset.mode === state.mode); });
+    legend(null);
   }
 
   function setWindow(n) {
@@ -357,21 +402,135 @@
     });
   }
 
+  /* ── Day vs night (nifty_daynight.json) - its own chart, never touches the main one ─────────── */
+  var N2 = null, dnChart = null, dnSeries = [];
+  function dnPlot(view) {
+    dnSeries.forEach(function (s) { dnChart.removeSeries(s); }); dnSeries = [];
+    var rows = N2.series, cn = 0, cd = 0;
+    if (view === "bars") {
+      var hn = dnChart.addHistogramSeries({ priceScaleId: "right", title: "night", priceFormat: { type: "price", precision: 0, minMove: 1 } });
+      var hd = dnChart.addHistogramSeries({ priceScaleId: "left", title: "day", priceFormat: { type: "price", precision: 0, minMove: 1 } });
+      hn.setData(rows.map(function (r) { return { time: r[0], value: r[3], color: r[3] >= 0 ? "#6366f1" : "#c7d2fe" }; }));
+      hd.setData(rows.map(function (r) { return { time: r[0], value: r[4], color: r[4] >= 0 ? "#f59e0b" : "#fde68a" }; }));
+      dnChart.applyOptions({ leftPriceScale: { visible: true } });
+      dnSeries = [hn, hd];
+      $("dn-note").textContent = "Right scale, blue: each night's gap (open − previous close). Left scale, orange: each day's move (close − open). Pale = negative.";
+    } else {
+      var sn = dnChart.addLineSeries({ color: "#6366f1", lineWidth: 2, title: "night (close → next open)", priceFormat: { type: "price", precision: 0, minMove: 1 } });
+      var sd = dnChart.addLineSeries({ color: "#f59e0b", lineWidth: 2, title: "day (open → close)", priceFormat: { type: "price", precision: 0, minMove: 1 } });
+      var sc = dnChart.addLineSeries({ color: "#0f172a", lineWidth: 1, lineStyle: 2, title: "Nifty (close − start)", priceFormat: { type: "price", precision: 0, minMove: 1 } });
+      var a = [], b = [], c = [], base = rows[0][2] - rows[0][3] - rows[0][4];
+      rows.forEach(function (r) {
+        cn += r[3]; cd += r[4];
+        a.push({ time: r[0], value: Math.round(cn) }); b.push({ time: r[0], value: Math.round(cd) }); c.push({ time: r[0], value: Math.round(r[2] - base) });
+      });
+      sn.setData(a); sd.setData(b); sc.setData(c);
+      dnChart.applyOptions({ leftPriceScale: { visible: false } });
+      dnSeries = [sn, sd, sc];
+      $("dn-note").textContent = "Points Nifty made only overnight (blue) and only during market hours (orange), added up session by session. " +
+        "Blue + orange = the dashed Nifty line exactly. No costs here: this is the market itself, not a trade.";
+    }
+    dnChart.timeScale().fitContent();
+    Array.prototype.forEach.call($("dn-view").children, function (x) { x.classList.toggle("on", x.dataset.v === view); });
+  }
+
+  function renderDayNight() {
+    var t = N2.totals;
+    $("dn-n").textContent = N2.sessions;
+    dnChart = LightweightCharts.createChart($("chart-dn"), {
+      autoSize: true, layout: { background: { color: "#ffffff" }, textColor: "#334155", fontSize: 12 },
+      grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
+      rightPriceScale: { borderColor: "#e2e8f0" }, leftPriceScale: { borderColor: "#e2e8f0" },
+      timeScale: { borderColor: "#e2e8f0" }
+    });
+    dnChart.subscribeCrosshairMove(function (p) {
+      var r = null;
+      if (p && p.time) { for (var i = 0; i < N2.series.length; i++) if (N2.series[i][0] === (typeof p.time === "string" ? p.time : "")) { r = N2.series[i]; break; } }
+      if (!r && p && p.time && typeof p.time === "object") {
+        var s = p.time.year + "-" + String(p.time.month).padStart(2, "0") + "-" + String(p.time.day).padStart(2, "0");
+        N2.series.forEach(function (x) { if (x[0] === s) r = x; });
+      }
+      if (!r) r = N2.series[N2.series.length - 1];
+      $("dn-legend").textContent = r[0] + "   open " + num(r[1], 2) + "   close " + num(r[2], 2) + "   night " + signed(r[3], 1) + "   day " + signed(r[4], 1);
+    });
+    Array.prototype.forEach.call($("dn-view").children, function (b) { b.addEventListener("click", function () { dnPlot(b.dataset.v); }); });
+    dnPlot("split");
+    $("dn-legend").textContent = N2.from + " → " + N2.to;
+
+    var k = $("dn-kpis"); k.textContent = "";
+    function kpi(label, val, sub, cls) {
+      var b = el("div", "nf-kpi" + (cls ? " " + cls : "")); b.appendChild(el("small", null, label));
+      b.appendChild(el("strong", null, val)); if (sub) b.appendChild(el("span", null, sub)); k.appendChild(b);
+    }
+    kpi("Night points", signed(t.night, 0), t.night_up_days + " of " + N2.sessions + " nights up · avg size " + num(t.night_abs_avg, 0), t.night >= 0 ? "up" : "dn");
+    kpi("Day points", signed(t.day, 0), t.day_up_days + " of " + N2.sessions + " days up · avg size " + num(t.day_abs_avg, 0), t.day >= 0 ? "up" : "dn");
+    kpi("Nifty (close to close)", signed(t.cc, 0), N2.from + " → " + N2.to, t.cc >= 0 ? "up" : "dn");
+    var y10 = N2.years.filter(function (y) { return y.sessions > 100; });
+    var nUp = y10.filter(function (y) { return y.night > y.day; }).length;
+    kpi("Ten years", nUp + " of " + y10.length, "years where the night beat the day");
+
+    var tb = head($("dn-ema"), [["Rule (unchanged)"], ["Trades", "num"], ["Night pts", "num"], ["Day pts", "num"], ["Last 200 sessions: night", "num"], ["day", "num"]]);
+    N2.ema_split.forEach(function (r) {
+      var tr = el("tr"); cell(tr, r.rule); cell(tr, String(r.all.trades), "num");
+      cell(tr, signed(r.all.night, 0), tone(r.all.night)); cell(tr, signed(r.all.day, 0), tone(r.all.day));
+      cell(tr, signed(r.last200.night, 0), tone(r.last200.night)); cell(tr, signed(r.last200.day, 0), tone(r.last200.day)); tb.appendChild(tr);
+    });
+
+    $("dn-sub").textContent = "(" + N2.from + " → " + N2.to + ", after " + num(N2.cost_pct, 3) + "% cost per trade)";
+    $("dn-rules-note").textContent = "\"Holds up\" = made money in BOTH the first 100 and the last 100 sessions (split " + N2.half_split +
+      "). " + N2.holds.length + " of " + N2.rules.length + " rules hold up. Sorted by points after costs.";
+    tb = head($("dn-rules"), [["Idea"], ["Rule"], ["Side"], ["Trades", "num"], ["Win %", "num"], ["PF", "num"], ["Net pts", "num"],
+      ["Worst DD", "num"], ["1st 100", "num"], ["Last 100", "num"], ["Holds up"]]);
+    N2.rules.slice().sort(function (a, b) { return b.net - a.net; }).forEach(function (r) {
+      var tr = el("tr", r.holds ? "nf-chosen" : null);
+      cell(tr, r.idea); cell(tr, r.rule); cell(tr, r.side, r.side === "BUY" ? "up" : r.side === "SELL" ? "dn" : null);
+      cell(tr, String(r.n), "num"); cell(tr, pct(r.win), "num"); cell(tr, num(r.pf, 2), "num");
+      cell(tr, signed(r.net, 0), tone(r.net)); cell(tr, num(r.dd, 0), "num");
+      cell(tr, signed(r.h1, 0), tone(r.h1)); cell(tr, signed(r.h2, 0), tone(r.h2)); cell(tr, r.holds ? "✓" : "—", r.holds ? "up" : null);
+      tb.appendChild(tr);
+    });
+
+    var o = N2.orb;
+    tb = head($("dn-orb"), [["Version"], ["Trades", "num"], ["Win %", "num"], ["PF", "num"], ["Net pts", "num"], ["Worst DD", "num"]]);
+    [["Hourly candles, first hour, all " + N2.sessions + " sessions", o.first_hour_1h_200],
+     ["… first 100 sessions", o.first_hour_1h_h1], ["… last 100 sessions", o.first_hour_1h_h2],
+     ["Hourly candles, only the " + o.sessions_5m + " sessions that have 5-minute data", o.first_hour_1h_same_days_as_5m],
+     ["5-minute candles, first hour (second check)", o.first_hour_5m],
+     ["5-minute candles, first 15 minutes", o.first_15m_5m], ["5-minute candles, first 30 minutes", o.first_30m_5m]].forEach(function (row) {
+      var s = row[1] || {}, tr = el("tr"); cell(tr, row[0]); cell(tr, String(s.n || 0), "num"); cell(tr, pct(s.win), "num");
+      cell(tr, num(s.pf, 2), "num"); cell(tr, signed(s.net, 0), tone(s.net)); cell(tr, num(s.dd, 0), "num"); tb.appendChild(tr);
+    });
+
+    tb = head($("dn-years"), [["Year"], ["Sessions", "num"], ["Night pts", "num"], ["Day pts", "num"], ["Night %", "num"], ["Day %", "num"], ["Nights up", "num"], ["Days up", "num"]]);
+    N2.years.forEach(function (y) {
+      var tr = el("tr"); cell(tr, String(y.year)); cell(tr, String(y.sessions), "num");
+      cell(tr, signed(y.night, 0), tone(y.night)); cell(tr, signed(y.day, 0), tone(y.day));
+      cell(tr, signed(y.night_pct, 1) + "%", tone(y.night_pct)); cell(tr, signed(y.day_pct, 1) + "%", tone(y.day_pct));
+      cell(tr, pct(y.night_up_pct), "num"); cell(tr, pct(y.day_up_pct), "num"); tb.appendChild(tr);
+    });
+    var ch = N2.checks;
+    $("dn-checks").textContent = "Checks: night + day = close-to-close on every session (max error " + ch.identity_max_error +
+      " points). Daily open vs first hourly candle open: median gap " + num(ch.open_vs_first_hour_median, 2) + " points (95% within " +
+      num(ch.open_vs_first_hour_p95, 1) + "). Idea from " + N2.source;
+  }
 
   function boot() {
     var get = function (f) {
       return fetch(f + "?v=" + Date.now(), { cache: "no-store" })
         .then(function (r) { if (!r.ok) throw new Error(f + " HTTP " + r.status); return r.json(); });
     };
-    Promise.all([get("nifty.json"), get("nifty_combo.json").catch(function () { return null; })])
+    var opt = function (f) { return get(f).catch(function () { return null; }); };
+    Promise.all([get("nifty.json"), opt("nifty_combo.json"), opt("nifty_daynight.json")])
       .then(function (res) {
-        D = res[0]; C = res[1];
+        D = res[0]; C = res[1]; N2 = res[2];
         if (!C) { state.mode = "ema"; $("nf-combo").textContent = "Combination research not available yet."; }
         renderHead(); renderFinalists(); renderAsked(); renderSignals(); renderMethod(); renderControls();
         if (C) renderCombo();
         if (typeof LightweightCharts === "undefined") { $("chart-main").textContent = "Chart library failed to load."; return; }
         buildChart();
         showWinner();
+        if (N2) { try { renderDayNight(); } catch (e) { $("dn-note").textContent = "Day vs night failed: " + e.message; } }
+        else $("nf-dn").textContent = "Day vs night research not available yet.";
       })
       .catch(function (e) { $("nf-asof").textContent = "Failed to load: " + e.message; });
   }
