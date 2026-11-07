@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nifty 50 — live chart, indicators and EMA Lab | NSE Value Lens</title>
-<meta name="description" content="Nifty 50 interactive chart with 35/70/140-session views, Fibonacci, EMAs, Bollinger, Supertrend, VWAP, RSI, MACD and horizontal-line drawing, plus a backtest of every EMA period on every timeframe ranked by Jev.">
+<title>Nifty 50 — one EMA: close above = up, close below = down | NSE Value Lens</title>
+<meta name="description" content="Which single EMA, on which candle timeframe, best tells Nifty 50's direction? Every EMA from 3 to 200 tested on 5m, 15m, 30m, 75m, 1h, 2h and daily candles, ranked by the numbers and by Jev, updated every trading day.">
 <link rel="stylesheet" href="swing.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="nifty.css?v=1">
+<link rel="stylesheet" href="nifty.css?v=2">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="nifty.js?v=1" defer></script>
+<script src="nifty.js?v=2" defer></script>
 </head>
 <body>
 <div class="shell nf-shell">
@@ -20,77 +20,52 @@
     <h1>NIFTY 50 <span id="nf-close">—</span> <small id="nf-chg"></small></h1>
     <p class="fd-note" id="nf-asof">Loading…</p>
   </div>
-  <div class="nf-signal" id="nf-signal"></div>
+  <div class="nf-signal" id="nf-signal" role="status"></div>
 </section>
+
+<section class="nf-answer" id="nf-answer" aria-label="The one EMA"></section>
 
 <section class="nf-chartbox">
-  <div class="nf-toolbar" role="toolbar" aria-label="Chart controls">
-    <div class="nf-group" id="tf-group" aria-label="Candle timeframe"></div>
-    <div class="nf-group" id="win-group" aria-label="Sessions shown">
-      <button data-win="35">35 sessions</button><button data-win="70" class="on">70</button><button data-win="140">140</button><button data-win="all">All</button>
+  <div class="nf-toolbar">
+    <div class="nf-group" id="nf-tf" aria-label="Candle timeframe"></div>
+    <div class="nf-group" id="nf-win" aria-label="Sessions shown">
+      <button type="button" data-win="35">35</button><button type="button" data-win="70">70</button><button type="button" data-win="140" class="on">140 sessions</button>
     </div>
     <div class="nf-group">
-      <button id="tool-hline" title="Click, then click the chart to place a horizontal line">✏️ Horizontal line</button>
-      <button id="tool-clear" title="Remove all your lines on this timeframe">Clear lines</button>
+      <button type="button" id="nf-draw" title="Click, then click the chart to place a horizontal line">✎ Line</button>
+      <button type="button" id="nf-clear" title="Remove your lines">Clear lines</button>
     </div>
   </div>
-  <div class="nf-toggles" id="ind-toggles" aria-label="Indicators"></div>
   <div class="nf-legend" id="nf-legend"></div>
   <div id="chart-main" class="nf-chart"></div>
-  <div id="chart-rsi" class="nf-pane" hidden></div>
-  <div id="chart-macd" class="nf-pane" hidden></div>
-  <div class="nf-lines" id="nf-lines"></div>
+  <p class="fd-note">Candles + <b>one</b> EMA line. <span class="up">▲</span> = a candle closed above the EMA (view turns up). <span class="dn">▼</span> = a candle closed below it (view turns down). The dashed line is today's flip level.</p>
 </section>
 
-<section class="nf-section">
-  <h2>EMA Lab — which EMA and which candle tell Nifty's direction</h2>
-  <p class="fd-note" id="lab-intro"></p>
-  <div id="chosen-card" class="nf-chosen"></div>
+<section class="section">
+  <h2 class="fd-h2">Best EMA on every timeframe <small>(click a row to see its chart)</small></h2>
+  <p class="fd-note" id="t-fin-note"></p>
+  <div class="fd-wrap"><table class="fd-table" id="t-fin"></table></div>
 </section>
 
-<section class="nf-section">
-  <h2>Finalists — code score + Jev ranking</h2>
-  <p class="fd-note">Top 10 by code score (60-session profit factor, win rate, net points, last-10-session net, full-history PF), then judged by Jev on reliability and whether the recent edge is improving. Final = 60% code + 40% Jev.</p>
-  <div class="fd-wrap"><table class="fd-table nf-table" id="t-finalists"></table></div>
+<section class="section">
+  <h2 class="fd-h2">Your EMAs: 5, 6, 9, 10, 11</h2>
+  <p class="fd-note">Same rule, same dates, same costs. Green = made money after costs.</p>
+  <div class="fd-wrap"><table class="fd-table" id="t-asked"></table></div>
 </section>
 
-<section class="nf-section">
-  <h2>Last 10 sessions — best EMA rules right now</h2>
-  <div class="fd-wrap"><table class="fd-table nf-table" id="t-last10"></table></div>
+<section class="section">
+  <h2 class="fd-h2">Every signal of the chosen EMA <small id="t-sig-sub"></small></h2>
+  <div class="fd-wrap nf-scroll"><table class="fd-table" id="t-sig"></table></div>
 </section>
 
-<section class="nf-section">
-  <h2>Your EMAs: 5, 6, 9, 10, 11 on every timeframe</h2>
-  <div class="fd-wrap"><table class="fd-table nf-table" id="t-asked"></table></div>
-</section>
-
-<section class="nf-section">
-  <h2>Best EMA per timeframe</h2>
-  <div class="fd-wrap"><table class="fd-table nf-table" id="t-bytf"></table></div>
-</section>
-
-<section class="nf-section">
-  <h2>Heatmap — code score of every EMA × timeframe</h2>
-  <p class="fd-note">Darker green = better 60-session and last-10-session results. Grey = too few trades. Click a cell to load it on the chart.</p>
-  <div class="nf-heat-wrap"><table class="nf-heat" id="t-heat"></table></div>
-</section>
-
-<section class="nf-section">
-  <h2>EMA crossover pairs (fast × slow)</h2>
-  <div class="fd-wrap"><table class="fd-table nf-table" id="t-pairs"></table></div>
-</section>
-
-<section class="nf-section">
-  <h2>Every trade of the chosen rule</h2>
-  <div class="fd-wrap nf-trades-wrap"><table class="fd-table nf-table" id="t-trades"></table></div>
-</section>
-
-<section class="nf-section fd-rules">
-  <h2>How it is tested and honest limits</h2>
-  <ul id="nf-limits"></ul>
-  <p class="fd-note" id="nf-coverage"></p>
+<section class="section">
+  <h2 class="fd-h2">How it is tested</h2>
+  <ol class="fd-rules" id="nf-method"></ol>
+  <h3>Limits</h3>
+  <ul class="fd-limits" id="nf-limits"></ul>
 </section>
 </main>
+
 <footer><span>NSE VALUE LENS / NIFTY 50</span><p>Paper research. Not SEBI-registered advice. No orders are placed by this website. Charts by TradingView Lightweight Charts™. <a href="https://github.com/originaonxi/nse-value-lens">Source code</a></p></footer>
 </div>
 </body>

@@ -1,52 +1,36 @@
+/* Nifty 50 — one EMA page. Extends swing.css + fund.css tokens. */
 .nf-shell { max-width: 1440px; }
 .nf-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin: .5rem 0 1rem; }
 .nf-head h1 { font-size: 1.9rem; font-weight: 800; margin: 0; }
 .nf-head h1 small { font-size: 1rem; font-weight: 700; }
-.nf-signal { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
-.nf-badge { font-weight: 800; padding: .35em .9em; border-radius: 8px; font-size: .95rem; }
-.nf-badge.long { background: #16a34a1f; color: #15803d; border: 1px solid #16a34a66; }
-.nf-badge.short { background: #dc26261f; color: #b91c1c; border: 1px solid #dc262666; }
-
-.nf-chartbox { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: .75rem; }
-.nf-toolbar { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .5rem; }
-.nf-group { display: flex; gap: 2px; background: var(--bg2); border-radius: 8px; padding: 2px; }
-.nf-group button, .nf-toggles button { border: 0; background: transparent; padding: .35rem .7rem; border-radius: 6px; font-size: .82rem; cursor: pointer; color: inherit; }
-.nf-group button.on { background: #fff; box-shadow: 0 1px 2px #0002; font-weight: 700; }
-.nf-group button.armed { background: #fde68a; font-weight: 700; }
-.nf-toggles { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .4rem; }
-.nf-toggles button { border: 1px solid var(--border); background: #fff; }
-.nf-toggles button.on { border-color: currentColor; font-weight: 700; }
-.nf-toggles button i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-.nf-legend { font-size: .78rem; color: var(--sub); min-height: 1.2em; margin: .1rem 0 .3rem; font-variant-numeric: tabular-nums; }
-.nf-chart { height: 520px; width: 100%; }
-.nf-pane { height: 130px; width: 100%; border-top: 1px solid var(--border); }
-.nf-chart.drawing { cursor: crosshair; }
-.nf-lines { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; font-size: .78rem; }
-.nf-lines span { background: var(--bg2); border-radius: 6px; padding: .15rem .5rem; }
-.nf-lines button { border: 0; background: none; cursor: pointer; color: #b91c1c; font-weight: 700; }
-
-.nf-section { margin-top: 2rem; }
-.nf-section h2 { font-size: 1.2rem; font-weight: 800; margin: 0 0 .4rem; }
-.nf-chosen { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; }
-.nf-chosen .kpi { background: var(--bg2); border-radius: 10px; padding: .7rem .9rem; }
-.nf-chosen .kpi span { display: block; font-size: .7rem; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
-.nf-chosen .kpi strong { font-size: 1.25rem; font-weight: 800; }
-.nf-chosen .kpi.wide { grid-column: 1 / -1; font-size: .88rem; line-height: 1.5; }
-.nf-table td, .nf-table th { padding: .35rem .55rem; font-size: .8rem; white-space: nowrap; }
-.nf-table tr.pick td { background: #16a34a14; font-weight: 700; }
-.nf-table tr[data-key] { cursor: pointer; }
-.nf-table tr[data-key]:hover td { background: var(--bg2); }
-.nf-pos { color: #15803d; } .nf-neg { color: #b91c1c; }
-.nf-spark { display: inline-flex; gap: 2px; align-items: flex-end; height: 18px; vertical-align: middle; }
-.nf-spark i { width: 5px; display: block; border-radius: 1px; }
-.nf-heat-wrap { overflow-x: auto; }
-.nf-heat { border-collapse: collapse; font-size: .68rem; }
-.nf-heat th { padding: 2px 4px; font-weight: 600; color: var(--sub); position: sticky; left: 0; background: #fff; }
-.nf-heat td { width: 24px; height: 22px; text-align: center; cursor: pointer; border: 1px solid #fff; color: #0f172a; }
-.nf-heat td.na { background: #f1f5f9; color: #94a3b8; cursor: default; }
-.nf-trades-wrap { max-height: 420px; overflow-y: auto; }
-@media (max-width: 760px) { .nf-chart { height: 380px; } }
-
-.nf-chosen .kpi.wide strong { font-size: .95rem; font-weight: 500; line-height: 1.55; }
-.nf-chosen .kpi.wide button { margin-top: .5rem; border: 1px solid #7c3aed; background: #7c3aed; color: #fff; border-radius: 6px; padding: .35rem .8rem; cursor: pointer; }
 .nf-head h1 #nf-close { margin: 0 .35rem 0 .5rem; }
+.up { color: #15803d; } .dn { color: #b91c1c; }
+td.up, td.dn { font-weight: 600; }
+
+.nf-signal { display: flex; flex-direction: column; gap: .15rem; padding: .7rem 1rem; border-radius: 10px; font-size: .85rem; }
+.nf-signal b { font-size: 1.1rem; font-weight: 800; }
+.nf-signal.long { background: #16a34a14; border: 1px solid #16a34a66; color: #14532d; }
+.nf-signal.short { background: #dc262614; border: 1px solid #dc262666; color: #7f1d1d; }
+
+.nf-answer { background: var(--bg2, #f8fafc); border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+.nf-answer h2 { font-size: 1.35rem; font-weight: 800; margin: 0 0 .3rem; }
+.nf-answer p { margin: .2rem 0 .6rem; line-height: 1.5; }
+.nf-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: .6rem; margin: .6rem 0; }
+.nf-kpi { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 10px; padding: .6rem .8rem; }
+.nf-kpi small { display: block; font-size: .7rem; color: var(--sub, #64748b); text-transform: uppercase; letter-spacing: .04em; }
+.nf-kpi strong { display: block; font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.nf-kpi span { display: block; font-size: .75rem; color: var(--sub, #64748b); }
+.nf-kpi.up strong { color: #15803d; } .nf-kpi.dn strong { color: #b91c1c; }
+
+.nf-chartbox { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 12px; padding: .75rem; }
+.nf-toolbar { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .5rem; }
+.nf-group { display: flex; flex-wrap: wrap; gap: 2px; background: var(--bg2, #f1f5f9); border-radius: 8px; padding: 2px; }
+.nf-group button { border: 0; background: transparent; padding: .35rem .7rem; border-radius: 6px; font-size: .82rem; cursor: pointer; color: inherit; }
+.nf-group button.on { background: #fff; box-shadow: 0 1px 2px #0002; font-weight: 700; }
+#nf-draw.on { background: #fde68a; font-weight: 700; }
+.nf-legend { font-size: .78rem; color: var(--sub, #64748b); min-height: 1.2em; margin: .1rem 0 .3rem; font-variant-numeric: tabular-nums; white-space: pre-wrap; }
+.nf-chart { height: 540px; width: 100%; }
+
+.fd-table tr.nf-chosen td { background: #2563eb12; font-weight: 700; }
+.nf-scroll { max-height: 460px; overflow-y: auto; }
+@media (max-width: 760px) { .nf-chart { height: 380px; } .nf-head h1 { font-size: 1.5rem; } }
