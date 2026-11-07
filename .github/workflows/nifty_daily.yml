@@ -1,0 +1,65 @@
+name: Nifty 50 EMA Lab refresh
+run-name: Nifty EMA Lab ${{ github.event.schedule || 'manual' }}
+on:
+  schedule:
+    # 16:05 IST and 20:35 IST, Monday–Friday (after NSE close)
+    - cron: '35 10 * * 1-5'
+    - cron: '5 15 * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: nifty-ema-lab
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Test EMA mechanics
+        run: python -m unittest tests.test_nifty_ema -v
+      - name: Build Nifty EMA Lab
+        run: python nifty_ema.py
+      - name: Verify output
+        run: |
+          python -c "
+          import json
+          d = json.load(open('docs/nifty.json'))
+          c = d['chosen']
+          assert len(d['bars']['15m']) > 100 and len(d['bars']['1D']) > 100
+          assert c['common']['trades'] >= 8
+          print('Nifty', d['as_of'], '| chosen', c['tf'], 'EMA', c['ema'], '| final', c['final'], '| now', c['current']['side'], '| Jev', d['jev']['status'])
+          "
+      - name: Commit data
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/nifty.json public/data/nifty.json data/nifty/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: Nifty EMA Lab ${{ github.run_id }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.commit.outputs.changed == 'true'
+        name: Push
+        run: |
+          for i in 1 2 3; do
+            git pull --rebase origin master && git push origin HEAD:master && break || sleep 15
+          done
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+      - id: deployment
+        uses: actions/deploy-pages@v4
