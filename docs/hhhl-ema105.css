@@ -1,0 +1,35 @@
+/* EMA 105 setup on every F&O stock - section of the HH/HL page. Uses the HH/HL palette. */
+#ema105-section .e105-rules{margin:6px 0 12px;padding-left:18px;font-size:13px;line-height:1.6;color:#345440}
+.e105-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+.e105-kpi{background:#fff;border:1px solid #e3e9e1;border-radius:8px;padding:10px 12px}
+.e105-kpi span{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#68776e}
+.e105-kpi strong{display:block;font:700 20px Manrope,sans-serif;margin-top:3px}
+.e105-kpi small{display:block;font-size:11px;color:#68776e;margin-top:2px}
+.e105-kpi.pos strong{color:#2b8666}.e105-kpi.neg strong{color:#c26859}.e105-kpi.ref{background:#f0f5ef}
+.e105-honest{background:#fff8eb;border:1px solid #f1d9a8;border-radius:6px;padding:10px 12px;font-size:13px;color:#6b4e16}
+.e105-states{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.e105-state{display:flex;align-items:baseline;gap:8px;border:1px solid #dfe6dc;background:#fff;border-radius:7px;padding:7px 12px;cursor:pointer;font:inherit}
+.e105-state strong{font:700 17px Manrope,sans-serif}.e105-state.active{border-color:#317858;box-shadow:0 0 0 2px #31785833}
+.e105-state.buy strong{color:#2b8666}.e105-state.top strong{color:#d97706}.e105-state.exit strong{color:#64748b}
+.e105-state.hold strong{color:#2563eb}.e105-state.out strong{color:#c26859}
+.e105-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:8px}
+.e105-filters label{display:flex;flex-direction:column;font-size:11px;gap:4px}
+#e105-table td,#e105-table th{white-space:nowrap}
+#e105-table td small{display:block;color:#68776e;font-size:10px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+#e105-table tbody tr{cursor:pointer}#e105-table tbody tr:hover td,#e105-table tbody tr.selected td{background:#f0f5ef}
+#e105-table td.num,#e105-parts td.num,#e105-trades td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.pos{color:#2b8666;font-weight:600}td.neg{color:#c26859}
+.e105-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#eef1ea;color:#345440}
+.e105-badge.big{font-size:14px;padding:5px 14px}
+.e105-badge.buy{background:#2b866622;color:#1f6b51}.e105-badge.top{background:#d9770622;color:#9a5305}
+.e105-badge.hold{background:#2563eb1a;color:#1d4ed8}.e105-badge.exit{background:#64748b22;color:#475569}
+.e105-badge.wait{background:#eab30822;color:#854d0e}.e105-badge.out{background:#c2685922;color:#9b4537}
+.e105-table-wrap{max-height:560px;overflow:auto;border:1px solid #eef1ea;border-radius:6px}
+.e105-table-wrap thead th{position:sticky;top:0;background:#fff;z-index:1}
+#e105-detail{margin-top:18px;border-top:1px solid #e3e9e1;padding-top:16px}
+#e105-chart{overflow-x:auto;border:1px solid #eef1ea;border-radius:6px}#e105-chart svg{min-width:900px}
+.e105-checks{list-style:none;padding:0;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 16px;font-size:12px}
+.e105-checks li.ok b{color:#2b8666}.e105-checks li.no b{color:#c26859}.e105-checks li.info{color:#68776e}
+#e105-parts tr.strong td{font-weight:700;background:#f0f5ef}
+.e105-maths{font-size:12px;color:#345440;background:#f0f5ef;border-radius:5px;padding:9px 12px}
+.e105-trades-wrap{max-height:320px;overflow:auto}

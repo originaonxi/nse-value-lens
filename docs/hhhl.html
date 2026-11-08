@@ -6,6 +6,7 @@
 <meta name="description" content="Nifty 200 and NSE F&O stocks classified by confirmed higher highs and higher lows, with dated breakout, exit and watch zones.">
 <link rel="stylesheet" href="swing.css"><link rel="stylesheet" href="hhhl.css?v=stock-reasons-1">
 <link rel="stylesheet" href="hhhl-universe.css?v=fno-1">
+<link rel="stylesheet" href="hhhl-ema105.css?v=1">
 <script src="market-context.js" defer></script>
 <script src="hhhl-chart.js" defer></script>
 <script src="hhhl-reason.js?v=stock-reasons-1" defer></script>
@@ -14,6 +15,8 @@
 <script src="live-cards.js?v=2" defer></script>
 <script src="hhhl-setups.js?v=1" defer></script>
 <script src="hhhl.js?v=setups-1" defer></script>
+<script src="vl-chart.js" defer></script>
+<script src="hhhl-ema105.js?v=1" defer></script>
 <link rel="stylesheet" href="daily-deals.css">
 <link rel="stylesheet" href="market-brief.css">
 </head>
@@ -63,6 +66,29 @@
 <div class="section-head"><div><div class="eyebrow">START HERE / CURRENT RULE FIT</div><h2 id="priority-title">10 strongest HH/HL setups to review</h2></div><span id="priority-summary" class="muted"></span></div>
 <p id="priority-method" class="muted">Eligible breakouts first, then blocked fresh breakouts and waiting structures nearest their trigger. No forecast score.</p>
 <div id="priority-list" class="priority-list"></div>
+</section>
+<section id="ema105-section" class="scan-section" aria-labelledby="e105-title">
+<div class="section-head"><div><div class="eyebrow">02 / ALL F&amp;O STOCKS · 2-HOUR CANDLES · NIFTY SETUP #1</div><h2 id="e105-title">EMA 105 + ADX&gt;20 + Supertrend + Daily&gt;EMA50 · TOP exit RSI 68</h2></div><span id="e105-asof" class="muted">Loading…</span></div>
+<ul id="e105-rules" class="e105-rules"></ul>
+<div id="e105-kpis" class="e105-kpis"></div>
+<p id="e105-honest" class="e105-honest"></p>
+<div id="e105-states" class="e105-states" aria-label="Filter by setup state"></div>
+<div class="e105-filters">
+<label>Stock, company or sector<input id="e105-search" type="search" placeholder="Search"></label>
+<label>Order<select id="e105-sort"><option value="state">Setup state (BUY first)</option><option value="pf">Best profit factor</option><option value="win">Best win rate</option><option value="net">Most % made</option><option value="unseen">Best on unseen part</option><option value="symbol">Symbol A-Z</option></select></label>
+</div>
+<p id="e105-count" class="muted" aria-live="polite"></p>
+<div class="table-wrap e105-table-wrap"><table id="e105-table"><caption>Setup #1 run on every F&amp;O stock, 2-hour candles, about 2 years, after costs</caption><thead><tr><th>Stock / sector</th><th>State</th><th>Close</th><th>EMA 105</th><th>RSI</th><th>ADX</th><th>Trades</th><th>Win %</th><th>PF</th><th>Net ₹/share</th><th>Net %</th><th>Worst DD</th><th>Unseen: win · PF</th><th>Per lot</th></tr></thead><tbody id="e105-rows"></tbody></table></div>
+<div id="e105-detail" hidden>
+<div class="section-head"><div><h3 id="e105-d-title"></h3><p id="e105-d-note" class="muted"></p></div><span id="e105-d-badge" class="e105-badge big"></span></div>
+<ul id="e105-d-checks" class="e105-checks"></ul>
+<div id="e105-chart" class="e105-chart"></div>
+<p id="e105-d-chartnote" class="muted"></p>
+<div class="table-wrap"><table id="e105-parts"><thead><tr><th>Part</th><th>Trades</th><th>Win %</th><th>PF</th><th>Net ₹/share</th><th>Worst DD</th></tr></thead><tbody id="e105-d-parts"></tbody></table></div>
+<p id="e105-d-maths" class="e105-maths"></p>
+<details><summary>Every trade</summary><div class="table-wrap e105-trades-wrap"><table id="e105-trades"><thead><tr><th>Buy at</th><th>Price</th><th>Sold at</th><th>Price</th><th>Why</th><th>₹/share</th><th>%</th></tr></thead><tbody id="e105-d-trades"></tbody></table></div></details>
+</div>
+<details><summary>Limits</summary><ul id="e105-limits"></ul></details>
 </section>
 <section class="scan-section" aria-labelledby="universe-title">
 <div class="section-head"><div><div class="eyebrow">01 / ALL CONSTITUENTS</div><h2 id="universe-title">Filter the full Nifty 200</h2></div><div class="download-actions"><button id="download-csv" type="button" disabled>Download filtered CSV</button><a id="download-json" href="hhhl_scan.json">Full JSON</a></div></div>
