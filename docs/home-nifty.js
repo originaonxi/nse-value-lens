@@ -60,30 +60,75 @@
       live(D.setup80.live, D.setup80, "hn-live80");
       setup(D.setup80, "hn-rule80", "hn-kpis80");
     }
+    if (D.sell) {
+      $("hn-sellwrap").hidden = false;
+      live(D.sell.live, D.sell, "hn-livesell");
+      setup(D.sell, "hn-rulesell", "hn-kpissell");
+    }
     $("hn-period").textContent = D.period.from + " → " + D.period.to + " · " + D.period.sessions + " sessions · " + num(D.tried, 0) +
       " rules tried · " + num(D.robust_count, 0) + " made money in every third · luck level Sharpe " + num(D.luck_sharpe, 2);
+  }
+
+  var CH = null, SER = null;
+  var SETS = [["A", "Setup A · best by the maths"], ["B", "Setup B · 80% win"], ["S", "Setup C · best SELL"]];
+  var WHY = { ema: "close through EMA 105", top: "RSI top", target: "ATR target", stop: "ATR stop", time: "time limit" };
+
+  function setupFor(key) { return key === "A" ? D.best : key === "B" ? D.setup80 : D.sell; }
+
+  function showSet(key) {
+    var ch = D.chart, set = (ch.sets || {})[key] || ch.markers || [], b = setupFor(key);
+    SER.setMarkers(set.map(function (m) {
+      var buy = m[1] === "buy", entry = m[3] == null;
+      var txt = (buy ? "BUY" : "SELL") + (entry ? "" : " " + sg(m[3], 2) + "%");
+      return { time: m[0], position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
+               shape: buy ? "arrowUp" : "arrowDown", text: txt, size: entry ? 1.2 : 0.9 };
+    }));
+    Array.prototype.forEach.call($("hn-switch").children, function (x) { x.classList.toggle("on", x.dataset.k === key); });
+    var entries = set.filter(function (m) { return m[3] == null; }).length, exits = set.length - entries;
+    $("hn-chart-note").textContent = (b ? b.label + ". " : "") + (b && b.side === -1
+      ? "SELL ▼ = short Nifty at that 2-hour close; BUY ▲ with a % = buy back (exit), result after costs."
+      : "BUY ▲ = buy at that 2-hour close; SELL ▼ with a % = sell (exit), result after costs.") +
+      " " + entries + " entries and " + exits + " exits in the last 140 sessions. Exit reasons: " +
+      Object.keys(WHY).map(function (k) { return WHY[k]; }).join(", ") + ".";
   }
 
   function chart() {
     var box = $("hn-chart");
     if (typeof LightweightCharts === "undefined") { box.textContent = "Chart library failed to load."; return; }
-    var c = LightweightCharts.createChart(box, {
+    CH = LightweightCharts.createChart(box, {
       autoSize: true, layout: { background: { color: "#ffffff" }, textColor: "#334155", fontSize: 12 },
       grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
       rightPriceScale: { borderColor: "#e2e8f0" }, timeScale: { borderColor: "#e2e8f0", timeVisible: true, secondsVisible: false, rightOffset: 4 }
     });
-    var s = c.addCandlestickSeries({ upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626", wickUpColor: "#16a34a", wickDownColor: "#dc2626" });
+    SER = CH.addCandlestickSeries({ upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626", wickUpColor: "#16a34a", wickDownColor: "#dc2626" });
     var ch = D.chart;
-    s.setData(ch.bars.map(function (b) { return { time: b[0], open: b[1], high: b[2], low: b[3], close: b[4] }; }));
-    var l = c.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, title: "EMA 105" });
+    SER.setData(ch.bars.map(function (b) { return { time: b[0], open: b[1], high: b[2], low: b[3], close: b[4] }; }));
+    var l = CH.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, title: "EMA 105" });
     l.setData(ch.bars.map(function (b, i) { return { time: b[0], value: ch.ema[i] }; }));
-    var long = D.best.side === 1, COL = { target: "#16a34a", top: "#f59e0b", ema: "#64748b", stop: "#dc2626", time: "#64748b" };
-    s.setMarkers(ch.markers.map(function (m) {
-      if (m[1] === "entry") return { time: m[0], position: long ? "belowBar" : "aboveBar", color: long ? "#16a34a" : "#dc2626", shape: long ? "arrowUp" : "arrowDown", text: long ? "BUY" : "SELL" };
-      return { time: m[0], position: long ? "aboveBar" : "belowBar", color: COL[m[1]] || "#64748b", shape: "circle", text: m[1].toUpperCase() + " " + sg(m[3], 2) + "%" };
-    }));
+    var sw = $("hn-switch"); sw.textContent = "";
+    SETS.forEach(function (s) {
+      if (!setupFor(s[0]) || !(ch.sets || {})[s[0]]) return;
+      var bt = el("button", null, s[1]); bt.type = "button"; bt.dataset.k = s[0];
+      bt.addEventListener("click", function () { showSet(s[0]); });
+      sw.appendChild(bt);
+    });
+    showSet("A");
     var n = ch.bars.length;
-    c.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - 280), to: n + 3 });
+    CH.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - 300), to: n + 3 });
+    // why 2-hour candles
+    var T = D.timeframes || [];
+    if (T.length) {
+      var top = T[0], tfname = { "5m": "5 min", "15m": "15 min", "30m": "30 min", "75m": "75 min", "1h": "1 hour", "2h": "2 hour", "1D": "daily" };
+      $("hn-tf").textContent = " · the best timeframe: " + tfname[top.tf] + " candles ranked first of " + T.length + " timeframes tested (EMA 3-200 on each)";
+      $("hn-tf-wrap").hidden = false;
+      var tb = head($("hn-tf-table"), [["Rank"], ["Candles"], ["Best EMA", "num"], ["Signals", "num"], ["Profit factor", "num"], ["Net points", "num"], ["Score", "num"]]);
+      T.forEach(function (t, i) {
+        var tr = el("tr", i === 0 ? "hn-best" : null);
+        td(tr, String(i + 1)); td(tr, tfname[t.tf] || t.tf); td(tr, String(t.ema), "num"); td(tr, num(t.trades, 0), "num");
+        td(tr, num(t.pf, 2), "num"); td(tr, sg(t.net, 0), t.net > 0 ? "num up" : "num dn"); td(tr, num(t.final, 1), "num");
+        tb.appendChild(tr);
+      });
+    }
   }
 
   function tables() {

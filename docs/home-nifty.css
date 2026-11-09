@@ -25,3 +25,12 @@
 .hn-scroll { max-height: 420px; overflow: auto; }
 .hn-80 { background: #fff8eb; border: 1px solid #f1d9a8; border-radius: 8px; padding: 10px 12px; font-size: .88rem; color: #6b4e16; }
 @media (max-width: 900px) { .hn-top { grid-template-columns: 1fr; } #hn-chart { height: 360px; } }
+
+.hn-chart-first { margin-top: 10px; }
+.hn-chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 2px 4px 8px; }
+.hn-chart-head strong { font-size: .95rem; margin-right: 6px; }
+.hn-switch { display: flex; gap: 2px; background: #f1f5f9; border-radius: 8px; padding: 2px; flex-wrap: wrap; }
+.hn-switch button { border: 0; background: transparent; padding: .38rem .8rem; border-radius: 6px; cursor: pointer; font: inherit; font-size: .82rem; }
+.hn-switch button.on { background: #fff; box-shadow: 0 1px 2px #0002; font-weight: 700; }
+.hn-chart-first #hn-chart { height: 560px; }
+@media (max-width: 900px) { .hn-chart-first #hn-chart { height: 380px; } }

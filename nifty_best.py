@@ -377,6 +377,11 @@ def build(now=None):
     # the 80% setup: highest profit factor among rules with 80%+ wins that made money in every third
     w80 = max(hi_robust, key=lambda r: (r["all"]["pf"] or 0, r["all"]["n"])) if hi_robust else None
     w80_tr = full(w80) if w80 else []
+    # the best SELL (short) setup from the same grid: robust ones first, then by the weakest third
+    sells = sorted([r for r in rows if r["side"] == -1],
+                   key=lambda r: (r["robust"] is None, -(r["robust"] or 0), -min(score_part(p) for p in r["thirds"]), -r["all"]["n"]))
+    sell = sells[0] if sells else None
+    sell_tr = full(sell) if sell else []
     # last 200 sessions of the winner
     days = pd.Index([str(t.date()) for t in df.index])
     d200 = sorted(set(days))[-200]
@@ -388,6 +393,8 @@ def build(now=None):
              ("The best setup by the maths (this page)", best_tr)]
     if w80:
         named.append(("The 80% setup (this page)", w80_tr))
+    if sell:
+        named.append(("The best SELL setup (this page)", sell_tr))
     for nm, tr in named:
         a, l2 = stats(tr), stats([t for t in tr if t[0] >= i200])
         comp.append({"rule": nm, "all": a | {"bayes": bayes(a), "t": t_stat(tr), "points": pts(tr)},
@@ -395,17 +402,38 @@ def build(now=None):
     se = 1 / math.sqrt((df.index[-1] - df.index[K.WARM]).days / 365.25)
     luck = round(se * math.sqrt(2 * math.log(tried)), 2)
 
-    # chart: last CHART_SESSIONS sessions
+    # chart: last CHART_SESSIONS sessions, with BUY / SELL markers for every setup on the page
     uniq = sorted(set(days))
     start = int(np.argmax(days >= uniq[max(0, len(uniq) - CHART_SESSIONS)]))
     tt = [N.chart_time(t, "2h") for t in df.index]
     chart = {"bars": [[tt[i], round(X["o"][i], 2), round(X["h"][i], 2), round(X["l"][i], 2), round(X["c"][i], 2)] for i in range(start, n)],
-             "ema": [round(float(X["ema"][i]), 2) for i in range(start, n)], "markers": []}
-    for eb, xb, net, why in best_tr:
-        if eb >= start:
-            chart["markers"].append([tt[eb], "entry", round(float(X["c"][eb]), 2), None])
-        if xb >= start and why != "open":
-            chart["markers"].append([tt[xb], why, round(float(X["c"][xb]), 2), round(net, 2)])
+             "ema": [round(float(X["ema"][i]), 2) for i in range(start, n)], "sets": {}}
+
+    def marks(tr, side):
+        out = []
+        for eb, xb, net, why in tr:
+            if eb >= start:
+                out.append([tt[eb], "buy" if side == 1 else "sell", round(float(X["c"][eb]), 2), None, None])
+            if xb >= start and why != "open":
+                out.append([tt[xb], "sell" if side == 1 else "buy", round(float(X["c"][xb]), 2), round(net, 2), why])
+        return out
+    chart["sets"]["A"] = marks(best_tr, best["side"])
+    if w80:
+        chart["sets"]["B"] = marks(w80_tr, w80["side"])
+    if sell:
+        chart["sets"]["S"] = marks(sell_tr, -1)
+    chart["markers"] = chart["sets"]["A"]
+    # why 2-hour candles: the single-EMA scan ranked every timeframe (nifty_ema.py -> docs/nifty.json)
+    tf_rank = []
+    try:
+        ema_scan = json.loads((DOCS / "nifty.json").read_text(encoding="utf-8"))
+        for r in ema_scan.get("finalists", []):
+            if all(x["tf"] != r["tf"] for x in tf_rank):
+                m = r.get("main") or {}
+                tf_rank.append({"tf": r["tf"], "ema": r["ema"], "final": r.get("final"), "trades": m.get("trades"),
+                                "pf": m.get("pf"), "net": m.get("net"), "sessions": m.get("sessions")})
+    except (OSError, ValueError, KeyError):
+        pass
     slim = lambda r: {k: r[k] for k in ("label", "side", "filters", "rsi", "tp", "sl", "maxbars", "all", "thirds", "every_third", "robust")} | \
         {"bayes": bayes(r["all"]), **({"jev": r.get("jev"), "final": r.get("final")} if "final" in r else {})}
     by_k = []
@@ -427,6 +455,10 @@ def build(now=None):
         "setup80": (slim(w80) | {"t": t_stat(w80_tr), "points": pts(w80_tr), "live": live_state(X, L, w80, w80_tr, df),
                                  "trades": [[str(df.index[eb])[:16], round(float(X["c"][eb]), 2), str(df.index[xb])[:16],
                                              round(float(X["c"][xb]), 2), round(net, 3), why] for eb, xb, net, why in w80_tr]}) if w80 else None,
+        "sell": (slim(sell) | {"t": t_stat(sell_tr), "points": pts(sell_tr), "live": live_state(X, L, sell, sell_tr, df),
+                               "trades": [[str(df.index[eb])[:16], round(float(X["c"][eb]), 2), str(df.index[xb])[:16],
+                                           round(float(X["c"][xb]), 2), round(net, 3), why] for eb, xb, net, why in sell_tr]}) if sell else None,
+        "timeframes": tf_rank,
         "top_win_robust": [slim(r) for r in top_win], "by_confirmations": by_k, "comparison": comp,
         "live": live_state(X, L, best, best_tr, df),
         "trades": [[str(df.index[eb])[:16], round(float(X["c"][eb]), 2), str(df.index[xb])[:16], round(float(X["c"][xb]), 2), round(net, 3), why]

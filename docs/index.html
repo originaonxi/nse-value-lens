@@ -10,9 +10,9 @@
 <link rel="stylesheet" href="market-brief.css">
 <link rel="stylesheet" href="home-nav.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="home-nifty.css?v=1">
+<link rel="stylesheet" href="home-nifty.css?v=2">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="home-nifty.js?v=1" defer></script>
+<script src="home-nifty.js?v=2" defer></script>
 </head>
 <body data-source="" class="home-page">
 <div class="shell">
@@ -22,6 +22,15 @@
 <div class="eyebrow"><span class="dot"></span> NIFTY 50 · 2-HOUR CANDLES · EMA 105 + EVERY SIGNAL WE RESEARCHED <span class="pill">REBUILT AFTER EVERY CLOSE</span></div>
 <h1 id="hn-title" style="margin:6px 0 4px">Nifty 50: the best setup by the numbers</h1>
 <p class="muted" id="hn-period">Loading…</p>
+<div class="hn-chartbox hn-chart-first">
+  <div class="hn-chart-head">
+    <div><strong>NIFTY 50 · 2-HOUR CANDLES · EMA 105</strong><span id="hn-tf" class="muted"></span></div>
+    <div class="hn-switch" id="hn-switch" role="group" aria-label="Setup shown on the chart"></div>
+  </div>
+  <div id="hn-chart"></div>
+  <p class="muted" id="hn-chart-note"></p>
+  <div class="fd-wrap" id="hn-tf-wrap" hidden><table class="fd-table" id="hn-tf-table"></table></div>
+</div>
 <div class="hn-top">
   <div id="hn-live" class="hn-live" role="status"></div>
   <div class="hn-setup"><small class="muted">SETUP A · THE BEST BY THE MATHS</small><h2 id="hn-rule"></h2><div id="hn-kpis" class="hn-kpis"></div></div>
@@ -30,7 +39,11 @@
   <div id="hn-live80" class="hn-live" role="status"></div>
   <div class="hn-setup"><small class="muted">SETUP B · THE 80% WIN SETUP</small><h2 id="hn-rule80"></h2><div id="hn-kpis80" class="hn-kpis"></div></div>
 </div>
-<div class="hn-chartbox"><div id="hn-chart"></div><p class="muted">2-hour candles, last 140 sessions, EMA 105 in blue. Arrows = entries; dots = exits with the result after costs. <a href="nifty.html">Full Nifty 50 chart →</a> · <a href="orderflow.html">Order Flow →</a> · <a href="quantmath.html">Bot Maths →</a></p></div>
+<div class="hn-top" id="hn-sellwrap" style="margin-top:12px" hidden>
+  <div id="hn-livesell" class="hn-live" role="status"></div>
+  <div class="hn-setup"><small class="muted">SETUP C · THE BEST SELL (SHORT) SETUP</small><h2 id="hn-rulesell"></h2><div id="hn-kpissell" class="hn-kpis"></div></div>
+</div>
+<p class="muted" style="margin-top:8px"><a href="nifty.html">Full Nifty 50 chart →</a> · <a href="orderflow.html">Order Flow →</a> · <a href="quantmath.html">Bot Maths →</a></p>
 <h2 class="fd-h2" style="margin-top:16px">How it compares</h2>
 <div class="fd-wrap"><table class="fd-table" id="hn-comp"></table></div>
 <details open><summary>Can Nifty 50 reach an 80% win rate?</summary>
