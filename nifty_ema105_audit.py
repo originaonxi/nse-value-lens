@@ -177,9 +177,11 @@ def ema_trades(h2, start, lots):
     e = N.ema(c, EMA_N)
     flips, ends, dirs, gross, net, closed = N.rule_trades(c, EMA_N, start, COST)
     out = []
+    known = {d: int(v) for d, v in lots.items() if v == v and v}            # drop NaN / 0
     for f, x, d, g, nt, cl in zip(flips, ends, dirs, gross, net, closed):
         day = h2["session"].iloc[f]
-        lot = int(lots.get(day) or 0)
+        prev = [k for k in known if k <= day]
+        lot = known[max(prev)] if prev else (known[min(known)] if known else 0)
         out.append({"side": "BUY" if d > 0 else "SELL", "entry_time": str(h2.index[f])[:16], "entry": round(c[f], 2),
                     "ema_at_entry": round(float(e[f]), 2), "exit_time": str(h2.index[x])[:16], "exit": round(c[x], 2),
                     "bars": int(x - f), "gross": round(float(g), 2), "cost": round(float(COST * c[f]), 2),

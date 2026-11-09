@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test \"tests/*.test.js\"",
     "start": "node src/server.js",
     "check": "node --check src/server.js && node --check src/analyzer.js && node --check src/adapters.js"
   },

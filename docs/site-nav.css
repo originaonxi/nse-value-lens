@@ -27,3 +27,9 @@ nav.sn .sn-m a[aria-current="page"] { background: #e3eedb; }
   nav.sn .sn-g:nth-last-child(-n+3) .sn-m { left: auto; right: 0; }
   nav.sn .sn-m { min-width: 220px; max-width: 86vw; }
 }
+@media (max-width: 400px) {
+  nav.sn { font-size: 12px; }
+  nav.sn summary { padding: 6px 3px; gap: 3px; }
+  nav.sn summary::after { width: 4px; height: 4px; }
+  nav.sn .sn-m { min-width: 200px; }
+}
