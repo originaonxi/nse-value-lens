@@ -1,0 +1,29 @@
+/* Grouped site menu (scripts/site_nav.py). 5 dropdowns; works with every page's header. */
+header { flex-wrap: wrap; height: auto; min-height: 76px; gap: 12px 24px; padding: 14px 0; }
+nav.sn { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+nav.sn details, nav.sn details[open] { border: 0; background: none; padding: 0; margin: 0; box-shadow: none; border-radius: 0; width: auto; }
+nav.sn summary { border: 0; background: none; margin: 0; min-height: 0; font-size: inherit; color: inherit; }
+nav.sn .sn-g { position: relative; }
+nav.sn summary { list-style: none; cursor: pointer; padding: 7px 12px; border-radius: 8px; font-weight: 600; user-select: none;
+  display: flex; align-items: center; gap: 6px; }
+nav.sn summary::-webkit-details-marker { display: none; }
+nav.sn summary::after { content: ""; width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor;
+  transform: rotate(45deg) translateY(-2px); opacity: .6; }
+nav.sn summary:hover, nav.sn .sn-g[open] summary { background: #eef3e7; }
+nav.sn .sn-on summary { color: #1f6b4a; box-shadow: inset 0 -2px 0 #2f8a5f; border-radius: 8px 8px 0 0; }
+nav.sn summary:focus-visible { outline: 3px solid #28694e; outline-offset: 2px; }
+nav.sn .sn-m { position: absolute; top: calc(100% + 6px); left: 0; z-index: 50; min-width: 250px; padding: 6px;
+  background: #fffdf7; border: 1px solid #cbd7c7; border-radius: 10px; box-shadow: 0 10px 30px #1b2a1f22; display: grid; gap: 1px; }
+nav.sn .sn-m a, nav.sn .sn-m a:first-child { display: flex; flex-direction: column; padding: 7px 10px; border-radius: 7px; line-height: 1.25; }
+nav.sn .sn-m a:hover { background: #eef3e7; text-decoration: none; }
+nav.sn .sn-m a b { font-weight: 600; font-size: 13.5px; }
+nav.sn .sn-m small { color: #6b7d70; font-size: 11.5px; }
+nav.sn .sn-m a[aria-current="page"] { background: #e3eedb; }
+@media (max-width: 700px) {
+  header { min-height: 0; padding: 10px 0; gap: 6px; }
+  nav.sn { width: 100%; font-size: 13px; gap: 0; justify-content: space-between; flex-wrap: nowrap; }
+  nav.sn summary { padding: 6px 6px; gap: 4px; }
+  nav.sn summary::after { width: 5px; height: 5px; }
+  nav.sn .sn-g:nth-last-child(-n+3) .sn-m { left: auto; right: 0; }
+  nav.sn .sn-m { min-width: 220px; max-width: 86vw; }
+}

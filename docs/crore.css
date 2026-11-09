@@ -1,0 +1,26 @@
+/* ₹1 crore test page. Extends swing.css + fund.css. */
+.cr-head h1 { margin: 6px 0 4px; }
+.cr-win { display: inline-flex; gap: 2px; background: #eef3e7; border-radius: 9px; padding: 3px; margin: 10px 0 4px; }
+.cr-win button { border: 0; background: transparent; padding: .45rem 1rem; border-radius: 7px; cursor: pointer; font: inherit; font-size: 14px; }
+.cr-win button.on { background: #fff; font-weight: 700; box-shadow: 0 1px 2px #0002; }
+.cr-answer { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+.cr-card { border: 1px solid #cbd7c7; border-radius: 11px; padding: 14px 16px; background: #fffdf7; }
+.cr-card small { display: block; font-size: 10px; letter-spacing: 1.2px; color: #617967; text-transform: uppercase; }
+.cr-card strong { display: block; font-size: 26px; line-height: 1.2; margin: 4px 0 2px; }
+.cr-card p { margin: 2px 0 0; font-size: 12.5px; color: #4b5d50; }
+.cr-card.best { border-color: #2f8a5f; background: #f1f8ee; }
+.cr-card.warn { border-color: #d9a441; background: #fff8ea; }
+.cr-chart { height: 380px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+.cr-scroll { max-height: 520px; overflow: auto; }
+.cr-click tbody tr { cursor: pointer; }
+.cr-click tbody tr:hover { background: #f3f7ef; }
+.cr-click tbody tr.sel { background: #e3eedb; }
+.cr-kind { font-size: 10px; letter-spacing: 1px; padding: 1px 6px; border-radius: 5px; background: #eef3e7; color: #3c5a45; text-transform: uppercase; white-space: nowrap; }
+.cr-kind.best { background: #dff0e1; color: #1f6b4a; }
+.cr-kind.benchmark { background: #edf0f4; color: #475569; }
+.cr-kind.honest { background: #fff1d6; color: #8a5a00; }
+.fd-table td.up, .fd-table td .up { color: #15803d; }
+.fd-table td.dn, .fd-table td .dn { color: #b91c1c; }
+.cr-rule { font-size: 12.5px; max-width: 560px; }
+.cr-h3 { margin: 18px 0 6px; font-size: 16px; }
+@media (max-width: 700px) { .cr-chart { height: 280px; } .cr-card strong { font-size: 22px; } }
