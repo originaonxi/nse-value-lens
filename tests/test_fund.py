@@ -48,7 +48,9 @@ class NoLookAhead(unittest.TestCase):
         base = F.score_universe(px, i)
         future = px.copy()
         future.iloc[i + 1:] *= 3.0
-        self.assertTrue(base.equals(F.score_universe(future, i)))
+        # identical inputs up to row i must give identical scores; allow only float-summation noise
+        # (numpy 2.x can sum the same window in a different order once later rows change: ~1e-13)
+        pd.testing.assert_frame_equal(base, F.score_universe(future, i), check_exact=False, rtol=1e-12, atol=1e-9)
 
     def test_month_end_rows_skip_running_month(self):
         idx = pd.bdate_range("2024-01-01", "2024-03-14")

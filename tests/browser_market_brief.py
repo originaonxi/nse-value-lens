@@ -61,7 +61,7 @@ def main():
             page.goto(urljoin(args.url, "index.html"),wait_until="networkidle")
             for target in ("hhhl.html","vcp.html","market-brief.html"):
                 assert page.locator(f'.home-tools a[href="{target}"]').is_visible()
-                assert page.locator(f'.home-primary-nav a[href="{target}"]').is_visible()
+                assert page.locator(f'nav.sn a[href="{target}"]').count() == 1, f"menu link {target}"
             assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), "Homepage overflow"
             if width in (1440,390):page.screenshot(path=str(artifacts / f"market-home-{width}.png"))
         assert not errors, errors

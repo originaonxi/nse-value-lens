@@ -277,7 +277,8 @@ def build(today=None):
     except Exception as e:  # pragma: no cover - network
         print(f"warn: bhavcopy download failed ({type(e).__name__}); using the files on disk")
     since = (today - timedelta(days=365 * YEARS + 1)).isoformat()
-    days = [d for d in od.sessions_available() if d >= since]
+    known = set(pd.read_csv(OFFICIAL_CSV, index_col=0).index.astype(str)) if OFFICIAL_CSV.exists() else set()
+    days = sorted(d for d in known | set(od.sessions_available()) if since <= d <= today.isoformat())
     off = official(days)
     frames = N.load_data()
     h2 = frames["2h"]
