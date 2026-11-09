@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nifty 50 EMA 9/21 · 1-hour chart · every trade of 2 years · P&amp;L | NSE Value Lens</title>
+<meta name="description" content="Nifty 50 EMA 9 / EMA 21 trend rule on 1-hour candles: candlestick chart with every BUY and EXIT, every trade of the last 2 years in points and rupees, rebuilt after every NSE close.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=3">
+<link rel="stylesheet" href="ema921.css?v=1">
+<script src="vendor/lightweight-charts.js" defer></script>
+<script src="ema921.js?v=1" defer></script>
+<link rel="stylesheet" href="site-nav.css?v=1">
+<script src="site-nav.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav class="sn" aria-label="Main menu"><details class="sn-g sn-on"><summary>Nifty 50</summary><div class="sn-m"><a href="index.html"><b>Best setup</b><small>the homepage: buy / sell chart</small></a><a href="crore.html"><b>₹1 crore test</b><small>every combination, real lots</small></a><a href="intraday.html"><b>Intraday 15-min</b><small>EMA 9 or lower, ₹1 crore, 1 year</small></a><a href="cross.html"><b>EMA cross lab</b><small>5/15/30-min crosses, Jev&#x27;s pick</small></a><a href="ema921.html" aria-current="page"><b>EMA 9/21 · 1-hour</b><small>chart, every trade, 2-year P&amp;L</small></a><a href="nifty.html"><b>Nifty 50 chart</b><small>EMA lab, day vs night</small></a><a href="orderflow.html"><b>Order Flow</b><small>futures + option OI</small></a><a href="quantmath.html"><b>Bot Maths</b><small>48 formulas</small></a><a href="nifty-chain.html"><b>Nifty chain</b><small>option chain</small></a><a href="options.html"><b>Options desk</b><small>IV, OI walls</small></a></div></details><details class="sn-g"><summary>Stocks</summary><div class="sn-m"><a href="confluence.html"><b>Top Picks</b><small>7 systems agree</small></a><a href="setups.html"><b>Daily setups</b><small>every stock in one category</small></a><a href="hhhl.html"><b>HH/HL scanner</b><small>Nifty 200 + F&amp;O, EMA 105</small></a><a href="dma.html"><b>DMA</b><small>200-day average</small></a><a href="vcp.html"><b>VCP</b><small>Minervini setups</small></a><a href="fno-play.html"><b>₹1 Play</b><small>F&amp;O futures</small></a><a href="kronos.html"><b>Kronos</b><small>100-path forecast</small></a></div></details><details class="sn-g"><summary>Invest</summary><div class="sn-m"><a href="fund.html"><b>Our Fund</b><small>best 30 of the Nifty 100</small></a><a href="dividends.html"><b>Dividends</b><small>10-year records</small></a><a href="retirement.html"><b>Opus 2031</b><small>the ₹5 crore plan</small></a></div></details><details class="sn-g"><summary>Market</summary><div class="sn-m"><a href="market-brief.html"><b>Jev brief</b><small>US + India context</small></a><a href="daily-market.html"><b>Daily market</b><small>deals and breadth</small></a><a href="global-markets.html"><b>Global markets</b><small>FX, gold, indices</small></a></div></details><details class="sn-g"><summary>Research</summary><div class="sn-m"><a href="indicator-lab.html"><b>Indicator lab</b><small>top 100 rules</small></a><a href="strategy-lab.html"><b>Strategy lab</b><small>backtests</small></a><a href="social-research.html"><b>Social research</b><small>what traders say</small></a></div></details></nav></header>
+<main>
+<section class="e9-head">
+  <div class="eyebrow"><span class="dot"></span> NIFTY 50 · 1-HOUR CANDLES · EMA 9 / EMA 21 · BUY ONLY · REBUILT AFTER EVERY CLOSE</div>
+  <h1>EMA 9/21 trend <small id="e9-sub" class="e9-sub">Loading…</small></h1>
+</section>
+
+<section class="e9-now" id="e9-now" role="status" aria-label="Right now"></section>
+
+<section class="e9-kpis" id="e9-kpis" aria-label="Two years, 1 lot"></section>
+
+<section class="e9-chartbox" aria-label="1-hour candlestick chart">
+  <div class="e9-tools"><span id="e9-range" role="group" aria-label="Chart range"></span>
+    <span class="e9-legend"><b class="up">▲ BUY</b> · <b class="dn">▼ EXIT</b> with ₹ result · <i class="l9"></i> EMA 9 · <i class="l21"></i> EMA 21 · dashed = entry of the open trade</span></div>
+  <div id="e9-chart" class="e9-chart"></div>
+  <p class="fd-note" id="e9-chart-note"></p>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">Profit over 2 years <small class="muted">1 lot, after costs · green = this rule · grey = Nifty bought and held</small></h2>
+  <div id="e9-curve" class="e9-curve"></div>
+</section>
+
+<div class="e9-grid">
+<section class="section">
+  <h2 class="fd-h2">Year by year</h2>
+  <div class="fd-wrap"><table class="fd-table" id="e9-years"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">The rule</h2>
+  <ol class="fd-rules" id="e9-rule"></ol>
+</section>
+</div>
+
+<section class="section">
+  <h2 class="fd-h2">Month by month</h2>
+  <div class="fd-wrap e9-scroll"><table class="fd-table" id="e9-months"></table></div>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">Every trade <small class="muted" id="e9-tr-n"></small></h2>
+  <p class="fd-note">Click a trade to see it on the chart.</p>
+  <div class="fd-wrap e9-scroll"><table class="fd-table" id="e9-trades"></table></div>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">Data check</h2>
+  <ul class="fd-limits" id="e9-data"></ul>
+  <h3>Limits: read before using</h3>
+  <ul class="fd-limits" id="e9-limits"></ul>
+  <p class="fd-note"><a href="ema921.json">ema921.json</a> · <a href="https://github.com/originaonxi/nse-value-lens/blob/master/ema921.py">ema921.py</a></p>
+</section>
+</main>
+<footer><span>NSE VALUE LENS / NIFTY 50 EMA 9/21</span><p>Paper research. Not SEBI-registered advice. No orders are placed by this website. Charts by TradingView Lightweight Charts™.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>

@@ -19,6 +19,7 @@ GROUPS = [
         ("crore.html", "₹1 crore test", "every combination, real lots"),
         ("intraday.html", "Intraday 15-min", "EMA 9 or lower, ₹1 crore, 1 year"),
         ("cross.html", "EMA cross lab", "5/15/30-min crosses, Jev's pick"),
+        ("ema921.html", "EMA 9/21 · 1-hour", "chart, every trade, 2-year P&L"),
         ("nifty.html", "Nifty 50 chart", "EMA lab, day vs night"),
         ("orderflow.html", "Order Flow", "futures + option OI"),
         ("quantmath.html", "Bot Maths", "48 formulas"),

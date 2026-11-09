@@ -1,0 +1,35 @@
+/* Nifty EMA 9/21 page. Builds on swing.css + fund.css. */
+.e9-head h1 { font-size: 40px; margin: 4px 0 8px; line-height: 1.1; }
+.e9-sub { display: block; font-size: 15px; font-weight: 500; color: #4b5d50; margin-top: 6px; }
+.e9-now { border: 2px solid #2f8a5f; border-radius: 12px; background: #f3f9f0; padding: 10px 14px; margin: 6px 0 12px;
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr); gap: 10px 18px; align-items: center; }
+.e9-now.flat { border-color: #b7791f; background: #fffaf0; }
+.e9-now .st { font: 800 22px Manrope, sans-serif; }
+.e9-now .st small { display: block; font: 600 11px 'DM Sans', sans-serif; letter-spacing: 1.1px; color: #4b5d50; text-transform: uppercase; }
+.e9-now ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+.e9-now li { margin: 2px 0; }
+.e9-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 8px; margin-bottom: 12px; }
+.e9-kpi { border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 10px; background: #fff; }
+.e9-kpi.main { border: 2px solid #2f8a5f; background: #f1f8ee; }
+.e9-kpi small { display: block; font-size: 9.5px; letter-spacing: .9px; color: #617967; text-transform: uppercase; }
+.e9-kpi strong { display: block; font-size: 19px; line-height: 1.25; }
+.e9-kpi span { font-size: 11.5px; color: #4b5d50; }
+.up, .fd-table td.up { color: #15803d; } .dn, .fd-table td.dn { color: #b91c1c; }
+.e9-chartbox { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 8px 10px; }
+.e9-tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: center; margin-bottom: 6px; font-size: 12.5px; }
+.e9-tools button { border: 1px solid #cbd5e1; background: #fff; border-radius: 7px; padding: 3px 9px; font-size: 12px; cursor: pointer; margin-right: 4px; }
+.e9-tools button.on { background: #1f6b4a; border-color: #1f6b4a; color: #fff; }
+.e9-legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; }
+.e9-legend i.l9 { background: #16a34a; } .e9-legend i.l21 { background: #dc2626; }
+.e9-chart { height: 520px; }
+.e9-curve { height: 260px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+.e9-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.e9-scroll { max-height: 520px; overflow: auto; }
+#e9-trades tbody tr { cursor: pointer; }
+#e9-trades tbody tr:hover td { background: #f4f8f1; }
+#e9-trades tr.open td { background: #eef7ea; font-weight: 600; }
+@media (max-width: 800px) {
+  .e9-head h1 { font-size: 30px; }
+  .e9-now, .e9-grid { grid-template-columns: minmax(0, 1fr); }
+  .e9-chart { height: 380px; }
+}
