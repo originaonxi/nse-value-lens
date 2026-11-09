@@ -28,6 +28,7 @@ GROUPS = [
     ]),
     ("Stocks", [
         ("confluence.html", "Top Picks", "7 systems agree"),
+        ("stocklab.html", "Formula lab · top 30", "every formula, BUY and SELL, 1-hour"),
         ("setups.html", "Daily setups", "every stock in one category"),
         ("hhhl.html", "HH/HL scanner", "Nifty 200 + F&O, EMA 105"),
         ("dma.html", "DMA", "200-day average"),

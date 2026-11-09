@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Top 30 Nifty 50 stocks · every formula · BUY and SELL on 1-hour candles | NSE Value Lens</title>
+<meta name="description" content="The 30 biggest Nifty 50 stocks by index weight, all in F&amp;O: every EMA, Supertrend, UT Bot, MACD, RSI and Donchian formula tested for buying and for short selling on 1-hour candles, with every trade and rupee P&amp;L.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=3">
+<link rel="stylesheet" href="ema921.css?v=1">
+<link rel="stylesheet" href="stocklab.css?v=1">
+<script src="vendor/lightweight-charts.js" defer></script>
+<script src="stocklab.js?v=1" defer></script>
+<link rel="stylesheet" href="site-nav.css?v=1">
+<script src="site-nav.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav class="sn" aria-label="Main menu"><details class="sn-g"><summary>Nifty 50</summary><div class="sn-m"><a href="index.html"><b>Best setup</b><small>the homepage: buy / sell chart</small></a><a href="crore.html"><b>₹1 crore test</b><small>every combination, real lots</small></a><a href="intraday.html"><b>Intraday 15-min</b><small>EMA 9 or lower, ₹1 crore, 1 year</small></a><a href="cross.html"><b>EMA cross lab</b><small>5/15/30-min crosses, Jev&#x27;s pick</small></a><a href="ema921.html"><b>EMA 9/21 · 1-hour</b><small>chart, every trade, 2-year P&amp;L</small></a><a href="nifty.html"><b>Nifty 50 chart</b><small>EMA lab, day vs night</small></a><a href="orderflow.html"><b>Order Flow</b><small>futures + option OI</small></a><a href="quantmath.html"><b>Bot Maths</b><small>48 formulas</small></a><a href="nifty-chain.html"><b>Nifty chain</b><small>option chain</small></a><a href="options.html"><b>Options desk</b><small>IV, OI walls</small></a></div></details><details class="sn-g sn-on"><summary>Stocks</summary><div class="sn-m"><a href="confluence.html"><b>Top Picks</b><small>7 systems agree</small></a><a href="stocklab.html" aria-current="page"><b>Formula lab · top 30</b><small>every formula, BUY and SELL, 1-hour</small></a><a href="setups.html"><b>Daily setups</b><small>every stock in one category</small></a><a href="hhhl.html"><b>HH/HL scanner</b><small>Nifty 200 + F&amp;O, EMA 105</small></a><a href="dma.html"><b>DMA</b><small>200-day average</small></a><a href="vcp.html"><b>VCP</b><small>Minervini setups</small></a><a href="fno-play.html"><b>₹1 Play</b><small>F&amp;O futures</small></a><a href="kronos.html"><b>Kronos</b><small>100-path forecast</small></a></div></details><details class="sn-g"><summary>Invest</summary><div class="sn-m"><a href="fund.html"><b>Our Fund</b><small>best 30 of the Nifty 100</small></a><a href="dividends.html"><b>Dividends</b><small>10-year records</small></a><a href="retirement.html"><b>Opus 2031</b><small>the ₹5 crore plan</small></a></div></details><details class="sn-g"><summary>Market</summary><div class="sn-m"><a href="market-brief.html"><b>Jev brief</b><small>US + India context</small></a><a href="daily-market.html"><b>Daily market</b><small>deals and breadth</small></a><a href="global-markets.html"><b>Global markets</b><small>FX, gold, indices</small></a></div></details><details class="sn-g"><summary>Research</summary><div class="sn-m"><a href="indicator-lab.html"><b>Indicator lab</b><small>top 100 rules</small></a><a href="strategy-lab.html"><b>Strategy lab</b><small>backtests</small></a><a href="social-research.html"><b>Social research</b><small>what traders say</small></a></div></details></nav></header>
+<main>
+<section class="e9-head">
+  <div class="eyebrow"><span class="dot"></span> TOP 30 NIFTY 50 STOCKS · F&amp;O · 1-HOUR CANDLES · BUY AND SELL · REBUILT AFTER EVERY CLOSE</div>
+  <h1>Stock formula lab <small id="sl-sub" class="e9-sub">Loading…</small></h1>
+</section>
+
+<section class="sl-answer" id="sl-answer" role="status" aria-label="The answer"></section>
+<section class="e9-kpis" id="sl-kpis" aria-label="Totals"></section>
+
+<section class="section">
+  <h2 class="fd-h2">One stock on the chart <small class="muted" id="sl-chart-sub">pick a stock</small></h2>
+  <div class="sl-pick"><label for="sl-sym">Stock</label> <select id="sl-sym"></select>
+    <label for="sl-side">Show</label> <select id="sl-side"><option value="buy">BUY trades only</option><option value="both">BUY + SELL (short)</option><option value="sell">SELL (short) only</option></select></div>
+  <div class="e9-chartbox">
+    <div class="e9-tools"><span id="sl-range" role="group" aria-label="Chart range"></span>
+      <span class="e9-legend"><b class="up">▲ BUY</b> · <b class="dn">▼ SELL (short)</b> · ● exit with ₹ result</span></div>
+    <div id="sl-chart" class="e9-chart"></div>
+    <p class="fd-note" id="sl-chart-note"></p>
+  </div>
+  <div class="e9-kpis" id="sl-stock-kpis"></div>
+  <details open><summary>Every trade of this stock <span class="muted" id="sl-tr-n"></span></summary>
+    <div class="fd-wrap e9-scroll"><table class="fd-table" id="sl-trades"></table></div></details>
+  <details><summary>Every formula on this stock (BUY book and SELL book, 1 lot, all dates)</summary>
+    <div class="fd-wrap e9-scroll"><table class="fd-table" id="sl-perf"></table></div></details>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">All 30 stocks <small class="muted" id="sl-stocks-sub"></small></h2>
+  <p class="fd-note">Click a row to put that stock on the chart.</p>
+  <div class="fd-wrap e9-scroll"><table class="fd-table" id="sl-stocks"></table></div>
+</section>
+
+<div class="e9-grid">
+<section class="section">
+  <h2 class="fd-h2">BUY formulas <small class="muted">30 stocks, 1 lot each</small></h2>
+  <div class="fd-wrap e9-scroll"><table class="fd-table" id="sl-buy"></table></div>
+</section>
+<section class="section">
+  <h2 class="fd-h2">SELL (short) formulas <small class="muted">30 stocks, 1 lot each</small></h2>
+  <div class="fd-wrap e9-scroll"><table class="fd-table" id="sl-sell"></table></div>
+</section>
+</div>
+
+<section class="section">
+  <h2 class="fd-h2">The rules</h2>
+  <ol class="fd-rules" id="sl-rules"></ol>
+  <h2 class="fd-h2">Data check</h2>
+  <ul class="fd-limits" id="sl-data"></ul>
+  <h3>Limits: read before using</h3>
+  <ul class="fd-limits" id="sl-limits"></ul>
+  <p class="fd-note"><a href="stock_lab.json">stock_lab.json</a> · <a href="https://github.com/originaonxi/nse-value-lens/blob/master/stock_lab.py">stock_lab.py</a> · <a href="https://github.com/originaonxi/nse-value-lens/blob/master/stock_data.py">stock_data.py</a></p>
+</section>
+</main>
+<footer><span>NSE VALUE LENS / STOCK FORMULA LAB</span><p>Paper research. Not SEBI-registered advice. No orders are placed by this website. Charts by TradingView Lightweight Charts™.</p><a href="https://github.com/originaonxi/nse-value-lens">Source code</a></footer>
+</div>
+</body>
+</html>
