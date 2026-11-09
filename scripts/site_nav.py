@@ -16,6 +16,7 @@ DOCS = Path(__file__).resolve().parents[1] / "docs"
 GROUPS = [
     ("Nifty 50", [
         ("index.html", "Best setup", "the homepage: buy / sell chart"),
+        ("best15.html", "★ Best setup · 15-min", "EMA 21/105, always in, every trade"),
         ("crore.html", "₹1 crore test", "every combination, real lots"),
         ("intraday.html", "Intraday 15-min", "EMA 9 or lower, ₹1 crore, 1 year"),
         ("cross.html", "EMA cross lab", "5/15/30-min crosses, Jev's pick"),
