@@ -1,0 +1,23 @@
+/* EMA 200 desk. Builds on swing.css + fund.css + ema921.css. */
+.sl-answer { border: 2px solid #b7791f; border-radius: 12px; background: #fffaf0; padding: 10px 14px; margin: 6px 0 12px; font-size: 14px; }
+.sl-answer b.big { display: block; font: 800 20px Manrope, sans-serif; margin-bottom: 4px; }
+.sl-answer ul { margin: 4px 0 0; padding-left: 18px; }
+.sl-answer li { margin: 2px 0; }
+.e2-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.e2-groups button { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 8px 10px; text-align: left; cursor: pointer; font: inherit; }
+.e2-groups button b { display: block; font: 800 22px Manrope, sans-serif; }
+.e2-groups button small { font-size: 10.5px; letter-spacing: .8px; color: #617967; text-transform: uppercase; }
+.e2-groups button.on { border: 2px solid #1f6b4a; background: #f1f8ee; }
+.e2-groups .g-ABOVE b { color: #15803d; } .e2-groups .g-BELOW b { color: #b91c1c; } .e2-groups .g-ON b { color: #b45309; }
+.sl-pick { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 4px 0 8px; font-size: 13px; }
+.sl-pick select { border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 6px; font-size: 13px; max-width: 100%; }
+.e9-legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; }
+.e9-legend i.lema { background: #2563eb; } .e9-legend i.lzone { background: #7c3aed; height: 5px; }
+.e9-legend i.lgrid { background: #94a3b8; } .e9-legend i.lsmall { background: #f59e0b; }
+.zt { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 5px; margin-left: 4px; background: #ede9fe; color: #5b21b6; }
+.pill-ABOVE { color: #15803d; font-weight: 700; } .pill-BELOW { color: #b91c1c; font-weight: 700; } .pill-ON { color: #b45309; font-weight: 700; }
+#e2-rows tbody tr { cursor: pointer; }
+#e2-rows tbody tr:hover td, #e2-rows tr.on td { background: #f4f8f1; }
+.fd-table tr.pick td { background: #eef7ea; font-weight: 700; }
+.fd-table tr.hold td { background: #f8fafc; font-style: italic; }
+@media (max-width: 800px) { .e2-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sl-pick label { width: 100%; margin-top: 4px; } .sl-pick select { width: 100%; } }
