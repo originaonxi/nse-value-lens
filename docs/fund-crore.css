@@ -1,0 +1,22 @@
+/* ₹1 crore one-year section on fund.html */
+.fc-box { border: 2px solid #2f8a5f; border-radius: 14px; background: #fff; padding: 14px 16px; margin: 14px 0 18px; }
+.fc-head { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+.fc-head h2 { margin: 4px 0 2px; font-size: 24px; }
+.fc-head small { font-size: 10px; letter-spacing: 1.3px; }
+.fc-auto { border: 1px solid #cbd7c7; border-radius: 10px; background: #f6faf3; padding: 8px 12px; font-size: 12.5px; min-width: 280px; max-width: 460px; }
+.fc-auto b { display: block; font-size: 10px; letter-spacing: 1.2px; color: #1f6b4a; margin-bottom: 2px; }
+.fc-auto ul { margin: 2px 0 0; padding-left: 16px; }
+.fc-auto li { margin: 1px 0; }
+.fc-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 8px; margin: 10px 0; }
+.fc-kpi { border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 10px; background: #fffdf7; }
+.fc-kpi small { display: block; font-size: 9.5px; letter-spacing: .9px; color: #617967; text-transform: uppercase; }
+.fc-kpi strong { display: block; font-size: 19px; line-height: 1.25; }
+.fc-kpi span { font-size: 11.5px; color: #4b5d50; }
+.fc-kpi.main { border: 2px solid #2f8a5f; background: #f1f8ee; }
+.fc-kpi .up, .fd-table td.up { color: #15803d; } .fc-kpi .dn, .fd-table td.dn { color: #b91c1c; }
+.fc-chart { height: 320px; border: 1px solid #e2e8f0; border-radius: 10px; }
+.fc-box details { margin-top: 8px; }
+.fc-scroll { max-height: 460px; overflow: auto; }
+.fc-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 5px; background: #eef3e7; color: #3c5a45; margin: 1px; }
+.fc-tag.out { background: #fdeaea; color: #8b1d1d; }
+@media (max-width: 700px) { .fc-chart { height: 240px; } .fc-head h2 { font-size: 20px; } }

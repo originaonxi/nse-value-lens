@@ -63,6 +63,7 @@
 .fd-heat{display:grid;grid-template-columns:52px repeat(12,1fr) 70px;gap:3px;font-size:11px;font-variant-numeric:tabular-nums}
 .fd-heat div{padding:5px 2px;text-align:center;border-radius:4px}
 .fd-heat .h{color:var(--muted);font-weight:700;background:none}
+@media (max-width:700px){.fd-heat{grid-template-columns:40px repeat(12,minmax(34px,1fr)) 52px;overflow-x:auto;font-size:10px}}
 .fd-goal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .fd-goal div{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
 .fd-goal b{display:block;font:800 20px Manrope,sans-serif}
@@ -80,3 +81,4 @@
 .fd-holdings tr.fd-sold td{color:var(--muted);text-decoration:line-through}
 .fd-holdings tr.fd-sold td.fd-sym small{text-decoration:none;color:var(--bear)}
 @media(max-width:900px){.fd-kpis{grid-template-columns:repeat(2,1fr)}.fd-kpis>div:nth-child(2){border-right:0}.fd-kpis>div:nth-child(-n+2){border-bottom:1px solid var(--line)}.fd-grid2,.fd-changes{grid-template-columns:1fr}.fd-goal{grid-template-columns:repeat(2,1fr)}.fd-levels{grid-template-columns:repeat(3,1fr)}.fd-hero h1{font-size:36px}}
+@media(max-width:480px){.fd-kpis{grid-template-columns:minmax(0,1fr)}.fd-kpis>div{border-right:0;border-bottom:1px solid var(--line)}.fd-kpis>div:last-child{border-bottom:0}.fd-kpis strong{font-size:24px}.fd-sector{grid-template-columns:minmax(0,1fr) 56px}.fd-grid2>*{min-width:0}#sip-sim{overflow-x:auto}#sip-sim .fd-table{font-size:12px}}

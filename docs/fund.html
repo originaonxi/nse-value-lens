@@ -5,7 +5,10 @@
 <title>Value Lens Nifty 100 Fund: best 30 of the Nifty 100, weights, Jev ranks and returns | NSE Value Lens</title>
 <meta name="description" content="Our own rules-based fund from the Nifty 50 + Nifty Next 50: today's best stocks with % weights adding to 100%, Jev score and rank for all 100, daily downtrend exits, and returns against the Nifty 50.">
 <link rel="stylesheet" href="swing.css">
-<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="fund.css?v=3">
+<link rel="stylesheet" href="fund-crore.css?v=1">
+<script src="vendor/lightweight-charts.js" defer></script>
+<script src="fund-crore.js?v=1" defer></script>
 <script src="fund.js?v=2" defer></script>
 <link rel="stylesheet" href="site-nav.css?v=1">
 <script src="site-nav.js?v=1" defer></script>
@@ -19,6 +22,21 @@
 <div class="fd-session">FUND NAV · STARTED AT 100<strong id="fd-nav-val">…</strong><span id="fd-asof">Loading…</span></div></section>
 
 <div id="fd-banner" class="fd-banner" role="status">Loading today's portfolio…</div>
+
+<section class="fc-box" id="fc" aria-labelledby="fc-title">
+  <div class="fc-head"><div><small class="muted">₹1 CRORE PUT IN ONE YEAR BACK · WHOLE SHARES · EVERY TRADE</small>
+    <h2 id="fc-title">Loading…</h2><p class="muted" id="fc-sub"></p></div>
+    <div class="fc-auto" id="fc-auto"></div></div>
+  <div class="fc-kpis" id="fc-kpis"></div>
+  <div id="fc-chart" class="fc-chart"></div>
+  <p class="fd-note">Green = ₹1 crore in the fund · grey = ₹1 crore in the Nifty 50 · orange = ₹1 crore spread equally over the Nifty 100. Value at every close.</p>
+  <details open><summary>Every rebalance <span class="muted" id="fc-rb-n"></span></summary><div class="fd-wrap"><table class="fd-table" id="fc-rebal"></table></div></details>
+  <details><summary>Every 200-day-average exit <span class="muted" id="fc-ex-n"></span></summary><div class="fd-wrap fc-scroll"><table class="fd-table" id="fc-exits"></table></div></details>
+  <details><summary>Month by month</summary><div class="fd-wrap"><table class="fd-table" id="fc-months"></table></div></details>
+  <details><summary>What the ₹1 crore holds today <span class="muted" id="fc-held-n"></span></summary><div class="fd-wrap fc-scroll"><table class="fd-table" id="fc-held"></table></div></details>
+  <details><summary>Every trade <span class="muted" id="fc-tr-n"></span></summary><div class="fd-wrap fc-scroll"><table class="fd-table" id="fc-trades"></table></div></details>
+  <ul class="fd-limits" id="fc-limits"></ul>
+</section>
 
 <section class="fd-kpis" aria-label="Fund at a glance">
 <div><span class="lab">Return a year (since start)</span><strong id="k-cagr">—</strong><small id="k-cagr-sub"></small></div>
