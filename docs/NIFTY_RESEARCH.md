@@ -1,6 +1,6 @@
 # Nifty 50 research record
 
-Generated 2026-11-09 19:10 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
+Generated 2026-11-10 02:34 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
 
 **Data:** NIFTY 50 index (^NSEI, Yahoo Finance). 2-hour candles 2024-03-19 → 2026-11-09 (2,590 candles). Daily candles 2016 → 2026-11-09. Hourly 2023 → today, 5-minute last ~60 sessions.
 
@@ -60,7 +60,7 @@ What moves the number: **ADX > 20** removes trades in sideways markets (most of 
 | 0 | 37 | 42.9% | EMA 105 · target 2 ATR |
 | 1 | 253 | 49.0% | EMA 105 + DI+>DI- · target 2 ATR |
 | 2 | 884 | 60.5% | EMA 105 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 |
-| 3 | 2,016 | 68.8% | EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 |
+| 3 | 2,019 | 68.8% | EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 |
 
 ## Where the win rate goes above 70%
 
@@ -89,7 +89,7 @@ What moves the number: **ADX > 20** removes trades in sideways markets (most of 
 | EMA 105 + ADX>25 + Supertrend + Daily>EMA50 · target 2 ATR | 18 tr · 72.2% · PF 1.90 · +1,846 | 7 tr · 42.9% · PF 0.55 · -681 |
 | EMA 105 + Daily>EMA50 + DI+>DI- · TOP exit 3 ATR | 24 tr · 70.8% · PF 3.24 · +1,898 | 14 tr · 50.0% · PF 0.63 · -499 |
 | EMA 105 + Daily>EMA50 + EMA slope + DI+>DI- · TOP exit 3 ATR | 24 tr · 70.8% · PF 2.59 · +1,586 | 14 tr · 50.0% · PF 0.54 · -614 |
-| EMA 105 + Daily>EMA50 + 2 closes + DI+>DI- · TOP exit 3 ATR | 24 tr · 70.8% · PF 2.65 · +1,601 | 14 tr · 50.0% · PF 0.59 · -572 |
+| EMA 105 + Daily>EMA50 + 2 closes + DI+>DI- · TOP exit 3 ATR | 24 tr · 70.8% · PF 2.65 · +1,601 | 14 tr · 50.0% · PF 0.60 · -572 |
 | EMA 105 + ADX>25 + Daily>EMA50 + DI+>DI- · target 2 ATR | 17 tr · 70.6% · PF 1.32 · +770 | 7 tr · 42.9% · PF 0.55 · -681 |
 | EMA 105 + ADX>25 + Daily>EMA50 + DI+>DI- · Bollinger top | 17 tr · 70.6% · PF 2.49 · +3,034 | 7 tr · 28.6% · PF 1.37 · +515 |
 
@@ -102,25 +102,25 @@ Same data, same costs. Tested part / unseen part / whole period. Long only unles
 | # | Rule | Tested: trades · win · PF · net | Unseen: trades · win · PF · net | Whole: trades | Win % | PF | Net pts | DD | Both parts profit |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | EMA 105 · exit on close below | 34 · 29.4% · 2.10 · +2,871 | 22 · 18.2% · 1.21 · +413 | 56 | 25.0% | 1.72 | +3,284 | 1,785 | ✓ |
-| 2 | EMA 105 · exit on close below · buy+sell | 69 · 23.2% · 1.24 · +1,588 | 43 · 20.9% · 1.47 · +1,744 | 112 | 22.3% | 1.32 | +3,333 | 1,894 | ✓ |
+| 2 | EMA 105 · exit on close below · buy+sell | 69 · 23.2% · 1.24 · +1,588 | 43 · 20.9% · 1.47 · +1,744 | 112 | 22.3% | 1.32 | +3,332 | 1,894 | ✓ |
 | 3 | EMA 105 · TOP exit RSI 70 | 44 · 34.1% · 2.76 · +5,489 | 26 · 30.8% · 2.11 · +2,339 | 70 | 32.9% | 2.50 | +7,828 | 1,124 | ✓ |
 | 4 | EMA 105 · target 2 ATR | 48 · 41.7% · 2.28 · +3,530 | 29 · 44.8% · 2.30 · +2,178 | 77 | 42.9% | 2.29 | +5,708 | 861 | ✓ |
 | 5 | EMA 105 · TOP exit 4 ATR | 43 · 34.9% · 2.34 · +3,632 | 26 · 30.8% · 1.29 · +608 | 69 | 33.3% | 1.88 | +4,240 | 1,252 | ✓ |
 | 6 | EMA 105 · trail 3 ATR | 44 · 31.8% · 2.36 · +4,356 | 27 · 33.3% · 1.56 · +1,188 | 71 | 32.4% | 2.05 | +5,544 | 1,428 | ✓ |
-| 7 | EMA 105 + RSI>50 · exit on close below | 30 · 33.3% · 1.83 · +2,339 | 19 · 10.5% · 0.98 · -45 | 49 | 24.5% | 1.44 | +2,294 | 2,243 | ✗ |
+| 7 | EMA 105 + RSI>50 · exit on close below | 30 · 33.3% · 1.83 · +2,339 | 19 · 10.5% · 0.98 · -45 | 49 | 24.5% | 1.44 | +2,294 | 2,244 | ✗ |
 | 8 | EMA 105 + MACD hist · exit on close below | 33 · 30.3% · 1.46 · +1,546 | 18 · 11.1% · 0.85 · -399 | 51 | 23.5% | 1.19 | +1,147 | 2,597 | ✗ |
 | 9 | EMA 105 + ADX>20 · exit on close below | 31 · 25.8% · 2.01 · +2,598 | 17 · 23.5% · 1.29 · +539 | 48 | 25.0% | 1.71 | +3,138 | 1,558 | ✓ |
-| 10 | EMA 105 + ADX>25 · exit on close below | 24 · 33.3% · 2.21 · +2,700 | 10 · 30.0% · 0.77 · -509 | 34 | 32.4% | 1.50 | +2,191 | 1,909 | ✗ |
-| 11 | EMA 105 + Supertrend · exit on close below | 28 · 35.7% · 1.63 · +1,887 | 16 · 12.5% · 0.89 · -296 | 44 | 27.3% | 1.28 | +1,591 | 2,538 | ✗ |
+| 10 | EMA 105 + ADX>25 · exit on close below | 24 · 33.3% · 2.21 · +2,700 | 10 · 30.0% · 0.77 · -509 | 34 | 32.4% | 1.50 | +2,191 | 1,910 | ✗ |
+| 11 | EMA 105 + Supertrend · exit on close below | 28 · 35.7% · 1.63 · +1,887 | 16 · 12.5% · 0.90 · -267 | 44 | 27.3% | 1.29 | +1,620 | 2,509 | ✗ |
 | 12 | EMA 105 + Daily>EMA50 · exit on close below | 26 · 30.8% · 1.83 · +2,128 | 14 · 14.3% · 0.69 · -639 | 40 | 25.0% | 1.32 | +1,489 | 2,141 | ✗ |
 | 13 | EMA 105 + Daily>EMA200 · exit on close below | 32 · 28.1% · 1.54 · +1,778 | 11 · 18.2% · 0.40 · -1,053 | 43 | 25.6% | 1.14 | +725 | 1,821 | ✗ |
-| 14 | EMA 105 + EMA slope · exit on close below | 29 · 34.5% · 1.92 · +2,368 | 18 · 11.1% · 1.01 · +22 | 47 | 25.5% | 1.52 | +2,390 | 2,153 | ✓ |
-| 15 | EMA 105 + 2 closes · exit on close below | 29 · 34.5% · 1.95 · +2,511 | 20 · 15.0% · 1.03 · +75 | 49 | 26.5% | 1.52 | +2,586 | 2,170 | ✓ |
+| 14 | EMA 105 + EMA slope · exit on close below | 29 · 34.5% · 1.92 · +2,368 | 18 · 11.1% · 1.01 · +20 | 47 | 25.5% | 1.52 | +2,388 | 2,153 | ✓ |
+| 15 | EMA 105 + 2 closes · exit on close below | 29 · 34.5% · 1.95 · +2,511 | 20 · 15.0% · 1.03 · +74 | 49 | 26.5% | 1.52 | +2,585 | 2,170 | ✓ |
 | 16 | EMA 105 + DI+>DI- · exit on close below | 26 · 38.5% · 1.83 · +2,018 | 18 · 11.1% · 0.97 · -65 | 44 | 27.3% | 1.40 | +1,953 | 2,263 | ✗ |
 | 17 | EMA 105 + ADX>20 · TOP exit RSI 70 | 41 · 34.1% · 2.73 · +4,805 | 20 · 40.0% · 2.72 · +2,474 | 61 | 36.1% | 2.72 | +7,279 | 1,032 | ✓ |
 | 18 | EMA 105 + ADX>20 + Daily>EMA50 · exit on close below | 23 · 26.1% · 1.90 · +2,112 | 11 · 18.2% · 0.90 · -166 | 34 | 23.5% | 1.49 | +1,946 | 1,566 | ✗ |
 | 19 | EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | 33 · 45.5% · 3.25 · +4,586 | 14 · 50.0% · 2.88 · +1,769 | 47 | 46.8% | 3.13 | +6,355 | 564 | ✓ |
-| 20 | EMA 105 + ADX>20 + Supertrend · TOP exit RSI 70 | 29 · 44.8% · 2.59 · +3,957 | 11 · 63.6% · 5.33 · +2,708 | 40 | 50.0% | 3.14 | +6,665 | 1,088 | ✓ |
+| 20 | EMA 105 + ADX>20 + Supertrend · TOP exit RSI 70 | 29 · 44.8% · 2.59 · +3,957 | 11 · 63.6% · 5.33 · +2,707 | 40 | 50.0% | 3.14 | +6,664 | 1,088 | ✓ |
 | 21 | EMA 105 + RSI>50 + ADX>20 · TOP exit RSI 70 | 30 · 43.3% · 2.88 · +4,598 | 14 · 50.0% · 3.68 · +2,654 | 44 | 45.5% | 3.11 | +7,251 | 1,088 | ✓ |
 | 22 | EMA 105 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | 25 · 64.0% · 2.92 · +3,992 | 13 · 53.8% · 2.06 · +1,198 | 38 | 60.5% | 2.62 | +5,190 | 1,088 | ✓ |
 | 23 | EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · exit on close below | 18 · 33.3% · 1.56 · +1,486 | 8 · 12.5% · 1.01 · +8 | 26 | 26.9% | 1.37 | +1,494 | 1,458 | ✓ |
@@ -130,7 +130,7 @@ Same data, same costs. Tested part / unseen part / whole period. Long only unles
 | 27 | EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | 23 · 69.6% · 3.45 · +4,025 | 11 · 54.5% · 4.11 · +1,587 | 34 | 64.7% | 3.61 | +5,612 | 1,088 | ✓ |
 | 28 | EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | 27 · 63.0% · 3.14 · +4,473 | 10 · 50.0% · 5.76 · +1,885 | 37 | 59.5% | 3.56 | +6,358 | 1,088 | ✓ |
 | 29 | EMA 105 + RSI>50 + ADX>25 + Daily>EMA50 · TOP exit 4 ATR | 16 · 75.0% · 6.08 · +2,560 | 8 · 50.0% · 0.40 · -452 | 24 | 66.7% | 2.68 | +2,108 | 1,008 | ✗ |
-| 30 | EMA 105 + MACD hist + Daily>EMA200 + EMA slope · TOP exit 3 ATR · buy+sell | 36 · 58.3% · 2.71 · +3,314 | 19 · 57.9% · 1.88 · +974 | 55 | 58.2% | 2.41 | +4,288 | 711 | ✓ |
+| 30 | EMA 105 + MACD hist + Daily>EMA200 + EMA slope · TOP exit 3 ATR · buy+sell | 36 · 58.3% · 2.71 · +3,314 | 19 · 57.9% · 1.88 · +975 | 55 | 58.2% | 2.41 | +4,289 | 711 | ✓ |
 
 ## Sensitivity: is the winner a lucky setting?
 
@@ -166,17 +166,17 @@ The same confirmations roughly double the win rate and cut the drawdown in a com
 | Sell rule | Tested part | Unseen part | Whole period |
 |---|---|---|---|
 | Sell below EMA 105 | exit: cross | 35 · 17.1% · PF 0.68 · -1,282 | 21 · 23.8% · PF 1.77 · +1,331 | 56 · 19.6% · PF 1.01 · +49 |
-| Sell below EMA 105 | exit: rsi 70 | 44 · 27.3% · PF 0.91 · -420 | 24 · 29.2% · PF 1.33 · +674 | 68 · 27.9% · PF 1.04 · +255 |
-| Sell below EMA 105 | exit: tp 3 | 42 · 28.6% · PF 1.03 · +116 | 26 · 30.8% · PF 1.35 · +789 | 68 · 29.4% · PF 1.13 · +905 |
+| Sell below EMA 105 | exit: rsi 70 | 44 · 27.3% · PF 0.91 · -420 | 24 · 29.2% · PF 1.33 · +674 | 68 · 27.9% · PF 1.04 · +254 |
+| Sell below EMA 105 | exit: tp 3 | 42 · 28.6% · PF 1.03 · +116 | 26 · 30.8% · PF 1.35 · +789 | 68 · 29.4% · PF 1.13 · +906 |
 | Sell below EMA 105 + Supertrend + 0.5 ATR buffer + 2 closes | exit: cross | 18 · 22.2% · PF 0.75 · -695 | 12 · 25.0% · PF 2.05 · +1,347 | 30 · 23.3% · PF 1.16 · +652 |
-| Sell below EMA 105 + Supertrend + 0.5 ATR buffer + 2 closes | exit: rsi 70 | 25 · 44.0% · PF 1.16 · +411 | 14 · 42.9% · PF 1.55 · +776 | 39 · 43.6% · PF 1.30 · +1,187 |
+| Sell below EMA 105 + Supertrend + 0.5 ATR buffer + 2 closes | exit: rsi 70 | 25 · 44.0% · PF 1.16 · +411 | 14 · 42.9% · PF 1.55 · +775 | 39 · 43.6% · PF 1.30 · +1,187 |
 | Sell below EMA 105 + Supertrend + 0.5 ATR buffer + 2 closes | exit: tp 3 | 22 · 50.0% · PF 1.85 · +2,074 | 14 · 42.9% · PF 1.56 · +782 | 36 · 47.2% · PF 1.74 · +2,856 |
 | Sell below EMA 105 + MACD hist + 0.5 ATR buffer + 2 closes | exit: cross | 19 · 21.1% · PF 0.62 · -1,225 | 13 · 23.1% · PF 2.15 · +1,426 | 32 · 21.9% · PF 1.04 · +201 |
 | Sell below EMA 105 + MACD hist + 0.5 ATR buffer + 2 closes | exit: rsi 70 | 23 · 39.1% · PF 0.96 · -103 | 14 · 42.9% · PF 1.93 · +1,071 | 37 · 40.5% · PF 1.26 · +968 |
-| Sell below EMA 105 + MACD hist + 0.5 ATR buffer + 2 closes | exit: tp 3 | 21 · 52.4% · PF 1.70 · +1,790 | 14 · 50.0% · PF 2.41 · +1,537 | 35 · 51.4% · PF 1.91 · +3,327 |
+| Sell below EMA 105 + MACD hist + 0.5 ATR buffer + 2 closes | exit: tp 3 | 21 · 52.4% · PF 1.70 · +1,790 | 14 · 50.0% · PF 2.41 · +1,538 | 35 · 51.4% · PF 1.91 · +3,327 |
 | Sell below EMA 105 + Daily>EMA200 + Supertrend | exit: cross | 5 · 40.0% · PF 0.77 · -267 | 14 · 21.4% · PF 0.95 · -92 | 19 · 26.3% · PF 0.89 · -358 |
 | Sell below EMA 105 + Daily>EMA200 + Supertrend | exit: rsi 70 | 5 · 60.0% · PF 1.47 · +409 | 16 · 37.5% · PF 0.66 · -725 | 21 · 42.9% · PF 0.90 · -316 |
-| Sell below EMA 105 + Daily>EMA200 + Supertrend | exit: tp 3 | 5 · 80.0% · PF 8.81 · +2,020 | 17 · 35.3% · PF 1.27 · +604 | 22 · 45.5% · PF 2.06 · +2,624 |
+| Sell below EMA 105 + Daily>EMA200 + Supertrend | exit: tp 3 | 5 · 80.0% · PF 8.81 · +2,020 | 17 · 35.3% · PF 1.27 · +605 | 22 · 45.5% · PF 2.06 · +2,625 |
 | Sell below EMA 105 + ADX>20 + Daily>EMA50 + Supertrend | exit: cross | 13 · 30.8% · PF 0.48 · -1,716 | 13 · 23.1% · PF 0.74 · -677 | 26 · 26.9% · PF 0.59 · -2,392 |
 | Sell below EMA 105 + ADX>20 + Daily>EMA50 + Supertrend | exit: rsi 70 | 15 · 40.0% · PF 0.75 · -556 | 14 · 21.4% · PF 0.34 · -1,528 | 29 · 31.0% · PF 0.54 · -2,084 |
 | Sell below EMA 105 + ADX>20 + Daily>EMA50 + Supertrend | exit: tp 3 | 13 · 38.5% · PF 0.62 · -1,187 | 13 · 23.1% · PF 0.61 · -1,009 | 26 · 30.8% · PF 0.62 · -2,196 |
@@ -189,27 +189,27 @@ No sell rule was profitable and consistent in both parts, so the setups are buy 
 
 | # | Candles | EMA | Signals | Up signals: hit · pts | Down signals: hit · pts | PF | Net pts | 140 sessions PF · net | Jev | Final |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 1h | 185 | 14 | 14.3% · +1,792 | 42.9% · +1,014 | 5.82 | +2,806 | 1.54 · +1,388 | weak | 58.8 |
-| 2 | 2h | 105 | 10 | 20.0% · +1,805 | 40.0% · +997 | 6.58 | +2,802 | 1.62 · +1,427 | weak | 58.2 |
-| 3 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +895 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 55.0 |
-| 4 | 15m | 77 | 51 | 23.1% · +1,702 | 40.0% · +874 | 2.28 | +2,577 | 2.28 · +2,577 | weak | 54.0 |
-| 5 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +928 | 2.39 | +2,684 | 2.39 · +2,684 | weak | 53.9 |
-| 6 | 30m | 59 | 33 | 17.6% · +1,824 | 31.2% · +804 | 2.91 | +2,628 | 2.91 · +2,628 | weak | 53.3 |
-| 7 | 15m | 76 | 51 | 26.9% · +1,737 | 40.0% · +909 | 2.36 | +2,646 | 2.36 · +2,646 | weak | 53.1 |
-| 8 | 1D | 12 | 8 | 25.0% · +1,540 | 50.0% · +931 | 3.06 | +2,470 | 0.75 · -1,337 | weak | 48.4 |
-| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.4 |
-| 10 | 5m | 178 | 120 | 15.0% · +1,256 | 20.0% · +441 | 1.52 | +1,698 | 1.52 · +1,698 | weak | 44.4 |
+| 1 | 2h | 105 | 10 | 20.0% · +1,805 | 40.0% · +996 | 6.57 | +2,802 | 1.62 · +1,426 | weak | 58.5 |
+| 2 | 1h | 185 | 14 | 14.3% · +1,793 | 42.9% · +1,015 | 5.83 | +2,808 | 1.54 · +1,391 | weak | 58.3 |
+| 3 | 15m | 77 | 51 | 23.1% · +1,703 | 40.0% · +876 | 2.28 | +2,578 | 2.28 · +2,578 | weak | 54.5 |
+| 4 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +929 | 2.39 | +2,685 | 2.39 · +2,685 | weak | 54.2 |
+| 5 | 30m | 81 | 21 | 18.2% · +2,061 | 30.0% · +417 | 3.95 | +2,478 | 3.95 · +2,478 | weak | 53.8 |
+| 6 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +894 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 53.6 |
+| 7 | 15m | 76 | 51 | 26.9% · +1,738 | 40.0% · +910 | 2.36 | +2,648 | 2.36 · +2,648 | weak | 52.9 |
+| 8 | 1D | 12 | 8 | 25.0% · +1,540 | 50.0% · +931 | 3.06 | +2,470 | 0.75 · -1,337 | weak | 48.5 |
+| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.5 |
+| 10 | 5m | 178 | 120 | 15.0% · +1,257 | 20.0% · +443 | 1.52 | +1,700 | 1.52 · +1,700 | weak | 44.5 |
 
 Your EMAs 5, 6, 9, 10, 11 (same rule, same dates):
 
 | Candles | EMA 5 | EMA 6 | EMA 9 | EMA 10 | EMA 11 |
 |---|---|---|---|---|---|
-| 5m | -6,546 | -6,023 | -4,974 | -4,634 | -4,365 |
-| 15m | -2,059 | -2,124 | -2,431 | -1,763 | -1,527 |
-| 30m | -916 | -1,139 | -1,449 | -1,154 | -1,356 |
-| 75m | -524 | -19 | +1,177 | +1,777 | +1,777 |
-| 1h | -2,305 | -1,523 | -1,242 | -482 | -540 |
-| 2h | +8 | -338 | +1,318 | +1,884 | +2,219 |
+| 5m | -6,665 | -5,986 | -5,009 | -4,496 | -4,244 |
+| 15m | -2,063 | -2,082 | -2,413 | -1,820 | -1,510 |
+| 30m | -904 | -1,134 | -1,443 | -1,157 | -1,338 |
+| 75m | -527 | -20 | +1,178 | +1,779 | +1,779 |
+| 1h | -2,303 | -1,523 | -1,243 | -481 | -540 |
+| 2h | +8 | -339 | +1,318 | +1,883 | +2,218 |
 | 1D | +1,593 | +1,767 | +2,234 | +1,469 | +2,447 |
 
 ## Test 3: day vs night (last 200 sessions, 2026-01-16 → 2026-11-09)
@@ -234,9 +234,9 @@ Where the EMA 105 trades made their points:
 
 | Rule | Trades | Overnight pts | Daytime pts |
 |---|---|---|---|
-| EMA 105 (buy above, sell below) | 112 | +3,898 | +383 |
-| EMA 105 buy only | 56 | +5,961 | -2,204 |
-| EMA 105 + confirmations (the winner) | 32 | +4,854 | +1,438 |
+| EMA 105 (buy above, sell below) | 112 | +3,960 | +320 |
+| EMA 105 buy only | 56 | +5,972 | -2,215 |
+| EMA 105 + confirmations (the winner) | 32 | +4,852 | +1,439 |
 
 All 49 session rules (sorted by points after costs; ✓ = profit in both 100-session halves):
 
@@ -257,8 +257,8 @@ All 49 session rules (sorted by points after costs; ✓ = profit in both 100-ses
 | 2 With the EMA 105 trend | Night buy only when 2h close > EMA 105 | BUY | 84 | 47.6% | 1.01 | +20 | -590 | +610 |  |
 | 3 Day of the week | Friday night sell | SELL | 39 | 43.6% | 1.01 | +16 | +308 | -292 |  |
 | 3 Day of the week | Thursday night sell | SELL | 40 | 42.5% | 1.01 | +15 | +689 | -675 |  |
-| 7 Inside the day | 09:15→15:15 up → buy the last 15 minutes | BUY | 94 | 46.8% | 0.99 | -12 | -485 | +472 |  |
-| 7 Inside the day | First hour up → buy 10:15, sell at close | BUY | 94 | 51.1% | 0.98 | -67 | -697 | +630 |  |
+| 7 Inside the day | First hour up → buy 10:15, sell at close | BUY | 95 | 51.6% | 1.00 | -7 | -697 | +690 |  |
+| 7 Inside the day | 09:15→15:15 up → buy the last 15 minutes | BUY | 94 | 46.8% | 0.99 | -12 | -485 | +473 |  |
 | 8 Turn of the month | Last day + first 3 days: night buy | BUY | 44 | 50.0% | 0.96 | -144 | -732 | +587 |  |
 | 3 Day of the week | Wednesday day buy (open → close) | BUY | 42 | 54.8% | 0.93 | -150 | +517 | -667 |  |
 | 8 Turn of the month | Last day + first 3 days: day buy | BUY | 44 | 50.0% | 0.95 | -175 | -666 | +491 |  |
@@ -272,7 +272,7 @@ All 49 session rules (sorted by points after costs; ✓ = profit in both 100-ses
 | 3 Day of the week | Friday night buy (previous close → Friday open) | BUY | 39 | 51.3% | 0.67 | -673 | -650 | -23 |  |
 | 3 Day of the week | Thursday night buy (previous close → Thursday open) | BUY | 40 | 47.5% | 0.73 | -687 | -1,014 | +327 |  |
 | 9 After a wide / quiet day | Range > 1.5× normal → next day sell | SELL | 34 | 41.2% | 0.73 | -733 | -183 | -550 |  |
-| 7 Inside the day | First hour down → sell 10:15, buy back at close | SELL | 105 | 46.7% | 0.86 | -856 | -1,115 | +258 |  |
+| 7 Inside the day | First hour down → sell 10:15, buy back at close | SELL | 104 | 47.1% | 0.87 | -781 | -1,115 | +334 |  |
 | 2 With the EMA 105 trend | Day buy only when EMA 105 is up | BUY | 84 | 44.0% | 0.83 | -883 | -1,315 | +432 |  |
 | 1 Day vs night | Sell at open, buy back at close (day) | SELL | 200 | 47.0% | 0.93 | -935 | +163 | -1,098 |  |
 | 3 Day of the week | Thursday day buy (open → close) | BUY | 40 | 37.5% | 0.65 | -1,028 | -833 | -196 |  |
@@ -287,8 +287,8 @@ All 49 session rules (sorted by points after costs; ✓ = profit in both 100-ses
 | 1 Day vs night | Sell at close, buy back next open (night) | SELL | 200 | 46.0% | 0.85 | -1,804 | -186 | -1,618 |  |
 | 3 Day of the week | Tuesday night sell | SELL | 38 | 50.0% | 0.35 | -1,907 | -1,760 | -146 |  |
 | 5 Where it closed | Closed in bottom ¼ → night buy (bounce) | BUY | 57 | 43.9% | 0.52 | -2,014 | -2,333 | +319 |  |
-| 10 Opening-range breakout | Break of the first-hour high (buy) or low (sell), hold to close | BOTH | 194 | 47.9% | 0.80 | -2,038 | -1,143 | -895 |  |
-| 7 Inside the day | 09:15→15:15 down → sell the last 15 minutes | SELL | 105 | 27.6% | 0.20 | -2,080 | -994 | -1,086 |  |
+| 10 Opening-range breakout | Break of the first-hour high (buy) or low (sell), hold to close | BOTH | 194 | 47.9% | 0.80 | -2,036 | -1,143 | -893 |  |
+| 7 Inside the day | 09:15→15:15 down → sell the last 15 minutes | SELL | 105 | 27.6% | 0.20 | -2,081 | -994 | -1,087 |  |
 | 3 Day of the week | Monday night buy (previous close → Monday open) | BUY | 41 | 46.3% | 0.47 | -2,200 | -2,391 | +191 |  |
 | 1 Day vs night | Buy at open, sell at close (day) | BUY | 200 | 48.0% | 0.83 | -2,425 | -1,862 | -563 |  |
 
@@ -296,9 +296,9 @@ Opening-range breakout, checked twice:
 
 | Version | Trades | Win % | PF | Net | DD |
 |---|---|---|---|---|---|
-| Hourly, first hour, 200 sessions | 194 | 47.9% | 0.80 | -2,038 | 3,840 |
+| Hourly, first hour, 200 sessions | 194 | 47.9% | 0.80 | -2,036 | 3,838 |
 | … first 100 | 97 | 48.5% | 0.80 | -1,143 | 1,737 |
-| … last 100 | 97 | 47.4% | 0.80 | -895 | 2,136 |
+| … last 100 | 97 | 47.4% | 0.80 | -893 | 2,134 |
 | Hourly, same days as 5-min | 60 | 55.0% | 1.36 | +763 | 477 |
 | 5-minute, first hour | 60 | 55.0% | 1.34 | +729 | 477 |
 | 5-minute, first 15 min | 61 | 50.8% | 1.37 | +1,045 | 768 |
@@ -310,12 +310,12 @@ Opening-range breakout, checked twice:
 
 | Rule | Reliability | Overfit risk | Jev score | Final |
 |---|---|---|---|---|
-| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 47.6 | 59.6 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 39.6 | 56.3 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 40.0 | 56.2 |
-| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 42.2 | 56.1 |
-| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 42.6 | 55.7 |
-| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 40.8 | 55.1 |
+| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 43.6 | 58.0 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 40.2 | 56.5 |
+| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 44.6 | 56.5 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 40.2 | 56.3 |
+| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 42.8 | 56.3 |
+| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 43.0 | 55.9 |
 
 ## Limits
 
