@@ -1,0 +1,198 @@
+/* =====================================================================
+   the app CARD & SURFACE CONSISTENCY LAYER
+   Loaded LAST (after ui-navbar-polish.css) so it is authoritative over
+   the accumulated scattered rules. One home to keep every card/panel on
+   the the app design tokens, in both dark and light themes.
+   Mr. Chartist x the app
+   ===================================================================== */
+
+/* ---------- the app Spec 1.3 Material Elevation Presets ---------- */
+/*
+ * REMOVED (design-system consistency pass): this file used to open with a
+ * `:root` block redefining --radius-sm/-lg, --shadow-0…5, --surface-raised,
+ * --surface-high and --line-strong. Every one of those lost the cascade —
+ * main.tsx imports this sheet at position 10, ui-prototype-system.css (the
+ * radius authority) at 27 and ui-colour-system.css (the palette and shadow
+ * authority) at 35 — so none of the values here were ever the computed value.
+ * They were a landmine: --radius-sm read 8px here and 6px in the authority,
+ * and three declarations carried literal-hex/rgba fallbacks the colour
+ * contract forbids. Deleting them changes nothing that paints; it removes the
+ * second opinion. Shadow tiers: ui-colour-system.css §--shadow-0…5.
+ */
+
+
+
+
+
+
+
+
+
+
+
+/* Apply material-menu to all global dashboard popovers */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ---------------------------------------------------------------------
+   LIGHT THEME — dark-stuck popovers / dropdowns / panels / inputs
+   (audit found these hardcode dark glass with no light variant, so they
+   render as dark islands on white). Flip them to light glass + dark text.
+   --------------------------------------------------------------------- */
+:root[data-theme='light'] .app .ui-customize-panel{
+  background: var(--surface-high) !important;
+  background-image: none !important;
+  border-color: var(--line-strong) !important;
+  border-radius: var(--radius-lg) !important;
+  color: var(--brand-950) !important;
+  box-shadow: var(--shadow-4) !important;
+}
+/* dark inputs / pills / badges */
+
+
+:root[data-theme='light'] .app .empty-brand-mark {
+  background: color-mix(in srgb, var(--brand-950) 5%, transparent) !important;
+  color: var(--brand-950) !important;
+}
+
+/* PANEL CARD BLOCKS — removed. `.ui-stat-card` is rendered nowhere in src
+   (no JSX, no template), so the two rules here matched nothing. They also
+   carried `box-shadow: var(--shadow-2)` on a card at rest, which the design
+   contract §1.2 forbids: a resting card takes its depth from the hairline
+   border, and only popovers (--shadow-4) and modals (--shadow-5) cast one. */
+
+
+/* =====================================================================
+   UI/UX CLEANUP
+   ===================================================================== */
+/* Build-up badges (LB/SB/SC/LC/NT) — flatten the glossy 3D pills into
+   clean flat semantic chips. Reads lighter, scannable, consistent, both
+   themes. --bu-accent is set per state by the existing colour rules.
+
+   LAYOUT LIVES HERE TOO, and did not always.
+   BuildUpBadge renders two adjacent spans — the two-letter code and the sign
+   pair — so the chip owns their spacing. This used to live only in
+   `.ui-oi-flowmore .ui-buildup-kpi` (open-interest-flow.css), scoped to an
+   element that is no longer rendered, which is why every badge above 900px read
+   as run-together text: "SBP− OI+". The badge is a shared component, so the
+   rule belongs on the class, not on one host. Gap is the 4px grid step
+   (contract §1.4) rather than the old rule's off-grid 5px — at a two-letter
+   code beside a sign pair that is ~0.4em of separation, which reads as two
+   tokens without the 1px the grid does not have a step for.
+
+   `display` is the one declaration here left un-`!important`: the rest of this
+   block is paint, where clobbering is the intent, but a layer that legitimately
+   wants to hide a badge (the ≤900px flow rules already hide its sign pair)
+   must still be able to. Nothing else sets display on this class, so the plain
+   declaration wins on its own. */
+.app .ui-buildup-kpi {
+  display: inline-flex;
+  align-items: center !important;
+  gap: var(--space-xs, 4px) !important;
+  white-space: nowrap !important;
+  background: color-mix(in srgb, var(--bu-accent) 15%, transparent) !important;
+  background-image: none !important;
+  border: 1px solid color-mix(in srgb, var(--bu-accent) 34%, transparent) !important;
+  color: color-mix(in srgb, var(--bu-accent) 86%, var(--text)) !important;
+  box-shadow: none !important;
+  min-width: 40px !important;
+  min-height: 20px !important;
+  padding: 2px 7px !important;
+  border-radius: var(--radius) !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em !important;
+}
+.app .ui-buildup-kpi::before,
+.app .ui-buildup-kpi::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+.app .ui-buildup-kpi-code { color: inherit !important; text-shadow: none !important; }
+.app .ui-buildup-kpi--analysis .ui-buildup-kpi-name,
+.app .ui-buildup-kpi--named .ui-buildup-kpi-name { font-weight: 750; }
+.app .ui-buildup-kpi--analysis,
+.app .ui-buildup-kpi--named {
+  max-width: 100%;
+  flex-wrap: wrap;
+  row-gap: 2px !important;
+  white-space: normal !important;
+}
+.app .ui-buildup-kpi--analysis .ui-buildup-kpi-signs,
+.app .ui-buildup-kpi--named .ui-buildup-kpi-signs {
+  padding-left: var(--space-xs, 4px);
+  border-left: 1px solid color-mix(in srgb, var(--bu-accent) 34%, transparent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+
+/* Global Font Enforcer — MOVED.
+   The `table, span, .mono { font-variant-numeric: tabular-nums }` rule that
+   used to sit here has been folded into the systematic columnar-numerals block
+   in `ui-typography.css` (§ "Tabular numerals"), which is the type authority
+   and loads later (main.tsx position 38 vs 10). The selector list there is a
+   strict SUPERSET of this one — `table, span, .mono` are all still covered, so
+   no element loses tabular figures. Nothing in `src` sets
+   `font-variant-numeric: normal`, so nothing between the two positions could
+   have been relying on this one winning. */
+
+
+/* =====================================================================
+   .ui-listrow — THE MARKET LIST ROW (opt-in, reference pattern R5)
+   =====================================================================
+   The single most repeated element in a broking UI: an instrument on the
+   left, its number on the right. This is a REUSABLE treatment, not a
+   retrofit — nothing in the tree carries these class names yet, so adopting
+   it is a per-page decision. Add the classes to opt in; existing rows are
+   untouched.
+
+   Markup contract:
+
+     <div class="ui-listrow-list">
+       <a class="ui-listrow" href="...">
+         <span class="ui-listrow__id">
+           <span class="ui-listrow__name">RELIANCE</span>
+           <span class="ui-listrow__sub">
+             <span class="ui-listrow__badge">Expiry in 1D</span>NSE
+           </span>
+         </span>
+         <span class="ui-listrow__vals">
+           <span class="ui-listrow__price">1,402.30</span>
+           <span class="ui-listrow__chg is-up">+16.25 (4.05%)</span>
+         </span>
+       </a>
+       …
+     </div>
+
+   Hierarchy (R10): the NAME and the PRICE are the loud pair; the sublabel and
+   the change sit one step down. Rows are separated by whitespace plus one
+   hairline, never by boxes.
+
+   Direction rule: the PRICE is always neutral ink (design contract §4 — LTP,
+   greeks and prices never take red/green). Only `__chg` is tinted, and it is
+   tinted AND glyphed, so colour is never the sole carrier of meaning.
+
+   NOTE: there is no `* { box-sizing: border-box }` reset in this repo, so
+   every box below that combines a width with padding declares its own. */
+
+/* Mobile (contract §7 boundary). R5's rows are ~97px on a phone — taller than
+   desktop, not shorter. Whitespace does the separating. */

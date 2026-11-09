@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The math inside a trading bot — 48 formulas on Nifty 50 and every F&amp;O stock | NSE Value Lens</title>
+<meta name="description" content="All 48 formulas from 'The math inside a trading bot' checked against Nifty 50, every NSE F&O stock and this site's strategies: volatility, Hurst, ADF, half-life, Kelly, Bayesian win rate, Sharpe t-stat, best-of-N, Monte Carlo drawdown.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="orderflow.css?v=1">
+<script src="quantmath.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell of-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="orderflow.html">Order Flow</a><a href="quantmath.html" aria-current="page"><strong>Bot Maths</strong></a><a href="nifty.html">Nifty 50</a><a href="fund.html">Our Fund</a><a href="confluence.html">Top Picks</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="dma.html">DMA</a><a href="fno-play.html">₹1 Play</a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="indicator-lab.html">Lab</a></nav></header>
+<main>
+<section class="of-head"><div>
+  <div class="eyebrow">48 FORMULAS · 8 STAGES · NIFTY 50 + EVERY F&amp;O STOCK</div>
+  <h1>The math inside a trading bot, on our market <small id="qm-date"></small></h1>
+  <p class="fd-note" id="qm-status">Loading…</p></div></section>
+
+<section class="section"><h2 class="fd-h2">Can it be applied? <small id="qm-counts"></small></h2>
+  <div class="fd-wrap"><table class="fd-table" id="qm-cat"></table></div></section>
+
+<section class="section"><h2 class="fd-h2">Do our strategies survive the validation maths?</h2>
+  <p class="of-verdict" id="qm-verdict"></p>
+  <div class="fd-wrap"><table class="fd-table" id="qm-strat"></table></div>
+  <p class="fd-note" id="qm-strat-note"></p></section>
+
+<section class="section"><h2 class="fd-h2">Nifty 50 today</h2><div class="of-kv" id="qm-nifty"></div></section>
+
+<section class="section"><h2 class="fd-h2">Every F&amp;O stock <small id="qm-sum"></small></h2>
+  <div class="of-kv" id="qm-port"></div>
+  <div class="of-filters"><label>Search<input id="qm-q" type="search" placeholder="Symbol or sector"></label>
+  <label>Order<select id="qm-sort"><option value="symbol">Symbol</option><option value="hurst">Hurst (trendiest first)</option><option value="vol_year">Volatility</option><option value="t_stat_1y">t-stat (1 year)</option><option value="half_life">Half-life</option><option value="max_dd_3y">Max drawdown</option><option value="var95_lot">VaR per lot</option></select></label></div>
+  <div class="fd-wrap of-scroll"><table class="fd-table" id="qm-rows"></table></div></section>
+
+<section class="section"><h2 class="fd-h2">Risk-based size for the EMA 105 trades open now <small id="qm-size-sub"></small></h2>
+  <div class="fd-wrap of-scroll"><table class="fd-table" id="qm-size"></table></div></section>
+
+<section class="section"><h3>Limits</h3><ul class="fd-limits" id="qm-limits"></ul>
+  <p class="fd-note">Formulas: <a href="https://quantbot-math.netlify.app/">The math inside a trading bot</a>. Every number here is computed from NSE data by <code>quant_math.py</code> after each close.</p></section>
+</main>
+<footer><span>NSE VALUE LENS / BOT MATHS</span><p>Paper research. Not SEBI-registered advice. No orders are placed by this website. <a href="https://github.com/originaonxi/nse-value-lens">Source code</a></p></footer>
+</div>
+</body>
+</html>

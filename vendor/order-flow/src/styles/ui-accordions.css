@@ -1,0 +1,87 @@
+/* Shared the app disclosure language, adapted from ui-theme-docs/accordion.html.
+   Typography remains inherited so compact dashboard surfaces keep their scale. */
+.ui-accordion-trigger {
+  font: inherit;
+  /* There is no universal `* { box-sizing: border-box }` in this repo, and this
+     rule ships `width: 100%`. Consumers add their own padding and border on top
+     of it — `.detail-contract-disclosure .detail-disclosure-trigger` is
+     `width: 100%` + `padding: 0 12px` + a 1px border — which made the "More
+     contract data" header 26px wider than the panel holding it, so its right
+     border sat outside the card edge. Owning the width means owning the box. */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 32px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* The 44px floor is a contract rule (§7 touch), not a default, so it carries
+   `!important`. Without it this single-class rule loses to every consumer's own
+   descendant-chain selector: the two disclosure triggers in the strike detail
+   studio pin themselves to 36px and 40px, and those values won at ALL widths —
+   the coarse-pointer branch here has never actually applied to the only
+   accordion the app ships. The header is full-width already, so raising the box
+   costs no layout; the painted chrome is unchanged. */
+@media (pointer: coarse) {
+  .ui-accordion-trigger { min-height: var(--tap-min, 44px) !important; }
+}
+
+.ui-accordion-indicator {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--accent-text);
+  transition: transform var(--dur-tap, 120ms) var(--ease-ios-out, ease);
+}
+
+.ui-accordion-indicator::before,
+.ui-accordion-indicator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  transition:
+    transform var(--dur-quick, 180ms) var(--ease-ios-out, ease),
+    opacity var(--dur-quick, 180ms) var(--ease-ios-out, ease);
+}
+
+.ui-accordion-indicator::before { width: 16px; height: 1.5px; }
+.ui-accordion-indicator::after { width: 1.5px; height: 16px; }
+
+.ui-accordion-trigger[aria-expanded='true'] .ui-accordion-indicator::after,
+details[open] > summary .ui-accordion-indicator::after {
+  opacity: 0;
+  transform: translate(-50%, -50%) scaleY(0);
+}
+
+/* Press feedback lives on the glyph, not the row — the row is the whole
+   header and a wash across it reads as a selection, not a tap. */
+.ui-accordion-trigger:active .ui-accordion-indicator,
+details > summary:active .ui-accordion-indicator {
+  transform: scale(.9);
+}
+
+.ui-accordion-trigger:focus-visible,
+details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-accordion-indicator,
+  .ui-accordion-indicator::before,
+  .ui-accordion-indicator::after { transition-duration: 1ms; }
+  .ui-accordion-trigger:active .ui-accordion-indicator,
+  details > summary:active .ui-accordion-indicator { transform: none; }
+}

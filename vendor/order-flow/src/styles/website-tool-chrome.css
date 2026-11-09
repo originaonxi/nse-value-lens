@@ -1,0 +1,315 @@
+/* Opt-in website integration only. Standalone chrome keeps its own geometry. */
+#root > .app[data-website-preview='true'] {
+  --ui-shell-header-h: 0px;
+}
+#root > .app[data-website-preview='true'] > .ui-preview-search-host {
+  flex: none;
+  height: 0;
+}
+#root > .app[data-website-preview='true'] .ui-pagebar__actions > .ui-preview-search {
+  flex: none;
+  gap: 6px;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar .ui-pagebar__secondary {
+    display: inline-flex !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    flex: none;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar .chain-breadcrumb-settings-host {
+    width: auto !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    flex: none;
+  }
+  :root[data-theme] body #root > .app.app[data-website-preview='true'] .ui-pagebar__actions > .ui-preview-search {
+    margin-inline: 0;
+  }
+  :root[data-theme] body #root > .app.app[data-website-preview='true'] .os-pagebar > .ui-pagebar__actions {
+    gap: 6px;
+  }
+  #root > .app[data-website-preview='true'] .os-pagebar-group {
+    flex: 1 1 0;
+    gap: 6px;
+    margin-inline-start: 0;
+  }
+  #root > .app[data-website-preview='true'] .os-pagebar-group .os-viewswitch {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  #root > .app[data-website-preview='true'] .os-viewswitch .ui-capsule__option {
+    flex: 1 1 auto;
+    padding-inline: 6px;
+  }
+  /* The document owns vertical scrolling on phones; the table pans only
+     sideways. Widget panes and the standalone laptop layout keep their bounds. */
+  #root > .app[data-website-preview='true'][data-active-tab='options-scanner'] .os-ct-scroll {
+    max-height: none;
+    overscroll-behavior: auto;
+  }
+}
+/* Phones: the labelled buttons are icon-only (the 768px block below sizes and hides them); under 480px the
+   icon also must not shrink in a tight row. */
+@media (max-width: 480px) {
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar .chain-breadcrumb-customize > .app-settings-button__icon {
+    flex: none;
+  }
+}
+
+/* The theme switch lives in the tool's own bar, at the end of the actions, now
+   that the website header carries none. Phones reach it from the workspace
+   sheet's Theme row instead, where the 44px controls already fill the row. */
+#root > .app[data-website-preview='true'] :is(.ui-pagebar__actions, .tw-bar__workspace) > .ui-preview-theme {
+  flex: none;
+  margin-inline-start: 4px;
+}
+@media (max-width: 768px) {
+  #root > .app[data-website-preview='true'] :is(.ui-pagebar__actions, .tw-bar__workspace) > .ui-preview-theme {
+    display: none;
+  }
+}
+
+/* PHONES, INSIDE THE WEBSITE (owner, 10 Oct): under the site's pill header the
+   tool opens with a thin moving line of the indices, then ONE line holding the
+   insight card as a compact capsule with Search and Customise as two round
+   icons beside it.
+
+   The ticker is the app's (.ui-site-tape, SiteHeader.css). */
+/* 769 to 900px: a page bar that also carries a view capsule (OI Heatmap) has no room for two labelled buttons beside it and
+   pushed the theme switch 15px past the edge. Search and Customise lose their words and keep their icons and names. */
+@media (min-width: 769px) and (max-width: 900px) {
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) {
+    width: 40px !important;
+    min-width: 40px !important;
+    padding-inline: 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) > span:not(.app-settings-button__icon) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Search and Customise: bare icons (no ring), 20px glyphs in 44px targets. */
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) {
+    width: 44px !important;
+    min-width: 44px !important;
+    padding-inline: 0 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none;
+    border-radius: 999px;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) > span:not(.app-settings-button__icon) {
+    display: none;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar .chain-breadcrumb-customize > .app-settings-button__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* No ring on these two in any state (owner, 10 Oct: the dark focus circle
+     read as a heavy effect). Focus and the open state show as a soft wash
+     instead, so a keyboard user still sees where they are. */
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize):is(:focus, :hover, .is-active, [aria-expanded='true']) {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize):is(:focus-visible, .is-active, [aria-expanded='true']) {
+    background: var(--surface-hover) !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize) {
+    box-shadow: none !important;
+  }
+  /* Keyboard focus keeps a visible 2px ring (the wash above is too faint to find alone); a pointer press
+     and hover stay ringless. Placed after the rule that removes outlines, so it wins. */
+  :root[data-theme] body #root#root > .app.app[data-website-preview='true'] .ui-pagebar :is(.ui-preview-search, .chain-breadcrumb-customize):focus-visible {
+    outline: 2px solid var(--accent-ring, var(--text)) !important;
+    outline-offset: 2px;
+  }
+
+  /* ONE LINE, every tool whose bar holds only Customise and Search: the bar
+     is lifted onto the right end of the insight bar's line and the capsule
+     gives up exactly that room (44 + 4 + 44 + 4 = 96px). Three shapes: the
+     chain (bar and capsule straight in the page), the wrapped tools (Open
+     Interest, Spurts, Heatmap, PCR, Straddle, GEX: capsule inside the page
+     wrapper) and IV (bar and capsule both inside its wrapper). The Heatmap's
+     Open Interest | Change switch counts as absent: on a phone it is hidden
+     and lives in Customise (oi-heatmap.css). So do Open
+     Interest's view switch and its phone ⓘ: both move into its Customise
+     (oi-customise.css, open-interest-phone.css). */
+  :root[data-theme] body #root#root > .app.app .dashboard-body:has(> .ui-pagebar + .ui-aisum),
+  :root[data-theme] body #root#root > .app.app .dashboard-body:has(> .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum),
+  :root[data-theme] body #root#root > .app.app .ui-iv-page:has(> .ui-pagebar + .ui-aisum) {
+    position: relative;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.ui-preview-search, .settings-gear-container, .ui-preview-theme, .chain-mode-pagebar, .ui-hm-metric, .ui-oi-viewtools, .ui-sp-viewtools, .ui-oi-breadcrumb-info--phone))):has(+ .ui-aisum),
+  :root[data-theme] body #root#root > .app.app .ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.ui-preview-search, .settings-gear-container, .ui-preview-theme, .chain-mode-pagebar, .ui-hm-metric, .ui-oi-viewtools, .ui-sp-viewtools, .ui-oi-breadcrumb-info--phone))):has(+ :is(.ui-oi-page, .ui-gex-page) .ui-aisum) {
+    position: absolute !important;
+    z-index: 2;
+    top: var(--tool-gap, 12px);
+    right: var(--tool-gutter, 12px);
+    width: auto;
+    height: 44px;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0;
+    background: none;
+    border: 0;
+  }
+  /* A lifted bar is still the home of a modal Customise: while the sheet is open its scrim must cover the
+     site header too, as on every other tool (the bar's z-index 2 above left the header sharp on Open
+     Interest, Spurts and PCR). Specificity beats the rule above by design. */
+  :root[data-theme] body #root#root > .app.app .ui-pagebar.ui-pagebar.ui-pagebar.ui-pagebar:is(:has(.ui-customize-panel), :has(.settings-popup-backdrop--customize)) {
+    z-index: 40000;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.ui-preview-search, .settings-gear-container, .ui-preview-theme, .chain-mode-pagebar, .ui-hm-metric, .ui-oi-viewtools, .ui-sp-viewtools, .ui-oi-breadcrumb-info--phone))):has(+ .ui-aisum), .ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.ui-preview-search, .settings-gear-container, .ui-preview-theme, .chain-mode-pagebar, .ui-hm-metric, .ui-oi-viewtools, .ui-sp-viewtools, .ui-oi-breadcrumb-info--phone))):has(+ :is(.ui-oi-page, .ui-gex-page) .ui-aisum)) > .ui-pagebar__actions {
+    gap: 4px;
+    margin: 0;
+  }
+
+  /* The closed capsule: 44px, filled, words only. It runs to Customise and
+     Search (the max-widths below leave their room), so its arrow sits in the
+     right-hand corner on every tool rather than wherever the words stop
+     (owner, 10 Oct 2026). */
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min {
+    container-type: normal !important;
+    width: 100% !important;
+    border-radius: 999px !important;
+    background: var(--surface-hover) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app .dashboard-body > .ui-pagebar + .ui-aisum.is-min {
+    max-width: calc(100% - 120px) !important;
+    margin: var(--tool-gap, 12px) auto var(--tool-gap, 12px) var(--tool-gutter, 12px) !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-iv-page > .ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min {
+    max-width: calc(100% - 96px) !important;
+    margin: 0 auto 0 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min > .ui-aisum__head {
+    min-height: 42px !important;
+    height: 42px !important;
+    gap: 8px !important;
+    padding: 0 4px 0 14px !important;
+    flex-wrap: nowrap !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min :is(.ui-symbol-mark, .ui-aisum__name-full) {
+    display: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__name {
+    flex: none !important;
+    overflow: visible !important;
+    font-size: 14px !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__name-short {
+    display: inline !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  /* The verdict is a line of text, not a pill inside a pill: a dot in the
+     reading's colour, then the words at the chain's 12px, trimmed with an
+     ellipsis when the row runs short (a block, since an ellipsis cannot end a
+     flex row). */
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__verdict {
+    display: block !important;
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__verdict::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: -2px 6px 0 0;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .chain-insight__verdict-tail {
+    display: inline !important;
+    margin-inline-start: .28em !important;
+    padding: 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__end {
+    margin-inline-start: 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-min .ui-aisum__toggle {
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 36px !important;
+    margin-inline-start: 0 !important;
+    border: 0 !important;
+    background: none !important;
+  }
+  /* Opened, the card takes the full width for its reading; the two icons stay
+     in its top right corner, so its own toggle moves left. */
+  :root[data-theme] body #root#root > .app.app .dashboard-body > .ui-pagebar + .ui-aisum.is-open {
+    margin: var(--tool-gap, 12px) var(--tool-gutter, 12px) !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-iv-page > .ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-open {
+    margin: 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.ui-pagebar + .ui-aisum, .ui-pagebar + :is(.ui-oi-page, .ui-gex-page) .ui-aisum).is-open > .ui-aisum__head {
+    padding-inline-end: 96px;
+  }
+}
+
+/* PHONES, TOOLS WITH A VIEW SWITCHER (Straddle, Spurts, GEX, IV; owner, 10 Oct: "similar treatment to the option chain …
+   common for all the tools"). The Heatmap and Open Interest are not among
+   them on a phone: their switches move into Customise there (owner, 10 Oct
+   2026), so their page bars are the plain one. The insight line is the chain's — capsule, then
+   Customise and Search as bare icons — and the tool's own view switcher keeps
+   the bar's row above it. Customise and Search leave the bar for the capsule's
+   line: the bar stays in the flow (so the switcher keeps its place) and gives
+   up its sticky box, so the two icons are placed against the page body, one
+   bar height plus one gap down, which is where the capsule starts. */
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app :is(.dashboard-body, .ui-iv-page) > .ui-pagebar:has(> .ui-pagebar__actions > :is(.ui-gex-viewtools, .ui-iv-viewtools, .ui-straddle-viewtools, .ui-capsule--page:not(.ui-hm-metric))) {
+    position: static !important;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-iv-page:has(> .ui-pagebar > .ui-pagebar__actions > .ui-iv-viewtools) {
+    position: relative;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.dashboard-body, .ui-iv-page) > .ui-pagebar:has(> .ui-pagebar__actions > :is(.ui-gex-viewtools, .ui-iv-viewtools, .ui-straddle-viewtools, .ui-capsule--page:not(.ui-hm-metric))) > .ui-pagebar__actions > :is(.settings-gear-container, .ui-preview-search) {
+    position: absolute !important;
+    z-index: 2;
+    top: calc(var(--pagebar-h, 48px) + var(--tool-gap, 12px));
+    margin: 0 !important;
+  }
+  :root[data-theme] body #root#root > .app.app :is(.dashboard-body, .ui-iv-page) > .ui-pagebar:has(> .ui-pagebar__actions > :is(.ui-gex-viewtools, .ui-iv-viewtools, .ui-straddle-viewtools, .ui-capsule--page:not(.ui-hm-metric))) > .ui-pagebar__actions > .ui-preview-search {
+    right: var(--tool-gutter, 12px);
+  }
+  :root[data-theme] body #root#root > .app.app :is(.dashboard-body, .ui-iv-page) > .ui-pagebar:has(> .ui-pagebar__actions > :is(.ui-gex-viewtools, .ui-iv-viewtools, .ui-straddle-viewtools, .ui-capsule--page:not(.ui-hm-metric))) > .ui-pagebar__actions > .settings-gear-container {
+    right: calc(var(--tool-gutter, 12px) + 48px);
+  }
+  /* The switcher row: the info mark and the switcher, from the gutter. */
+  :root[data-theme] body #root#root > .app.app :is(.dashboard-body, .ui-iv-page) > .ui-pagebar:has(> .ui-pagebar__actions > :is(.ui-gex-viewtools, .ui-iv-viewtools, .ui-straddle-viewtools, .ui-capsule--page:not(.ui-hm-metric))) > .ui-pagebar__actions {
+    justify-content: flex-start !important;
+    gap: 4px !important;
+  }
+}

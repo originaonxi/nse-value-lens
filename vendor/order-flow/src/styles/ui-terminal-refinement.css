@@ -1,0 +1,153 @@
+/* Targeted refinement. Preserve the existing iOS capsules, surfaces and layout.
+   Lower sidebar utilities stay unframed; nested readings use quieter edges. */
+:root[data-theme] body #root#root > .app.app {
+  --terminal-util: 28px;
+}
+
+/* Compact square eye/help utilities; primary controls remain capsules. */
+:root[data-theme] body #root#root > .app.app :is(.ui-page-info > button, .ui-aisum__toggle.is-icon) {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--terminal-util) !important; height: var(--terminal-util) !important;
+  min-width: var(--terminal-util) !important; min-height: var(--terminal-util) !important;
+  padding: 0 !important; border: 1px solid var(--ui-border-subtle) !important; border-radius: 0 !important;
+  background: var(--surface-card) !important; box-shadow: none !important; color: var(--text-muted);
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum__toggle.is-icon::before,
+:root[data-theme] body #root#root > .app.app .ui-aisum__toggle.is-icon::after { content: none !important; }
+:root[data-theme] body #root#root > .app.app :is(.ui-page-info > button, .ui-aisum__toggle.is-icon):hover {
+  background: var(--surface-hover) !important; color: var(--text);
+}
+/* The info glyph carries its own circle; keep the square hit area unframed. */
+:root[data-theme] body #root#root > .app.app .ui-page-info.ui-page-info > button {
+  border: 0 !important;
+  background: transparent !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-page-info.ui-page-info > button:hover,
+:root[data-theme] body #root#root > .app.app .ui-page-info.ui-page-info > button[aria-expanded='true'] {
+  color: var(--text);
+  background: var(--surface-hover) !important;
+}
+:root[data-theme] body #root#root > .app.app :is(.ui-page-info > button, .ui-aisum__toggle.is-icon):focus-visible {
+  outline: 2px solid var(--text-muted) !important; outline-offset: 2px; box-shadow: none !important;
+}
+
+/* One hairline tone for the shell splitters and the fixed Strike spine.
+   Keep the expiry row clear so its capsule never has a second edge beside it. */
+:root[data-theme] body #root#root > .app.app :is(.ui-top, .ui-pagebar) {
+  border-color: var(--ui-border-subtle) !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table :is(td.strike-cell, th.th-strike) {
+  border-inline-color: var(--ui-border-subtle) !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  border-color: var(--ui-border-subtle);
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table .chain-header-row > th {
+  border-bottom-color: var(--ui-border-subtle) !important;
+}
+
+/* The insight keeps its existing capsule chips and rounded outer frame. */
+:root[data-theme] body #root#root > .app.app :is(.ui-aisum, .chain-insight__chip) {
+  border-color: var(--ui-border-subtle) !important; box-shadow: none !important;
+}
+/* Build-up colour, corners and bars stay intact, with no outline around each cell. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table.chain-table td.bu-cell-v2 .ui-bucell {
+  border-color: transparent !important; box-shadow: none !important;
+}
+
+/* Customise keeps grouped iOS rows, softer fills and one divider per row. */
+:root[data-theme] body #root#root > .app.app .ui-customize-panel.ui-customize-panel {
+  --cz-card: color-mix(in srgb, var(--text) 2%, var(--scp-panel-surface, var(--surface)));
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel :is(.scp-reset-btn, .scp-close-btn, .cz-col-action) {
+  border-radius: 999px !important; border-color: var(--ui-border-subtle) !important; box-shadow: none !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel :is(.scp-reset-btn, .scp-close-btn, .cz-col-action):focus-visible {
+  outline: 2px solid var(--text-muted) !important; outline-offset: 2px;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-section-title { font-weight: 600; }
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-card > * + *::before {
+  right: var(--cz-pad);
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper {
+  border-color: var(--ui-border-subtle); box-shadow: none;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel :is(.ui-stepper, .ui-capsule):focus-within {
+  border-color: var(--ui-border-active) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper > button {
+  border: 0; border-radius: 999px;
+  background: transparent; box-shadow: none;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper > button:hover:not(:disabled) {
+  background: var(--surface-hover) !important;
+}
+/* Firefox uses its thin native track; Chromium/WebKit get a precise 4px track.
+   Keep scrolling native and reserve its width so settings never shift. */
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--ui-border-active) transparent !important;
+}
+@supports selector(::-webkit-scrollbar) {
+  :root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body {
+    scrollbar-width: auto !important;
+    scrollbar-color: auto !important;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body::-webkit-scrollbar {
+    width: 4px; height: 4px;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body::-webkit-scrollbar-thumb {
+    border: 0; border-radius: 999px; background: var(--ui-border-active);
+  }
+  :root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
+/* Navigation controls step up with the established chart scaling. */
+@media (min-width: 2560px) {
+  :root[data-theme] body #root#root > .app.app {
+    --terminal-util: 32px;
+  }
+}
+@media (min-width: 769px) and (max-width: 2559px) {
+  :root[data-theme] body #root#root > .app.app .ui-pagebar__crumbs .ui-pagebar__current {
+    font-size: 16px;
+  }
+}
+@media (max-width: 768px), (pointer: coarse) {
+  :root[data-theme] body #root#root > .app.app { --terminal-util: 44px; }
+}
+
+/* Remove stacked highlights without changing the navigation's surface. */
+:root[data-theme='dark'] body #root#root > .app.app :is(.ui-top, .ui-pagebar) {
+  box-shadow: none;
+}
+:root[data-theme='dark'] body #root#root > .app.app :is(.chain-breadcrumb-customize, .ui-capsule.ui-capsule, .ui-seg__track.ui-seg__track) {
+  border-color: var(--ui-border-subtle) !important;
+  box-shadow: none !important;
+}
+
+/* One edge around a grouped Customise card; no extra highlight on the header. */
+:root[data-theme='dark'] body #root#root > .app.app .ui-customize-panel.ui-customize-panel {
+  border-color: var(--ui-border-active) !important;
+}
+:root[data-theme='dark'] body #root#root > .app.app .ui-customize-panel .scp-header {
+  border-color: var(--ui-border-subtle);
+  box-shadow: none;
+}
+
+/* Analytical cards share the same flat semantic surface as cockpit frames.
+   Chart stages retain their own surface, clipping and fullscreen geometry. */
+:root[data-theme] body #root#root > .app.app :is(.ui-aisum, .ui-gex-card, .ui-pcr-card, .ui-straddle-card, .ui-iv-card, .ui-iv-panel, .ui-price-oi-panel, .ui-sp-detail):not([data-chart-stage-active] *):not(.tw-frame *):not(:fullscreen):not(:fullscreen *):not(.is-fullscreen):not(.is-fullscreen *) {
+  background-color: var(--surface) !important;
+  border-color: var(--ui-border-card) !important;
+  box-shadow: none !important;
+}
+/* Settings use their existing shared fill; elevation belongs to the overlay. */
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-card {
+  box-shadow: none;
+}

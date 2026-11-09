@@ -1,0 +1,19 @@
+/*
+ * Final selection-control authority.
+ *
+ * Selection uses neutral ink and surface tokens. Market meaning (Call/Put,
+ * positive/negative, risk, warnings) continues to use semantic colour.
+ *
+ * The `--ui-selection-*` :root blocks that used to live here were removed:
+ * nothing in src reads `var(--ui-selection-…)`, and both ui-theme.css and
+ * ui-colour-system.css redefine every one of those names later in the
+ * main.tsx import order. They were dead declarations carrying the only literal
+ * hex/rgba values in this sheet.
+ */
+
+/* Native fallbacks keep a neutral selection when a feature has not adopted UiInput.
+   Same token as ui-inputs.css so the two never drift apart again. */
+#root > .app input[type='checkbox'],
+#root > .app input[type='radio'] {
+  accent-color: var(--selection-ink);
+}

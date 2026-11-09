@@ -1,0 +1,22 @@
+/* The option chain while it loads: one quiet status line in the chain's
+   place (OptionChainLoadingState.tsx). No placeholder table, no shimmer
+   (owner, 10 Oct: no preloaded skeletons anywhere). */
+.option-chain-loading {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  padding: 24px 16px;
+}
+.option-chain-loading__line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+}
+.option-chain-loading__line strong { color: var(--text); font-weight: 600; }
+.option-chain-loading__line > span::before { content: '·'; margin-inline-end: 10px; color: var(--text-subtle, var(--text-muted)); }

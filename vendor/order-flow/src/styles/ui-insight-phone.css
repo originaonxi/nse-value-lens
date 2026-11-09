@@ -1,0 +1,107 @@
+/*
+ * THE INSIGHT CARD ON A PHONE — the desktop line, in two rows
+ * ===========================================================================
+ *
+ * Owner, 2026-09-25: the phone follows the desktop. On a desktop the closed
+ * insight card is one line: mark, name, verdict, then what moved (5m / 15m /
+ * Today — or the chain's and Open Interest's level chips), then
+ * "View insight". The card's container queries (ui-insight-cards.css) drop
+ * the movement below 900px and the "View insight" words below 560px, so a
+ * phone was left with "NIFTY + badge + a bare caret": the reading, with none
+ * of the evidence the desktop shows beside it.
+ *
+ * Here the same parts wrap instead of dropping:
+ *   row 1  mark · name · verdict        — who, and the read
+ *   row 2  movement or chips · View insight — what moved, and the way in
+ * The verdict never shares its row with the 102px button, because the
+ * longest verdicts ("Bullish indications", "Put net change leads") would be
+ * cut with an ellipsis beside it. Movement that is itself too long for its
+ * row (GEX's rupee figures, the chain's three chips) wraps inside itself;
+ * the button stays at the end of the last row.
+ *
+ * The long stamps and gists stay desktop-only: they are the card's context,
+ * and on a phone they are one tap away, in the open reading.
+ *
+ * `:has()` gates it: a card with nothing to put on row 2 (a page still
+ * loading) keeps the single closed row.
+ */
+/* A CARD query, not a viewport one: a tablet's card (769–900px) used to drop
+   the movement and the figure chips outright (ui-insight-cards.css, ≤900),
+   so a tablet showed no 5m / 15m / Today on any page. It wraps into the same
+   two rows as a phone instead — figures fold by device, they are not dropped. */
+@container (max-width: 900px) {
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(:is(.ui-insight-move, .chain-insight__head-chips)) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    row-gap: 8px !important;
+    column-gap: 8px !important;
+    padding-block: 10px !important;
+  }
+
+  /* The row break. A zero-height flex item a full line wide: everything
+     ordered before it is row 1, everything after it row 2. */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(:is(.ui-insight-move, .chain-insight__head-chips))::after {
+    content: '';
+    order: 5;
+    flex: 0 0 100%;
+    height: 0;
+  }
+
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(:is(.ui-insight-move, .chain-insight__head-chips))
+    :is(.ui-aisum__mark, .ui-aisum__name, .ui-aisum__verdict) {
+    order: 1 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* The desktop's full verdict ("Bullish indications"): row 1 has the room.
+     The two words are separate spans with no text node between them; the
+     desktop spaces them with the pill's flex `gap`, which the phone's block
+     pill does not have — so the space is the tail's own margin, or it reads
+     "BULLISHINDICATIONS". */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum .ui-aisum__head .chain-insight__verdict-tail {
+    display: inline !important;
+    margin-inline-start: .3em !important;
+  }
+
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head :is(.ui-insight-move, .chain-insight__head-chips) {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    order: 6 !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    row-gap: 4px !important;
+    margin: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(:is(.ui-insight-move, .chain-insight__head-chips)) .ui-aisum__end {
+    order: 7 !important;
+    align-self: flex-end !important;
+    margin-left: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* Figure chips AND the movement trio on one card: flow them left to right as
+     ONE run of figures ("ATM IV 16.08% · 5m +0.19 · 15m −0.05 · Today +6.34"),
+     wrapping where the card runs out, rather than two half-width boxes — the
+     trio squeezed into half a phone row stacked into a column of three. */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(.ui-insight-move):has(.chain-insight__head-chips)
+    :is(.ui-insight-move, .chain-insight__head-chips) {
+    display: contents !important;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head:has(.ui-insight-move):has(.chain-insight__head-chips)
+    :is(.chain-insight__chip, .ui-insight-move__cell, .ui-insight-move__label) {
+    order: 6 !important;
+  }
+
+  /* "View insight", in words, as on desktop — not a bare caret. */
+}

@@ -1,0 +1,207 @@
+/* Premium Dark Mode / Glassmorphism */
+
+
+/* Clean column backgrounds aligned with the app Options Trader — uniform theme background across columns */
+:root[data-theme='dark'] {
+  --chain-ce-itm-fill: var(--oc-itm-bg, var(--warm-400));
+  --chain-pe-itm-fill: var(--oc-itm-bg, var(--warm-400));
+  --chain-itm-fill: var(--oc-itm-bg, var(--warm-400));
+}
+
+:root[data-theme='light'] {
+  --chain-ce-itm-fill: var(--oc-itm-bg, var(--warm-500));
+  --chain-pe-itm-fill: var(--oc-itm-bg, var(--warm-500));
+  --chain-itm-fill: var(--oc-itm-bg, var(--warm-500));
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table .chain-row:is(.ce-itm, .pe-itm):not(.atm-row) {
+  background: none !important;
+}
+
+/* ATM Strike Row remains uniform with the rest of the table */
+.chain-row.atm-row {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table .chain-row.atm-row td {
+  border: 0 !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table .chain-row.atm-row td.strike-cell {
+  border-inline: 1px solid var(--oc-grid-line-strong) !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+}
+
+/* Max Pain Badge */
+.badge-max-pain {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-size: var(--chain-font-xs, 10px);
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+  background: color-mix(in srgb, var(--warm-400) 24%, transparent) !important;
+  color: var(--warm-300) !important;
+  border: 1px solid color-mix(in srgb, var(--warm-400) 45%, transparent) !important;
+  box-shadow: none !important;
+}
+:root[data-theme='light'] .badge-max-pain {
+  color: var(--warm-800) !important;
+}
+
+/* GEX Flip Badge */
+.badge-gex-flip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  font-size: var(--chain-font-xs, 10px);
+  font-weight: 700;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  background: color-mix(in srgb, var(--warm-400) 18%, transparent);
+  color: var(--warm-300);
+  border: 1px solid color-mix(in srgb, var(--warm-400) 45%, transparent);
+}
+
+/* All added badges and labels in uppercase matching the app web */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  :is(
+    .strike-header-label,
+    .badge-max-pain,
+    .badge-atm,
+    .badge-gex-flip,
+    .oc-wing-label
+  ) {
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Strike-axis type hierarchy. Regular strikes and live spot are easier to
+   scan, while OI-defined support/resistance receive one additional pixel—the
+   restrained word-cloud effect requested for important market levels. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table th.th-strike {
+    font-size: var(--chain-font-cell, 12px) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .strike-val-lbl {
+    font-family: var(--font-num, var(--font-sans)) !important;
+    font-variant-numeric: tabular-nums !important;
+    font-size: var(--chain-font-lg, 14px) !important;
+    font-weight: 600 !important;
+    letter-spacing: -.006em !important;
+    line-height: 1.2 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row:is(.oi-support-strike, .oi-resistance-strike)
+    .strike-val-lbl {
+    font-size: 15px !important;
+  }
+
+/* Live market level: a continuation of the Strike spine, not a floating
+   white notification. This file loads after the density passes and therefore
+   owns the final spot-marker silhouette in both themes. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider::before {
+  background: color-mix(in srgb, var(--text) 18%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-center {
+  box-sizing: border-box !important;
+  width: calc(176px * var(--chain-scale, 1)) !important;
+  min-width: calc(176px * var(--chain-scale, 1)) !important;
+  max-width: calc(176px * var(--chain-scale, 1)) !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 0 9px 0 7px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 5px !important;
+  background: var(--surface-high) !important;
+  color: var(--text) !important;
+  box-shadow: 0 2px 7px color-mix(in srgb, #0F0F0F 20%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-center::before {
+  display: none !important;
+}
+
+:root:not([data-theme='light']) body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-center {
+  border-color: rgba(0, 0, 0, .14) !important;
+  background: var(--capital-white) !important;
+  color: var(--capital-black) !important;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, .45) !important;
+}
+
+:root:not([data-theme='light']) body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-price {
+  color: var(--capital-black) !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-center {
+  border-color: rgba(26, 26, 26, .20) !important;
+  background: var(--capital-white) !important;
+  color: var(--capital-black) !important;
+  box-shadow: 0 2px 7px rgba(26, 26, 26, .14) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-label {
+  display: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-price {
+  padding: 0 !important;
+  border: 0 !important;
+  color: var(--capital-black) !important;
+  font-family: var(--font-num, var(--font-sans)) !important;
+  font-variant-numeric: tabular-nums !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-level-cluster--spot-only :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  padding: 0 !important;
+  border: 0 !important;
+  font-family: var(--font-num, var(--font-sans)) !important;
+  font-variant-numeric: tabular-nums !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* ── Synthetic forward, beside the spot it is not the same as ──────────────
+   The chain's IV and Greeks are solved against the forward; the divider prints
+   spot. Naming the forward on the same bar is what keeps the two reconcilable
+   — the unlabelled version of this is register defect D-1. The reference desk shows its
+   own as "Synth Fut Price"; this is the compact form of the same disclosure.
+
+   Colour is `inherit` on purpose: the divider's ink already adapts to theme and
+   to the up/down tone, so borrowing it introduces no new value to keep in step
+   and cannot drift from the price it sits next to. */
+
+
+/* The divider collapses to the price alone on a narrow chain; the forward is
+   context, not a headline, so it is the first thing to go rather than wrapping
+   the cluster onto a second line. */
+

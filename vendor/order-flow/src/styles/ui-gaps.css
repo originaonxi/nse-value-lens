@@ -1,0 +1,60 @@
+/*
+ * the app known-gaps authority
+ * --------------------------------------------------------------------------
+ * Source: ui-theme-docs/gaps.html, sections 7.2, 7.3, 7.6 and 7.8.
+ * This final layer resolves library omissions without changing the dashboard's
+ * established type sizes, card dimensions, table density or route geometry.
+ */
+
+:root {
+  --ui-status-surface: var(--capital-spring-wood);
+  --ui-status-text: var(--capital-black);
+  --ui-toast-surface: var(--text);
+  --ui-toast-text: var(--bg);
+  --ui-level-support: var(--success-600);
+  --ui-level-resistance: var(--error-600);
+  --ui-level-maxpain-surface: var(--warm-100);
+  --ui-level-maxpain-text: var(--capital-black);
+  --ui-level-atm-surface: var(--capital-black);
+  --ui-level-atm-text: var(--capital-white);
+}
+
+:root[data-theme='dark'] {
+  --ui-level-support: var(--success-500);
+  --ui-level-resistance: var(--error-400);
+}
+
+
+
+
+
+
+
+
+
+/* Reusable semantic pills plus the option-chain's existing market markers. */
+
+
+
+
+/* Shared toast/snackbar contract. The inverse surface remains visible in both
+   themes and respects the reference three-second component behavior. */
+
+
+
+
+/* The reference allows purple fills only for small selected controls. Dark
+   focus boundaries use the accessible theme accent instead of Capital Purple. */
+
+
+
+
+/* ============================================================================
+   COMPONENT — Select (spec 3.7 adapted for Dashboard density)
+   ========================================================================= */
+.select { position: relative; min-width: 180px; }
+
+/* ============================================================================
+   COMPONENT — Spinner (spec 3.4)
+   ========================================================================= */
+

@@ -1,0 +1,752 @@
+/* Strike decision studio -------------------------------------------------
+   Final-authority layout for the selected payoff-first contract workspace.
+   It is intentionally scoped to the option-chain detail sheet. */
+
+/* The studio tokens are published on the sheet,
+   not on `.strike-detail-studio` inside it. The sheet chrome further down
+   paints its background, border and modal shadow from `--studio-surface`,
+   `--studio-border` and `--studio-accent`, and while those were declared one
+   level lower they did not exist on the sheet: each declaration was invalid at
+   computed-value time, so the sheet painted no surface (the page showed
+   through its padding ring and behind the grab handle), no border and no
+   shadow. The studio inherits them from here unchanged. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet) {
+  --studio-surface: var(--surface);
+  --studio-surface-raised: var(--surface-raised, var(--surface2));
+  --studio-surface-soft: color-mix(in srgb, var(--surface-raised, var(--surface2)) 42%, transparent);
+  --studio-border: var(--line);
+  --studio-border-soft: color-mix(in srgb, var(--line) 30%, transparent);
+  --studio-muted: var(--text-subtle, var(--text2));
+  --studio-positive: var(--ui-positive-strong, var(--up));
+  --studio-negative: var(--ui-negative-strong, var(--down));
+  --studio-accent: var(--capital-purple);
+  /* Fill vs ink (contract §1.1). The three above are FILLS — rules, dots,
+     tints. Type takes these: `--up` is 2.9:1 on the light surface, and
+     capital purple mixed into dark ink measured under 3:1 on the dark one. */
+  --studio-positive-ink: var(--up-ink, var(--studio-positive));
+  --studio-negative-ink: var(--down-ink, var(--studio-negative));
+  --studio-accent-ink: var(--accent-text, var(--studio-accent));
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--studio-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--studio-surface) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keep the compact chain-view label available to assistive technology without
+   letting it consume scarce header space at tablet/compact desktop widths. */
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-contract {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio :is(.detail-index, .detail-expiry-chip, .detail-dte-tag, .detail-strike-side-chip) {
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 9px !important;
+  white-space: nowrap !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-index {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.01em !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio :is(.detail-expiry-chip, .detail-dte-tag) {
+  padding: 0 9px !important;
+  border: 1px solid var(--studio-border-soft) !important;
+  background: var(--studio-surface-soft) !important;
+  color: var(--ink-2) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .025em !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-strike-side-chip {
+  gap: 7px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--studio-border) !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+/* Leg identity is calls red, puts green (contract §4.4) — the same pairing the
+   chain's own Call Options / Put Options headers carry one tap behind this
+   sheet. Ink and a hairline, the way the chain prints them; the filled, tinted
+   capsule this used to be was a second design language for the same fact. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-strike-side-chip.ce-tag {
+  border-color: color-mix(in srgb, var(--studio-negative) 34%, var(--studio-border)) !important;
+  color: var(--studio-negative-ink) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-strike-side-chip b {
+  font-size: 11px;
+  font-weight: 700 !important;
+  letter-spacing: .055em !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-strike-side-chip.pe-tag {
+  border-color: color-mix(in srgb, var(--studio-positive) 34%, var(--studio-border)) !important;
+  color: var(--studio-positive-ink) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp {
+  min-width: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-left: 6px;
+  padding-left: 13px;
+  border-left: 1px solid var(--studio-border-soft);
+  white-space: nowrap;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp small {
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp strong {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700 !important;
+  letter-spacing: -.012em !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp > span {
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp > span.up {
+  color: var(--studio-positive-ink);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-studio-ltp > span.down {
+  color: var(--studio-negative-ink);
+}
+
+/* `.detail-header-actions` is laid out by ui-strike-studio-authority.css,
+   which also has to make it a full-width row on a phone. Its `flex: 0 0 auto`
+   lived here at a specificity that sheet cannot reach, so the direction
+   capsule stayed hugged to "Short P…" at 390px. */
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-close {
+  min-height: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  font-family: var(--font-sans);
+  cursor: pointer !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-close {
+  width: 32px !important;
+  min-width: 32px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--ink-2) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-disclosure-trigger {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--studio-accent-ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700 !important;
+  cursor: pointer;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-disclosure-trigger svg {
+  transition: transform var(--dur-quick, 180ms) var(--ease-ios-out, ease);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-disclosure-trigger[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-disclosure-panel {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 0 10px 10px;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group {
+  padding: 8px 9px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 9px;
+  background: var(--studio-surface-soft);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group h4 {
+  /* Contract §3 section eyebrow: 10 / 700 / .06em caps on the subtle ink. */
+  margin: 0 0 6px;
+  color: var(--studio-muted);
+  font-size: var(--text-meta, 11px);
+  font-weight: 700 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group .detail-stat {
+  min-height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 2px 0 !important;
+  border-bottom: 1px dashed var(--studio-border-soft) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group .detail-stat:last-child {
+  border-bottom: 0 !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group :is(.stat-label, .stat-value) {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+/* Label as meta (11 / 500, subtle), figure as a tabular value (12 / 600) — the
+   label/value pair used to be one 11/700 weight, so nothing told the eye which
+   half of each row was the number. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group .stat-label {
+  color: var(--studio-muted) !important;
+  font-weight: 500 !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-compact-data-group .stat-value {
+  color: var(--ink) !important;
+  font-family: var(--font-num, var(--font-sans));
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-control-cluster--greeks {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 700 !important;
+  letter-spacing: .055em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-control-label small {
+  color: var(--studio-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend span::before {
+  width: 6px;
+  height: 6px;
+  content: '';
+  border-radius: 999px;
+  background: var(--studio-positive);
+}
+
+/* Each series owns its own mark. The legend used to print a literal "●" glyph
+   AND draw this pseudo-element, so every entry rendered two dots; and
+   `.volume` matched nothing because the spans carried no class at all. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend .oi::before {
+  background: var(--studio-accent);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend .volume::before {
+  opacity: .38;
+}
+
+/* The chart paints a CALL's premium and volume in the down fill (calls red,
+   puts green — OptionIntradayLightweightChart), so the key has to follow the
+   side too; it was green for both, contradicting a red call series. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-intraday-legend.is-call :is(.premium, .volume)::before {
+  background: var(--studio-negative);
+}
+
+/* Ticker left, session provenance right; wraps to stacked lines on a phone,
+   where the Open Interest key joins it as a third line. Same anatomy as the
+   PCR/Straddle readout (analysis-chart.css): hairline under a quiet band. */
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-disclosure-trigger[aria-expanded='true'] {
+  border-top: 1px solid var(--studio-border-soft);
+  background: color-mix(in srgb, var(--studio-accent) 6%, transparent);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-plot-card {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-plot-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-plot-head {
+  min-height: 36px !important;
+  padding: 8px 12px 6px !important;
+  border-bottom: 1px solid var(--studio-border-soft) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-chart-legends,
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-direction-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-direction-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--studio-muted);
+  font-size: var(--text-meta, 11px);
+  font-weight: 700;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-direction-legend span::before {
+  width: 14px;
+  height: 2px;
+  content: '';
+  border-radius: 999px;
+  background: var(--studio-positive);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-direction-legend .loss::before {
+  background: var(--studio-negative);
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-plot-foot {
+  min-height: 28px !important;
+  padding: 5px 12px 6px !important;
+  border-top: 1px solid var(--studio-border-soft) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-canvas-shell {
+  min-height: 0 !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-hover-card {
+  max-width: min(160px, calc(100% - 16px));
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-chart-empty {
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-content: center !important;
+  gap: 5px !important;
+  padding: 24px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--studio-muted) !important;
+  text-align: center !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-chart-empty strong {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-chart-empty span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* The scrim and the dialog frame moved to ui-strike-studio-authority.css,
+   which loads after every other sheet that reaches this portaled surface. The
+   72% blackout, the 860px height cap and the accent ring around the shadow all
+   lived here; the first hid the chain behind its own dialog, the second clipped
+   the dialog's own footer, and the third was a glow. */
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-sheet-grip {
+  display: none;
+}
+
+/* The `:is(#root …)` prefix is load-bearing: the studio's base rule carries it,
+   so at (0,4,0) this `border: 0 !important` lost to that rule's (1,5,0)
+   `border … !important` and never applied. Unnoticed while the sheet itself
+   painted nothing; once the sheet has its own surface and border, the studio's
+   leftover frame drew a second box 10px inside the first. */
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  .strike-detail-bottom-sheet .strike-detail-studio {
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: var(--studio-surface) !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-header {
+  position: sticky !important;
+  top: -8px;
+  z-index: 12;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet:focus {
+  outline: none;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .detail-greek-status {
+  color: var(--studio-muted);
+  font-size: var(--text-meta, 11px);
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card {
+  min-height: 72px;
+  padding: 10px 12px;
+  border-color: var(--studio-border) !important;
+  border-radius: 10px;
+  background: var(--studio-surface-raised) !important;
+  box-shadow: none !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card span {
+  /* Contract §3 metric label — the same step the metric strip below uses. */
+  color: var(--studio-muted) !important;
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card strong {
+  color: var(--ink) !important;
+  font-family: var(--font-num, var(--font-sans));
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.015em;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card small {
+  /* Contract §3 caption: 10 / 400-500 on the subtle ink, tabular figures. */
+  color: var(--studio-muted) !important;
+  font-size: var(--text-meta, 11px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card--profit {
+  border-color: color-mix(in srgb, var(--studio-positive) 26%, var(--studio-border)) !important;
+  background: color-mix(in srgb, var(--studio-positive) 6%, var(--studio-surface-raised)) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card--loss,
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card.down {
+  border-color: color-mix(in srgb, var(--studio-negative) 24%, var(--studio-border)) !important;
+  background: color-mix(in srgb, var(--studio-negative) 5%, var(--studio-surface-raised)) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card--profit strong,
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card.up strong {
+  color: var(--studio-positive-ink) !important;
+}
+
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card--loss strong,
+:is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+  :is(.strike-detail-bottom-sheet)
+  .strike-detail-studio .payoff-summary-card.down strong {
+  color: var(--studio-negative-ink) !important;
+}
+
+/* The lightweight chart must not swallow the sheet's vertical scroll. */
+
+/* Coarse pointers: keep the painted chrome slim, expand the hit box. The greek
+   strip scrolls horizontally, so the target is grown INWARD (min-height on the
+   button) rather than with an outward pseudo-element, which that scroller
+   would clip. */
+@media (pointer: coarse) {
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-close {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+/* Phone: a full-screen sheet, not a centred dialog with 40px gutters -----
+   The `[data-workspace='chain']` block above turned this surface into a
+   desktop dialog at EVERY width: at 360px the sheet was 280px wide, floated in
+   the middle of the screen, and its grab handle was `display: none`. Contract
+   §7 makes 768px the mobile boundary; below it this is a bottom sheet again. */
+@media (max-width: 768px) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'] {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    /* dvh, never vh — the mobile URL bar makes vh lie. */
+    max-height: 92dvh;
+    padding: 10px 10px max(12px, env(safe-area-inset-bottom));
+    /* Top-only radius: the sheet is flush with the bottom edge. */
+    border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+    border-bottom: 0;
+    /* The sheet BODY scrolls; the page behind it must not. */
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* One grab handle, 38px on --line-strong, like every other sheet. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-sheet-grip {
+    display: block;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-header {
+    top: -10px;
+  }
+
+  /* `overflow: hidden` on the studio would make the sticky footer stick to a
+     box that never scrolls — i.e. not stick at all. */
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio {
+    overflow: visible !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-studio-contract {
+    flex-wrap: wrap !important;
+    row-gap: 6px !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-studio-ltp {
+    flex: 1 0 100%;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-control-cluster--greeks {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-compact-data-group {
+    box-sizing: border-box;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    :is(.strike-detail-bottom-sheet)
+    .strike-detail-studio .detail-disclosure-trigger svg {
+    transition: none;
+  }
+}
+
+/* The intraday chart's own chrome used to live here — `.intraday-readout`,
+   `.intraday-ticker*`, `.intraday-oi-key*`, `.intraday-lightweight-*`. That
+   chart was the lightweight-charts plane in the strike dialog; it is the the app
+   plane now (UiStrikeChart.tsx, ui-strike-chart.css), which carries its
+   own readout over the plot. The rules went with the markup rather than being
+   left as selectors that match nothing. */

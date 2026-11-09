@@ -1,0 +1,23 @@
+/* Table-header expiry selector ------------------------------------------------
+ * A dedicated overlay contract prevents legacy navbar expiry rules from
+ * turning the table switcher into a dense grid.
+ */
+.app[data-active-tab='chain'] .strike-header-controls {
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.app[data-active-tab='chain'] .strike-header-controls .strike-header-button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app[data-active-tab='chain'] .th-strike {
+  min-width: 112px !important;
+  width: 112px !important;
+  padding-inline: 4px !important;
+}

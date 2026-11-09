@@ -1,0 +1,206 @@
+/* THE FINISH PASS (owner, 10 Oct 2026: "cleanliness and the finish, the
+   borders … one of the finest for all the tools"). No new colour: every value
+   below is a token the app already has. Measured across all eleven tools
+   before this sheet: outer edges in four greys, eleven corner radii, type at
+   10.5 / 11.5 / 12.5px and a 650 weight. Loaded last (main.tsx).
+
+   EDGES   every outer edge is the card edge, --hairline (owner, 10 Oct: the
+           containers' borders must be plainly visible; --ui-border-card was
+           12% white in the dark theme and all but vanished on the page).
+   CORNERS boxes 12px · blocks inside a box 8px · small marks and logos 6px ·
+           controls stay capsules · chart bars keep their 2px.
+   TYPE    whole pixels only; weights 400 / 500 / 600 / 700. */
+
+/* EDGES ------------------------------------------------------------------ */
+:root[data-theme] body #root#root > .app.app :is(
+  .ui-site-header, .tp-card, .tp-discovery, .ui-sp-empty, .ui-hm-state-wrap, .ui-oi-blankwrap, .ui-iv-plot,
+  /* Every tool's own box: the Open Interest family's cards (OI, PCR,
+     Straddle, IV, GEX, Heatmap), the Spurts plane, the Strategy Builder's
+     cards and the Scanner's table. Only the colour: a box that draws no
+     border keeps none. */
+  .ui-oi-card, .ui-sp-plane, .sb-card, .os-ct-scroll
+) {
+  border-color: var(--hairline) !important;
+}
+/* The chain box draws its edge from one variable (ui-chain-selection-header.css),
+   which its pinned header row also reads for the top line. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  --chain-box-edge: var(--hairline);
+  /* Seven older sheets each set this box's border colour and the winner did
+     not read the variable, so the sides drew at 12% ink. Set from it here,
+     last; the top edge stays drawn by the pinned header row. */
+  border-color: var(--chain-box-edge) !important;
+}
+
+/* CORNERS ---------------------------------------------------------------- */
+:root[data-theme] body #root#root > .app.app .tp-card {
+  border-radius: var(--radius-card, 12px) !important;
+}
+:root[data-theme] body #root#root > .app.app :is(
+  .ui-bucell, .sb-strike-step, .sb-flip, .sb-lots, .sb-leg-entry, .sb-toolbar, .sb-hb-tile, .tp-thumb
+) {
+  border-radius: 8px !important;
+}
+:root[data-theme] body #root#root > .app.app .sb-page input:not([type='checkbox']):not([type='radio']):not([type='range']) {
+  border-radius: 8px !important;
+}
+:root[data-theme] body #root#root > .app.app :is(.ui-symbol-mark, .ui-aisum__mark) {
+  border-radius: 6px !important;
+}
+
+/* TYPE ------------------------------------------------------------------- */
+:root[data-theme] body #root#root > .app.app .ui-pane-head__val {
+  font-size: 13px !important;
+}
+:root[data-theme] body #root#root > .app.app :is(.ui-pane-head__ctx, .os-ct-asof) {
+  font-size: 12px !important;
+}
+:root[data-theme] body #root#root > .app.app .sb-page :is(.st-sigma, .sb-step-label) {
+  font-size: 11px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-insight-move__v {
+  font-weight: 600 !important;
+}
+:root[data-theme] body #root#root > .app.app .st-strip-cell > span {
+  font-size: 11px !important;
+}
+:root[data-theme] body #root#root > .app.app .os-ct-head__status span {
+  font-size: 12px !important;
+}
+
+/* The stale-baseline note: one quiet line above the chain, on its gutter. */
+:root[data-theme] body #root#root > .app.app .ui-baseline-note {
+  margin: 0 var(--tool-gutter, 12px) 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* NOTHING CUT OFF ON A PHONE: three labels were ending in "…" at 375px. Each
+   wraps to a second line instead (a Build plate already does on desktop). */
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app .ui-bucell__name {
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    line-height: 1.15 !important;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-oi-axiscap {
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+  /* State cards (no data, error) are not the one-line capsule: their title wraps. */
+  :root[data-theme] body #root#root > .app.app .ui-aisum:not(.is-min) .ui-aisum__name {
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+}
+
+/* THE CHAIN'S HEADER ROWS take the Strike column's colour (owner, 10 Oct): it
+   had a shade no other surface used, and the Call/Put cells carried a red and
+   a teal tint on top. One header colour, the Strike's, across the whole band. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] {
+  --table-head-surface: var(--oc-grid-strike);
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead th:is(.chain-side-nav-ce, .chain-side-nav-pe, .chain-side-nav-group, .chain-side-expiry-th) {
+  background: var(--table-head-surface) !important;
+}
+/* The expiry cell is part of that band, not a white patch in it (owner, 10
+   Oct: "the background and the expiry structure need to be a perfect match").
+   The pill is drawn by its outline alone, so the band's colour runs through
+   it the way it runs behind Call and Put. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger {
+  background: transparent !important;
+  border-color: var(--line-strong) !important;
+}
+
+/* SCROLLBARS are thin (owner, 10 Oct: the chain's right-hand bar was 12px).
+   A thin thumb in the line colour on a clear track, in both directions. */
+:root[data-theme] body #root#root > .app.app :is(.chain-table-container, .dashboard-body) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* CUSTOMISE in the chain's measure (owner, 10 Oct: "follow the font size …
+   according to the font we used in our option chain … perfect and compact").
+   The chain's ladder: 13px for the heading (the Strike's size), 12px for
+   labels and values (a cell), 11px for notes (a column head). Controls come
+   down from 44-52px to the chain's own phone controls: 40px switches with
+   34px options, 36px steppers, a 32px Reset; 16px between sections. One shell
+   (.ui-customize-panel) serves every tool's Customise, so all of them take it. */
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-head {
+  min-height: 48px !important;
+  padding-block: 6px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-title {
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 600 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-head button {
+  height: 32px !important;
+  min-height: 32px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-head .ui-btn-label {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 500 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .scp-body {
+  gap: 16px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-section {
+  gap: 6px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-section-title {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel :is(.cz-section-meta, .cz-group-title) {
+  font-size: var(--chain-font-sm, 11px) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel :is(.cz-choice-label, .cz-stepper-row__label, .cz-col-name, label) {
+  font-size: var(--chain-font-cell, 12px) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-card {
+  border-radius: var(--radius-card, 12px) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-capsule {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 3px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-capsule :is([role='radio'], button) {
+  min-height: 34px !important;
+  height: 34px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-capsule__label {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 500 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-capsule [aria-checked='true'] .ui-capsule__label {
+  font-weight: 600 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper {
+  min-height: 36px !important;
+  height: 36px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper button {
+  min-height: 34px !important;
+  height: 34px !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .ui-stepper__value {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+}
+
+/* THE PAGE INDICATOR under the Strike (chain and heatmap) glides to its new
+   place as the columns pan, so it reads as movement: how far the reader has
+   moved and how much is left. Motion tokens, so reduced motion collapses it. */
+:root[data-theme] body #root#root .app.app :is(.chain-lane-progress, .ui-hm-split__progress) > i,
+:root[data-theme] body #root#root .app.app :is(.chain-lane-dots, .ui-hm-split__dots) > i {
+  transition:
+    left var(--dur-quick, 180ms) var(--ease-ios-out, ease-out),
+    width var(--dur-quick, 180ms) var(--ease-ios-out, ease-out),
+    background-color var(--dur-quick, 180ms) var(--ease-ios-out, ease-out);
+}

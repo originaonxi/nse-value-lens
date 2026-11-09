@@ -1,0 +1,534 @@
+/*
+ * Global index market lane
+ *
+ * This file loads last because the header has several older layout authorities.
+ * It keeps every one-minute index link in the DOM and uses horizontal scrolling
+ * at constrained widths instead of hiding market pages from users or crawlers.
+ */
+
+.ui-static-index-header .ui-index-market-strip {
+  box-sizing: border-box;
+  min-width: 0;
+  height: var(--nav-capsule-h, 36px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+/* The one horizontally panned surface in this feature. `touch-action` and
+   `overscroll-behavior-x` have to be on it at EVERY width, not only under a
+   mobile query: without them the browser burns the opening frames of each
+   swipe deciding whether the gesture belongs to the strip or the page, and
+   that hesitation is what reads as heaviness. Never `scroll-behavior: smooth`
+   here — a call site that wants an animated jump passes it in JS. */
+.ui-index-market-strip__links {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.ui-index-market-strip__links::-webkit-scrollbar {
+  display: none;
+}
+
+/* Snapping so the pan always comes to rest on a cell boundary: a reading that
+   is half off the edge is a partial reading, and this strip never shows one. */
+.ui-index-market-strip__links > .ui-index-market-link {
+  scroll-snap-align: start;
+}
+
+.ui-index-market-strip__links {
+  scroll-snap-type: x proximity;
+}
+
+/* The scrollbar is hidden, so the fade is the only thing that can say there is
+   another index behind the edge — and in the More sheet at 360 there is. The
+   attribute is written by a ResizeObserver in IndexMarketStrip.tsx against
+   this element's own box, so it appears wherever the row genuinely overflows
+   and nowhere else. No viewport query is involved, and nothing is hidden:
+   every index keeps its name and complete price. */
+.ui-index-market-strip[data-overflow='end'] .ui-index-market-strip__links {
+  -webkit-mask-image: linear-gradient(to right, #0F0F0F calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, #0F0F0F calc(100% - 24px), transparent);
+}
+
+.ui-index-market-strip[data-overflow='start'] .ui-index-market-strip__links {
+  -webkit-mask-image: linear-gradient(to right, transparent, #0F0F0F 24px);
+  mask-image: linear-gradient(to right, transparent, #0F0F0F 24px);
+}
+
+.ui-index-market-strip[data-overflow='both'] .ui-index-market-strip__links {
+  -webkit-mask-image: linear-gradient(to right, transparent, #0F0F0F 24px, #0F0F0F calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, transparent, #0F0F0F 24px, #0F0F0F calc(100% - 24px), transparent);
+}
+
+.ui-index-market-link {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-height: var(--nav-capsule-h, 36px);
+  height: var(--nav-capsule-h, 36px);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 6px);
+  background: transparent;
+  color: var(--text-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  /* Named properties, not `all` — `all` puts every future declaration on a
+     timer, including the grid template that changes at each container rung.
+     Easing comes from the motion authority; this file must not restate a
+     curve of its own. */
+  transition:
+    background-color var(--dur-tap, 120ms) var(--ease-ios-out),
+    border-color var(--dur-tap, 120ms) var(--ease-ios-out),
+    color var(--dur-tap, 120ms) var(--ease-ios-out),
+    box-shadow var(--dur-tap, 120ms) var(--ease-ios-out);
+  font-family: var(--font-sans);
+}
+
+/* ONE READING, ONE BASELINE: name, level, move (in points). The same set the
+   current instrument's chip prints, so the three indices read as one kind of
+   thing. Auto-flow columns rather than a fixed template, so a part that a
+   density rung folds away (display: none) takes its track with it instead of
+   leaving an empty column. `align-content` centres the single row in the
+   36px cell; `align-items: baseline` keeps the 11px move on the price's
+   baseline. */
+.ui-index-market-strip__links > .ui-index-market-link {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  justify-content: start;
+  align-items: baseline;
+  align-content: center;
+  column-gap: 8px;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+/* 12px of margin with the tick drawn at -6px puts the hairline exactly on the
+   centre line between two cells. 11/-6 left it one pixel proud of centre, and
+   that asymmetry is visible when five of them repeat across the bar. */
+.ui-index-market-strip__links > .ui-index-market-link:not(:first-child) {
+  position: relative;
+  margin-left: 12px;
+}
+
+.ui-index-market-strip__links > .ui-index-market-link:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+  transform: translateY(-50%);
+}
+
+/* Name muted, price ink: the price is the live thing, and the name is the
+   label that says which price. --text-secondary is theme-aware at :root, so
+   the dark override this rule used to carry was a duplicate of itself. */
+.ui-index-market-strip__links > .ui-index-market-link .ui-index-market-link__symbol {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-index-market-strip__links > .ui-index-market-link .ui-index-market-link__price,
+.ui-index-market-strip__links > .ui-index-market-link .ui-index-market-link__change {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Current index chip lives in .header-left, ahead of the strip — same chip
+   look as BankNifty/Sensex, just named "you are here" with a touch more
+   weight, the way an active tab reads heavier than its neighbours. */
+.ui-index-market-link.is-current {
+  flex: 0 0 auto;
+}
+
+.ui-index-market-link.is-current .ui-index-market-link__symbol {
+  font-weight: 700;
+}
+
+/* Search/switch trigger — leads the row, ahead of Nifty | BankNifty | Sensex,
+   same pipe treatment, icon-only so it reads as one more stop on the same
+   chip row rather than a different kind of control. */
+
+@media (hover: hover) {
+  .ui-index-market-link:hover {
+    background: var(--surface-hover, var(--hover-wash));
+    border-color: var(--line-strong);
+    color: var(--text-primary);
+  }
+}
+
+.ui-index-market-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ui-index-market-link.is-active {
+  border-color: var(--selection-line);
+}
+
+/* line-height 1 clips the descender on any lowercase name the prerenderer
+   passes through and leaves the three cells optically high in a 36px row;
+   1.2 is the dense-row floor from the contract and centres cleanly. */
+.ui-index-market-link__symbol {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.ui-index-market-link__price {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* No wash behind the change. The figure already carries a sign and a tone,
+   which are two readings; a tinted block behind it is a third, and it turns a
+   fact into a badge. A track around a set that is already divided by hairlines
+   is a second frame inside a bar that is already a frame.
+
+   THE WHOLE MOVE: points, then the percentage in brackets — two spans with a
+   GAP between them, never a typed space (a flex item's leading whitespace is
+   trimmed, and the percentage has to be able to stand alone). Where a bar is
+   short, its own sheet folds the parts in a fixed order: the point move and
+   the brackets first ("−0.43%"), then the move itself, leaving name and a
+   direction-coloured level. The top bar decides by its width
+   (ui-index-market-strip-theme.css); every link's spoken name keeps the
+   whole reading. */
+.ui-index-market-link__change {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color var(--dur-tap, 120ms) var(--ease-ios-in-out);
+}
+
+
+/* --up / --down are the FILL greens and reds. As 11px text on the light
+   theme's card --up (#08955A) is only 2.7:1 — the palette documents this and
+   provides --up-ink / --down-ink as the text steps. They resolve in both
+   themes (dark aliases them straight back to --up / --down), so the dark
+   overrides below stay unchanged. Dropping the wash behind these figures made
+   the ink steps more necessary, not less: there is no tint left to sit on. */
+.ui-index-market-link.is-positive .ui-index-market-link__change {
+  color: var(--up-ink);
+}
+
+.ui-index-market-link.is-negative .ui-index-market-link__change {
+  color: var(--down-ink);
+}
+
+.ui-index-market-link.is-neutral .ui-index-market-link__change {
+  color: var(--text-muted);
+}
+
+/* The three dark overrides that used to sit here restated --up / --down for
+   the direction figures. ui-colour-system.css already aliases --up-ink back
+   to --up on dark (only light needs the separate AA ink step), so they were
+   three duplicate rules producing the identical colour. */
+
+/* --warning is not a token in this repo: this read `var(--warning, #C5AA84)`,
+   so a stale price was always painted by the literal, in both themes.
+   --attentive is the amber the contract names for uncertainty. */
+.ui-index-market-link.is-stale .ui-index-market-link__price {
+  color: var(--attentive);
+}
+
+.ui-index-market-strip__cadence {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 8px;
+  display: inline-grid;
+  grid-template-columns: 6px minmax(0, auto) auto 24px;
+  grid-template-areas:
+    "pulse copy link dismiss"
+    "pulse context link dismiss";
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 1px;
+  border-left: 1px solid var(--line);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+.ui-index-market-strip__cadence-copy {
+  grid-area: copy;
+}
+
+/* --text-faint is not published anywhere in this repo, so this was always
+   resolving to the --text3 fallback; naming --text-subtle says so. */
+.ui-index-market-strip__cadence-context {
+  grid-area: context;
+  color: var(--text-subtle);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.ui-index-market-strip__cadence-link {
+  grid-area: link;
+  margin-left: 2px;
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+  color: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .ui-index-market-strip__cadence-link:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+.ui-index-market-strip__cadence-link:focus-visible {
+  border-radius: var(--radius-xs, 4px);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ui-index-market-strip__cadence-dismiss {
+  position: relative;
+  grid-area: dismiss;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs, 4px);
+  background: var(--surface-card, var(--surface-raised));
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-tap, 120ms) var(--ease-ios-out),
+    color var(--dur-tap, 120ms) var(--ease-ios-out),
+    border-color var(--dur-tap, 120ms) var(--ease-ios-out);
+}
+
+/* The dismiss chip is 24px because the cadence bar it lives in is 30px tall;
+   growing the button would grow the bar and the header offset that is pinned
+   to it. The hit area grows instead — 36px of pointer target around a 24px
+   mark, which is the touch floor without a single pixel of layout change. */
+.ui-index-market-strip__cadence-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+@media (hover: hover) {
+  .ui-index-market-strip__cadence-dismiss:hover {
+    border-color: var(--line-strong);
+    background: var(--hover-wash);
+    color: var(--text-primary);
+  }
+}
+
+.ui-index-market-strip__cadence-dismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ui-index-market-strip__pulse {
+  grid-area: pulse;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: none;
+}
+
+.ui-index-market-strip__cadence.is-fresh .ui-index-market-strip__pulse {
+  background: var(--up);
+  animation: ui-cadence-pulse 1.6s var(--ease-ios-in-out) infinite;
+}
+
+@keyframes ui-cadence-pulse {
+  0%,
+100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-index-market-strip__cadence.is-fresh .ui-index-market-strip__pulse {
+    animation: none;
+  }
+}
+
+/* ── THE TICKER ───────────────────────────────────────────────────────────
+ *
+ * The phone's top bar runs the tape as a ticker (owner, 25 Sep): the row
+ * slides left on a loop and holds still under a finger. IndexMarketStrip.tsx
+ * draws two identical runs inside one track; the track moves by exactly one
+ * run per loop (−50%), so the second run lands where the first began and
+ * there is no seam and no jump. A run is the set of readings repeated until
+ * it covers the tape, and every set carries half the gap on each side, so the
+ * spacing across the seam and between sets is the gap between two readings.
+ * The loop's duration is measured in the component (speed over width, whole
+ * seconds) and arrives as --ui-ticker-duration.
+ *
+ * STILL, WHEN IT SHOULD BE:
+ *   a finger on it          .is-held, set on pointerdown, cleared 1.5s after
+ *                           the finger lifts — read the level, or tap it;
+ *   keyboard focus in it    back to rest, so the focused link is where the
+ *                           eye expects it (never on a tap: a tap's focus is
+ *                           not :focus-visible, and moving the row between
+ *                           pointerdown and click would lose the click);
+ *
+ * `touch-action: pan-y`: the page still scrolls vertically through it, and a
+ * sideways drag is not a pan of a row that is moving by itself. */
+.ui-index-market-strip.is-ticker .ui-index-market-strip__links {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  scroll-snap-type: none;
+  touch-action: pan-y;
+  -webkit-mask-image: linear-gradient(to right, transparent, #0F0F0F 16px, #0F0F0F calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, transparent, #0F0F0F 16px, #0F0F0F calc(100% - 16px), transparent);
+}
+
+.ui-index-market-strip__track {
+  display: flex;
+  flex: none;
+  width: max-content;
+  height: 100%;
+  animation: ui-index-ticker var(--ui-ticker-duration, 14s) linear infinite;
+}
+
+.ui-index-market-strip__run {
+  display: flex;
+  flex: none;
+  height: 100%;
+}
+
+.ui-index-market-strip__set {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 20px;
+  height: 100%;
+  padding-inline: 10px;
+}
+
+.ui-index-market-strip__set > .ui-index-market-link {
+  scroll-snap-align: none;
+}
+
+.ui-index-market-strip.is-held .ui-index-market-strip__track {
+  animation-play-state: paused;
+}
+
+.ui-index-market-strip.is-ticker:has(.ui-index-market-link:focus-visible) .ui-index-market-strip__track {
+  animation: none;
+}
+
+@keyframes ui-index-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* The market tape runs continuously as requested. Keep this exception scoped
+   to the ticker; other interface animations retain their motion preference. */
+.ui-index-market-strip.is-ticker .ui-index-market-strip__track {
+  animation-duration: var(--ui-ticker-duration, 14s) !important;
+  animation-iteration-count: infinite !important;
+}
+
+/* Trails the chip row — first to fold once the bar itself is tight, since
+   it restates what the chips already show rather than adding a new fact. */
+@container uitop (max-width: 960px) {
+  .ui-index-market-strip__cadence {
+    display: none;
+  }
+}
+
+.ui-index-market-strip__snapshot-note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Static prerender fallback. React replaces this node on mount. */
+/* The prerendered header is NOT inside `.oi-design` or `.ui-top-shell`, so
+   --surface-card resolves to nothing out here and the old `#1A1A1A` fallback
+   was the colour that actually painted — a dark plate on the light canvas. */
+.ui-static-index-header {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-card, var(--surface-raised));
+}
+
+.ui-static-index-header .ui-index-market-strip {
+  width: 100%;
+}
+
+
+/*
+ * Standalone-navbar parity: cadence is a quiet full-width fact bar above the
+ * market row, while the three core indices stay on one uninterrupted line.
+ * The element remains inside the market nav for a single data/fetch owner; it
+ * is positioned against the sticky TopBar so it still spans the whole shell.
+ */
+
+/* `.ui-top__pickwrap` was removed from TopBar in f5d108f2; the rule that
+   used to sit here matched nothing. */
+
+@media (max-width: 720px) {
+
+  /* 20 + 8 + 8 = 36px of target around the smallest form of the mark. */
+
+  /* .cadence-context { display: none } repeats, byte-for-byte and
+     unconditionally (no media query), in ui-index-market-strip-theme.css,
+     which main.tsx loads after this sheet — that later, always-applying copy
+     wins the cascade at every width, so this narrow-only one was dead weight
+     and was removed. */
+}

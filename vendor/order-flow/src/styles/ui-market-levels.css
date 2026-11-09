@@ -1,0 +1,357 @@
+/*
+ * Actionable market-level strip
+ * --------------------------------------------------------------------------
+ * Keeps immediate support, spot, resistance, and the two moneyness modes in a
+ * single quiet row. Structural walls stay available through titles and table
+ * markers instead of competing with near-spot levels in the primary visual.
+ */
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious,
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious > td,
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-spacious .spot-divider {
+  height: 50px !important;
+  min-height: 50px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  padding: 0 !important;
+  border-top: 1px solid rgba(64, 232, 151, .16) !important;
+  border-bottom: 1px solid rgba(64, 232, 151, .16) !important;
+  background: var(--bg) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 0 14px !important;
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 720px) 64px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--bg) !important;
+  box-shadow: none !important;
+}
+
+/* Sole owner of the cluster's placement and inner track layout.
+ *
+ * grid-column: 2 is load-bearing. The divider above is a three-track grid
+ * (64px | 720px | 64px) whose middle track is centred on the STRIKE column by
+ * construction. Without this the cluster auto-places into track 1 and renders
+ * 64px wide, well left of the strikes — which is exactly what four earlier
+ * stylesheets kept fighting over with sticky/left:50%/translate hacks. Those
+ * blocks were removed; do not reintroduce cluster placement elsewhere. */
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-level-cluster {
+  grid-column: 2 !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  translate: none !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  display: grid !important;
+  grid-template-columns: minmax(150px, 1fr) minmax(205px, auto) minmax(150px, 1fr) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  box-sizing: border-box !important;
+  position: static !important;
+  inset: auto !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, .16) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  min-width: 205px !important;
+  padding: 0 12px !important;
+  display: grid !important;
+  grid-template-columns: auto auto auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  border-color: rgba(165, 15, 102, .34) !important;
+  background: transparent !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-label {
+  color: rgba(255, 255, 255, .88) !important;
+  font-size: var(--ui-type-min) !important;
+  font-weight: 700 !important;
+  letter-spacing: .075em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-price {
+  padding: 0 9px !important;
+  border-inline: 1px solid rgba(255, 255, 255, .16) !important;
+  color: #FFFFFF !important;
+  font-size: var(--chain-font-lg, 14px) !important;
+  font-weight: 700 !important;
+  letter-spacing: .005em !important;
+  line-height: 1 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-change-pct {
+  /* Was #40E897 — the dark-theme green, which is 2.0:1 on the light chain. */
+  color: var(--up-ink) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider.spot-down .oc-spot-change-pct {
+  color: var(--down-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider.spot-flat .oc-spot-change-pct {
+  /* Was a near-white pink, which vanished against the light chain surface. */
+  color: var(--text-muted) !important;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-cell,
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  border-color: rgba(8, 149, 90, .14) !important;
+  background: #FEF1FA !important;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  border-color: rgba(15, 15, 15, .11) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 1px 2px rgba(15, 15, 15, .045) !important;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-price {
+  color: #0F0F0F !important;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  border-color: rgba(165, 15, 102, .24) !important;
+  background: #EEFDF5 !important;
+}
+
+/*
+ * Strike cell: the numeral and one capsule above and below it
+ * --------------------------------------------------------------------------
+ * This file is the sole owner of what sits inside a strike cell. Placement is
+ * decided in TypeScript (placeStrikeTags in strikeLevelPlacement.ts, unit
+ * tested); this block only draws it:
+ *
+ *   - the numeral is centred in the row at its own size in EVERY row. It never
+ *     moves, shrinks or shares its line, so the column reads as one axis;
+ *   - one lane above it and one below, one capsule per lane;
+ *   - resistance above, support below; a same-role OI + VOL pair splits around
+ *     the numeral (OI above, VOL below); ATM / Max Pain / Flip take the free
+ *     side, below when both are free;
+ *   - a strike with marks AND levels cannot split its pair, so the pair shares
+ *     one capsule on its role's side ("OI·VOL Support") and the marks share
+ *     the other ("ATM · Max Pain"). Nothing is dropped and nothing stacks.
+ *
+ * Budget, against the 52px row (51px inside its bottom rule; the ATM row is
+ * 53px): 14 capsule + 17 numeral + 14 capsule = 45px, centred. Each lane
+ * clears the row rules by 3px and the numeral's ink by about 3px, and the
+ * numeral lands on the same centre line as a strike with nothing around it.
+ * Across: the widest capsule, "OI·VOL Resistance", is ~100px; the cell leaves
+ * 100px inside its padding, so it clears the column rules by 5px.
+ *
+ * One capsule for every tag: 14px, fully round, a flat wash of its colour, no
+ * ring, no inner highlight, sentence case, hugging its words. Colour follows
+ * meaning: support green, resistance red, the strike's own marks amber (the
+ * ATM row's colour).
+ */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-cell-inner:has(> .strike-market-row) {
+  display: grid !important;
+  grid-template-rows: 14px 17px 14px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: center !important;
+  justify-items: center !important;
+  gap: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-cell-inner:has(> .strike-market-row) > .strike-val-lbl {
+  grid-row: 2 !important;
+  align-self: center !important;
+  height: 17px !important;
+  min-width: 0 !important;
+  line-height: 17px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-market-row {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 14px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-market-row-top {
+  grid-row: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-market-row-bottom {
+  grid-row: 3 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag {
+  --strike-tag-wash: 16%;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  height: 14px !important;
+  margin: 0 !important;
+  padding: 0 6px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--strike-tag-fill) var(--strike-tag-wash), transparent) !important;
+  box-shadow: none !important;
+  color: var(--strike-tag-ink) !important;
+  font-size: var(--ui-type-min) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 14px !important;
+  text-align: center !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+/* A shared capsule gives some padding and a hair of tracking back to its words:
+   "OI·VOL Resistance" is 103.5px at the capsule's normal spacing, 3px from the
+   column rules. This brings it to 100px. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag.is-joined {
+  padding: 0 4.5px !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Two halves of each colour: the FILL draws the wash, the INK is what type may
+   be printed in. The palette splits them on purpose (see the `--success-650`
+   note in ui-colour-system.css): the fill green is only 2.9:1 as text on
+   white. */
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-support {
+  --strike-tag-fill: var(--up);
+  --strike-tag-ink: var(--up-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-resistance {
+  --strike-tag-fill: var(--down);
+  --strike-tag-ink: var(--down-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-mark {
+  --strike-tag-fill: var(--warm-400);
+  --strike-tag-ink: var(--warm-300);
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .strike-tag {
+  --strike-tag-wash: 12%;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-mark {
+  --strike-tag-wash: 20%;
+  --strike-tag-ink: var(--warm-800);
+}
+
+/* A capsule that names the ATM strike is never warm: ATM is positional, so it
+   wears the neutral. Max Pain and Flip on their own keep the hue. */
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-mark:has(.badge-atm) {
+  --strike-tag-fill: var(--atm-hue);
+  --strike-tag-ink: var(--text);
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .strike-tag.is-mark:has(.badge-atm) {
+  --strike-tag-wash: 14%;
+  --strike-tag-ink: var(--text);
+}
+
+/* The words inside a capsule are plain text. Each still carries its old class
+   (.strike-market-marker, .badge-atm, .badge-max-pain, .badge-gex-flip) for
+   the hover cards, tests and QA scripts, and several older sheets paint those
+   classes as boxes of their own, uppercase and letter-spaced. Inside a capsule
+   none of that applies: the capsule is the only shape. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag .strike-tag-part {
+  all: unset !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag :is(.strike-market-kind, .badge-atm) {
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag :is(.strike-market-kind, .strike-market-role) {
+  color: inherit !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag .strike-market-kind {
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-tag-sep {
+  margin: 0 1.5px !important;
+  opacity: .7 !important;
+}
+
+/* The ATM strike is amber by its wash and its row's dashed rules. Two things
+   used to draw it a second time: an inset amber ring, which doubled both the
+   dashed rules and the Strike column's own rules, and side rules in a darker
+   grey than the rest of the split spine (the grid-finish rule was written
+   before the split and outranks chain-split.css's spine rule). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table.chain-table .chain-row td.strike-cell.atm-strike {
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container[data-chain-layout='split'] .chain-split-pane.is-spine .chain-table.chain-table .chain-row td.strike-cell.atm-strike {
+  border-inline-color: var(--line) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .market-resistance-level td.strike-cell:not(.atm-strike),
+#root > .app.app[data-active-tab='chain'] .chain-table .market-support-level td.strike-cell:not(.atm-strike) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .022),
+    inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .market-resistance-level td.strike-cell:not(.atm-strike) {
+  border-inline-color: rgba(227, 86, 80, .22) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .market-support-level td.strike-cell:not(.atm-strike) {
+  border-inline-color: rgba(64, 232, 151, .22) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-cell.shrunk .strike-market-row {
+  display: none !important;
+}
+
+/* Reduced motion: handled once, in ui-motion.css (transitions 0s,
+   animations 1ms; design contract §6). */
+
+/* A badge whose row has scrolled under the sticky header (OptionChainTable
+   sets the flag). It is wider than the Strike column, and the Strike pane is
+   a layer above the Call/Put panes, so its overhang would otherwise paint over
+   their headers. Visibility, not display: the row keeps its height. */
+#root .chain-table td.strike-cell .strike-tag[data-under-head] {
+  visibility: hidden;
+}

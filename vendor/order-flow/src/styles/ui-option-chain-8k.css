@@ -1,0 +1,440 @@
+/* Option Chain 8K polish: calmer terminal grid, sharper strike spine, lighter reconnect strip. */
+
+.app[data-active-tab='chain'] {
+  --oc8k-bg: var(--surface);
+  --oc8k-line-soft: var(--line);
+  --oc8k-call: var(--up);
+  --oc8k-put: var(--down);
+  --oc8k-radius-control: var(--radius-sm);
+  --oc8k-radius-card: var(--radius-lg);
+  --oc8k-radius-shell: var(--radius-lg);
+  --oc8k-control-h: var(--chain-control-h, 34px);
+  --oc8k-table-header-h: var(--chain-head-h, 32px);
+  --oc8k-table-row-h: 50px;
+  --oc8k-surface-border: var(--line);
+  --oc8k-surface-bg: var(--surface);
+}
+
+.app[data-active-tab='chain'] .main-content {
+  /* Flat page background — no cyan top-glow (the vendor web app is flat). */
+  background: var(--oc8k-bg) !important;
+}
+
+.app[data-active-tab='chain'] .dashboard-body {
+  background: var(--oc8k-bg) !important;
+}
+
+
+
+
+
+
+
+.app[data-active-tab='chain'] .chain-table-container {
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  border-radius: var(--oc8k-radius-shell) var(--oc8k-radius-shell) 0 0 !important;
+  border-top: 1px solid rgba(254, 163, 229, .14) !important;
+  border-bottom: 1px solid rgba(254, 163, 229, .08) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .020), rgba(255, 255, 255, .004)),
+    var(--oc8k-bg) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .030),
+    inset 0 -1px 0 rgba(255, 255, 255, .016) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table {
+  flex: 0 0 auto !important;
+  color: rgba(253, 230, 247, .82) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: transparent !important;
+}
+
+.app[data-active-tab='chain'] .chain-table thead {
+  position: sticky !important;
+  top: 0 !important;
+  /* z-index is NOT set here. ui-option-chain-focus.css owns the chain's
+     stacking ladder and puts thead at 30. This file declared 8 !important —
+     also !important, so the winner was decided purely by main.tsx import
+     order, and whenever this file won, thead dropped BELOW the sticky strike
+     th (12) and the spot divider (24) and the body painted through the header
+     row. One ladder, one owner (§0). */
+  filter: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-row th {
+  height: 34px !important;
+  padding: 0 10px !important;
+  cursor: pointer !important;
+  border-bottom: 1px solid rgba(254, 163, 229, .14) !important;
+  background-color: rgba(0, 0, 0, .96) !important;
+  background:
+    linear-gradient(180deg, rgba(61, 9, 32, .92), rgba(0, 0, 0, .96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .050),
+    inset 0 -1px 0 rgba(0, 0, 0, .32) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-label {
+  min-height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: .040em !important;
+  text-transform: uppercase !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-label-ce {
+  color: color-mix(in srgb, var(--oc8k-call) 84%, #FEF1FA) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-label-pe {
+  color: color-mix(in srgb, var(--oc8k-put) 84%, #FEF1FA) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-width: 74px !important;
+  height: 24px !important;
+  padding: 0 9px !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid transparent !important;
+  color: inherit !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-arrow {
+  transform: translateY(-1px) !important;
+  font-size: var(--chain-font-lg, 14px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  opacity: .82 !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-active-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: max-content !important;
+  height: 28px !important;
+  padding: 0 7px 0 11px !important;
+  border-radius: 7px !important;
+  border: 1px solid rgba(254, 163, 229, .16) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .050), rgba(255, 255, 255, .010)),
+    rgba(0, 0, 0, .72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-active-chip-ce {
+  border-color: color-mix(in srgb, var(--down-ink) 28%, transparent) !important;
+  color: var(--down-ink) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-active-chip-pe {
+  border-color: color-mix(in srgb, var(--up-ink) 28%, transparent) !important;
+  color: var(--up-ink) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-active-chip > span:first-child {
+  color: inherit !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  letter-spacing: .030em !important;
+  text-transform: uppercase !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-close {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid currentColor !important;
+  border-radius: 5px !important;
+  padding: 0 !important;
+  background: color-mix(in srgb, currentColor 8%, transparent) !important;
+  color: rgba(253, 230, 247, .72) !important;
+  line-height: 1 !important;
+  opacity: .76 !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-button:focus-visible .chain-side-nav-close {
+  background: color-mix(in srgb, currentColor 16%, transparent) !important;
+  opacity: 1 !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-expiry-th {
+  min-width: 94px !important;
+  padding: 0 10px !important;
+  color: var(--text) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: .012em !important;
+  text-align: center !important;
+  background-color: var(--surface) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-header-row th {
+  height: var(--oc8k-table-header-h) !important;
+  padding: 5px 7px !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: .025em !important;
+  text-transform: uppercase !important;
+}
+
+/* .chain-header-row .th-ce/.th-pe { background-color: var(--surface) } repeat,
+   byte-for-byte, in the "Final paint authority" block further down this file
+   — that later copy wins the cascade, so these were dead weight and were
+   removed. */
+
+.app[data-active-tab='chain'] .chain-header-row .th-strike {
+  color: var(--text) !important;
+  background: var(--surface) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+}
+
+.app[data-active-tab='chain'] .chain-header-row .sort-indicator {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row td {
+  height: var(--oc8k-table-row-h) !important;
+  min-height: var(--oc8k-table-row-h) !important;
+  padding: 5px 7px !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: var(--surface) !important;
+}
+
+
+
+
+
+.app[data-active-tab='chain'] .chain-table .val-cell,
+.app[data-active-tab='chain'] .chain-table .ltp-cell,
+.app[data-active-tab='chain'] .chain-table .chg-cell,
+.app[data-active-tab='chain'] .chain-table .empty-cell {
+  font-family: var(--font-num, var(--font-sans)) !important;
+  font-variant-numeric: tabular-nums !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .empty-cell {
+  color: var(--text) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-cell {
+  min-width: 82px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-cell-inner {
+  width: 100% !important;
+  min-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  color: rgba(254, 241, 250, .96) !important;
+  font-family: var(--font-num, var(--font-sans)) !important;
+  font-variant-numeric: tabular-nums !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  /* Metric-value rung tracks negative (-.006em at 13); the strike is a numeral,
+     not an eyebrow, so it must not carry positive tracking. */
+  letter-spacing: -.006em !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .atm-row td {
+  border-top: 1px solid rgba(64, 232, 151, .34) !important;
+  border-bottom: 1px solid rgba(64, 232, 151, .26) !important;
+  background-color: rgba(61, 9, 32, .82) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .atm-row .strike-cell,
+.app[data-active-tab='chain'] .chain-table .strike-cell.atm-strike {
+  background:
+    linear-gradient(180deg, rgba(64, 232, 151, .18), rgba(64, 232, 151, .050)),
+    rgba(0, 0, 0, .98) !important;
+  box-shadow:
+    inset 2px 0 0 rgba(64, 232, 151, .84),
+    inset -2px 0 0 rgba(64, 232, 151, .84),
+    0 0 0 1px rgba(64, 232, 151, .12) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-cell.maxpain-strike:not(.atm-strike) {
+  background:
+    linear-gradient(180deg, rgba(250, 208, 206, .14), rgba(250, 208, 206, .035)),
+    rgba(0, 0, 0, .98) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider-row td,
+.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious td {
+  height: 38px !important;
+  padding: 0 !important;
+  border-top: 1px solid rgba(64, 232, 151, .10) !important;
+  border-bottom: 1px solid rgba(64, 232, 151, .08) !important;
+  background:
+    linear-gradient(90deg, rgba(64, 232, 151, .030), rgba(64, 232, 151, .036), rgba(227, 86, 80, .030)),
+    rgba(0, 0, 0, .94) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider {
+  position: relative !important;
+  min-height: 36px !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 4px 14px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider::before,
+.app[data-active-tab='chain'] .chain-table .spot-divider::after {
+  content: none !important;
+  display: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+
+/* The +/− in "P+ OI+" is a character in the label, not an icon: it inherits the
+   chip's size and carries no glow, so the legend reads as words rather than as
+   symbols floating above them. (Replaces the arrow this slot used to hold.) */
+
+.app[data-active-tab='chain'] .chain-table .support-row td {
+  box-shadow:
+    inset 0 1px 0 rgba(64, 232, 151, .12),
+    inset 0 -1px 0 rgba(64, 232, 151, .095) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .resistance-row td {
+  box-shadow:
+    inset 0 1px 0 rgba(227, 86, 80, .12),
+    inset 0 -1px 0 rgba(227, 86, 80, .095) !important;
+}
+
+/* The light-theme block that sat here (brand-50 pink container, spine and
+   header gradients, #3D0920 wine ink, a magenta row hover — all literals) was
+   removed 2026-09-14. Measured in the browser first, light theme, straddle /
+   Call-only / Put-only: none of it painted. ui-chain-prototype-theme.css
+   and ui-chain-grid-finish.css repaint every one of those surfaces at
+   higher specificity, so the block was only a trap — the pink would have
+   returned the moment either of those sheets was simplified. */
+
+/* Final paint authority: keep gradient layers, but make computed surface colors deterministic. */
+.app[data-active-tab='chain'] .chain-side-nav-row th {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-header-row th {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-header-row .th-ce {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-header-row .th-pe {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-side-expiry-th,
+.app[data-active-tab='chain'] .chain-header-row .th-strike,
+.app[data-active-tab='chain'] .chain-table .strike-cell {
+  background-color: var(--surface) !important;
+  border-left-color: var(--line) !important;
+  border-right-color: var(--line) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row td.strike-cell {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .atm-row .strike-cell,
+.app[data-active-tab='chain'] .chain-table .strike-cell.atm-strike {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row.atm-row td.strike-cell,
+.app[data-active-tab='chain'] .chain-table .chain-row td.strike-cell.atm-strike {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-cell.maxpain-strike:not(.atm-strike) {
+  background-color: var(--surface) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row td.strike-cell.maxpain-strike:not(.atm-strike) {
+  background-color: var(--surface) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-side-nav-row th,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-header-row th,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-side-expiry-th,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-header-row .th-strike,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .strike-cell,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-row td.strike-cell {
+  background-color: var(--surface) !important;
+}

@@ -1,0 +1,94 @@
+/*
+ * Option-chain finish pass (2026-10-09)
+ * --------------------------------------------------------------------------
+ * Measured against the reference design's live NIFTY50 chain: 55px rows, 12px / 400-500
+ * type, one 4% hairline between rows, a soft build tint, and headers that are
+ * quiet labels rather than bold text. Ours read heavier because every figure
+ * and header sat at 600-700 and the build wash ran at full data strength.
+ *
+ * This sheet changes weight, hairline and tint ONLY. Data, columns, colour
+ * semantics (neutral LTP, red/green for change) and geometry other than the
+ * one CHAIN_ROW_H constant are untouched. Loaded last; same selector prefix as
+ * ui-chain-grid-finish.css so it wins by order.
+ */
+
+/* Primary figures: medium, not bold. The size already carries the hierarchy. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-cell {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .val-cell {
+  font-weight: 500 !important;
+}
+
+/* Column headers: quiet labels. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table .chain-header-row > th:not(.th-strike),
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table .chain-header-row > th:not(.th-strike) .chain-sort-button {
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+/* One faint hairline between rows (reference: 4% ink). The line itself is the
+   faded gradient ui-data-surface-finish.css draws from --dsf-sep (9%); only
+   the strength changes here. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table.chain-table {
+  --dsf-sep: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+/* Build-up tint: same data-driven share, at about half the strength, so the
+   outer columns stop out-shouting the figures. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .ui-bucell {
+  background-image: linear-gradient(
+    to left,
+    color-mix(in srgb, currentColor calc((var(--bu-wash, 0%) + var(--bu-focus-boost, 0%)) * 0.55), transparent),
+    color-mix(in srgb, currentColor calc((var(--bu-inner-wash, 0%) + var(--bu-focus-boost, 0%)) * 0.55), transparent)
+  ) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .ui-bucell.is-mirror {
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, currentColor calc((var(--bu-wash, 0%) + var(--bu-focus-boost, 0%)) * 0.55), transparent),
+    color-mix(in srgb, currentColor calc((var(--bu-inner-wash, 0%) + var(--bu-focus-boost, 0%)) * 0.55), transparent)
+  ) !important;
+}
+
+/* Column-label row: 48px -> 40px (reference 36px). The OI heading carries a
+   second, 10px sub-line, so 40 is the floor that keeps it unclipped. The chain
+   measures its own header into --chain-head-h, so the sticky offsets follow.
+   The top Calls / expiry / Puts row stays 48px: it is tied to the loading
+   skeleton and the fixed expiry capsule (see ui-chain-grid-finish.css). */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table.chain-table .chain-header-row > th {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+}
+
+/* Strike figure: the reference sets it at 12px / 500 on the same row as the
+   prices. 13px / 500 keeps it the anchor of the row without the bold slab. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table .strike-cell .strike-val-lbl {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+/* OI bars: the filled segment was drawn at full palette strength, so the bars
+   out-weighed the figures above them. Opacity only: geometry is the drawn
+   quantity (see bar-cell-max rule) and is not touched. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-oicell__seg.is-base {
+  opacity: 0.78;
+}

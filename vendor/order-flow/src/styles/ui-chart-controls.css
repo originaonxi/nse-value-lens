@@ -1,0 +1,194 @@
+/* Shared chart-control finish: inset inputs, quiet labels, one compact row. */
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) {
+  --ui-toolbar-control-h: 36px;
+  --control-face: var(--surface-raised);
+  --control-track: var(--surface-sunken, var(--bg-sunken));
+  --control-bar: var(--surface-raised);
+  /* 999, not 8: every control in the app is a capsule now
+     (ui-control-capsule-authority.css), and this sheet's `!important`
+     radius is what every toolbar control actually resolves to. Changing the
+     TOKEN moves the expiry trigger, the Window track, Show, the steppers and
+     the collapsed "Chart controls" button together, instead of nine rules
+     each being re-pointed and one being missed. */
+  --control-radius: 999px;
+}
+:root[data-theme='dark'] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) {
+  /* The strip sits on the page's own ground, not a raised grey. Every page that
+     draws this dock — Open Interest, OI Spurts, Heatmap, PCR, Straddle, GEX and
+     Implied Volatility — shared --neutral-850, which put the strip at #1f1f1f
+     on a #0f0f0f page: a slab under the card, and a different surface every
+     time a reader switched pages. The controls stay legible because the track
+     keeps its own 1px hairline; bar and track are two bands on one ground. */
+  --control-bar: var(--neutral-950);
+  --control-track: var(--neutral-950);
+  --control-face: var(--neutral-800);
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar:not(.ui-oi-settings__panel), .ui-sp-toolbar) {
+  min-height: 54px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--control-bar);
+  /* NO FRAME. Every control in this row already draws its own capsule, so a
+     border here was a second box 9px outside the first — two rounded outlines
+     around one group of controls, which is what the page read as unfinished.
+     The chain settles it: `.ui-pagebar` and `.ui-pagebar__actions` are
+     border-width 0 and only the capsules inside them are outlined. */
+  border: 0;
+}
+
+/* The Open Interest selection dock needs a quiet edge on both theme grounds. */
+:root[data-theme] body #root > .app.app .ui-open-interest-page .ui-oi-card.is-plot .ui-oi-toolbar:not(.ui-oi-settings__panel) {
+  border: 1px solid color-mix(in srgb, var(--line-strong) 72%, var(--line));
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-strip__k {
+  color: var(--text-muted);
+  font-size: var(--text-tick, 10px);
+  font-weight: 600;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-hm-menu, .ui-oi-menu, .ui-control-more__trigger, .ui-stepper, .ui-asof__control, .ui-replay-trigger, .ui-oi-viewmenu__trigger, .ui-straddle-strikeplot-toggle, .ui-price-oi-strike-control select) {
+  box-sizing: border-box;
+  min-height: var(--ui-toolbar-control-h);
+  height: var(--ui-toolbar-control-h);
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius) !important;
+  background: var(--control-track) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.shared-expiry__trigger, .ui-show__trigger, .ui-hm-menu, .ui-oi-menu, .ui-control-more__trigger, .ui-replay-trigger, .ui-oi-viewmenu__trigger, .ui-straddle-strikeplot-toggle) {
+  gap: 7px;
+  padding-inline: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) {
+  box-sizing: border-box;
+  height: var(--ui-toolbar-control-h);
+  min-height: var(--ui-toolbar-control-h);
+  gap: 2px;
+  padding: 3px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--control-radius) !important;
+  background: var(--selection-track) !important;
+  box-shadow: none;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button {
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding-block: 2px;
+  border: 0;
+  border-radius: calc(var(--control-radius) - 3px) !important;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px !important;
+  font-weight: 600;
+}
+/* The selected segment is the ink capsule the rest of the app draws, not a
+   raised face with a brighter border — see the note on `--control-radius`
+   above. The `:has()` pair is the same one the capsule authority uses: a
+   track whose selection TRAVELS paints it on the pill, not on the button. */
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-pressed='true']) {
+  background: var(--selection-fill) !important;
+  border-color: transparent !important;
+  color: var(--selection-text);
+  box-shadow: none !important;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-pressed='true']):has(.ui-seg__pill) {
+  background: transparent !important;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-pressed='true']) small {
+  color: currentColor;
+  opacity: .72;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-time-switch__k { font-size: 12px; font-weight: 600; color: inherit; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) small { color: var(--text-muted); font-size: var(--text-tick, 10px); font-weight: 400; line-height: 1.1; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:disabled { opacity: .45; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-stepper, .ui-asof__control) > button {
+  min-height: 0;
+  height: 100%;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-stepper > button { width: 32px; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-stepper__value { min-width: 32px; padding-inline: 4px; font-variant-numeric: tabular-nums; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) button:focus-visible {
+  outline: 2px solid var(--text-primary) !important;
+  outline-offset: 2px !important;
+}
+/* A segment lives inside its track's `overflow: hidden`, so the outward ring
+   above was clipped to its right-hand curve — a stray ")" beside "15m" in the
+   Window control. Segments draw the ring inside their own box instead. */
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:focus-visible {
+  outline-offset: -2px !important;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-pressed='true']):focus-visible {
+  outline-color: var(--selection-text) !important;
+}
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-hm-menu, .ui-oi-menu, .ui-control-more__trigger):hover:not(:disabled) {
+    border-color: var(--line-strong);
+    background: var(--surface-hover) !important;
+  }
+}
+@media (max-width: 768px), (pointer: coarse) {
+  :root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) { --ui-toolbar-control-h: 44px; }
+  :root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-stepper, .ui-asof__control) > button { min-width: 40px; }
+}
+
+/* Group names belong beside the inputs. Extra timing detail stays on hover. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-strip__g:has(> .ui-time-switch) > .ui-strip__k {
+    display: inline;
+  }
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more:not(.is-dock) .ui-control-more__items > .ui-strip__g {
+  gap: 6px;
+  padding-inline: 6px;
+  border-left: 1px solid var(--line);
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls > .shared-expiry {
+  padding-right: 8px;
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls.ui-hm-controls .ui-control-more:not(.is-dock) > .ui-control-more__body > .ui-control-more__items > .ui-strip__g {
+  padding-inline: 4px;
+  gap: 5px;
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls.ui-hm-controls .chart-window-control .ui-time-switch__track > button {
+  min-width: 40px;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-oi-viewmenu__trigger > .ui-strip__k { display: none; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-oi-viewmenu__trigger { min-width: 0; width: auto; white-space: nowrap; }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-oi-viewmenu__pop {
+  top: calc(100% + 6px);
+  bottom: auto;
+  min-width: 180px;
+  max-width: calc(100vw - 40px);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  padding: 6px;
+  box-sizing: border-box;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-oi-viewmenu__pop > button {
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) .ui-oi-viewmenu__pop > button[aria-selected='true'] {
+  background: var(--control-face);
+  box-shadow: inset 0 0 0 1px var(--line-strong) !important;
+}
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-time-switch__track, .ui-seg__track, .ui-gex-views) > button:not(.is-on):not([aria-checked='true']):hover:not(:disabled) {
+    background: var(--surface-hover) !important;
+    color: var(--text);
+  }
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls.is-collapsed .ui-control-more.is-dock .ui-control-more__items > .ui-strip__g {
+  border-left: 0;
+  padding: 8px 0;
+  gap: 8px;
+}

@@ -1,0 +1,691 @@
+/* Option-chain market line — final placement and legibility authority.
+   The row remains in the correct price position, while its readout is layered
+   over the centered Strike spine independently of Call/Put table direction. */
+
+/* The ROW is a 28px band; the RULE is 2px on desktop, 1px on narrow screens.
+   The row used to collapse to 1px as well, with a 30px pill centred on it, so
+   the pill hung 15px into both ATM-adjacent strikes — over the ATM strike's
+   "Vol Resistance" badge and the bottom of both LTP % figures, at every width.
+   A 28px band holds the 24px pill with 2px to spare on each side. The rule is
+   vertically centred in the cell, and the pill is centred on the rule, so the
+   row's measured centre (what OptionChainTable reads for the spot position)
+   is still exactly the line. Row virtualisation estimates strike rows only
+   (CHAIN_ROW_H); one extra 27px band is far inside its overscan. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  vertical-align: middle !important;
+}
+
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] {
+    --chain-market-rule-width: 2px;
+  }
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row > td.spot-divider-cell {
+  position: relative !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row .spot-divider {
+  position: relative !important;
+  inset: auto !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: transparent !important;
+  direction: ltr !important;
+  z-index: 24 !important;
+}
+
+/* When the chain scrolls horizontally, the rule becomes a viewport-wide
+   sticky overlay. Its 50% anchor therefore continues to be the sticky Strike
+   spine instead of the centre of the wider table. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table tr.spot-divider-row .spot-divider {
+  position: sticky !important;
+  left: 0 !important;
+  right: auto !important;
+  width: var(--chain-sticky-viewport-width, 100%) !important;
+  max-width: var(--chain-sticky-viewport-width, 100%) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row
+.spot-divider .spot-level-cluster--spot-only,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table tr.spot-divider-row .spot-divider .spot-level-cluster--spot-only {
+  position: absolute !important;
+  inset: auto !important;
+  top: 50% !important;
+  left: 50% !important;
+  grid-column: auto !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  transform: translate(-50%, -50%) !important;
+  direction: ltr !important;
+  z-index: 26 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row
+.spot-level-cluster--spot-only > .oc-spot-center,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table tr.spot-divider-row .spot-divider .oc-spot-center {
+  box-sizing: border-box !important;
+  position: relative !important;
+  inset: auto !important;
+  grid-column: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  min-width: 214px !important;
+  max-width: min(292px, calc(100vw - 24px)) !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  gap: 7px !important;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--capital-black) 24%, transparent) !important;
+  font-variant-numeric: tabular-nums !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+/* Call-only, Put-only and the combined Straddle table have no centred spine:
+   Strike sits at one EDGE of the table, so the `left: 50%` above parked the
+   readout over the table's middle — across the Open Interest column in
+   Call-only at 1440, and ~500px past a phone's right edge in the combined
+   view. OptionChainTable measures the Strike column's in-flow centre and
+   publishes it as --chain-strike-center-x (the column scales stretch every
+   column with the viewport, so no constant would do).
+
+   The cluster becomes a window centred on that point and as wide as the
+   table allows on both sides, minus a 4px inset. The pill centres in it via
+   auto margins; when it is wider than the window (a 112px Strike column
+   against a ~200px pill) the auto margins collapse to zero and it starts at
+   the window's table-edge side instead — flush left for Put-only/combined,
+   flush right for Call-only (row-reverse) — so it never hangs off the table.
+   Sticky left/right keep it inside the scrollport when Strike itself is
+   panned out of view: Put-only on a phone opens scrolled past Strike. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container:not([data-table-view='straddle']) .chain-table tr.spot-divider-row
+.spot-divider .spot-level-cluster--spot-only {
+  --chain-spot-anchor: var(--chain-strike-center-x, 50%);
+  --chain-spot-reach: max(0px, min(var(--chain-spot-anchor), 100% - var(--chain-spot-anchor)) - 4px);
+  position: sticky !important;
+  inset: auto 4px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: calc(2 * var(--chain-spot-reach)) !important;
+  height: 0 !important;
+  margin: 0 0 0 calc(var(--chain-spot-anchor) - var(--chain-spot-reach)) !important;
+  transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='calls'] .chain-table tr.spot-divider-row
+.spot-divider .spot-level-cluster--spot-only {
+  flex-direction: row-reverse !important;
+  /* Seat the window from the RIGHT. A sticky box may never push its margin
+     box out of its containing block, and a ~550px margin-left pins its left
+     edge to the table's: `right: 4px` could not pull it left at all, so the
+     readout stayed off screen whenever Strike was panned out of view. Auto
+     margins are exempt from that rule. */
+  margin: 0 calc(100% - var(--chain-spot-anchor) - var(--chain-spot-reach)) 0 auto !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container:not([data-table-view='straddle']) .chain-table tr.spot-divider-row
+.spot-divider .spot-level-cluster--spot-only > .oc-spot-center {
+  flex: 0 0 auto !important;
+  margin-inline: auto !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row .spot-divider
+.spot-level-cluster--spot-only > .oc-spot-center {
+  border-color: var(--oc-grid-line-strong, #D3D3D3) !important;
+  background: #FFFFFF !important;
+  color: #1A1A1A !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row .spot-divider
+.spot-level-cluster--spot-only > .oc-spot-center {
+  border-color: var(--oc-grid-line-strong, #272727) !important;
+  background: #1A1A1A !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .4) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row :is(.oc-spot-label, .oc-spot-price, .oc-spot-change-points, .oc-spot-change-pct) {
+  flex: 0 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: var(--chain-font-md, 13px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* The "Spot" caption rides the INVERTED pill above, so its ink has to be
+   derived from the pill — not from the page.
+
+   `ui-market-semantics.css` paints this label `var(--text-muted)`, and that
+   token is tuned for the page background. On the pill it lands mid-grey on a
+   dark chip in light theme (1.62:1) and mid-grey on a near-white chip in dark
+   (2.30:1) — the caption all but disappeared in both themes.
+
+   That sheet loads BEFORE this one, so the `color: inherit` below looks like
+   it should win. It does not: its selector carries ten class-level
+   components to this rule's eight, and specificity beats import order however
+   a file is named. So this rule is specified past it deliberately — through
+   `.chain-table-container`, `.spot-divider`, `.spot-level-cluster` and
+   `.oc-spot-center` — rather than by adding another `!important` that would
+   have changed nothing.
+
+   `currentColor` inside the `color` property resolves to the INHERITED value
+   (per spec it is treated as `inherit` there), i.e. the pill's own ink. So
+   the caption de-emphasises against whichever surface the pill is wearing and
+   cannot drift when either theme is retuned. 72% measures 5.82:1 on the light
+   chip and 6.69:1 on the dark one — both clear of the 4.5:1 floor for 13px. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container .chain-table tr.spot-divider-row .spot-divider
+.spot-level-cluster .oc-spot-center .oc-spot-label {
+  font-weight: 500 !important;
+  color: color-mix(in srgb, currentColor 72%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-label {
+  font-weight: 500 !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-price {
+  /* 650 was not a loaded face. Manrope ships 400/500/600/700, so the browser
+     already resolved 650 upward to 700 — same pixels, stated honestly. */
+  font-weight: 700 !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-market-move {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+}
+
+/* Semantic movement remains consistent across both inverse card surfaces. */
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-down .oc-market-move {
+  color: #E35650 !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-up .oc-market-move {
+  color: #40E897 !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-down .oc-market-move {
+  color: #E35650 !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-up .oc-market-move {
+  color: #0E854D !important;
+}
+
+/* The phone box. Its selector list mirrors the base pill block above one for
+   one: the mirrored book's selector carries two more attribute components,
+   so with only the generic selector here the 214px / 10px / 7px desktop box
+   still won in the view a phone opens on, and the pill ran 214px wide. */
+@media (max-width: 480px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .chain-table tr.spot-divider-row
+  .spot-level-cluster--spot-only > .oc-spot-center,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky]
+  .chain-table tr.spot-divider-row .spot-divider .oc-spot-center {
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+    padding-inline: 12px !important;
+    gap: 5px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row :is(.oc-spot-label, .oc-spot-price, .oc-spot-change-points, .oc-spot-change-pct) {
+    font-size: var(--chain-font-cell, 12px) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Market line — the last traded price leads.
+   ───────────────────────────────────────────────────────────────────────────
+   One ink for the rule, the Spot pill and the outlines of the pills beside it:
+   near-black in the LIGHT theme, near-white in the DARK theme. Appended, not
+   edited in place: everything above stays as it was and these rules win by
+   specificity (doubled container + the spacious row class) and by order.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The cluster is a three-track grid, not a block. Both the overflow-state rule
+   in ui-option-chain-focus.css and the centring rule above set it to
+   `display: block`, which left the wing pills with nowhere to sit: they floated
+   off to the right (one past the viewport) instead of beside the price.
+   `1fr auto 1fr` under `max-content` sizes both wing tracks to the wider wing,
+   which also keeps the Spot pill centred on the Strike spine. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view='straddle'] .chain-table
+tr.spot-divider-row .spot-divider .spot-level-cluster--spot-only {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  width: max-content !important;
+  max-width: none !important;
+  height: auto !important;
+}
+
+/* The Spot pill always takes the middle track. With no pills beside it (every
+   option switched off) a lone grid child auto-places into the FIRST `1fr`
+   track, which pushed the pill half its own width left of the Strike spine. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view='straddle'] .chain-table
+tr.spot-divider-row .spot-divider .spot-level-cluster--spot-only > .oc-spot-center {
+  grid-column: 2 !important;
+}
+
+/* ui-spot-divider-overlay.css pins each wing pill absolutely by its old
+   `oc-spot-wing-left/right` class while the table scrolls sideways. The pills
+   now sit in flow inside their wing group, so that pinning is switched off
+   (without it both pills fall back to left:0 and stack on each other). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row .spot-divider .oc-spot-wing-pill {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+/* One neutral guide through the capsule group. Its desktop weight makes the
+   live price easy to follow without changing the reserved row or inverse ink. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row.spot-divider-spacious .spot-divider {
+  height: var(--chain-market-rule-width, 1px) !important;
+  min-height: var(--chain-market-rule-width, 1px) !important;
+  max-height: var(--chain-market-rule-width, 1px) !important;
+  border-top: var(--chain-market-rule-width, 1px) solid var(--line-strong) !important;
+}
+
+/* The Spot pill: 26px, and the same solid ink in EVERY state. The tone-tinted
+   variants in ui-option-chain-focus.css only apply while the table scrolls
+   sideways, which made the same pill change colour when a column was added. The
+   up/down tone lives on the move beside the price (`.oc-market-move`). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+.spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center {
+  min-width: 228px !important;
+  max-width: min(304px, calc(100vw - 24px)) !important;
+  height: 26px !important;
+  min-height: 26px !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+.spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center {
+  border-color: #0F0F0F !important;
+  background: #0F0F0F !important;
+  color: #FAFAFA !important;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .28) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+.spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center {
+  border-color: #FAFAFA !important;
+  background: #FAFAFA !important;
+  color: #0F0F0F !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .48) !important;
+}
+
+/* The price and the move beside it print in colours legible on each pill, set
+   on the leaf spans because older layers (ui-spot-divider-overlay.css) colour
+   `.oc-spot-change-points/.oc-spot-change-pct` directly. */
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-center :is(.oc-spot-label, .oc-spot-price) { color: #FAFAFA !important; }
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-center :is(.oc-spot-label, .oc-spot-price) { color: #0F0F0F !important; }
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider.spot-up .oc-market-move :is(.oc-spot-change-points, .oc-spot-change-pct) { color: #40E897 !important; }
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider.spot-down .oc-market-move :is(.oc-spot-change-points, .oc-spot-change-pct) { color: #E35650 !important; }
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider.spot-up .oc-market-move :is(.oc-spot-change-points, .oc-spot-change-pct) { color: #0E854D !important; }
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider.spot-down .oc-market-move :is(.oc-spot-change-points, .oc-spot-change-pct) { color: #E35650 !important; }
+
+/* The last traded price is what this line is for: a step larger than its
+   caption and the move beside it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container .chain-table tr.spot-divider-row
+.oc-spot-center .oc-spot-price {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.005em !important;
+}
+
+/* The strip is a row of separate capsules, in the reverse of the cells around
+   it. The strike column and cells are dark in the dark theme and light in the
+   light theme; the capsules are the opposite — near-white on dark, near-black
+   on light — so they read as the line's own component instead of another table
+   cell. Every capsule is fully rounded and sits one even 8px from its
+   neighbour (Day Low, Straddle, Spot, Exp Move, Day High), so no two touch.
+   Spot stays the tallest and brightest: the last traded price leads. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-group {
+  gap: 8px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-group-left { margin-right: 8px !important; }
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-group-right { margin-left: 8px !important; }
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill {
+  height: 24px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Reverse fills. */
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill {
+  background: #E6E6E6 !important;
+  border-color: #E6E6E6 !important;
+  color: #0F0F0F !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill {
+  background: #272727 !important;
+  border-color: #272727 !important;
+  color: #FAFAFA !important;
+}
+
+/* Inside a wing pill: caption and range recede, the figure leads. All three
+   take the pill's own ink (older layers colour them from the page). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill .oc-wing-label {
+  color: color-mix(in srgb, currentColor 72%, transparent) !important;
+  opacity: 1 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill .oc-wing-value {
+  color: currentColor !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table tr.spot-divider-row
+.spot-divider .oc-spot-wing-pill .oc-wing-range {
+  color: color-mix(in srgb, currentColor 66%, transparent) !important;
+  opacity: 1 !important;
+}
+
+/* The wing groups carry their own 8px margin toward the Spot pill; the grid's
+   own column gap would stack on it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container .chain-table tr.spot-divider-row
+.spot-divider .spot-level-cluster--spot-only {
+  column-gap: 0 !important;
+}
+
+/* Call-only / Put-only have no centred spine (Strike sits at one table edge),
+   so the readout is a flex window anchored to it, and the Spot pill's auto
+   margins shove the wings to the window's two ends — far from the price — while
+   Call-only's row-reverse also swaps Low/High and Straddle/Exp Move. On desktop,
+   where the wings show, the cluster is one contiguous strip in natural order
+   (Day Low, Straddle, Spot, Exp Move, Day High) centred in the table. Phones
+   show only the Spot pill and keep the window. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view]:not([data-table-view='straddle']) .chain-table tr.spot-divider-row
+  .spot-divider .spot-level-cluster--spot-only {
+    position: sticky !important;
+    inset: auto 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    width: min(100%, var(--chain-sticky-viewport-width, 100%)) !important;
+    height: 0 !important;
+    margin: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view]:not([data-table-view='straddle']) .chain-table tr.spot-divider-row
+  .spot-divider .spot-level-cluster--spot-only > .oc-spot-center {
+    margin-inline: 0 !important;
+  }
+}
+
+/* Phone box: the desktop pill sizing above must not widen the phone pill. */
+@media (max-width: 480px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container[data-table-view] .chain-table
+  .spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center {
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container .chain-table tr.spot-divider-row
+  .oc-spot-center .oc-spot-price {
+    font-size: var(--chain-font-md, 13px) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Market line — stays on screen.
+   ───────────────────────────────────────────────────────────────────────────
+   The line is a sticky row: in view it sits between its two strikes as always;
+   scrolled out of view it holds the top edge (just under the header) or the
+   bottom edge, so where Spot, Straddle, Exp Move and the day's range sit is
+   never lost. The row stays mounted while the rows around it are windowed away
+   (OptionChainTable renders it at the window's edge), so this holds at any
+   scroll distance.
+
+   FLUSH to those edges, not 16px inside them. The inset was here to keep the
+   readout and its wing pills — which hang ~13px either side of a 2px rule —
+   from sliding under the header. What it actually did was park the strip in
+   the MIDDLE of the first visible row: the readout landed on that strike's
+   numeral, its ATM badge and its level pills and swallowed them, which is the
+   defect the phone screenshots showed. The pills no longer need clearing,
+   because the strip now carries its own 28px opaque band (see "THE PINNED LINE
+   IS CHROME" in ui-spot-divider-overlay.css) and they sit inside it. Flush
+   against the header, that band reads as what it is — pinned chrome with the
+   grid scrolling under it, exactly like the `thead` above it — instead of as a
+   slab dropped across the middle of a strike.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row.spot-divider-spacious {
+  position: sticky !important;
+  top: var(--chain-head-h, 84px) !important;
+  bottom: 0 !important;
+  z-index: 26 !important;
+}
+
+/* "Return to ATM" is a fixed button at the foot of the screen; lift it clear
+   of the strip when the strip is pinned to the bottom. */
+.oc-return-to-atm-btn[data-direction='down'] {
+  bottom: 60px !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The price gauge — Day Low, the last price and Day High in ONE capsule.
+   ───────────────────────────────────────────────────────────────────────────
+   With "Day low & day high" on, the price capsule is a gauge of the day:
+
+        LOW 23317.15      23414.30  +67.90 (+0.29%)      23466.80 HIGH
+       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+                                   ^ the last price, 61% of the way up
+
+   The stretch from the capsule's left end (the day's low) up to the last
+   price is filled with a lighter tone of the capsule's own ink; the rest keeps
+   the capsule's plain surface. Where the tone changes IS the price. There is no
+   separate rail, dot or tick, and no extra height — the capsule stays 26px and
+   fully round, and the row band is untouched. `--oc-range-pos` is set by
+   OptionChainTable from the same numbers the two ends print.
+
+   The fill is `background-image` only, so the capsule's own colour rules (the
+   inverted ink in each theme) keep painting the surface. It is a tint of
+   `currentColor` at 26%, which leaves every figure at or above 4.5:1 on either
+   tone in both themes.
+
+   Specified one class past the Spot capsule's own sizing rules above
+   (`.oc-spot-center--range`) and appended after them, so it wins by order and
+   specificity without a new !important war.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+.spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center.oc-spot-center--range {
+  width: max-content !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  min-width: 430px !important;
+  max-width: min(500px, calc(100vw - 24px)) !important;
+  padding: 0 16px !important;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, currentColor 26%, transparent) var(--oc-range-pos, 0%),
+    transparent var(--oc-range-pos, 0%)
+  ) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row .oc-spot-center--range .oc-range-end {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 5px !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* Low and High are the frame; the last price leads. The caption recedes against
+   its figure (the same 72% the Spot caption uses). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row .oc-spot-center--range .oc-range-label {
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+  color: color-mix(in srgb, currentColor 72%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row .oc-spot-center--range .oc-range-value {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  color: currentColor !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* The row is one 1024px table wide under 1280px: the captions go and the
+   figures stay, so the ends are still the exact Low and High. */
+@media (max-width: 1279px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container[data-table-view] .chain-table
+  .spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center.oc-spot-center--range {
+    min-width: 350px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container[data-table-view] .chain-table
+  tr.spot-divider-row .oc-spot-center--range .oc-range-label {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container[data-table-view] .chain-table
+  .spot-divider:is(.spot-up, .spot-down, .spot-flat) .spot-level-cluster--spot-only .oc-spot-center.oc-spot-center--range {
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+    gap: 6px !important;
+    padding: 0 12px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container.chain-table-container[data-table-view] .chain-table
+  tr.spot-divider-row .oc-spot-center--range .oc-range-value {
+    font-size: var(--chain-font-sm, 11px) !important;
+  }
+}

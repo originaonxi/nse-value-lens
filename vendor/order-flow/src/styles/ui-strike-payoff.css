@@ -1,0 +1,274 @@
+/* Expanded option payoff workstation
+   Scoped and imported last so this component has one visual authority despite
+   the legacy option-chain stylesheet stack. */
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-workspace {
+  /* These four used to be declared on `.detail-chart-wrapper--payoff`, a class
+     no component has rendered since the studio rebuild. Every `var(--payoff-*)`
+     below was therefore invalid at computed-value time — the summary cards lost
+     their border outright and the muted label ink fell back to `inherit`.
+     They live on the element that is actually rendered, bound to the semantic
+     palette so they invert with the theme instead of being hand-tuned twice. */
+  --payoff-surface: var(--surface);
+  --payoff-surface-raised: var(--surface-raised);
+  --payoff-border: var(--line);
+  --payoff-muted: var(--text-muted);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .detail-control-cluster {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .detail-control-cluster--greeks {
+  flex: 0 1 auto;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .detail-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--payoff-muted);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .detail-control-label small {
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  color: var(--text-subtle);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-workspace {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--payoff-border);
+  border-radius: 9px;
+  background: var(--payoff-surface-raised);
+  box-shadow: none;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card span {
+  color: var(--payoff-muted);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card small {
+  overflow: hidden;
+  color: var(--text-subtle);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card.up strong,
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card--profit strong {
+  color: var(--up-ink);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card.down strong,
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card--loss strong {
+  color: var(--down-ink);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-card {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--payoff-border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--payoff-surface);
+  box-shadow: none;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head,
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head {
+  padding: 9px 12px 7px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head > div:first-child {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head span,
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-foot {
+  color: var(--payoff-muted);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-overlay-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-overlay-legend i {
+  width: 18px;
+  height: 0;
+  border-top: 2px dashed var(--payoff-greek-color);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-overlay-legend small {
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  color: var(--text-subtle);
+  font-size: var(--ui-type-min);
+  font-style: normal;
+  font-weight: 700;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-canvas-shell {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: block;
+  cursor: crosshair;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior-x: contain;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-hover-card {
+  position: absolute;
+  top: 57px;
+  z-index: 3;
+  min-width: 136px;
+  display: grid;
+  gap: 4px;
+  padding: 7px 9px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 9px);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-4);
+  /* No backdrop-filter: the surface above is already opaque, so the blur
+     rendered nothing and cost a compositor layer on a per-mousemove element. */
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-hover-card span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: var(--ui-type-min);
+  font-weight: 700;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-hover-card b {
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-hover-card b.up {
+  color: var(--up-ink);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-hover-card b.down {
+  color: var(--down-ink);
+}
+
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-foot {
+  padding: 5px 12px 7px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+/* Phone geometry (contract §7: 768px is the mobile boundary) --------------
+   Four summary cards across a 360px sheet left ~62px of content each, so
+   every figure ellipsised — "−₹1234.00" is not a number you can truncate. */
+@media (max-width: 768px) {
+  :is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-summary-card {
+    box-sizing: border-box;
+  }
+
+  :is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-head,
+:is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-plot-foot {
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  /* The greek overlay legend and the profit/loss key both fit on one line at
+     desktop widths and neither does at 360px. */
+  :is(.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain']) :is(.strike-detail-bottom-sheet) .payoff-chart-legends {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+}
+
+/* The light-theme block that used to live here only existed to undo the
+   hardcoded dark rgba values above. Those are semantic tokens now, so both
+   themes fall out of the palette and there is nothing left to override. */

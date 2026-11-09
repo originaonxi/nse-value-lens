@@ -1,0 +1,499 @@
+/*
+ * Option Chain focus pass
+ * --------------------------------------------------------------------------
+ * Keeps the educational read useful without letting it dominate the chain.
+ * The deeper narrative remains available from "Read full insight".
+ */
+
+/* Show the previous OI value beneath the profile bar for faster comparison.
+   The Volume column sits right beside the OI profile and shares its track
+   capped track (see DESKTOP_LEG_COLUMN_WIDTHS.volume), so it takes the same
+   vertical rhythm here rather than the taller default profile-cell padding. */
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.oi-bar-cell, .vol-bar-cell).oc-profile-cell {
+  padding-block: 3px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oi-bar-cell .oc-profile-meter {
+  gap: 3px !important;
+}
+
+/* Keep the strike spine fixed while the wider Call/Put metric lanes move. */
+  /* Keep every Call/Put metric on its own fixed track. Without an explicit
+     table width, the browser can assign the spare colspan width to column 1,
+     leaving the visible option lanes as large empty panels.
+
+     `max(…, 100%)` rather than the content width alone: the content width is
+     the FLOOR, not the size. Pinned to it exactly, dropping columns left the
+     table at its shrunken sum and parked flush left with a dead band beside
+     it — the Call Only view never had this rule and always filled the
+     viewport, which is the behaviour wanted everywhere.
+
+     With `table-layout: fixed`, width beyond the sum of the <col> widths is
+     handed back to the columns in proportion to those widths. The Call and
+     Put lanes carry the same column set (ceColumns is peColumns reversed),
+     so their shares stay equal and the Strike spine holds the centre for
+     free at every column count — no separate centring step. min-width keeps
+     the scroll floor so a wide column set still pans instead of crushing. */
+  #root > .app.app[data-active-tab='chain'] .chain-table {
+    width: max(var(--chain-table-content-width), 100%) !important;
+    min-width: var(--chain-table-content-width) !important;
+    table-layout: fixed !important;
+  }
+
+  /* Data changes and side switches should settle smoothly without animating
+     row geometry (which causes text shimmer and sticky-column drift). */
+  #root > .app.app[data-active-tab='chain'] .chain-table :is(
+    .ui-oicell__bar,
+    .ui-oicell__seg,
+    .ui-volcell__bar,
+    .ui-volcell__seg,
+    .ui-bucell__bar
+  ) {
+    /* Tokenised: a raw literal inside an !important shorthand outranks
+       ui-motion.css's `* { transition-duration: 0s !important }` reset, so
+       every OI / volume / build-up bar on the chain kept animating its width
+       for a reduced-motion user. --dur-quick is 180ms, the same value. */
+    transition: width var(--dur-quick) var(--ease-ui-standard, cubic-bezier(.22, 1, .36, 1)),
+      opacity var(--dur-tap) ease !important;
+  }
+
+  /* ── The chain's stacking order, stated once ──────────────────────────────
+     Every sticky layer on this surface, top of the paint order first. Nothing
+     on the chain may claim a z-index without appearing here.
+
+        48  .oc-side-nav-overlay          zero-height sticky rail, sits over
+                                          the header it visually replaces
+        30  thead                         both header rows, `isolation: isolate`
+                                          so the two numbers below are scoped
+                                          to it and cannot escape into tbody
+        25  .spot-level-cluster           the floating market-price pill
+        24  .spot-divider                 the market hairline, sticky-left
+        12  th.th-strike / expiry th      strike spine, inside thead
+        11  th.chain-col-ltp               pinned LTP headers beside Strike
+         9  td.strike-cell                strike spine, in tbody — deliberately
+                                          under the divider so the pill can
+                                          float across the spine between rows
+         8  td.chain-col-ltp               pinned LTP values beside Strike
+       auto every other cell
+
+     The sticky strike cells live in tbody with their own z-index so they can
+     cover horizontally scrolling Call/Put columns. The header must stay in the
+     higher context above, or a body strike paints through the expiry row
+     during vertical scrolling. */
+  #root > .app.app[data-active-tab='chain'] .chain-table thead {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    isolation: isolate;
+  }
+
+  /* Call/Put labels must not travel with their very wide colspan cells. This
+     zero-height sticky overlay pins the two real navigation buttons beside
+     the fixed expiry/Strike spine at every horizontal and vertical position. */
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .oc-side-nav-overlay {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: var(--chain-sticky-viewport-width, 100%) !important;
+    height: 0 !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    z-index: 48 !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .oc-side-nav-overlay__button {
+    position: absolute !important;
+    top: 0 !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    width: min(120px, calc((100% - var(--chain-strike-width, 112px)) / 2)) !important;
+    height: 34px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    background: transparent !important;
+    font: 700 var(--text-dense, 12px)/1 var(--font-sans) !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .oc-side-nav-overlay__button.is-call {
+    right: calc(50% + var(--chain-strike-width, 112px) / 2) !important;
+    color: var(--down-ink) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .oc-side-nav-overlay__button.is-put {
+    left: calc(50% + var(--chain-strike-width, 112px) / 2) !important;
+    color: var(--up-ink) !important;
+  }
+
+    #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .oc-side-nav-overlay__button:focus-visible {
+    background: color-mix(in srgb, currentColor 8%, transparent) !important;
+    outline: none !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='on']
+  .chain-side-nav-th .chain-side-nav-button[aria-hidden='true'] .chain-side-nav-label {
+    visibility: hidden !important;
+  }
+
+  /* A focused Call- or Put-only book can still be wider than the phone.
+     Keep its active side chip centred in the visible table viewport while
+     the metrics move underneath, just like the persistent spot readout.
+     Centred with `translate`, not `transform`: a state rule that sets
+     `transform` (the press used to) replaces this one, and the chip jumped by
+     half its own width under the finger. */
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-horizontal-overflow='on']:not([data-table-view='straddle'])
+  .oc-side-nav-overlay__button {
+    left: 50% !important;
+    right: auto !important;
+    width: auto !important;
+    min-width: 132px !important;
+    translate: -50% 0 !important;
+  }
+
+  /* Keep the live-price marker as a separator, not a full empty table row. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row.spot-divider-spacious,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row.spot-divider-spacious .spot-divider {
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+  }
+
+  /* The SPOT divider spans the book, but its live value belongs to the Strike
+     spine. Pin the divider to the visible table viewport and place the compact
+     readout at the exact same inset/width used by every sticky strike cell. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider {
+    position: sticky !important;
+    left: 0 !important;
+    right: auto !important;
+    width: var(--chain-sticky-viewport-width, 100%) !important;
+    max-width: var(--chain-sticky-viewport-width, 100%) !important;
+    display: block !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 11 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-level-cluster--spot-only {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    z-index: 12 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider .spot-level-cluster--spot-only .oc-spot-center {
+    box-sizing: border-box !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    min-width: 148px !important;
+    height: 22px !important;
+    min-height: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 8px !important;
+    border: 1px solid var(--oc-grid-line-strong, var(--line)) !important;
+    border-radius: 6px !important;
+    background: var(--surface-raised, #1A1A1A) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .42) !important;
+    color: var(--text) !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+  }
+
+  :root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider .spot-level-cluster--spot-only .oc-spot-center {
+    border-color: var(--oc-grid-line-strong, #D3D3D3) !important;
+    background: var(--capital-white) !important;
+    box-shadow: 0 2px 6px rgba(26, 26, 26, .12) !important;
+    color: #1A1A1A !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider .spot-level-cluster--spot-only .oc-spot-center::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  :root:not([data-theme='light']) body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-down .spot-level-cluster--spot-only .oc-spot-center {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    background: var(--capital-white) !important;
+    color: var(--capital-black) !important;
+  }
+
+  :root:not([data-theme='light']) body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-up .spot-level-cluster--spot-only .oc-spot-center {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    background: var(--capital-white) !important;
+    color: var(--capital-black) !important;
+  }
+
+  :root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-down .spot-level-cluster--spot-only .oc-spot-center {
+    border-color: color-mix(in srgb, var(--down-ink) 54%, #D3D3D3) !important;
+    background: var(--capital-white) !important;
+  }
+
+  :root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-up .spot-level-cluster--spot-only .oc-spot-center {
+    border-color: color-mix(in srgb, var(--up-ink) 54%, #D3D3D3) !important;
+    background: var(--capital-white) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-change-points {
+    color: var(--text-muted);
+    font-family: var(--font-num, var(--font-sans)) !important;
+    font-variant-numeric: tabular-nums !important;
+    font-size: var(--chain-font-sm, 11px) !important;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-change-pct {
+    padding: 0 !important;
+    border: 0 !important;
+    font-family: var(--font-num, var(--font-sans)) !important;
+    font-variant-numeric: tabular-nums !important;
+    font-size: var(--chain-font-sm, 11px) !important;
+    font-weight: 700 !important;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-level-cluster--spot-only .oc-spot-price {
+    padding: 0 !important;
+    border: 0 !important;
+    color: var(--capital-black) !important;
+    font-family: var(--font-num, var(--font-sans)) !important;
+    font-variant-numeric: tabular-nums !important;
+    font-size: var(--chain-font-cell, 12px) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-up :is(.oc-spot-change-points, .oc-spot-change-pct) {
+    color: var(--up-ink) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .spot-divider.spot-down :is(.oc-spot-change-points, .oc-spot-change-pct) {
+    color: var(--down-ink) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table :is(td.strike-cell, th.th-strike, th.chain-side-expiry-th) {
+    /* Edge-sticky, not centre-pinned. The table scrolls natively; the Strike
+       rides in its natural place between the two LTPs and only pins once it
+       would otherwise leave the viewport — to the LEFT edge while reading
+       Puts, to the RIGHT edge while reading Calls.
+
+       It used to be pinned to the viewport centre. A centre-pinned sticky box
+       leaves its own natural slot blank, and at any scroll position away from
+       centre that blank slot is ON screen: a ~300px dead band (with the two
+       pinned LTPs) and the inner columns of one side showing through on the
+       other — Call prices under "Put Options". A JS lane engine used to paint
+       over that with per-cell transforms and clip-paths every frame, and any
+       drift in its bookkeeping exposed the band. Pinning to the edge the
+       Strike is crossing puts the vacated slot off-screen by construction,
+       so there is nothing to paint over. */
+    position: sticky !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 12 !important;
+    background-color: var(--surface) !important;
+    background-clip: padding-box !important;
+    border-inline: 1px solid var(--line) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table td.strike-cell {
+    z-index: 9 !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table th.chain-col-ltp {
+    z-index: 11 !important;
+    background: var(--surface) !important;
+    background-color: var(--surface) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table td.chain-col-ltp {
+    z-index: 8 !important;
+    background: var(--oc-grid-row) !important;
+    background-color: var(--oc-grid-row) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .chain-table .chain-row-even td.chain-col-ltp {
+    background: var(--oc-grid-row-alt) !important;
+    background-color: var(--oc-grid-row-alt) !important;
+  }
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-previous {
+  min-height: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  /* 10px is the repo's readable-type floor (scripts/audit-font-sizes.mjs
+     gates the build on it); 9px here failed that audit. */
+  font-family: var(--font-num, var(--font-sans));
+  font-variant-numeric: tabular-nums;
+  font-size: var(--chain-font-xs, 10px);
+  font-weight: 600;
+  letter-spacing: .025em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-previous b {
+  color: var(--text-secondary, var(--text-muted));
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 700 !important;
+}
+
+/* Compact proportional bars for the standalone OI and OI Change columns. */
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-inline-profile-cell {
+  box-sizing: border-box !important;
+  min-width: 84px !important;
+  padding: 5px 9px !important;
+  vertical-align: middle !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-inline-change-cell {
+  min-width: 112px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.is-compact {
+  width: 100% !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.is-compact .oc-profile-value-line {
+  min-height: 13px !important;
+  justify-content: flex-start !important;
+  white-space: nowrap !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.is-compact .oc-profile-track {
+  height: 10px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.oc-profile-kind-change.is-positive {
+  --oc-profile-tone: var(--up-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.oc-profile-kind-change.is-negative {
+  --oc-profile-tone: var(--down-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-meter.oc-profile-kind-change.is-flat {
+  --oc-profile-tone: var(--text-muted);
+}
+
+/* Mobile lane gestures are vertical-first. Horizontal intent is handled by
+   OptionChainTable so Call and Put can mirror around the fixed Strike spine. */
+@media (max-width: 768px) {
+  #root > .app.app[data-active-tab='chain'] .dashboard-body {
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table .chain-row td {
+    height: var(--chain-row-h, 52px) !important;
+    min-height: var(--chain-row-h, 52px) !important;
+    padding-inline: 8px !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .oc-side-nav-overlay__button {
+    width: calc((100% - var(--chain-strike-width, 112px)) / 2) !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    padding-inline: 8px !important;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 24%, var(--line)) !important;
+    background: color-mix(in srgb, currentColor 7%, var(--surface-raised)) !important;
+    font-size: var(--chain-font-cell, 12px) !important;
+  }
+
+  #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-horizontal-overflow='on']:not([data-table-view='straddle'])
+  .oc-side-nav-overlay__button {
+    height: 40px !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-row th {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root > .app.app[data-active-tab='chain'] .oc-side-nav-overlay__button {
+    transition: none !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table :is(
+    .ui-oicell__bar,
+    .ui-oicell__seg,
+    .ui-volcell__bar,
+    .ui-volcell__seg,
+    .ui-bucell__bar
+  ) {
+    transition: none !important;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container {
+    scroll-behavior: auto !important;
+  }
+}

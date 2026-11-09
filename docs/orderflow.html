@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Flow — every F&amp;O underlying read from its future | NSE Value Lens</title>
+<meta name="description" content="Every NSE F&O underlying read from its future after each close: move, open-interest build-up, five conviction checks, strength, option support and resistance. Maths from MrChartist/order-flow, backtested on 300 sessions of NSE bhavcopy.">
+<link rel="stylesheet" href="swing.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="orderflow.css?v=1">
+<script src="vl-chart.js" defer></script>
+<script src="orderflow.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell of-shell">
+<header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="orderflow.html" aria-current="page"><strong>Order Flow</strong></a><a href="quantmath.html">Bot Maths</a><a href="nifty.html">Nifty 50</a><a href="fund.html">Our Fund</a><a href="confluence.html">Top Picks</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="dma.html">DMA</a><a href="fno-play.html">₹1 Play</a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="indicator-lab.html">Lab</a></nav></header>
+
+<main>
+<section class="of-head">
+  <div>
+    <div class="eyebrow">ORDER FLOW · EVERY NSE F&amp;O UNDERLYING · READ FROM ITS FUTURE</div>
+    <h1>Where the money moved <small id="of-date"></small></h1>
+    <p class="fd-note" id="of-status">Loading…</p>
+  </div>
+  <div class="of-switch" role="group" aria-label="Universe">
+    <button type="button" data-u="all" class="on">All F&amp;O</button><button type="button" data-u="n50">Nifty 50</button>
+  </div>
+</section>
+
+<section class="of-spread" aria-label="Every underlying by its move"><div id="of-spread"></div><p class="fd-note" id="of-spread-note"></p></section>
+
+<section class="of-board">
+  <div class="of-left">
+    <h2 class="fd-h2">Sectors <small>median move</small></h2>
+    <div id="of-sectors" class="of-sectors"></div>
+    <h2 class="fd-h2">Build-up</h2>
+    <div id="of-buildups" class="of-buildups"></div>
+  </div>
+  <div class="of-right">
+    <div class="of-side bull"><h2>Bullish <small id="of-n-bull"></small></h2><div id="of-bull" class="of-tiles"></div></div>
+    <div class="of-zero"><span>0% · rangebound <b id="of-n-flat"></b></span></div>
+    <div class="of-side bear"><h2>Bearish <small id="of-n-bear"></small></h2><div id="of-bear" class="of-tiles"></div></div>
+  </div>
+</section>
+
+<section class="of-detail" id="of-detail" hidden>
+  <div class="of-detail-head"><div><h2 id="od-title"></h2><p id="od-sub" class="fd-note"></p></div><span id="od-badge" class="of-badge"></span></div>
+  <div class="of-kv" id="od-kv"></div>
+  <ul class="of-checks" id="od-checks"></ul>
+  <p id="od-why" class="of-why"></p>
+  <div id="od-chart" class="of-chart"></div>
+  <p class="fd-note" id="od-chart-note"></p>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">All underlyings <small id="of-table-sub"></small></h2>
+  <div class="of-filters"><label>Search<input id="of-q" type="search" placeholder="Symbol or sector"></label>
+  <label>Side<select id="of-side"><option value="">All</option><option>bullish</option><option>bearish</option><option>rangebound</option></select></label>
+  <label>Build-up<select id="of-bu"><option value="">All</option><option value="LONG_BUILD">Long build-up</option><option value="SHORT_COVER">Short covering</option><option value="SHORT_BUILD">Short build-up</option><option value="LONG_UNWIND">Long unwinding</option></select></label></div>
+  <div class="fd-wrap of-scroll"><table class="fd-table" id="of-table"></table></div>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">Did the readings make money the next session? <small id="of-bt-sub"></small></h2>
+  <p class="of-verdict" id="of-bt-verdict"></p>
+  <div class="fd-wrap"><table class="fd-table" id="of-bt"></table></div>
+  <p class="fd-note" id="of-bt-note"></p>
+</section>
+
+<section class="section">
+  <h2 class="fd-h2">How it is read</h2>
+  <ol class="fd-rules" id="of-method"></ol>
+  <h3>What a bhavcopy cannot show</h3>
+  <ul class="fd-limits" id="of-na"></ul>
+  <h3>Limits</h3>
+  <ul class="fd-limits" id="of-limits"></ul>
+  <p class="fd-note" id="of-credit"></p>
+</section>
+</main>
+
+<footer><span>NSE VALUE LENS / ORDER FLOW</span><p>Order-flow maths from <a href="https://github.com/MrChartist/order-flow">MrChartist/order-flow</a> (Required Notice: Copyright (c) 2026 Mr. Chartist, PolyForm Noncommercial 1.0.0). Paper research. Not SEBI-registered advice. No orders are placed by this website. <a href="https://github.com/originaonxi/nse-value-lens">Source code</a></p></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+/* ONE RHYTHM FOR EVERY TOOL (owner, 10 Oct: "that container always needs to
+   be equal in all the places"), desktop and phone alike.
+
+   Under the site header and the page bar, every tool sits on the same 12px
+   side gutter, and the page bar, the insight bar and the main box are 12px
+   apart. Measured before this sheet: gaps of 0, 8, 12 and 16px and gutters of
+   0, 8, 14, 16 and 20px, one set per tool wrapper. Loaded last (main.tsx). */
+
+:root {
+  --tool-gutter: 12px;
+  --tool-gap: 12px;
+}
+
+/* The tools that draw inside a page wrapper. */
+:root[data-theme] body #root#root > .app.app :is(.ui-oi-page, .ui-gex-page, .ui-iv-page, .sb-workspace, .os-workspace) {
+  padding-top: var(--tool-gap) !important;
+  padding-inline: var(--tool-gutter) !important;
+  row-gap: var(--tool-gap) !important;
+}
+/* IV draws its page bar inside its wrapper and pulls it back to the edges. */
+:root[data-theme] body #root#root > .app.app .ui-iv-page > .ui-pagebar {
+  margin: calc(-1 * var(--tool-gap)) calc(-1 * var(--tool-gutter)) 0 !important;
+}
+/* Inside a wrapper the insight bar takes the wrapper's gutter, not its own. */
+:root[data-theme] body #root#root > .app.app :is(.ui-oi-page, .ui-gex-page, .ui-iv-page) > .ui-aisum {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+/* The Option Chain has no wrapper: its insight bar and box carry the rhythm. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .dashboard-body > .ui-aisum {
+    width: auto !important;
+    margin: var(--tool-gap) var(--tool-gutter) var(--tool-gap) !important;
+  }
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  margin-inline: var(--tool-gutter) !important;
+  margin-bottom: var(--tool-gutter) !important;
+}
+
+/* The Trader Cockpit's canvas. Its margin is the gap the reader chose between widgets (View, Gap), so the
+   outer edge and the gaps read the same; it falls back to the tool rhythm. */
+:root[data-theme] body #root#root > .app.app .tw-canvas {
+  margin: var(--tw-outer, var(--tool-gap)) var(--tw-outer, var(--tool-gutter)) !important;
+}
+
+/* THE INSIGHT BAR, CLOSED: a 44px capsule on every tool and every width
+   (owner, 10 Oct: thinner, capsule-like), the height of the page-bar
+   buttons. Opened, it is a card again. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.is-min {
+  border-radius: 999px !important;
+}
+@media (min-width: 769px) {
+  :root[data-theme] body #root#root > .app.app .ui-aisum.is-min > .ui-aisum__head {
+    /* Full width, so the dropdown sits in the bar's right-hand corner on
+       every tool (owner, 10 Oct 2026), not after the last word. */
+    width: 100% !important;
+    box-sizing: border-box;
+    flex-wrap: nowrap !important;
+    min-height: 42px !important;
+    padding-block: 0 !important;
+    padding-inline: 16px 6px !important;
+    overflow: hidden;
+  }
+}
+/* Its control: a dropdown chevron on desktop, where the reading opens in
+   place; an arrow on a phone, where it opens as a sheet. */
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app .ui-aisum.is-min .ui-aisum__toggle svg {
+    transform: rotate(-90deg) !important;
+  }
+}
+
+/* The Scanner's filter band runs edge to edge: it pulls out by exactly the gutter and pads back in by the
+   same, so its controls line up with the heading below at every width (at 768px and under the band's own
+   padding was 0, and the controls touched the screen edge). */
+:root[data-theme] body #root#root > .app.app .os-workspace > .os-ct-bar {
+  margin-inline: calc(-1 * var(--tool-gutter)) !important;
+  padding-inline: var(--tool-gutter) !important;
+}
+
+/* A tool build (npm run build:tools) has no site header above it: the page
+   opens on the same gap that separates everything else. */
+:root[data-theme] body #root#root > .app.app[data-tool-build] {
+  padding-top: var(--tool-gap, 12px);
+}
+/* The Trader Cockpit's own toolbar is its top edge: no gap above it. */
+:root[data-theme] body #root#root > .app.app[data-tool-build]:has(.tw-terminal) {
+  padding-top: 0;
+}
+
+/* THE VERDICT reads as a sentence, not a shouted chip (owner, 10 Oct 2026:
+   "easier to read for laymen"): "Bullish indications · puts added, calls
+   cut" in normal case at 12px, on one line, on every tool. Phones already
+   set it this way (website-tool-chrome.css). */
+@media (min-width: 769px) {
+  :root[data-theme] body #root#root > .app.app .ui-aisum.is-min .ui-aisum__verdict {
+    font-size: var(--chain-font-cell, 12px) !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* THE CLOSED INSIGHT BAR, ONE LINE ON EVERY TOOL AND EVERY WIDTH (owner,
+   10 Oct 2026: "optimized for all the devices so they do not hide everything
+   in one go … the dropdown always in the right corner").
+
+   - The dropdown is pinned to the bar's right corner, out of the flow, so no
+     figure can push it along or wrap it away.
+   - Everything else is one wrapping flex line exactly one row tall, clipped
+     below. A flex line breaks at the first item that no longer fits, so as the
+     bar narrows the figures drop off one at a time, last in priority first,
+     and whatever shows is always whole. No ellipsis, and no breakpoint per tool.
+   - Priority: symbol, name, verdict (never dropped), then the figure chips,
+     the Puts − Calls moves, the as-of stamp and the gist.
+
+   Before this, Open Interest, Spurts and the Heatmap broke the row in two
+   between 901 and 1320px (oi-controls.css) while the bar was held to one
+   row, so every figure vanished at once and the dropdown sat right after
+   the verdict. The phone hid every figure outright (ui-phone-polish.css).
+   Cockpit widgets keep their own layout. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head {
+  --ins-row: 42px;
+  --ins-gap: 8px;
+  position: relative !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  align-content: flex-start !important;
+  column-gap: var(--ins-gap) !important;
+  row-gap: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  height: var(--ins-row) !important;
+  min-height: 0 !important;
+  padding-block: 0 !important;
+  padding-inline: 16px 42px !important;
+  overflow: hidden !important;
+}
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head {
+    --ins-row: 44px;
+    padding-inline-start: 12px !important;
+  }
+}
+/* The line's height: a zero-width strut one row tall, so every item centres
+   on the bar and anything that wraps lands below it, out of sight. Its
+   negative margin cancels the gap it would add. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head::before {
+  content: '' !important;
+  display: block !important;
+  order: -1 !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  height: var(--ins-row) !important;
+  margin-inline-end: calc(-1 * var(--ins-gap)) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head::after {
+  content: none !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > :is(.ui-symbol-mark, .ui-aisum__mark, .ui-aisum__name, .ui-aisum__verdict) {
+  order: 0 !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > :is(.chain-insight__head-chips, .ui-insight-move) {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .chain-insight__head-chips { order: 3 !important; }
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .ui-insight-move { order: 4 !important; }
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head :is(.chain-insight__chip, .ui-insight-move__cell, .ui-insight-move__label) {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > :is(.chain-local-insight__stamp, .ui-aisum__gist) {
+  display: block !important;
+  flex: 0 0 auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .chain-local-insight__stamp { order: 5 !important; }
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .ui-aisum__gist { order: 6 !important; }
+/* The dropdown, in the corner. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .ui-aisum__end {
+  position: absolute !important;
+  inset: 0 6px 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  order: 0 !important;
+}
+/* Where the whole row is the tap target (phones, touch), the toggle's
+   invisible layer used to resolve against the head; with the dropdown now
+   positioned it resolves against the corner, so it reaches back across the
+   whole bar instead. The head's overflow clips it to the bar. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .ui-aisum__end .ui-aisum__toggle::before {
+  inset: 0 0 0 auto !important;
+  width: 200vw !important;
+}
+/* The verdict's tail ("· puts added, calls cut", "indications") prints in
+   full wherever the bar has room. The heatmap's tail carries its own " · ". */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head .chain-insight__verdict-tail {
+  display: inline !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min.ui-hm-insight:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head .chain-insight__verdict-tail {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* A phone-narrow bar has no room for a figure beside the verdict, and the
+   verdict is the point of the row: it drops its tail whole, and if the lean
+   alone still cannot fit it shortens rather than disappearing. */
+@container (max-width: 440px) {
+  :root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head .chain-insight__verdict-tail {
+    display: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > :is(.chain-insight__head-chips, .ui-insight-move, .chain-local-insight__stamp, .ui-aisum__gist) {
+    display: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) > .ui-aisum__head.ui-aisum__head > .ui-aisum__verdict {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: max-content !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+/* The bar measures itself for the rule above. The phone capsule had turned
+   this off (website-tool-chrome.css); it is a fixed 100% wide now, so the
+   containment cannot collapse it. */
+:root[data-theme] body #root#root > .app.app .ui-aisum.ui-aisum.is-min:not(.tw-widget .ui-aisum) {
+  container-type: inline-size !important;
+}

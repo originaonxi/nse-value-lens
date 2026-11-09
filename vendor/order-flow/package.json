@@ -1,0 +1,79 @@
+{
+  "name": "order-flow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Order Flow: a live board of where the money is flowing across Indian F&O, read from every underlying's future. Built-in demo market; plug in any broker API.",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": {
+    "name": "Mr. Chartist",
+    "url": "https://mrchartist.com"
+  },
+  "homepage": "https://github.com/MrChartist/order-flow#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrChartist/order-flow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MrChartist/order-flow/issues"
+  },
+  "keywords": [
+    "nse",
+    "bse",
+    "fno",
+    "futures",
+    "options",
+    "open-interest",
+    "nifty",
+    "order-flow",
+    "trading",
+    "india",
+    "market-data"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:recorded": "node scripts/dev.mjs --recorded",
+    "dev:archive": "node scripts/dev.mjs --archive",
+    "dev:web": "vite",
+    "api": "node server/index.mjs",
+    "build": "tsc -b && vite build",
+    "start": "node server/index.mjs",
+    "start:recorded": "node server/index.mjs --recorded",
+    "start:archive": "node server/index.mjs --archive",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "check:provider": "node server/checkProvider.mjs",
+    "record": "node scripts/record-session.mjs",
+    "fetch:nse": "node scripts/fetch-nse-archive.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "motion": "^12.41.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "jsdom": "^29.1.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.8"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
+}

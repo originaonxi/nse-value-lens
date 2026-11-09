@@ -1,0 +1,113 @@
+/*
+ * Shared segmented-control authority.
+ *
+ * Every workspace view selector uses this one flat, macOS-style hairline
+ * treatment. New tabs should render `.ui-seg__track` with radio buttons
+ * rather than adding a page-specific segmented control.
+ *
+ * `--surface-sunken` / `--surface-raised` come from the `.oi-design` alias
+ * layer, so both carry a :root-level fallback — a segmented control also
+ * renders in the PageBar, which is outside that scope.
+ *
+ *
+ * ── TWO JOBS, TWO TREATMENTS ────────────────────────────────────────────────
+ *
+ * A segmented control does one of two things, and the reference standard we
+ * are held to draws the line sharply:
+ *
+ *   TEXT variant  (`.ui-seg--text`, or `[data-seg='text']`)
+ *     PAGE-LEVEL navigation — "F&O | Stocks | Commodities | Research | IPO".
+ *     No pill, no border, no track. Active is carried by weight plus a short
+ *     underline under the label. The row is short because there is no chrome
+ *     at all; the tap target is the full-height button box, not the paint.
+ *
+ *   CHIP variant  (`.ui-seg--chips`, or `[data-seg='chips']`)
+ *     IN-CARD metric switching — "Price | OI | Change in OI | PCR".
+ *     These ARE pills: rounded rect, 1px border, transparent fill, active =
+ *     brighter border and brighter text. The TRACK still carries no chrome of
+ *     its own, so a chip is never a pill inside a pill inside a bar.
+ *
+ * Never mix them. A control that changes which PAGE you are on is text; a
+ * control that changes which NUMBER a card shows is chips.
+ *
+ * The unmarked track keeps the legacy hairline-track look so that nothing
+ * regresses while views migrate. New views should pick a variant.
+ *
+ *
+ * ── HOW A CONSUMER TUNES THIS SHEET ─────────────────────────────────────────
+ *
+ * This file's selectors are (1,5,2) and up: nothing in a feature sheet can
+ * outrank them, which previously meant feature sheets had to write around the
+ * heights pinned here (see the comments in `open-interest-flow.css`, which
+ * sizes its phone tab rail to 32px specifically because this file pinned 32px
+ * from a selector it could not beat).
+ *
+ * So no geometry is pinned as a literal any more. Every value this sheet sets
+ * is `var(--ui-seg-*, <today's value>)` and the sheet never DECLARES those
+ * custom properties. A feature sheet therefore retunes any of them from any
+ * specificity it likes — there is no competing declaration to outrank:
+ *
+ *   .ui-pagebar.oi-design .ui-seg__track {
+ *     --ui-seg-track-min: 36px;
+ *     --ui-seg-btn-min: 32px;
+ *   }
+ *
+ * Knobs: --ui-seg-track-min, --ui-seg-btn-min (coarse-pointer floors),
+ * --ui-seg-btn-min-mobile (<=768 target box), --ui-seg-paint (<=768
+ * painted chrome height), --ui-seg-underline-w / --ui-seg-underline-inset
+ * / --ui-seg-underline-gap (text variant), --ui-seg-chip-radius.
+ */
+
+/* Hover washes are pointer-only (convention in ui-motion.css): a tapped
+   segment otherwise keeps the wash until the next tap lands elsewhere. */
+
+/* PageBar pins these segments at 24px, which misses on a finger. Raised from
+   the shared authority so every track that adopts this sheet clears the
+   touch floor at once.
+
+   These are the values that used to be literals. The fallbacks are byte-for-
+   byte what this sheet enforced before, so an unmodified consumer renders
+   exactly as it did; a consumer that wants a different rail now sets the
+   custom property instead of trying — and failing — to outrank (1,5,2). */
+
+/* ── R2 — the text tab strip (page-level navigation) ─────────────────────────
+ *
+ * Text only. The track is an invisible rail, the buttons have no box, and the
+ * selected tab is weight + a short underline. Because there is no chrome the
+ * row can be short while the button box stays tall enough to hit.
+ */
+
+/* ── R3 — the bordered chip strip (in-card metric switching) ─────────────────
+ *
+ * Rounded rect, 1px border, transparent fill. The chip is the ONLY painted
+ * box: the track around it drops its border and its sunken fill, which is what
+ * kills the "pill inside a pill inside a bar" stack.
+ */
+
+/* ── Mobile: slim paint, full target ────────────────────────────────────────
+ *
+ * 768 is the contract's mobile boundary (§7). Both variants keep the painted
+ * chrome slim while the interactive box stays at `--tap-min`.
+ *
+ * The technique matters. These strips are `overflow-x: auto` on a phone, and a
+ * pseudo-element that expands OUTWARD to grow a target is clipped by that
+ * scroller — the target silently shrinks back to the painted size. So the
+ * BOX carries the height (`min-height: --tap-min`) and the PAINT is pulled
+ * inward: the text variant paints nothing at all, and the chip variant paints
+ * its border on an inward-inset `::before` rather than on the 44px box.
+ *
+ * Only the two variants are touched. The unmarked legacy track is left exactly
+ * as it renders today, because `PageBar.css` and `open-interest-flow.css` both
+ * paint their own phone rails on it and re-inflating those rows from here
+ * would undo work this sheet cannot see.
+ */
+
+/* ── Analytics view switch ─────────────────────────────────────────────────
+ *
+ * The three OI workspaces use the Heatmap switch as their shared visual
+ * language: one quiet rail, equal-width labels, and a softly raised active
+ * surface.  This modifier is intentionally desktop/tablet-only.  On phones,
+ * Open Interest and OI Spurts keep their measured compact menu behaviour,
+ * while the Heatmap keeps its existing full-width, touch-sized switch.
+ */
+

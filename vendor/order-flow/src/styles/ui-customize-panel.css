@@ -1,0 +1,103 @@
+/* ==========================================================================
+   the app Customize Panel System (Table View & Column Customizer)
+   Official the app Charts Design System Specification
+   ========================================================================== */
+
+/* ---------------- Panel Container ---------------- */
+.ui-customize-panel {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(85vh - 60px);
+  max-height: calc(85dvh - 60px);
+  display: flex;
+  flex-direction: column;
+  /* `--surface-card` / `--surface-sunken` / `--surface-active` are published
+     ONLY under `.oi-design` (contract §1.6). This panel is not inside that
+     scope, so every one of them needs a :root-resolvable fallback or the
+     declaration is invalid at computed-value time and the surface vanishes. */
+  background: var(--surface-card, var(--surface-raised));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg, 12px);
+  /* Popover / menu tier (contract §1.2). */
+  box-shadow: var(--shadow-4);
+  font-family: var(--font-sans);
+  color: var(--text);
+  z-index: 100;
+  overflow: hidden;
+  transform-origin: top right;
+}
+
+:root[data-theme="dark"] .ui-customize-panel,
+[data-theme="dark"] .ui-customize-panel {
+  background: var(--surface-card, var(--surface-raised));
+  border-color: var(--line);
+  box-shadow: var(--shadow-4);
+  color: var(--text);
+}
+
+/* ---------------- Header ---------------- */
+.scp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-card, var(--surface-raised));
+}
+
+:root[data-theme="dark"] .scp-header,
+[data-theme="dark"] .scp-header {
+  border-bottom-color: var(--line);
+  background: var(--surface-card, var(--surface-raised));
+}
+
+.scp-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scp-title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .scp-title,
+[data-theme="dark"] .scp-title {
+  color: var(--text);
+}
+
+.scp-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.scp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scp-reset-btn,
+.scp-close-btn {
+  border-radius: var(--radius-sm, 6px) !important;
+}
+
+/* ---------------- Body & Sections ---------------- */
+.scp-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  gap: 20px;
+}
+

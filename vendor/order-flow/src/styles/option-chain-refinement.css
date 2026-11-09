@@ -1,0 +1,192 @@
+/* Option Chain refinement: explicit trade intent, honest data states, and
+   keyboard-complete table controls. Loaded last so it can safely unify the
+   earlier responsive layers without rewriting them. */
+
+.app[data-active-tab='chain'] :is(
+  .chain-side-nav-button,
+  .chain-sort-button,
+  .strike-header-button
+) {
+  display: flex;
+  align-items: center;
+  justify-content: inherit;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app[data-active-tab='chain'] .chain-side-nav-button,
+.app[data-active-tab='chain'] .strike-header-button {
+  justify-content: center;
+}
+
+.app[data-active-tab='chain'] .chain-sort-button {
+  gap: 4px;
+  justify-content: inherit;
+  white-space: nowrap;
+}
+
+
+
+/* The strike cell is read-only: the detail sheet opens from a leg's LTP
+   cell only, so it keeps the old button's box but not its pointer. */
+.app[data-active-tab='chain'] .strike-cell-body {
+  display: flex;
+  align-items: center;
+  justify-content: inherit;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 30px;
+}
+
+.app[data-active-tab='chain'] .strike-cell-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app[data-active-tab='chain'] .strike-cell-inner {
+  width: 100%;
+}
+
+/* Reference-style split moneyness controls. Each side owns one quiet,
+   reversible ITM toggle so the strike column never jumps when OTM data is
+   hidden. */
+
+.app.app[data-active-tab='chain'] .chain-table td.itm-filter-hidden {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  color: transparent !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app[data-active-tab='chain'] .metric-unavailable {
+  color: var(--text3) !important;
+  font-style: normal;
+  opacity: .82;
+}
+
+/* The expanded row is analysis-first. The order ticket appears only after
+   the user invokes Trade. */
+.app[data-active-tab='chain'] .detail-header-actions {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+/* The detail sheet's header actions are in-flow, laid out by the studio's own
+   header (see ui-strike-studio-authority.css). They were absolutely pinned
+   to the sheet's top-right corner here, which left no room for the position
+   capsule that now sits beside the close button. */
+
+
+/* Full live-spot control deck: keep moneyness, support, resistance, and
+   live-price signals together without sacrificing their individual roles. */
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious,
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious td,
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-spacious .spot-divider {
+  height: 52px !important;
+  min-height: 52px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  border-top-color: rgba(64, 232, 151, .18) !important;
+  border-bottom-color: rgba(64, 232, 151, .18) !important;
+  background: rgba(0, 0, 0, .94) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 16px !important;
+  overflow: visible !important;
+}
+
+/* Cluster placement lives in ui-market-levels.css. The grid-column: auto in
+ * this block was the actual bug: it outranked ui-unified-nav's
+ * grid-column: 2 and dropped the cluster into the divider's 64px side track. */
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  min-width: 252px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid rgba(254, 163, 229, .20);
+  border-radius: 5px;
+  background: rgba(61, 9, 32, .94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 6px 16px rgba(0, 0, 0, .16);
+  color: rgba(254, 241, 250, .96);
+  font-family: var(--font-num, var(--font-sans));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-label {
+  color: rgba(254, 163, 229, .84);
+  font-size: var(--chain-font-sm, 11px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-price {
+  color: #FEF1FA;
+  padding: 0 9px;
+  border-inline: 1px solid rgba(254, 163, 229, .16);
+  font-family: var(--font-num, var(--font-sans));
+  font-variant-numeric: tabular-nums;
+  font-size: var(--chain-font-lg, 14px);
+  font-weight: 700;
+  letter-spacing: -.006em;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-change-pct {
+  font-family: var(--font-num, var(--font-sans));
+  font-variant-numeric: tabular-nums;
+  font-size: var(--chain-font-sm, 11px);
+  font-weight: 700;
+}
+
+
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  border-top-color: rgba(8, 149, 90, .18) !important;
+  border-bottom-color: rgba(8, 149, 90, .18) !important;
+  background: #EEFDF5 !important;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-center {
+  border-color: rgba(61, 9, 32, .12);
+  background: var(--capital-white);
+  box-shadow: 0 2px 8px rgba(61, 9, 32, .07);
+  color: var(--capital-black);
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-price {
+  color: var(--capital-black);
+}
+
+

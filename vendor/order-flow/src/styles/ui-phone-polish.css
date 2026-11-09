@@ -1,0 +1,239 @@
+/*
+ * PHONE POLISH — the last pass, presentation only
+ * ===========================================================================
+ * Loaded after component sheets. Nothing here changes what a page says or
+ * does; it only tidies how the existing parts sit at phone width (≤768px).
+ *
+ *   1. Chrome   Denser header glass keeps market data readable.
+ *               The floating navigation island is owned by MobileNav.css.
+ *   2. Insight  5m · 15m · Today stay together as one unit. When the card
+ *               also carries figure chips, the unit drops to the next line
+ *               whole instead of leaving "5m —" stranded on its own.
+ *   3. IV       Card captions wrap to two lines instead of ending in "…".
+ *   4. Spurts   The plot card can no longer push the page 2px sideways.
+ */
+@media (max-width: 768px) {
+  /* 1 ── Header glass ───────────────────────────────────────────────────────── */
+
+  /* 2 ── Insight card: the movement trio is one unit ────────────────── */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head.ui-aisum__head:has(.ui-insight-move):has(.chain-insight__head-chips)
+    .ui-insight-move {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    align-items: baseline;
+    gap: 10px;
+    order: 6 !important;
+    white-space: nowrap;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum:is(.is-min, .is-open)
+    > .ui-aisum__head.ui-aisum__head:has(.ui-insight-move):has(.chain-insight__head-chips)
+    .ui-insight-move > * {
+    order: 0 !important;
+  }
+
+  /* 4 ── OI Spurts plot card ────────────────────────────────────────── */
+  .ui-sp-page > section:last-of-type > .ui-oi-card.is-plot {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  /* Give intervals their own row so chart actions cannot hide them. */
+  .ui-pane-tools {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-inline: 8px;
+    gap: 4px 8px;
+  }
+  .ui-pane-tools > .ui-pane-capsule {
+    order: 0;
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-right: 0;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y pinch-zoom;
+    scrollbar-width: thin;
+  }
+  .ui-pane-tools > .ui-pane-capsule .ui-capsule__option {
+    flex: 1 0 40px;
+    padding-inline: 6px;
+    min-width: 40px;
+  }
+  .ui-pane-tools > .ui-pane-window { order: 1; margin-right: 0; }
+  .ui-pane-tools > .ui-pane-tools__end {
+    order: 1;
+    position: static;
+    flex: 0 0 auto;
+    padding-left: 0;
+    background: none;
+  }
+  .ui-pane-tools .ui-pane-icon { width: 44px; height: 44px; }
+
+  /* A compact menu must still have a complete touch target on phones. */
+  .ui-pagebar .ui-oi-viewmenu__trigger,
+  .ui-pagebar .ui-oi-viewmenu__pop button { min-height: 44px; }
+  .ui-pagebar .ui-oi-viewmenu__trigger { border: 0; background: transparent; box-shadow: none; }
+
+  /* iOS zooms into smaller editable fields and leaves the workspace enlarged. */
+  :root[data-theme] body #root > .app.app :is(
+    input:not([type]), input[type='text'], input[type='search'],
+    input[type='number'], input[type='date'], input[type='time'], textarea, select
+  ),
+  :root[data-theme] body :is([role='dialog'], [role='listbox']) :is(
+    input:not([type]), input[type='text'], input[type='search'],
+    input[type='number'], input[type='date'], input[type='time'], textarea, select
+  ) { font-size: 16px; }
+
+  /* 6 ── Index ticker: fade at both edges, so a moving name is never
+       sliced hard mid-letter ("ENSEX"). Fade only; nothing is hidden. */
+  .ui-static-index-header .ui-index-market-strip.is-ticker .ui-index-market-strip__links {
+    -webkit-mask-image: linear-gradient(to right, transparent, #0F0F0F 18px, #0F0F0F calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to right, transparent, #0F0F0F 18px, #0F0F0F calc(100% - 18px), transparent);
+  }
+
+  /* 7 ── Header: a clearer, calmer top bar ────────────────────────────
+       Denser pane so the page never competes with the figures, a soft
+       hairline at rest (the bar reads as a bar, not a floating strip), a
+       compact instrument chip, and a hairline between the identity
+       row and the index tape so the two rows read as two things. */
+  /* Quotes are one continuous tape. The shared index capsule rule belongs
+     to the desktop header and workspace sheet, not these moving readings. */
+  /* Fade the readings gently as they enter and leave the ticker. */
+  /* The price is the anchor; point and percentage moves keep their colour. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .ui-pagebar {
+    height: 48px;
+    min-height: 48px;
+  }
+  /* Every Customise sheet is modal. Its page-bar stacking context must
+     clear the dock on all workspaces, including bars hidden at rest. */
+  :root[data-theme] body #root > .app.app .ui-pagebar:is(:has(.ui-customize-panel), :has(.settings-popup-backdrop--customize)) {
+    z-index: 40000;
+  }
+  :root[data-theme] body #root#root > .app.app .workspace-columns-host .ui-customize-panel .scp-close-btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  /* The dock is below the modal, so its old clearance is empty space here.
+     Keep one safe-area inset on the sheet, and contain the inner scroll. */
+  :root[data-theme] body #root > .app.app .workspace-columns-host .ui-customize-panel .scp-body {
+    --scp-body-bottom: 20px;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-block: 12px;
+  }
+
+  /* Share spare room by label width. Equal fifths clipped "Custom" and
+     longer presets; at the narrow limit the complete choices can pan. */
+  :root[data-theme] body #root > .app.app .ui-customize-panel .ui-capsule--fill.ui-capsule {
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 52px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  :root[data-theme] body #root > .app.app .ui-customize-panel .ui-capsule--fill.ui-capsule::-webkit-scrollbar {
+    display: none;
+  }
+  :root[data-theme] body #root > .app.app .ui-customize-panel .ui-capsule--fill.ui-capsule .ui-capsule__option {
+    flex: 1 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: 6px;
+  }
+  /* The insight already covers the dock. Use that space for the reading,
+     rather than retaining a second navigation-sized blank area inside it. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .ui-aisum.is-open .ui-aisum__body {
+    max-height: 84dvh;
+    padding: 24px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .ui-aisum__sheet-head {
+    position: sticky;
+    top: -24px;
+    z-index: 3;
+    margin: -4px -16px 0;
+    width: calc(100% + 32px);
+    padding: 8px 16px;
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* 9 ── The closed insight card: one slim row ──────────────────────────
+       Owner: inside the page, the card is only the indication — logo, name,
+       verdict — and small. The figure chips, 5m / 15m / Today, gist and
+       stamp are still in the card; they are one tap away in the opened
+       reading, and the closed row no longer spends three lines on them. */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    padding: 6px 10px !important;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head::after {
+    content: none !important;
+    display: none !important;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head
+    :is(.chain-insight__head-chips, .chain-insight__chip, .ui-insight-move,
+        .ui-insight-move__cell, .ui-insight-move__label,
+        .ui-aisum__gist, .chain-local-insight__stamp,
+        .ui-oi-inlineflow, .ui-pcr-inlineflow, .ui-straddle-inlineflow) {
+    display: none !important;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head :is(.ui-aisum__mark, .ui-aisum__name, .ui-aisum__verdict) {
+    order: 0 !important;
+  }
+  /* The verdict is the point of the row: it may shorten, never wrap. */
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head .ui-aisum__verdict {
+    flex: 0 1 auto !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum.ui-aisum.is-min
+    > .ui-aisum__head.ui-aisum__head .ui-aisum__end {
+    order: 10 !important;
+    align-self: center !important;
+    margin-left: auto !important;
+  }
+}
+/* A landscape phone has enough width for one chart-control row. Keeping
+   portrait's forced two rows put the plot and Full screen below the dock. */
+@media (min-width: 568px) and (max-width: 768px) and (max-height: 480px) {
+  .ui-pane-tools {
+    flex-wrap: nowrap;
+  }
+  .ui-pane-tools > .ui-pane-capsule {
+    flex: 1 1 auto;
+    width: auto;
+  }
+  .ui-pane-tools > .ui-pane-capsule .ui-capsule__option {
+    flex: 1 0 40px;
+  }
+  .ui-pane-tools > .ui-pane-window,
+  .ui-pane-tools > .ui-pane-tools__end {
+    flex: none;
+  }
+}
+@media (max-width: 480px) {
+  /* Room for the verdict: the caret stands for "View insight". The button
+     keeps its accessible name; only the visible words step aside. */
+}

@@ -1,0 +1,83 @@
+name: Order Flow and Bot Maths refresh
+run-name: Order Flow ${{ github.event.schedule || github.event.workflow_run.name || 'manual' }}
+on:
+  # NSE publishes the F&O bhavcopy in the evening; retries catch late files.
+  schedule:
+    - cron: '45 13 * * 1-5'   # 19:15 IST
+    - cron: '45 16 * * 1-5'   # 22:15 IST
+    - cron: '45 2 * * 2-6'    # 08:15 IST next morning
+  workflow_run:
+    workflows: ['EMA 105 F&O setup refresh']
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: order-flow-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Test the order-flow and bot-maths engines
+        run: python -m unittest tests.test_order_flow -v
+      - name: Read every F&O underlying from the latest NSE bhavcopy
+        run: python order_flow.py
+      - name: Apply the 48 bot-maths formulas to Nifty 50 and every F&O stock
+        run: python quant_math.py
+      - name: Check the output
+        run: python -m unittest tests.test_order_flow -v
+      - name: Commit
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/order_flow.json public/data/order_flow.json docs/quant_math.json public/data/quant_math.json data/order_flow data/nifty
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: order flow and bot maths run ${GITHUB_RUN_ID}"
+            for attempt in 1 2 3; do
+              git pull --rebase origin master
+              if git push origin HEAD:master; then break; fi
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 5
+            done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+  publish:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

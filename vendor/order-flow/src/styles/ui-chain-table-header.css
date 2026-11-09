@@ -1,0 +1,567 @@
+/*
+ * Option-chain orientation header
+ * --------------------------------------------------------------------------
+ * Final authority for the two-row table header: one quiet surface, semantic
+ * Call/Put edges, a clear expiry control and motion that never changes layout.
+ */
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] {
+  --oc-head-surface: var(--table-head-surface);
+  --oc-head-surface-hover: var(--surface-raised, #1F1F1F);
+  --oc-head-line: color-mix(in srgb, var(--line, #404040) 82%, transparent);
+  /* Was color-mix(--accent 68%, transparent). The ring is drawn `inset`, so
+     --oc-head-surface is the adjacent colour on BOTH sides; 68% of brand-600
+     composited on the dark head surface measures 2.02:1, under the 3:1 focus
+     floor, on all four keyboard-reachable header controls (side-nav, expiry,
+     sort, side-nav overlay). This is the same tint bug ui-colour-system.css
+     :140-144 swept when it made --accent-ring solid; this local token was
+     missed. Solid --accent-ring is 4.6:1 dark / 12.8:1 light. */
+  --oc-head-focus: var(--accent-ring, #E61C9A);
+  --oc-head-motion: var(--dur-quick, 180ms) var(--ease-ui-standard, cubic-bezier(.22, 1, .36, 1));
+  --oc-call-wash: color-mix(in srgb, var(--down-ink, #E35650) 5%, var(--oc-head-surface));
+  --oc-put-wash: color-mix(in srgb, var(--up-ink, #40E897) 5%, var(--oc-head-surface));
+}
+
+.oi-profile-heading__short {
+  display: none;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead {
+  background: var(--oc-head-surface) !important;
+  box-shadow: 0 1px 0 var(--oc-head-line) !important;
+}
+
+/* Read the header as three zones at a glance: Calls | Strike | Puts.  The
+   wash is intentionally quiet so values remain the dominant information. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-ce,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > .th-ce {
+  background-color: var(--oc-head-surface) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-pe,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > .th-pe {
+  background-color: var(--oc-head-surface) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-row > th {
+  position: relative;
+  box-sizing: border-box !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  cursor: default !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--oc-head-line) !important;
+  background: var(--oc-head-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-th::after {
+  display: none !important;
+}
+
+/* Straddle (combined) view's group header — neither Call-red nor Put-green,
+   since it is not a side; the app's own accent identifies it instead, same
+   token the Straddle analytics tab's IV line and ticker already use.
+   `chain-side-nav-group`, not `-combined`: the ROW itself already carries a
+   dynamic `chain-side-nav-${tableView}` class, which for this table view
+   resolves to the identical string `chain-side-nav-combined` — naming this
+   cell's own class the same way made `.chain-side-nav-combined` match the
+   whole row (and its expiry cell) as well as this one `<th>`. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-group::after {
+  background: var(--accent, #C80E7D);
+  transform-origin: center;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-static {
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The group cell spans every combined column (~1040px), so a label centred
+   in it sat ~600px in — off a phone screen, and past the right edge at 820,
+   until the reader panned. Size the label's box to the part of the header a
+   reader can see in front of the table (the scrollport minus the Strike
+   column; OptionChainTable measures and publishes both), and pin it with
+   sticky so the label stays on screen while the table pans. At 1440 the
+   visible part IS the whole cell, so the desktop header is unchanged. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-group .chain-side-nav-static {
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
+  width: min(100%, var(--chain-sticky-viewport-width, 100%) - var(--chain-strike-width, 0px));
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-th:has(.chain-side-nav-button:is(:focus-visible, [aria-pressed='true']))::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-button {
+  width: 100% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-button:focus-visible {
+  outline: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-ce .chain-side-nav-button:focus-visible {
+  background: color-mix(in srgb, var(--down-ink) 7%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-pe .chain-side-nav-button:focus-visible {
+  background: color-mix(in srgb, var(--up-ink) 7%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-button:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--oc-head-focus) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-label,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-link {
+  min-height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  white-space: nowrap;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-label-ce,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-label-pe {
+  color: var(--text) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-title {
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-weight: 700 !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-title-tail {
+  display: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-arrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  opacity: .72 !important;
+  transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-ce .chain-side-nav-button:focus-visible .chain-side-nav-arrow {
+  opacity: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-pe .chain-side-nav-button:focus-visible .chain-side-nav-arrow {
+  opacity: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-active-chip {
+  width: auto !important;
+  height: 30px !important;
+  padding: 0 6px 0 11px !important;
+  gap: 8px !important;
+  border: 1px solid color-mix(in srgb, currentColor 34%, transparent) !important;
+  border-radius: 7px !important;
+  color: inherit !important;
+  background: color-mix(in srgb, currentColor 7%, transparent) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-active-chip > span:first-child {
+  color: inherit !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-close {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+  color: currentColor !important;
+  background: color-mix(in srgb, currentColor 10%, transparent) !important;
+  opacity: .78 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-button:focus-visible .chain-side-nav-close {
+  opacity: 1 !important;
+}
+
+/* Desktop orientation: keep both side controls close to the expiry/strike
+   spine so the relationship is immediate instead of floating in each half. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-ce .chain-side-nav-button {
+    justify-content: center !important;
+    padding-right: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-pe .chain-side-nav-button {
+    justify-content: center !important;
+    padding-left: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-link {
+    min-width: 80px !important;
+  }
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table th.chain-side-expiry-th {
+  width: var(--chain-strike-width, 112px) !important;
+  min-width: var(--chain-strike-width, 112px) !important;
+  padding: 0 !important;
+  border-inline: 0 !important;
+  border-bottom: 1px solid var(--oc-head-line) !important;
+  background: var(--surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-expiry-wrap {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > th {
+  height: 34px !important;
+  min-height: 34px !important;
+  padding-block: 5px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--oc-head-line) !important;
+  background: var(--oc-head-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--text-secondary) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transition: color var(--oc-head-motion), background-color var(--oc-head-motion) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > th:not(.th-strike):has(.chain-sort-button:focus-visible) {
+  color: var(--text) !important;
+  background-color: color-mix(in srgb, currentColor 5%, var(--oc-head-surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-sort-button:focus-visible,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-header-button:focus-visible {
+  outline: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--oc-head-focus) !important;
+  border-radius: 4px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > th.th-strike {
+  border-inline: 1px solid var(--oc-grid-line-strong) !important;
+  background: var(--oc-grid-strike) !important;
+  color: var(--text) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-header-label {
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-header-sort::before {
+  content: '⫸⫷';
+  display: inline-block;
+  font-size: var(--chain-font-sm, 11px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  opacity: 0.85;
+  margin-left: 3px;
+}
+
+/* A slightly stronger bottom edge separates controls from streaming rows and
+   keeps the header readable when the data is moving underneath it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > th {
+  border-bottom-color: color-mix(in srgb, var(--oc-head-line) 78%, var(--text-muted)) !important;
+}
+
+/* When the real labels are pinned beside the sticky Strike spine, give the
+   overlay exactly the same visual and motion contract as the table row. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .oc-side-nav-overlay__button {
+  top: 0 !important;
+  height: 40px !important;
+  border: 0 !important;
+  border-bottom: 2px solid color-mix(in srgb, currentColor 66%, transparent) !important;
+  border-radius: 0 !important;
+  background: var(--oc-head-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+  .oc-side-nav-overlay__button:focus-visible {
+  background: color-mix(in srgb, currentColor 7%, var(--oc-head-surface)) !important;
+  outline: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--oc-head-focus) !important;
+}
+
+/* The overflow controls sit beside the table rather than inside it, so the
+   active chips need their own final authority. Without this, an older purple
+   specimen rule leaks into the mobile Call/Put-only state. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button.is-active {
+  border-bottom-width: 2px !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 18%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button.is-call.is-active {
+  background: color-mix(in srgb, var(--down-ink) 10%, var(--oc-head-surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button.is-put.is-active {
+  background: color-mix(in srgb, var(--up-ink) 10%, var(--oc-head-surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button .chain-side-nav-active-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  width: auto !important;
+  height: 30px !important;
+  padding: 0 6px 0 11px !important;
+  border: 1px solid color-mix(in srgb, currentColor 38%, transparent) !important;
+  border-radius: 7px !important;
+  background: color-mix(in srgb, currentColor 12%, var(--oc-head-surface)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button .chain-side-nav-active-chip > span:first-child {
+  color: inherit !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button .chain-side-nav-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent) !important;
+  border-radius: 5px !important;
+  background: color-mix(in srgb, currentColor 10%, transparent) !important;
+  color: currentColor !important;
+  opacity: .9 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .oc-side-nav-overlay__button:focus-visible .chain-side-nav-close {
+  background: color-mix(in srgb, currentColor 18%, transparent) !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading__full {
+    display: none !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading__short {
+    display: block !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading {
+    min-width: 0;
+    line-height: 1.05;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading > b {
+    font-size: var(--chain-font-sm, 11px) !important;
+    white-space: nowrap;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading > small {
+    margin-top: 2px;
+    font-size: var(--chain-font-xs, 10px) !important;
+    white-space: nowrap;
+  }
+
+  /* OI profile cells are wider than one mobile half-lane. Anchor their short
+     labels to the visible inner edge so neither heading starts off-canvas. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .th-ce .oi-profile-term-tip > .tt-label {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    left: auto;
+    text-align: right;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .th-pe .oi-profile-term-tip > .tt-label {
+    position: absolute;
+    top: 0;
+    right: auto;
+    left: 8px;
+    text-align: left;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-row > th,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-button,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-expiry-wrap,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+    .oc-side-nav-overlay__button {
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+
+  /* The pinned Call/Put switches are the phone's one-tap route to a
+     single-side book, so they take the 44px tap floor. The group above is the
+     rule that actually sizes them (it outranks the 44px that
+     ui-chain-selection-header.css states for the same buttons by two
+     attribute selectors); the header cells it also sizes stay at 42. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+    .oc-side-nav-overlay__button {
+    /* Match the expiry trigger's 2px row inset so the three controls read as
+       one aligned command bar. This selector outranks the same inset in
+       ui-chain-selection-header.css, so it has to carry the value too. */
+    top: 2px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-label,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-link,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='straddle'][data-strike-sticky='on']
+    .oc-side-nav-overlay__button {
+    font-size: var(--chain-font-cell, 12px) !important;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table :is(
+      .chain-side-nav-button,
+      .chain-side-nav-arrow,
+      .chain-side-nav-close
+    ),
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oc-side-nav-overlay__button {
+    transition: none !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-side-nav-th::after {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,407 @@
+/* Live market level — between-strikes treatment
+   The spot price belongs on its true market divider, between the surrounding
+   strikes. The row collapses to a hairline and its compact marker stays on the
+   Strike spine; it must never be replaced by a header-clamped floating copy. */
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious .spot-divider {
+  height: 2px !important;
+  min-height: 2px !important;
+  max-height: 2px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell {
+  position: relative !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table .spot-divider {
+  position: sticky !important;
+  left: 0 !important;
+  right: auto !important;
+  width: var(--chain-sticky-viewport-width, 100%) !important;
+  max-width: var(--chain-sticky-viewport-width, 100%) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border-top: 2px solid var(--oc-grid-line-strong, var(--line)) !important;
+  background: transparent !important;
+  z-index: 24 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table .spot-divider .spot-level-cluster--spot-only {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  z-index: 25 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table .spot-divider .oc-spot-center {
+  position: absolute !important;
+  top: 50% !important;
+  left: calc(var(--chain-strike-sticky-offset, 50%) + var(--chain-strike-width, 112px) / 2) !important;
+  transform: translate(-50%, -50%) !important;
+  box-sizing: border-box !important;
+  width: max-content !important;
+  min-width: 148px !important;
+  max-width: min(220px, calc(100vw - 24px)) !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--oc-grid-line-strong, var(--line)) !important;
+  background: var(--surface-raised, #1A1A1A) !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--capital-black) 22%, transparent) !important;
+  color: var(--text) !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-center {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  background: #FFFFFF !important;
+  color: #15020B !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .45) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-price {
+  color: #15020B !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider.spot-down :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  color: #C4342E !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider.spot-up :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  color: #116A40 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table .spot-divider .oc-spot-label {
+  display: none !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-center {
+  border-color: var(--oc-grid-line-strong, #D3D3D3) !important;
+  background: #FFFFFF !important;
+  color: #1A1A1A !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08) !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-price {
+  color: #1A1A1A !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider.spot-down :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  color: #AE2C27 !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider.spot-up :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  color: #0D5634 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table .spot-divider .oc-spot-wing-pill {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--oc-grid-line-strong, var(--line)) !important;
+  background: var(--surface-raised, #1A1A1A) !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--capital-black) 18%, transparent) !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  pointer-events: auto !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-wing-pill {
+  border-color: var(--oc-grid-line-strong, #272727) !important;
+  background: #1A1A1A !important;
+  color: #A3A3A3 !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky] .chain-table .spot-divider .oc-spot-wing-pill {
+  border-color: var(--oc-grid-line-strong, #D3D3D3) !important;
+  background: #FFFFFF !important;
+  color: #535353 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table .spot-divider .oc-spot-wing-pill {
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table .spot-divider .oc-wing-label {
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+}
+
+/* Keep the ATM/Max Pain cells on the same 57px grid as every other strike.
+   Older theme layers added a top border only to highlighted strike cells,
+   making that one cell a pixel taller and breaking the horizontal rules
+   immediately around the live-price divider. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table :is(.atm-row td.strike-cell, td.strike-cell.atm-strike, td.strike-cell.maxpain-strike) {
+  box-sizing: border-box !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+/* The market divider and strike grid now share one rule colour, avoiding a
+   darker segment through the center spine in either theme. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container[data-table-view='straddle'][data-strike-sticky]
+.chain-table .spot-divider {
+  border-top-color: var(--line) !important;
+}
+
+/* The real divider owns the only visible spot readout. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider .oc-spot-center {
+  visibility: visible !important;
+}
+
+/* A spot-only cluster has one child, so grid auto-placement used to put the
+   card into an outer lane (and, under RTL Call geometry, visibly into the Put
+   corner). Pin that child to the middle track: the Strike spine. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-level-cluster--spot-only {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-level-cluster--spot-only > .oc-spot-center {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  margin-inline: auto !important;
+}
+
+/* The compact marker only needs cash spot context. Forward-model disclosure
+   remains available elsewhere without overcrowding this precise level. */
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-label {
+  display: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-center {
+  box-sizing: border-box !important;
+  width: max-content !important;
+  min-width: 148px !important;
+  max-width: min(240px, calc(100vw - 24px)) !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  gap: 5px !important;
+  padding: 0 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--oc-grid-line-strong, var(--line)) !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--capital-black) 20%, transparent) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-price,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row :is(.oc-spot-change-points, .oc-spot-change-pct) {
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-price {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-market-move {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-center {
+  background: #FFFFFF !important;
+  color: #1A1A1A !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .oc-spot-center {
+  background: #FFFFFF !important;
+  color: #15020B !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-down .oc-market-move {
+  color: var(--down-ink) !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-up .oc-market-move {
+  color: var(--up-ink) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-down .oc-market-move {
+  color: var(--down-ink) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+.chain-table tr.spot-divider-row .spot-divider.spot-up .oc-market-move {
+  color: var(--up-ink) !important;
+}
+
+@media (max-width: 480px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider .oc-spot-center {
+    min-width: 142px !important;
+    height: 22px !important;
+    padding-inline: 7px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider .oc-spot-center {
+    transition: none !important;
+  }
+
+}
+/* Base row geometry moved here when the retired unified-navbar sheet was removed. */
+.app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious,
+.app.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious td,
+.app.app[data-active-tab='chain'] .chain-table .spot-divider-spacious .spot-divider {
+  height: 32px !important;
+  min-height: 32px !important;
+}
+
+/* The mobile Customise sheet owns the working surface. This rule sits beside
+   the spot authority so it wins the same specificity/layer cascade and keeps
+   the live market marker from painting across modal controls. */
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'][data-settings-open='true']
+  .chain-table tr.spot-divider-row .oc-spot-center {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+.app.app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  padding: 0 !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(245px, auto) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 32px !important;
+  padding: 0 16px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table .spot-divider::before,
+.app.app[data-active-tab='chain'] .chain-table .spot-divider::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PINNED LINE IS CHROME, SO IT HAS TO LOOK LIKE CHROME.
+   ───────────────────────────────────────────────────────────────────────────
+   The market line is a sticky row (ui-market-line-authority.css): scrolled
+   away from, it holds the top or bottom edge so the live price is never lost.
+   That part works. What did not is that it held those edges as a TRANSPARENT
+   overlay, so the readout parked in the middle of whatever strike happened to
+   be under it and swallowed that strike's ink. On a phone the first row below
+   the header is the one it lands on, which is how a reader ends up looking at
+   "VOL Resistance", a black pill and "MAX PAIN" with the strike itself, its
+   ATM badge and its figure simply gone.
+
+   A pinned overlay cannot fix that by moving: every row in this grid is 52px
+   and the readout is 22, so wherever it parks it is on top of something. What
+   it can do is stop pretending to be a hairline between two strikes while it
+   is doing a pinned bar's job. The band takes the grid's own surface, so rows
+   read as scrolling UNDER pinned chrome — which is what they are doing, and
+   what `thead` two rows above already looks like — rather than as a strike
+   that has been damaged.
+
+   The band is the CELL, not the `.spot-divider` inside it: the divider is
+   pinned to 2px plus its rule (3px measured) against a 22px readout, so a
+   surface there would cover an eighth of the readout and nothing else. The
+   row's cells are the 28px box that actually spans the grid.
+
+   Each cell takes the background of the column it sits in — the grid's own
+   `--oc-grid-row` and `--oc-grid-strike`, not a generic surface token — so the
+   Strike spine's tint runs through the band unbroken and, between its two
+   strikes, the band is the colour that was already behind it and nothing about
+   the resting state changes. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell {
+  background: var(--oc-grid-row) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+.chain-table-container.chain-table-container[data-table-view] .chain-table
+tr.spot-divider-row.spot-divider-spacious > td.spot-divider-cell.spot-divider-cell--strike {
+  background: var(--oc-grid-strike) !important;
+}

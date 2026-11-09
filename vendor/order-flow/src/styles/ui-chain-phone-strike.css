@@ -1,0 +1,145 @@
+/*
+ * THE PHONE STRIKE COLUMN — 64px, desktop words (owner, 2026-09-25)
+ * ===========================================================================
+ *
+ * Why. On a phone the Strike is pinned while both lanes of data scroll past
+ * it, so every pixel it keeps is a pixel the Call and Put figures cannot use.
+ * At 112px it was 29% of a 390px screen, holding a five-digit numeral.
+ *
+ * What. The column is 64px at phone widths (OptionChainTable.tsx
+ * `PHONE_STRIKE_COLUMN_WIDTH`, which also sizes the <col> and the lanes).
+ * The level capsules keep EXACTLY their desktop words — "VOL Resistance",
+ * "OI Support", "Max Pain", "ATM" — and, as the owner chose over shortening
+ * them, hang past the cell's edges over the neighbouring LTP cells. The spine
+ * pane already paints above both lanes and does not clip (chain-split.css),
+ * so the only things that stood in the way were the 90px floor
+ * (ui-chain-approved.css) and the cell's own clipping.
+ *
+ * Rules the overhang has to keep:
+ *   - Centred on the numeral, so it overhangs both sides equally and reads
+ *     as belonging to this strike, not to the Call or Put next to it.
+ *   - Opaque: a translucent wash over an LTP figure would print one number
+ *     through the other, so on phones the capsule's wash is laid over the
+ *     row's own surface instead of over transparency.
+ *   - Its own lane: tags sit on the row's top or bottom line, never on the
+ *     numeral's (ui-market-levels.css two-lane grid), so the overhang only
+ *     ever meets the LTP cell's padding and its small % line.
+ */
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table :is(td.strike-cell, th.th-strike, th.chain-side-expiry-th) {
+    min-width: 64px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table td.strike-cell {
+    padding-inline: 2px !important;
+    overflow: visible !important;
+  }
+
+  /* "STRIKE ⫸⫷" is 69px at the desktop's 4px gap and 3px lead-in; the
+     glyph is the level-tag toggle, so it stays — the spacing goes. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table th.th-strike {
+    padding-inline: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table th.th-strike .strike-header-label {
+    gap: 1px !important;
+    letter-spacing: .04em !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table th.th-strike .strike-header-sort::before {
+    margin-left: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table td.strike-cell :is(.strike-cell-body, .strike-cell-inner, .strike-market-row) {
+    overflow: visible !important;
+  }
+
+  /* Centred overhang is right only where the Strike has data on BOTH sides
+     (the mirrored book). Where it is pinned to a screen edge — Put-only and
+     the Straddle view on the left, Call-only on the right — half of a wide
+     capsule would hang off the screen ("OL Resistance"). There it overhangs
+     toward the data only: `safe center` keeps a capsule that fits centred
+     and starts a wider one at the cell's own edge; Call-only mirrors it. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container:is([data-table-view='puts'], [data-table-view='combined'])
+    .chain-table td.strike-cell .strike-market-row {
+    justify-content: safe center !important;
+  }
+
+  /* Call-only mirrors it. `safe` falls back to the PHYSICAL start (left) in
+     any flex direction, so it cannot be used here: instead the row packs to
+     the right and the capsule carries auto side margins. Auto margins take
+     only POSITIVE free space, so a capsule that fits sits centred; one that
+     does not has none to take and overhangs leftward, over the data. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='calls']
+    .chain-table td.strike-cell .strike-market-row {
+    justify-content: flex-end !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='calls']
+    .chain-table td.strike-cell .strike-market-row > .strike-tag {
+    margin-inline: auto !important;
+  }
+
+  /* The expiry capsule in the same pinned cell: the stacked form (date over
+     "4 DTE") is ~87px, and centred on a 64px Strike at the screen's edge it
+     lost 10px off that edge ("9 Sept"). Anchored 4px in from the outer edge
+     instead, it grows toward the data, where the header band is empty up to
+     the pinned Call / Put chip. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined'])
+    .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+    padding-inline: 4px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='puts'], [data-table-view='combined'])
+    .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    justify-content: flex-start !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='calls']
+    .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    justify-content: flex-end !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined'])
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger {
+    flex: none !important;
+  }
+
+  /* An opaque capsule: the tag's own wash, mixed onto the Strike column's
+     surface rather than onto transparency, so the part that hangs over an
+     LTP cell covers what is under it instead of printing through it. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table td.strike-cell .strike-tag {
+    position: relative !important;
+    z-index: 1 !important;
+    background: color-mix(in srgb, var(--strike-tag-fill) var(--strike-tag-wash), var(--oc-grid-strike, var(--surface))) !important;
+  }
+  /* A level capsule ("VOL Support", "OI Resistance") and the expiry capsule
+     overhang the pinned Strike column toward the data. The Strike cell is a
+     sticky box that paints in DOM order, so the next (LTP) cell, which comes
+     later, was painting over the overhang and clipped it at the column edge
+     in the Put view. Lifting the Strike cell and the expiry header cell one
+     step puts the overhang in front. Colour, size and text are untouched. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table td.strike-cell {
+    z-index: 2 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+    .chain-table thead th.chain-side-expiry-th {
+    z-index: 3 !important;
+  }
+}

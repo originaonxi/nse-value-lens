@@ -1,0 +1,193 @@
+/* One surface for selection controls, including menus portalled to body. */
+:root {
+  --selection-surface: var(--neutral-950);
+  --selection-hover: var(--neutral-850);
+  --selection-edge: var(--line-strong);
+}
+:root[data-theme='light'] {
+  --selection-surface: var(--capital-white);
+  --selection-hover: var(--neutral-100);
+}
+
+/* The Open Interest rail is the reference for page-level selection bars. */
+:root[data-theme] body #root > .app.app :is(
+  .ui-open-interest-page .ui-oi-toolbar:not(.ui-oi-settings__panel),
+  .ui-sp-page .ui-analysis-controls,
+  .ui-gex-strip.ui-analysis-controls,
+  .ui-iv-strip.ui-analysis-controls
+) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 54px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--selection-edge) 72%, var(--line));
+  border-radius: 10px;
+  background: var(--selection-surface);
+}
+:root[data-theme] body #root > .app.app .ui-sp-toolbar.ui-analysis-controls .ui-replay-trigger {
+  display: inline-flex;
+  flex: none;
+  width: 36px;
+  min-width: 36px;
+  justify-content: center;
+  padding: 0;
+}
+:root[data-theme] body #root > .app.app .ui-sp-toolbar.ui-analysis-controls .ui-replay-trigger > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:root[data-theme] body #root > .app.app .ui-sp-toolbar.ui-analysis-controls .ui-replay-trigger > svg:last-child { display: none; }
+
+/* Explicit scope also reaches menus outside the app's inherited page tokens. */
+:root[data-theme] body :is(
+  .chain-expiry-selector__panel,
+  .ui-time-switch__sheet,
+  .ui-asof-panel,
+  .ui-oi-winpanel,
+  .ui-show__menu,
+  .ui-oi-settings__panel,
+  .ui-control-more.is-dock > .ui-control-more__body,
+  .ui-hm-customise
+) {
+  --surface: var(--selection-surface);
+  --surface-raised: var(--selection-surface);
+  --surface-card: var(--selection-surface);
+  --surface-hover: var(--selection-hover);
+  background: var(--selection-surface) !important;
+  color: var(--text) !important;
+  border-color: var(--selection-edge);
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-menu);
+}
+
+/* Expiry and window menus stay attached to their trigger at every width.
+   Shared placement flips them above the trigger when space below is short. */
+:root[data-theme] body .chain-expiry-selector__panel {
+  top: var(--chain-expiry-top);
+  left: var(--chain-expiry-left);
+  right: auto;
+  bottom: auto;
+  width: min(312px, calc(100vw - 16px));
+  max-height: min(500px, var(--chain-expiry-height));
+}
+:root[data-theme] body .ui-time-switch__sheet {
+  top: var(--window-top);
+  left: var(--window-left);
+  right: auto;
+  bottom: auto;
+  width: min(328px, calc(100vw - 16px));
+  max-height: min(520px, var(--window-max-height));
+  padding: 6px;
+}
+:root[data-theme] body .ui-time-switch__sheet > i { display: none; }
+:root[data-theme] body .ui-time-switch__sheet > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 0 10px;
+}
+:root[data-theme] body .ui-time-switch__sheet > header > span:nth-child(2) { margin-left: auto; }
+:root[data-theme] body .ui-time-switch__sheet > header > button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+:root[data-theme] body .ui-time-switch__scrim { background: transparent; }
+:root[data-theme] body .ui-time-switch__sheet [role='radiogroup'] > button {
+  min-height: 44px;
+  border-bottom: 0;
+  border-radius: 6px;
+}
+:root[data-theme] body .ui-time-switch__sheet [aria-checked='true'] {
+  background: var(--selection-hover);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* The overflow menu is the same anchored panel on a tablet, phone or desktop. */
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more.is-open.is-dock > .ui-control-more__body {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: var(--selection-top);
+  left: var(--selection-left);
+  right: auto;
+  bottom: auto;
+  width: min(560px, calc(100vw - 16px));
+  max-height: var(--selection-max-height);
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--selection-surface);
+  overflow: hidden;
+  z-index: 1101;
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more__head,
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more__body > footer {
+  background: var(--selection-surface);
+  flex: none;
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more__head > i { display: none; }
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more__scrim { background: transparent; z-index: 1100; }
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more.is-dock .ui-control-more__items {
+  gap: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more.is-dock .ui-control-more__items > .ui-strip__g {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  grid-area: auto;
+  gap: 8px;
+  order: 0 !important;
+  flex-shrink: 0;
+}
+/* Open triggers keep readable ink on the toolbar's dark or light ground. */
+:root[data-theme] body #root > .app.app .ui-analysis-controls.ui-oi-toolbar :is(.ui-control-more__trigger, .ui-time-switch__trigger, .ui-show__trigger)[aria-expanded='true'] {
+  color: var(--text);
+  border-color: var(--selection-edge);
+}
+:root[data-theme] body #root > .app.app .ui-analysis-controls.ui-oi-toolbar .ui-control-more__trigger strong { color: inherit; }
+
+/* A nested time picker escapes the scrolling controls panel through a portal. */
+
+@media (max-width: 768px) {
+  /* The page's fixed navigation stays outside the controls panel's scroll area. */
+  :root[data-theme] body #root > .app.app .ui-analysis-controls .ui-control-more.is-open.is-dock > .ui-control-more__body {
+    max-height: min(var(--selection-max-height), calc(100dvh - var(--selection-top) - 84px - env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+@media (max-width: 400px) {
+  :root[data-theme] body #root > .app.app :is(.ui-gex-strip, .ui-iv-strip, .ui-sp-toolbar).ui-analysis-controls {
+    padding-inline: 4px;
+  }
+  :root[data-theme] body #root > .app.app :is(.ui-gex-strip, .ui-iv-strip, .ui-sp-toolbar).ui-analysis-controls > .shared-expiry {
+    padding-inline: 0;
+  }
+  :root[data-theme] body #root > .app.app .ui-iv-strip > .shared-expiry > .ui-strip__k { display: none; }
+  :root[data-theme] body #root > .app.app .ui-analysis-controls.ui-oi-toolbar .ui-control-more.is-dock .ui-control-more__trigger { padding-inline: 6px; gap: 5px; }
+}

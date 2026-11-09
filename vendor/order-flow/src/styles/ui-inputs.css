@@ -1,0 +1,14 @@
+/* ---------- Native selection controls ----------
+   Checkbox, radio and the Switch share the neutral selection ink. */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--selection-ink);
+}
+
+/* Global numeral enforcer: every figure in the terminal is column-aligned.
+   (Stated once — ui-selection-theme.css used to repeat this rule verbatim.) */
+table,
+span,
+.mono {
+  font-variant-numeric: tabular-nums;
+}

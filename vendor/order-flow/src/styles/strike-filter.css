@@ -1,0 +1,166 @@
+/* Spot divider cleanup: keep the chips,
+remove the full-width horizontal rail. */
+.app .chain-table .spot-divider::before,
+.chain-table .spot-divider::before {
+  content: none !important;
+  display: none !important;
+}
+
+
+/* Strike detail: compact stats + payoff/Greeks chart workspace. */
+.detail-panel .detail-index {
+  font-size: 12px !important;
+}.detail-panel .detail-dte-tag,
+.detail-panel .detail-expiry-chip {
+  min-height: 18px !important;
+  padding: 2px 7px !important;
+  border-radius: var(--radius) !important;
+  font-size: 12px !important;
+}.detail-panel .detail-close {
+  /* No interactive target below 24px on a fine pointer (contract §7). */
+  width: 24px !important;
+  height: 24px !important;
+  flex: 0 0 24px !important;
+}.detail-panel .detail-stat {
+  min-height: 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(58px, 1fr) auto !important;
+  gap: 6px !important;
+  align-items: baseline !important;
+  padding: 2px 0 !important;
+  border-bottom: 1px dashed var(--border2) !important;
+}.detail-panel .detail-stat:last-child {
+  border-bottom: 0 !important;
+}.detail-panel .stat-label {
+  min-width: 0 !important;
+  color: var(--text2) !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}.detail-panel .stat-value {
+  color: var(--text) !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* Mobile strike details open above the option-chain table,
+not inside its wide scroll row. */
+.strike-detail-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* One scrim for every overlay in the app (contract §2.B). This used to be an
+     OPAQUE `--surface` — a page, not a scrim.
+     No CSS entrance either: the sheet and its scrim are mounted by
+     motion/react, which animates opacity and transform inline. A CSS
+     `animation` on those same properties overrides the inline values while it
+     runs, so the two curves fought each other on every open. */
+  background: var(--scrim-sheet, var(--scrim-modal));
+  backdrop-filter: blur(var(--scrim-sheet-blur, 2px));
+  -webkit-backdrop-filter: blur(var(--scrim-sheet-blur, 2px));
+}.strike-detail-bottom-sheet {
+  /* There is no universal border-box reset in this repo. `width: min(100vw,…)`
+     plus 8px of inline padding and a 1px border measured 100vw + 18px, so the
+     phone sheet was 18px wider than the viewport and the studio inside it was
+     clipped on the right at every phone width. */
+  box-sizing: border-box;
+  width: min(100vw, 720px);
+  max-height: min(86dvh, 760px);
+  min-height: min(58dvh, 560px);
+  padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+  border: 1px solid var(--border2);
+  border-bottom: 0;
+  /* One modal radius (contract §2.B). */
+  border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+  background: var(--surface-raised);
+  /* `--shadow-smooth-L3` resolves to a WHOLE box-shadow value, so using it in
+     the colour slot made this declaration invalid at computed-value time and
+     the sheet rendered with no shadow at all. This is the contract's mobile
+     bottom-sheet tier. */
+  box-shadow: 0 -18px 48px color-mix(in srgb, var(--text) 30%, transparent);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}.strike-detail-sheet-grip {
+  /* 38px on `--line-strong`, like every other sheet handle. This one was 42px
+     on `--border2` — a wider handle in a different ink, so the same affordance
+     changed size and weight depending on which sheet you had opened. */
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  margin: 0 auto 8px;
+  background: var(--line-strong);
+}.strike-detail-bottom-sheet .detail-panel {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+  animation: none !important;
+}.strike-detail-bottom-sheet .detail-close {
+  flex: 0 0 32px;
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid var(--border2) !important;
+  color: var(--text) !important;
+}.strike-detail-bottom-sheet .greeks-canvas,
+.strike-detail-bottom-sheet .payoff-canvas {
+  min-height: 132px !important;
+}
+
+
+
+
+/* Themed snapshot calendar: replaces the browser-native gray date picker. */
+
+
+/* Mobile calendar refinement: compact date grid,
+not a wide bottom sheet. */
+
+
+/* Trader readability pass: keep market color,
+remove decorative glow noise. */
+.chain-table th,
+.chain-table td,
+.chain-table .val-cell,
+.chain-table .ltp-cell,
+.chain-table .chg-cell{
+  text-shadow: none !important;
+}.chain-table .chain-row td {
+  border-bottom-color: var(--border2) !important;
+}
+.chain-table .atm-row {
+  box-shadow: none !important;
+}.chain-table .atm-row td {
+  background: var(--components-Chip-stroke-selected) !important;
+}.chain-table .atm-row .strike-cell {
+  box-shadow: inset 2px 0 0 var(--accent), inset -2px 0 0 var(--accent) !important;
+}
+.chain-table .chg-cell.val-up::before,
+.chain-table .chg-cell.val-down::before {
+  box-shadow: none !important;
+  filter: none !important;
+}.chain-table .chg-cell.val-up {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--positive, var(--green)) 5%, transparent)) !important;
+}.chain-table .chg-cell.val-down {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--negative, var(--red)) 5%, transparent)) !important;
+}
+
+/* Snapshot calendar day states — moved out of SnapshotDatePicker inline \3c style> (2026-06-25) */
+
+
+
+

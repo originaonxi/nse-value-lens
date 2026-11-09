@@ -1,0 +1,387 @@
+/*
+ * Approved the app option-chain composition
+ * --------------------------------------------------------------------------
+ * Final chain-only authority for the selected OI profile + ranked Volume
+ * direction. This file intentionally loads after the shared prototype system.
+ */
+
+#root > .app.app[data-active-tab='chain'] {
+  --oc-approved-bg: var(--surface);
+  --oc-approved-panel: var(--surface);
+  --oc-approved-panel-2: var(--surface);
+  --oc-approved-line: var(--line);
+  --oc-approved-line-2: var(--line);
+  --oc-approved-ink: var(--text);
+  /* Secondary ink is NEUTRAL in both themes. This read var(--up) here and
+     var(--text) in the light block below, so the same token was green,
+     muted or full ink depending on theme and import order (the dark value
+     only lost to ui-colour-system.css by loading earlier). Direction
+     colour never lives in a generic ink token — contract §4. */
+  --oc-approved-ink-2: var(--text-muted);
+  --oc-approved-muted: var(--text);
+  --oc-approved-green: var(--up, #08955A);
+  --oc-approved-green-soft: var(--surface);
+  --oc-approved-red: var(--down, #E35650);
+  --oc-approved-red-soft: var(--surface);
+  --oc-approved-accent: var(--up);
+  --oc-approved-accent-soft: var(--surface);
+  --oc-approved-accent-line: var(--line);
+  --oc-approved-amber: var(--down);
+  --oc-approved-chip: var(--surface);
+  --oc-approved-font: var(--font-sans);
+  font-family: var(--oc-approved-font) !important;
+  font-size: var(--chain-font-md, 13px) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] {
+  --oc-approved-bg: var(--surface);
+  --oc-approved-panel: var(--surface);
+  --oc-approved-panel-2: var(--surface);
+  --oc-approved-line: var(--line);
+  --oc-approved-line-2: var(--line);
+  --oc-approved-ink: var(--text);
+  --oc-approved-ink-2: var(--text-muted);
+  --oc-approved-muted: var(--text);
+  --oc-approved-green-soft: var(--up);
+  --oc-approved-red-soft: var(--down);
+  --oc-approved-accent-soft: var(--surface);
+  --oc-approved-accent-line: var(--line);
+  --oc-approved-chip: var(--surface);
+  --oc-approved-green: var(--up, #116A40);
+  --oc-approved-red: var(--down, #C4342E);
+}
+
+
+
+#root > .app.app[data-active-tab='chain'] :is(strong, b) {
+  font-weight: 700 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .dashboard-shell {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Compact single-side context row from the approved concept. */
+#root > .app.app[data-active-tab='chain'] .oc-chain-desktop-context {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 14px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(220px, 1fr);
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--oc-approved-line);
+  background: var(--oc-approved-bg);
+  color: var(--oc-approved-ink-2);
+  font-size: var(--chain-font-cell, 12px);
+}
+
+/* Table geometry and hierarchy. */
+#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  border: 0 !important;
+  border-bottom: 1px solid var(--oc-approved-line) !important;
+  border-radius: 0 !important;
+  background: var(--oc-approved-bg) !important;
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table {
+  background: var(--oc-approved-bg) !important;
+  color: var(--oc-approved-ink) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  table-layout: auto !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: var(--oc-approved-line-2) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-header-row th {
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  border-bottom: 1px solid var(--oc-approved-line) !important;
+  background: var(--oc-approved-panel-2) !important;
+  color: var(--oc-approved-ink) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  /* 11px is the meta rung, which is 500–600 — there is no 700 at this size.
+     This rule is the one that actually paints the header (verified in the
+     browser: it outranks the 600 set in ui-chain-table-header.css and
+     ui-chain-prototype-theme.css), so the weight has to be corrected here. */
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-sort-button {
+  color: inherit !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row td {
+  /* Was a stale literal 50px that lost to ui-chain-grid-finish.css's 52px
+     anyway (later import, same !important). Reads the one constant now. */
+  height: var(--chain-row-h, 52px) !important;
+  min-height: var(--chain-row-h, 52px) !important;
+  padding: 0 9px !important;
+  border-bottom: 1px solid var(--oc-approved-line-2) !important;
+  background: var(--oc-approved-bg) !important;
+  color: var(--oc-approved-ink) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 400 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background: var(--oc-approved-bg) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  min-width: 90px !important;
+  background: color-mix(in srgb, var(--line) 42%, var(--oc-approved-bg)) !important;
+  color: var(--oc-approved-ink) !important;
+}
+
+:root:not([data-theme='light']) #root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  background: color-mix(in srgb, var(--line) 32%, var(--oc-approved-bg)) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  color: var(--oc-approved-ink) !important;
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.006em !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row td.val-cell:not(.oc-profile-cell) {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row td.val-cell:not(.oc-profile-cell)::before,
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row td.val-cell:not(.oc-profile-cell)::after {
+  display: none !important;
+  content: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.ltp-cell, .chg-cell) {
+  min-width: 74px !important;
+  text-align: center !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.ltp-header, .chg-header) .chain-sort-button {
+  justify-content: center !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.ltp-value, .chg-val) {
+  font-weight: 600 !important;
+}
+
+/* OI profile and ranked Volume meters. */
+#root > .app.app[data-active-tab='chain'] .chain-table .oi-bar-header {
+  min-width: 202px !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .oi-profile-term-tip {
+  width: 100%;
+  outline-offset: 3px;
+}
+
+#root > .app.app[data-active-tab='chain'] .oi-profile-heading {
+  min-width: 178px;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+#root > .app.app[data-active-tab='chain'] .oi-profile-heading b {
+  color: var(--oc-approved-ink);
+  font-size: var(--chain-font-sm, 11px);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#root > .app.app[data-active-tab='chain'] .oi-profile-heading small {
+  color: var(--oc-approved-muted) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-profile-cell {
+  min-width: 192px !important;
+  width: 192px !important;
+  padding: 4px 12px !important;
+  vertical-align: middle !important;
+  background-image: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-meter {
+  width: 168px;
+  min-width: 168px;
+  margin-block: auto;
+  display: grid;
+  gap: 4px;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-value-line {
+  min-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--oc-approved-ink);
+  font-size: var(--chain-font-sm, 11px);
+  line-height: 1;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-value-line b {
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-value-line small {
+  color: var(--oc-approved-ink-2) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-change {
+  min-width: 66px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  justify-content: end;
+  gap: 4px;
+  color: var(--oc-approved-muted);
+  white-space: nowrap;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-change strong {
+  color: inherit;
+  font-size: var(--chain-font-sm, 11px);
+  font-weight: 700;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-change small {
+  color: inherit !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-change.is-positive {
+  color: var(--oc-approved-green);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-change.is-negative {
+  color: var(--oc-approved-red);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  display: block;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--oc-profile-tone) 18%, var(--oc-approved-panel));
+  overflow: visible;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-meter.ce {
+  --oc-profile-tone: var(--oc-approved-red);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-meter.pe {
+  --oc-profile-tone: var(--oc-approved-green);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--oc-profile-current);
+  border-radius: 2px;
+  background: var(--oc-profile-tone);
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .oc-profile-track {
+  background: color-mix(in srgb, var(--oc-profile-tone) 13%, #FDE6F7);
+}
+
+:root[data-theme='light'] #root > .app.app[data-active-tab='chain'] .oc-profile-fill {
+  filter: saturate(1.08);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-addition {
+  position: absolute;
+  inset: 0 auto 0 var(--oc-profile-addition-start);
+  width: var(--oc-profile-addition-width);
+  border-radius: 0 2px 2px 0;
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--oc-profile-tone) 28%, transparent) 0,
+    color-mix(in srgb, var(--oc-profile-tone) 28%, transparent) 2px,
+    color-mix(in srgb, var(--oc-approved-bg) 84%, transparent) 2px,
+    color-mix(in srgb, var(--oc-approved-bg) 84%, transparent) 4px
+  );
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-current-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--oc-profile-current);
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--oc-profile-tone) 52%, var(--oc-approved-ink));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--oc-approved-bg) 72%, transparent);
+  transform: translateX(-1px);
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-reduction {
+  position: absolute;
+  top: -1px;
+  left: var(--oc-profile-reduction-start);
+  width: var(--oc-profile-reduction-width);
+  height: 7px;
+  border: 1px dashed var(--oc-profile-tone);
+  border-radius: 2px;
+  background: transparent;
+}
+
+#root > .app.app[data-active-tab='chain'] .oc-profile-endpoint {
+  position: absolute;
+  top: 50%;
+  left: var(--oc-profile-current);
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--oc-approved-bg);
+  border-radius: 50%;
+  background: var(--oc-profile-tone);
+  transform: translate(-50%, -50%);
+}
+
+/* Buildup stays secondary: soft cell, quiet evidence line, no full heat fill. */
+
+#root > .app.app[data-active-tab='chain'] .chain-table td.bu-neutral::before {
+  display: none;
+}
+
+/* Positioning divider and bottom legend stay matte and information-first. */
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  height: 52px !important;
+  background: transparent !important;
+  border-color: var(--oc-approved-line) !important;
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider::before,
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider::after {
+  display: none !important;
+  content: none !important;
+}
+
+
+
+
+

@@ -1,0 +1,90 @@
+/*
+ * PHONE CELLS, COMPRESSED (owner, 2026-10-01)
+ * ===========================================================================
+ *
+ * Why. On a phone the chain's cells carried desktop air: 8-12px of side
+ * padding and 74-202px minimum widths (ui-chain-approved.css) that held a
+ * lane to one column per page. The tracks themselves are squeezed in
+ * OptionChainTable (`phoneLegColumnWidth`); this sheet removes the floors and
+ * the padding that would otherwise refuse the squeeze, so one rule set serves
+ * Simple and Advanced, Call, Put and Call + Put alike.
+ *
+ * What it does not do: change a label, a figure, a format, a colour or a
+ * formula. Type stays Manrope, tabular, never under 10px. Row height and
+ * the 44px side-switch targets are untouched.
+ *
+ * Scope: `.chain-table` at <=768px, same specificity prefix as the sheets it
+ * overrides, loaded after them.
+ */
+@media (max-width: 768px) {
+  /* One gutter for every data cell: 4px each side, strike keeps its own 2px. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row td:not(.strike-cell):not(.oc-profile-cell) {
+    padding-inline: 4px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-header-row th.chain-leg-header {
+    padding-inline: 4px !important;
+  }
+
+  /* The desktop floors that held a squeezed track open. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table :is(.ltp-cell, .chg-cell, .ltp-header, .chg-header) {
+    min-width: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .oi-bar-header {
+    min-width: 0 !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row td.oc-profile-cell {
+    min-width: 0 !important;
+    width: auto !important;
+    padding: 4px 6px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oc-profile-meter {
+    width: 100%;
+    min-width: 0;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .oi-profile-heading {
+    min-width: 0;
+  }
+
+  /* Figures: tabular Manrope at 12px (>= the 10px floor), centred in the
+     squeezed track. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row td.val-cell {
+    font-family: var(--font-num, var(--font-sans)) !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  /* OI heading: on a phone the title + "now · chg · prev" label is pinned
+     absolutely at the top of its (zero-height) wrapper, which sits at the
+     vertical middle of the header cell, so the whole label hung below the
+     header band and printed over the first row. Centre it on that middle
+     line instead. Wording, size and colour are untouched. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    :is(.th-ce, .th-pe) .oi-profile-term-tip > .tt-label {
+    top: 0 !important;
+    transform: translateY(-50%);
+  }
+  /* 1D BUILD: "Long build-up" needs ~69px at 11px and the squeezed track left
+     62px, so it ended "Long Buil...". Less side padding inside the cell and
+     a touch less tracking give the full word room. Same text, same size. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .ui-bucell.ui-bucell {
+    padding-inline: 4px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .ui-bucell__name {
+    letter-spacing: -0.03em;
+  }
+}

@@ -1,0 +1,112 @@
+/*
+ * the app workspace overlays
+ * --------------------------------------------------------------------------
+ * Final visual authority for the shared controls that open from the app
+ * bars: table layouts, strike universe, expiry series and custom columns.
+ */
+
+/* The second fallback in each of these was a literal hex, which the contract
+   forbids even in that position — and it was theme-blind, so any theme without
+   `--main-nav-*` got a fixed maroon/white chrome in BOTH modes. Every primary
+   name below is published at :root, so the hex is dead weight.
+   `--ui-overlay-radius` and `--ui-overlay-shadow` were declared here and
+   read by nothing in `src`. */
+:root .app {
+  --ui-overlay-surface: var(--main-nav-popover, var(--surface-high));
+  --ui-overlay-surface-subtle: var(--main-nav-surface, var(--surface));
+  --ui-overlay-hover: var(--main-nav-surface-hover, var(--hover-wash));
+  --ui-overlay-line: var(--main-nav-border, var(--line));
+  --ui-overlay-text: var(--main-nav-text, var(--text));
+  --ui-overlay-muted: var(--main-nav-muted, var(--text-muted));
+  --ui-overlay-faint: var(--main-nav-faint, var(--text-subtle));
+  --ui-overlay-accent: var(--main-nav-accent, var(--accent));
+  --ui-overlay-accent-soft: color-mix(in srgb, var(--ui-overlay-accent) 14%, transparent);
+}
+
+:root[data-theme='light'] .app {
+  --ui-overlay-accent-soft: color-mix(in srgb, var(--ui-overlay-accent) 9%, var(--capital-white));
+}
+
+/* Shared panel chrome ----------------------------------------------------- */
+
+/* Customise -------------------------------------------------------------- */
+#root > .app.app[data-active-tab] .workspace-columns-host .ui-customize-panel {
+  width: 332px !important;
+  min-width: 332px !important;
+  max-width: calc(100vw - 20px) !important;
+}
+
+#root > .app.app[data-active-tab] .workspace-columns-host .ui-customize-panel .scp-body {
+  padding: 8px 14px 14px !important;
+  background: var(--ui-overlay-surface) !important;
+  scrollbar-color: var(--ui-overlay-line) transparent !important;
+}
+
+/* Expiry selector -------------------------------------------------------- */
+
+/* Shared overlay type scale: use only installed the app font weights. */
+
+/* Typography and density authority for shared navbar overlays. */
+
+:root[data-theme] body #root > .app.app[data-active-tab]
+  .workspace-columns-host .ui-customize-panel {
+  width: 344px !important;
+  min-width: 344px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab]
+  .workspace-columns-host .ui-customize-panel .scp-body {
+  padding: 4px 16px 14px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab]
+  .workspace-columns-host .ui-customize-panel .scp-title {
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.01em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab]
+  .workspace-columns-host .ui-customize-panel .scp-subtitle {
+  margin-top: 4px !important;
+  font: 400 11px/1.2 var(--font-sans) !important;
+  letter-spacing: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab]
+  .workspace-columns-host .ui-customize-panel :is(.scp-reset-btn, .scp-close-btn) {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Hover-capable pointers only: on a phone the tapped add/remove glyph kept its
+   wash and its 1px lift until the next tap landed somewhere else. */
+
+/* Phones: the panel must fit the phone ------------------------------------
+ *
+ * `min-width: 344px` above is unconditional, and in CSS `min-width` always
+ * beats `max-width` — so the `max-width: calc(100vw - 20px)` guard a few rules
+ * up has never been able to do its job. On a 360px viewport the Customize
+ * panel rendered 344px wide plus its host's inset, and on a 320px one it was
+ * 24px wider than the screen outright: the panel's right edge and its close
+ * button sat off-screen and the whole page gained a horizontal scrollbar.
+ *
+ * Released to a fluid width under 480px only. Nothing at or above the tablet
+ * breakpoint changes, so the desktop geometry the rest of this sheet is tuned
+ * to is untouched. `box-sizing` is explicit because this repo has no universal
+ * reset and the panel below carries its own padding. */
+@media (max-width: 480px) {
+  :root[data-theme] body #root > .app.app[data-active-tab]
+    .workspace-columns-host .ui-customize-panel {
+    box-sizing: border-box !important;
+    width: min(344px, calc(100vw - 16px)) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+}
+
+/* Unified control cards -------------------------------------------------- */
+
+/* view-dropdown anchor: the preset menu lost its legacy base positioning when
+   the old navbar stylesheet was retired, so anchor it to its container here —
+   below the trigger, above the fixed backdrop (z 1490). */

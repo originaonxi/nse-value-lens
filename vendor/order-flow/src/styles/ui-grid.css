@@ -1,0 +1,152 @@
+/* ========================================================
+   the app PREMIUM GRID OVERHAUL
+   High-specificity overrides — no !important needed
+   ======================================================== */
+
+/* 1. Typography & General Table Padding */
+/* No resting shadow: design contract §1.2 puts a card's depth in the hairline
+   border and reserves elevation for popovers and modals. The
+   `box-shadow: var(--shadow-L1)` that used to be here was already dead —
+   ui-chain-prototype-theme.css sets `box-shadow: none !important` at higher
+   specificity on the chain tab, which is the only tab that renders this
+   element — so removing it is the declaration catching up with the paint. */
+.app .chain-table-container {
+    border-radius: var(--radius-lg);
+}
+
+.app .chain-table-container .chain-table th {
+    padding: 8px 6px;
+    background: var(--terminal-panel-strong);
+
+    border-bottom: 1px solid var(--border);
+    border-top: none;
+}
+
+.app .chain-table-container .chain-table .val-cell {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border2);
+}
+
+.app .chain-table-container .chain-table .strike-cell {
+    padding: 6px 12px;
+    background: var(--surface);
+    border-left: 1px solid var(--border2);
+    border-right: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2);
+    text-align: center;
+}
+
+/* 2. ITM/OTM Tints (Subtle Glassmorphism) */
+/* --chain-itm-fill now has an unthemed :root value (ui-precision-edge.css),
+   so the literal-hex fallbacks the colour contract forbids are gone. */
+.app .chain-table-container .chain-table .ce-itm td:not(.strike-cell):not(.oi-bar-cell) {
+    background: color-mix(in srgb, var(--chain-itm-fill) 12%, var(--surface));
+}
+
+.app .chain-table-container .chain-table .pe-itm td:not(.strike-cell):not(.oi-bar-cell) {
+    background: color-mix(in srgb, var(--chain-itm-fill) 12%, var(--surface));
+}
+
+/* 4. Spot Divider Overhaul */
+.app .chain-table-container .spot-divider-row td {
+    padding: 0;
+    height: 1px;
+    border: none;
+    background: transparent;
+}
+.chain-table-container .spot-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    margin: 4px 0;
+}
+.chain-table-container .spot-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+}
+
+/* 5. ATM Row Highlight */
+.chain-table-container .chain-table .atm-row td {
+    border-top: 1px solid var(--components-Chip-stroke-selected);
+    border-bottom: 1px solid var(--components-Chip-stroke-selected);
+}
+.chain-table-container .chain-table .atm-row .strike-cell {
+    background: var(--components-Chip-surface-selected);
+    border-left: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+}
+
+/* 6. OI Heatmap Bars Refinement */
+
+.chain-table-container .oi-bar-cell {
+    position: relative;
+    padding: 0;
+    vertical-align: bottom;
+}
+
+
+
+/* 7. Scrollbar styling */
+.chain-table-container::-webkit-scrollbar {
+    height: 6px;
+}
+.chain-table-container::-webkit-scrollbar-thumb {
+    background: var(--surface2);
+    border-radius: var(--radius-lg);
+}
+
+/* ========================================================
+   8. CHAIN ANALYTICS ROW — Inline visual widgets
+   ======================================================== */
+
+/* ========================================================
+   11. FINAL USER READABILITY REQUESTS
+   ======================================================== */
+
+/* 11.1 Make CE/PE OI bars fully sleek and minimalist (true histograms) */
+
+
+
+
+
+
+
+
+
+
+/* 11.2 Fix Spot Divider visibility and make it stand out simply */
+.app .chain-table-container .spot-divider-row td {
+    padding: 6px 0 !important;
+    height: auto !important;
+    background: transparent !important;
+}
+.app .chain-table-container .spot-divider {
+    height: 30px !important;
+    margin: 0 !important;
+}
+.app .chain-table-container .spot-divider::before {
+    height: 2px !important;
+    background: var(--accent) !important;
+    opacity: 0.3 !important;
+}
+
+
+/* 11.4 Remove the small vertical line before the CHG% */
+.app .chain-table .chg-cell::before,
+.app .chain-table td.chg-cell.val-up::before,
+.app .chain-table td.chg-cell.val-down::before {
+    content: none !important;
+    display: none !important;
+}
+
+/* Global Font Enforcer */
+table, span, .mono {
+  font-variant-numeric: tabular-nums;
+}

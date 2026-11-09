@@ -1,0 +1,27 @@
+/*
+ * the app widget frames
+ * ------------------
+ * The dashboard reference uses one calm card language: a thin neutral outline,
+ * compact corners, flat surfaces and a divider between controls and content.
+ * This late authority applies that language to the two desktop workspaces
+ * without recolouring market data or adding nested decorative boxes.
+ */
+
+:root {
+  --ui-widget-outline: var(--line-strong);
+  --ui-widget-divider: var(--line);
+  --ui-widget-surface: var(--surface-raised);
+  --ui-widget-radius: 8px;
+}
+
+/* Option Chain insight: one card, one header rail, one reading area. */
+
+/* Keep the option-chain read visually separate from the table below. */
+
+/* Maintain the same geometry in dark mode; only the existing theme tokens
+   change, so the border remains visible without becoming a bright halo. */
+:root:not([data-theme='light']) #root > .app {
+  --ui-widget-outline: color-mix(in srgb, var(--text) 18%, var(--surface));
+  --ui-widget-divider: color-mix(in srgb, var(--text) 11%, var(--surface));
+}
+

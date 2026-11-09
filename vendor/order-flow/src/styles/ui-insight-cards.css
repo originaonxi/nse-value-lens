@@ -1,0 +1,303 @@
+/*
+ * Shared insight-card authority.
+ *
+ * Option Chain, Open Interest and OI Spurts all use `.ui-aisum`. New
+ * analytical tabs must use the same shell and state classes instead of
+ * creating local card chrome or disclosure controls.
+ */
+
+/*
+ * The card's edge, stated ONCE (contract §2.A). Every sheet that draws the
+ * shell's outline — this one, ai-summary-card.css, a page modifier — reads
+ * these two properties instead of writing its own number.
+ *
+ * Declared on a bare `.ui-aisum`, not behind this file's `#root > .app.app`
+ * prefix: a custom property has nothing to out-rank, and the base sheet reads
+ * them too, so they must resolve wherever the shell renders.
+ *
+ * The radius is a literal on purpose. It was `var(--radius-md, 8px)`, and
+ * `--radius-md` is one of the scoped names (§1.6): absent at `:root`, 8px under
+ * `.oi-design`, `var(--radius)` (9px) under the chrome scope — the card's
+ * corner depended on which scope it happened to sit in. 12px is `--radius-lg`.
+ */
+.ui-aisum {
+  --aisum-radius: 12px;
+  --aisum-edge: color-mix(in srgb, var(--line-strong) 70%, transparent);
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum {
+  /* One quiet boundary — `--line-strong` at 70%, a step firmer than the control
+     rails' `--line` — the 12px card radius, and a lightly contained surface.
+     `container-type` is restated here because §2.A makes it part of the final
+     geometry: every degradation step on the card is an @container query. */
+  box-sizing: border-box;
+  border: 1px solid var(--aisum-edge);
+  border-radius: var(--aisum-radius);
+  background: var(--surface-raised);
+  background-image: none;
+  box-shadow: none;
+  container-type: inline-size;
+  font-family: var(--font-sans);
+  transition:
+    border-color var(--dur-fast, 120ms) var(--ease-ui-standard, ease),
+    background-color var(--dur-fast, 120ms) var(--ease-ui-standard, ease);
+}
+
+/* Direction belongs to the verdict, figures and mark—not the structural card. */
+:root[data-theme] body #root > .app.app .ui-aisum:is(
+  .is-tone-up,
+  .is-tone-down,
+  .is-tone-flat
+) {
+  border-color: var(--aisum-edge);
+  background: var(--surface-raised);
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum__head {
+  min-height: 28px;
+}
+
+/* One closed summary row across every analysis page. Optional context yields
+   to the instrument, verdict and disclosure; the expanded reading retains it. */
+:root[data-theme] body #root > .app.app .ui-aisum:is(.is-min, .is-open) {
+  display: block;
+  min-height: 0;
+  padding: 0;
+}
+:root[data-theme] body #root > .app.app .ui-aisum:is(.is-min, .is-open) > .ui-aisum__head {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  gap: 8px;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__head :is(
+  .ui-oi-aisum__identity, .ui-pcr-aisum__identity,
+  .ui-straddle-aisum__identity, .ui-sp-inlineinsight
+) { display: contents; }
+:root[data-theme] body #root > .app.app .ui-aisum__head :is(
+  .ui-aisum__mark, .ui-aisum__name, .ui-aisum__verdict,
+  .ui-aisum__end, .ui-insight-move
+) { order: 0; margin-block: 0; }
+:root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__name {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__name-full { display: inline; }
+:root[data-theme] body #root > .app.app .ui-aisum__name-short { display: none; }
+:root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__verdict {
+  /* Shrinks (and ellipsises) before the instrument's name does: the name never
+     goes, a long verdict is the part that gives way. */
+  flex: 0 4 auto;
+  min-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__end {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: auto;
+  order: 10;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__head :is(
+  .ui-aisum__gist, .ui-gex-aisum__summary, .ui-iv-aisum__summary
+) {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 20px;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__head :is(
+  .ui-oi-inlineflow, .ui-pcr-inlineflow, .ui-straddle-inlineflow
+) {
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  margin-left: 0;
+  padding-left: 0;
+  gap: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+:root[data-theme] body #root > .app.app .ui-aisum__head :is(
+  .ui-oi-aisum__stamp, .ui-pcr-aisum__stamp, .ui-straddle-aisum__stamp
+) {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@container (max-width: 1400px) {
+  :root[data-theme] body #root > .app.app .ui-aisum__head :is(
+    .ui-oi-inlineflow, .ui-pcr-inlineflow, .ui-straddle-inlineflow
+  ) { display: none; }
+}
+@container (max-width: 1200px) {
+  :root[data-theme] body #root > .app.app .ui-aisum__head :is(
+    .ui-oi-aisum__stamp, .ui-pcr-aisum__stamp, .ui-straddle-aisum__stamp,
+    .chain-local-insight__stamp, .ui-gex-aisum__stamp, .ui-iv-aisum__stamp
+  ) { display: none; }
+}
+@container (max-width: 900px) {
+  :root[data-theme] body #root > .app.app .ui-aisum__head :is(
+    .ui-insight-move, .ui-aisum__gist, .ui-gex-aisum__summary,
+    .ui-iv-aisum__summary, .chain-insight__head-chips
+  ) { display: none; }
+}
+@container (max-width: 560px) {
+  :root[data-theme] body #root > .app.app .ui-aisum:is(.is-min, .is-open) > .ui-aisum__head {
+    min-height: 46px;
+    padding: 5px 10px;
+    gap: 6px;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum__name-full { display: none; }
+  :root[data-theme] body #root > .app.app .ui-aisum__name-short { display: inline; }
+  :root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__name { flex: 0 0 auto; max-width: 40%; }
+  :root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__verdict {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 22px;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum__head .chain-insight__verdict-tail { display: none; }
+}
+@container (max-width: 340px) {
+  :root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__mark { display: none; }
+}
+@media (max-width: 768px), (pointer: coarse) {
+  :root[data-theme] body #root > .app.app .ui-aisum__head :is(.ui-aisum__end, .ui-aisum__toggle) { position: static; }
+  /* The header owns its padding now, so the full-row tap target ends at its edge. */
+  :root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__toggle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  :root[data-theme] body #root > .app.app .ui-aisum__head .ui-aisum__toggle::after { content: none; }
+}
+
+/* Expanded readings use the same solid neutral surface as the card. Keep the
+   existing mobile sheet geometry and scrolling; only its content rhythm changes. */
+:root[data-theme] body #root > .app.app .ui-aisum__body:has(.insight-evidence) {
+  gap: 10px;
+  background: var(--surface-raised);
+}
+
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app .ui-aisum__body:has(.insight-evidence) {
+    padding: 12px 14px;
+  }
+
+  /* Inner radius follows the card. The body is the card's last row, and on the
+     unpadded page cards without `overflow: hidden` (Option Chain, Gamma
+     Exposure, Implied Volatility) the solid surface above sat flush on the
+     bottom edge and painted square corners straight across the card's curve.
+     Border-box radius minus the 1px edge. Not below 769px: there an open body
+     is the bottom sheet, which owns its own top-only corners. */
+  :root[data-theme] body #root > .app.app .ui-aisum__body {
+    border-bottom-right-radius: calc(var(--aisum-radius) - 1px);
+    border-bottom-left-radius: calc(var(--aisum-radius) - 1px);
+  }
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum__mark {
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  box-shadow: none;
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum__verdict {
+  border: 1px solid color-mix(in srgb, currentColor 22%, var(--line));
+  background: color-mix(in srgb, currentColor 5%, var(--surface-raised));
+  box-shadow: none;
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum__act.ui-aisum__toggle {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  gap: 5px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  /* One label treatment on every tab. Open Interest, OI Spurts, PCR and
+     Straddle set `text-transform: uppercase` + caps tracking on every
+     `.ui-aisum__act` in their own sheets, so the same control read
+     "VIEW INSIGHT" (123px) there and "View insight" (102px) on Option Chain,
+     Heatmap, GEX and Implied Volatility, side by side in the rail. Option Chain
+     is the reference surface and contract §2.A writes the label in sentence
+     case; caps tracking belongs to 10px eyebrows and tags (§3), not to a
+     control label. Scoped to the toggle only — other actions are untouched. */
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app .ui-aisum__act.ui-aisum__toggle:hover {
+    border-color: var(--hairline-hover);
+    background: var(--surface-hover, var(--hover-wash));
+    color: var(--text);
+  }
+}
+/* The toggle is the row's one control, so it carries the box's focus ring. */
+:root[data-theme] body #root > .app.app .ui-aisum__act.ui-aisum__toggle:focus-visible {
+  outline: 2px solid var(--accent-ring, var(--text));
+  outline-offset: 2px;
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum__toggle svg {
+  transition: transform var(--dur-fast, 120ms) var(--ease-ui-standard, ease);
+}
+
+:root[data-theme] body #root > .app.app .ui-aisum:not(.is-min) .ui-aisum__toggle svg,
+:root[data-theme] body #root > .app.app .ui-aisum.is-open .ui-aisum__toggle svg {
+  transform: rotate(180deg);
+}
+
+/*
+ * Touch. This sheet's `height: 28px` on the toggle carries enough specificity
+ * to beat every feature-level mobile rule, so the caret was painting at 28px on
+ * phones no matter what a tab asked for. Under a coarse pointer it steps up to
+ * 34px of painted chrome; the full-row hit area is the feature sheet's job
+ * (ai-summary-card.css expands the toggle's ::before across the whole header),
+ * so this is deliberately not grown to 44px — a 44px pill in a 48px row is
+ * chrome, not comfort.
+ */
+@media (pointer: coarse) {
+  :root[data-theme] body #root > .app.app .ui-aisum__act.ui-aisum__toggle {
+    min-width: 34px;
+    height: 34px;
+  }
+}
+
+/* Reduced motion: deliberately NOT handled here.
+ *
+ * This block used to write `transition: none` on the card and its caret. That
+ * is the one thing the design contract (§6) forbids: `none` sets
+ * transition-property to none, so ui-motion.css's global
+ * `transition-duration: 1ms !important` had nothing left to time and the
+ * element stopped firing `transitionend` altogether. The card's disclosure and
+ * the mobile sheet both settle on that event. ui-motion.css already collapses
+ * every transition in the app to 1ms under `prefers-reduced-motion`, which is
+ * imperceptible AND still fires the event, so this override only did harm.
+ */

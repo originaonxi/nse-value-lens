@@ -1,0 +1,706 @@
+/* Common OI control grammar.
+   Keep mode, timeframe, filter, view, and segmented controls consistent across
+   the OI workspace while leaving chart/table logic untouched. */
+
+/* Market light theme authority: cleaner contrast for chain desktop/mobile.
+   The custom properties and the background/color rule that used to open this
+   sheet are declared verbatim, later, in the "Chain light final authority"
+   block at EOF (same selector, same specificity) — an identical earlier copy
+   here never wins the cascade, so it was removed rather than kept as dead
+   weight. */
+
+/* Light table: crisp grid and readable data without washed-out cells. */
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .84), rgba(254, 241, 250, .92)),
+    #FEF1FA !important;
+  border-color: var(--chain-light-border) !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table {
+  color: var(--chain-light-ink) !important;
+  background: #FFFFFF !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: rgba(61, 9, 32, .070) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table th {
+  background:
+    linear-gradient(180deg, #FFFFFF, #FEF1FA),
+    #FEF1FA !important;
+  color: rgba(61, 9, 32, .86) !important;
+  text-shadow: none !important;
+}
+
+/* chain-row-even/odd td used to be declared
+   here too, verbatim; it is repeated byte-for-byte, same selector and
+   specificity, in the "Chain light final authority" block at EOF, which wins
+   the cascade — so the earlier copies here were dead weight and removed. */
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.val-cell, .chg-cell, .ltp-cell) {
+  color: rgba(61, 9, 32, .88) !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .strike-cell,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .th-strike,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .chain-side-expiry-th {
+  background:
+    linear-gradient(180deg, rgba(254, 241, 250, .96), rgba(254, 241, 250, .96)),
+    #FEF1FA !important;
+  border-color: rgba(8, 149, 90, .14) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .strike-val-lbl,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  color: var(--chain-light-ink) !important;
+  text-shadow: none !important;
+}
+
+/* =====================================================================
+   OI workspace consistency pass
+   Option Chain is the benchmark: crisp KPI-card surfaces, compact segmented
+   controls, fewer nested boxes, and mobile-landscape-safe chart/table space.
+   ===================================================================== */
+
+/* Option-chain control popovers: same crisp sheet effect as Customise. */
+
+/* Option-chain strike and LTP polish: static the app table read, no animated strike glow. */
+.app[data-active-tab='chain'] .chain-table td.strike-cell,
+.app[data-active-tab='chain'] .chain-table th.th-strike,
+.app[data-active-tab='chain'] .chain-side-expiry-th {
+  animation: none !important;
+  /* Tokenised so the global reduced-motion reset can reach it — a raw literal
+     inside an !important shorthand outranks ui-motion.css's `*` rule. */
+  transition: background-color var(--dur-tap) ease, border-color var(--dur-tap) ease !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .022), rgba(255, 255, 255, .006)),
+    #0F0F0F !important;
+  border-left: 1px solid rgba(254, 163, 229, .11) !important;
+  border-right: 1px solid rgba(254, 163, 229, .11) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .018) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.strike-cell {
+  padding-inline: 8px !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.strike-cell * {
+  animation: none !important;
+  filter: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .atm-row .strike-cell,
+.app[data-active-tab='chain'] .chain-table td.strike-cell.atm-strike {
+  background:
+    linear-gradient(180deg, rgba(64, 232, 151, .085), rgba(64, 232, 151, .026)),
+    #0F0F0F !important;
+  border-left-color: rgba(64, 232, 151, .28) !important;
+  border-right-color: rgba(64, 232, 151, .28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .035),
+    inset 0 0 0 1px rgba(64, 232, 151, .18) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.strike-cell.maxpain-strike:not(.atm-strike) {
+  background:
+    linear-gradient(180deg, rgba(197, 170, 132, .060), rgba(197, 170, 132, .014)),
+    #0F0F0F !important;
+  border-left-color: rgba(197, 170, 132, .18) !important;
+  border-right-color: rgba(197, 170, 132, .18) !important;
+  box-shadow: inset 0 0 0 1px rgba(197, 170, 132, .10) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 52px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: rgba(254, 241, 250, .94) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .atm-strike .strike-val-lbl {
+  color: #FEF1FA !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.ltp-cell {
+  background: transparent !important;
+  color: rgba(253, 230, 247, .92) !important;
+  font-weight: 700 !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.ltp-cell::before {
+  content: none !important;
+  display: none !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 62px !important;
+  height: 24px !important;
+  padding: 0 4px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious,
+.app[data-active-tab='chain'] .chain-table .spot-divider-row.spot-divider-spacious td,
+.app[data-active-tab='chain'] .chain-table .spot-divider-spacious .spot-divider {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  background:
+    linear-gradient(180deg, rgba(64, 232, 151, .030), rgba(250, 208, 206, .020)),
+    rgba(0, 0, 0, .86) !important;
+  border-top: 1px solid rgba(64, 232, 151, .16) !important;
+  border-bottom: 1px solid rgba(250, 208, 206, .12) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider {
+  display: grid !important;
+  grid-template-columns: minmax(132px, 1fr) auto minmax(132px, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  overflow: hidden !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider::before {
+  left: 14px !important;
+  right: 14px !important;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(64, 232, 151, .16) 36%,
+      rgba(254, 163, 229, .26) 50%,
+      rgba(250, 208, 206, .14) 64%,
+      transparent
+    ) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .spot-divider::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Cluster placement lives in ui-market-levels.css. */
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table td.strike-cell,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table th.th-strike,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-side-expiry-th {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(254, 241, 250, .88)),
+    #FFFFFF !important;
+  border-left-color: rgba(61, 9, 32, .10) !important;
+  border-right-color: rgba(61, 9, 32, .10) !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .strike-val-lbl,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  color: rgba(61, 9, 32, .82) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  background: rgba(61, 9, 32, .035) !important;
+  border-color: rgba(61, 9, 32, .08) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .spot-divider-cell {
+  background:
+    linear-gradient(180deg, rgba(8, 149, 90, .045), rgba(227, 86, 80, .026)),
+    rgba(254, 241, 250, .92) !important;
+  border-top-color: rgba(8, 149, 90, .16) !important;
+  border-bottom-color: rgba(227, 86, 80, .10) !important;
+}
+
+/* Minimal bell dropdown: notification mode only. */
+
+/* Option Chain final readability pass: crisp the app surfaces, readable cells, restrained motion. */
+
+.app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .016), rgba(255, 255, 255, .004)),
+    #0F0F0F !important;
+  border-color: rgba(254, 163, 229, .12) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table {
+  color: rgba(253, 230, 247, .88) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.app[data-active-tab='chain'] .chain-table th,
+.app[data-active-tab='chain'] .chain-table td {
+  letter-spacing: 0 !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-side-nav-row th,
+.app[data-active-tab='chain'] .chain-table .chain-header-row th {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .038), rgba(255, 255, 255, .010)),
+    rgba(0, 0, 0, .98) !important;
+  color: rgba(253, 230, 247, .84) !important;
+  border-color: rgba(254, 163, 229, .10) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  /* 11px meta rung is 500–600; 700 is off-ladder at this size. */
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row td {
+  color: rgba(253, 230, 247, .86) !important;
+  background-color: rgba(0, 0, 0, .72) !important;
+  border-color: rgba(254, 163, 229, .070) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  /* Tokenised so the global reduced-motion reset can reach it. */
+  transition: background-color var(--dur-tap) ease, border-color var(--dur-tap) ease, color var(--dur-tap) ease !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: rgba(0, 0, 0, .68) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: rgba(0, 0, 0, .82) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .val-cell,
+.app[data-active-tab='chain'] .chain-table .chg-cell,
+.app[data-active-tab='chain'] .chain-table .ltp-cell {
+  color: rgba(253, 230, 247, .88) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .val-up,
+.app[data-active-tab='chain'] .chain-table .chg-cell.val-up {
+  color: var(--up-ink) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .val-down,
+.app[data-active-tab='chain'] .chain-table .chg-cell.val-down {
+  color: var(--down-ink) !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  min-width: 58px !important;
+  height: 23px !important;
+  border-radius: var(--radius-lg) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .052), rgba(255, 255, 255, .016)),
+    rgba(254, 163, 229, .045) !important;
+  font-weight: 700 !important;
+}
+
+.app[data-active-tab='chain'] .chain-table td.strike-cell,
+.app[data-active-tab='chain'] .chain-table th.th-strike,
+.app[data-active-tab='chain'] .chain-table .chain-side-expiry-th {
+  width: 76px !important;
+  min-width: 76px !important;
+}
+
+.app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  min-width: 54px !important;
+  color: rgba(254, 241, 250, .94) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(254, 241, 250, .96)),
+    #FFFFFF !important;
+  border-color: rgba(61, 9, 32, .10) !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table {
+  color: rgba(61, 9, 32, .90) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-side-nav-row th,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-header-row th {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(254, 241, 250, .92)),
+    #FFFFFF !important;
+  color: rgba(114, 114, 114, .88) !important;
+  border-color: rgba(61, 9, 32, .09) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-row td {
+  color: rgba(61, 9, 32, .90) !important;
+  background-color: rgba(255, 255, 255, .94) !important;
+  border-color: rgba(61, 9, 32, .065) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: rgba(254, 241, 250, .96) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: rgba(255, 255, 255, .98) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .val-up,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chg-cell.val-up {
+  color: var(--up-ink) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .val-down,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chg-cell.val-down {
+  color: var(--down-ink) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  color: rgba(61, 9, 32, .90) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table td.strike-cell,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table th.th-strike,
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .chain-side-expiry-th {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(254, 241, 250, .94)),
+    #FFFFFF !important;
+  border-color: rgba(61, 9, 32, .10) !important;
+}
+
+:root[data-theme='light'] .app[data-active-tab='chain'] .chain-table .strike-val-lbl {
+  color: rgba(61, 9, 32, .90) !important;
+}
+
+/* Mobile option-chain control deck: search, notifications, date, expiry and strike filters. */
+
+/* Build-up absolute override: beat older 8K polish selectors with direct cell paint. */
+
+/* Chain light final authority: placed at EOF so it beats earlier polish passes. */
+:root[data-theme='light'] .app.app[data-active-tab='chain'] {
+  --chain-light-page: #FEF1FA;
+  --chain-light-border: rgba(61, 9, 32, .115);
+  --chain-light-ink: #3D0920;
+  --chain-light-muted: #727272;
+  --chain-light-cyan: var(--up);
+  --chain-light-red: var(--down);
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'],
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .dashboard-shell,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .dashboard-body {
+  /* Flat clean background — the vendor web app has no radial glow or page gradient. */
+  background: var(--bg) !important;
+  color: var(--chain-light-ink) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(254, 241, 250, .92)),
+    #FEF1FA !important;
+  border-color: var(--chain-light-border) !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table {
+  background: #FFFFFF !important;
+  color: var(--chain-light-ink) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: rgba(61, 9, 32, .070) !important;
+  text-shadow: none !important;
+}
+
+/* .chain-table th (light) repeats, byte-for-byte, further down this file —
+   that later copy wins the cascade (same selector, same specificity), so this
+   one was dead weight and was removed. */
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: rgba(255, 255, 255, .98) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: rgba(254, 241, 250, .98) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.val-cell, .chg-cell, .ltp-cell) {
+  color: rgba(61, 9, 32, .90) !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  background:
+    linear-gradient(180deg, rgba(254, 241, 250, .96), rgba(254, 241, 250, .96)),
+    #FEF1FA !important;
+  border-color: rgba(8, 149, 90, .14) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.strike-val-lbl, td.ltp-cell .ltp-value) {
+  color: var(--chain-light-ink) !important;
+  text-shadow: none !important;
+}
+
+/* Option Chain theme authority: crisp the app surfaces for dark and light. */
+.app.app[data-active-tab='chain'] {
+  --chain-page-bg: #0F0F0F;
+  --chain-panel: var(--ui-bg-1);
+  --chain-panel-2: #3D0920;
+  --chain-panel-3: #3D0920;
+  --chain-border: rgba(254, 163, 229, .18);
+  --chain-border-strong: rgba(254, 163, 229, .28);
+  --chain-text: #FEF1FA;
+  --chain-text-soft: rgba(253, 230, 247, .82);
+  --chain-muted: rgba(254, 163, 229, .82);
+  --chain-teal: #40E897;
+  --chain-red: var(--down);
+  --chain-shadow: 0 14px 36px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] {
+  --chain-page-bg: #FEF1FA;
+  --chain-panel: #FFFFFF;
+  --chain-panel-2: #EEFDF5;
+  --chain-panel-3: #FEF1FA;
+  --chain-border: rgba(61, 9, 32, .12);
+  --chain-border-strong: rgba(61, 9, 32, .18);
+  --chain-text: #0F0F0F;
+  --chain-text-soft: rgba(61, 9, 32, .84);
+  --chain-muted: rgba(114, 114, 114, .90);
+  --chain-teal: var(--up);
+  --chain-red: var(--down);
+  --chain-shadow: 0 12px 28px rgba(61, 9, 32, .075), inset 0 1px 0 rgba(255, 255, 255, .96);
+}
+
+.app.app[data-active-tab='chain'],
+.app.app[data-active-tab='chain'] .dashboard-shell,
+.app.app[data-active-tab='chain'] .dashboard-body {
+  background: var(--chain-page-bg) !important;
+  color: var(--chain-text) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .006)),
+    #0F0F0F !important;
+  border-color: var(--chain-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055), 0 14px 34px rgba(0, 0, 0, .22) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table-container {
+  background:
+    linear-gradient(180deg, #FFFFFF, #FEF1FA),
+    #FEF1FA !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table {
+  background: transparent !important;
+  color: var(--chain-text-soft) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: rgba(254, 163, 229, .095) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: rgba(61, 9, 32, .075) !important;
+  text-shadow: none !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table th {
+  background:
+    linear-gradient(180deg, rgba(61, 9, 32, .96), rgba(0, 0, 0, .98)),
+    var(--chain-panel) !important;
+  color: var(--chain-muted) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table th {
+  background:
+    linear-gradient(180deg, #FFFFFF, #FEF1FA),
+    #FEF1FA !important;
+  color: rgba(61, 9, 32, .86) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: rgba(0, 0, 0, .82) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: rgba(0, 0, 0, .88) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background-color: rgba(255, 255, 255, .99) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background-color: rgba(236, 250, 252, .99) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table :is(.val-cell, .ltp-cell, .chg-cell) {
+  color: var(--chain-text-soft) !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.val-cell, .ltp-cell, .chg-cell) {
+  color: rgba(61, 9, 32, .92) !important;
+  text-shadow: none !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  background:
+    linear-gradient(180deg, rgba(61, 9, 32, .98), rgba(0, 0, 0, .98)),
+    #0F0F0F !important;
+  border-color: rgba(64, 232, 151, .18) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  background:
+    linear-gradient(180deg, rgba(254, 241, 250, .98), rgba(254, 241, 250, .98)),
+    #FEF1FA !important;
+  border-color: rgba(8, 149, 90, .14) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table :is(.strike-val-lbl, .ltp-value) {
+  color: var(--chain-text) !important;
+  text-shadow: none !important;
+}
+
+.app.app[data-active-tab='chain'] .spot-divider {
+  background:
+    linear-gradient(90deg, rgba(64, 232, 151, .10), rgba(211, 243, 248, .08), rgba(227, 86, 80, .10)),
+    var(--chain-panel) !important;
+  border-color: var(--chain-border) !important;
+  color: var(--chain-text-soft) !important;
+}
+
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .spot-divider {
+  background:
+    linear-gradient(90deg, rgba(8, 149, 90, .070), rgba(64, 232, 151, .060), rgba(227, 86, 80, .070)),
+    #EEFDF5 !important;
+}
+
+/* Final shared app chrome. Keep top bar, sub topbar, and left rail identical on every workspace page. */
+  .app.app[data-active-tab] {
+    --ui-chrome-ink: rgba(254, 241, 250, .94);
+    --ui-chrome-muted: rgba(254, 163, 229, .84);
+    --ui-chrome-border: rgba(254, 163, 229, .14);
+    --ui-chrome-border-strong: rgba(254, 163, 229, .22);
+    --ui-chrome-surface-2: rgba(0, 0, 0, .88);
+  }
+
+  :root[data-theme='light'] .app.app[data-active-tab] {
+    --ui-chrome-ink: #3D0920;
+    --ui-chrome-muted: rgba(114, 114, 114, .86);
+    --ui-chrome-border: rgba(61, 9, 32, .105);
+    --ui-chrome-border-strong: rgba(61, 9, 32, .155);
+    --ui-chrome-surface-2: rgba(236, 250, 252, .94);
+  }
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+/* Option Chain value cells: remove chip/button treatment from LTP, OI, and VOL. */
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .018), rgba(255, 255, 255, .004)),
+    rgba(0, 0, 0, .72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .018) !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  line-height: inherit !important;
+  text-align: center !important;
+  text-shadow: none !important;
+}
+
+/* Clean LTP Price Cells: Complete removal of all background paint, borders, and pill highlights */
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell,
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table td.ltp-cell,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table td.ltp-cell .ltp-value {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell::before,
+.app.app[data-active-tab='chain'] .chain-table td.ltp-cell::after,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table td.ltp-cell::before,
+:root[data-theme='light'] .app.app[data-active-tab='chain'] .chain-table td.ltp-cell::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+
+/* The closed insight row (Open Interest, Spurts, Heatmap and every other
+   tool) is laid out once, for every width, in ui-tool-rhythm.css. */

@@ -1,0 +1,86 @@
+/* Option-chain header cells remain opaque around the fixed Strike spine. */
+#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+/* The vertical scrollbar belongs to the page, not to the card (owner,
+   2026-10-09: "out of the option chain, always out of the tools").
+
+   On a mouse pointer, while the table fits its card, the card stops being a
+   scroller and the content area scrolls instead — that puts the bar at the
+   window edge, outside the card, the way the the reference design page reads. `overflow:
+   clip` is not a scroll container, so the sticky header and Strike spine pin
+   to the one scroller there is. When the table overflows sideways the card
+   keeps both axes exactly as before, and so does every touch device.
+   OptionChainTable's scroll effect watches both elements and feeds the row
+   window from whichever is scrolling. */
+@media (hover: hover) and (pointer: fine) {
+  #root > .app.app[data-active-tab='chain'] .main-content:has(> .chain-table-container[data-horizontal-overflow='off']) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable;
+  }
+
+  #root > .app.app[data-active-tab='chain'] .chain-table-container[data-horizontal-overflow='off'] {
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    margin-bottom: 8px !important;
+    border-radius: var(--radius-card, 12px) !important;
+    overflow: clip !important;
+    scrollbar-gutter: auto;
+  }
+
+  /* Wider than the window, the table stays in its container like every other
+     tool (owner, 10 Oct, replacing the 9 Oct edge-to-edge rule): it pans
+     sideways inside the box; the page still owns the vertical scroll. */
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead :is(
+  .chain-side-nav-row,
+  .chain-header-row
+) > th {
+  border-color: var(--line) !important;
+  background: var(--table-head-surface) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead :is(
+  .chain-side-nav-row,
+  .chain-header-row
+) button {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-label-ce {
+  color: var(--down-ink) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-label-pe {
+  color: var(--up-ink) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead
+  th.chain-side-nav-th.chain-side-nav-ce {
+  background: color-mix(in srgb, var(--down) 8%, var(--table-head-surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead
+  th.chain-side-nav-th.chain-side-nav-pe {
+  background: color-mix(in srgb, var(--up) 8%, var(--table-head-surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead
+  th.chain-side-expiry-th.chain-side-expiry-th {
+  border-color: var(--line) !important;
+  background: var(--surface) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+}

@@ -1,0 +1,88 @@
+/*
+ * the app pixel-clean pass
+ * --------------------------------------------------------------------------
+ * Loads last. This file owns *render quality* only — how crisply the existing
+ * design paints. It adds no colour, no spacing and no component, and it hides
+ * nothing. Every rule removes something that measurably softens a pixel.
+ *
+ * Deliberately NOT touched:
+ *   - Text haloes that act as a legibility scrim over chart bars and SVG
+ *     series (.bar-ltp-label, the OI/spurt chart value labels). There the
+ *     shadow is doing real work against a moving background, so it stays.
+ *   - Backdrop blur on genuine floating glass — popovers, dropdowns,
+ *     tooltips, sheets, the sticky navbar — where live content really does
+ *     scroll underneath. Only blur with nothing translucent behind it was
+ *     folded away, and that was done at each rule's source, not here.
+ */
+
+/* ── 1. Small badge text carries no blur shadow ──────────────────────────────
+   `0 1px 1px rgba(0,0,0,.18–.30)` under 11px/900 text puts the shadow inside
+   the glyph stems instead of behind them, so the bottom edge reads as a soft
+   double line. These badges sit on a solid, high-contrast fill and need no
+   lift to separate from it. */
+/* The chain's own badge rules reach five classes deep with !important, so this
+   escalates through #root to land above all of them. */
+
+
+/* ── 2. No letterpress emboss on dense label text ────────────────────────────
+   `0 1px 0 rgba(255,255,255,.22–.42)` is a raised-type effect borrowed from a
+   heavier UI. At 9–12px it lightens the glyph baseline rather than lifting the
+   text, which is read as blur. */
+
+
+
+/* ── 4. Numeric columns hold their figure width ──────────────────────────────
+   Proportional digits make a column of prices twitch sideways every time a
+   value ticks. The chain table already opts in; this extends the same contract
+   to the KPI strips and stat cards so no live number shifts under itself. */
+
+
+/* ── 5. Chain section headers keep their full-strength ink ───────────────────
+   index.css no longer forces `color` on every button, which lets each control's
+   own colour apply. For these four that colour is the muted token, and the
+   CALL / STRIKE / PUT headers are structural labels that must stay as loud as
+   the rows they head. */
+.app :is(
+  .chain-side-nav-button,
+  .strike-header-button
+) {
+  color: var(--text);
+}
+
+/* ── 6. Accent used as ink resolves to the readable accent ───────────────────
+   --accent is a fill (brand-600, #C80E7D). On dark it is 3.4:1 as text, so the
+   eyebrows, instrument chips and accent tags that use it for ink read as a
+   smudge. --accent-text is the ink half of the same brand pair — brand-300 on
+   dark, and unchanged from --accent on light where the fill colour is already
+   a valid ink. */
+
+
+/* ── 7. Type system stays inside the family it ships ─────────────────────────
+   Manrope loads exactly four faces: 400, 500, 600 and 700. Anything heavier
+   is remapped by the browser, so `font-weight: 700` rendered identically to
+   700 while telling every future reader a black weight existed. The declared
+   values were normalised to the four real ones; b/strong are the last holdout
+   because they inherit the UA's relative `bolder`, which computes to 800-900
+   beside this app's 600-700 parents. Stating 700 is the same pixels and keeps
+   the computed value inside the family. */
+#root > .app :is(b, strong) {
+  font-weight: 700;
+}
+
+/* ── 8. One timestamp grammar across Open Interest workspaces ────────────────
+   Time is market context, not a promotional chip. Keep it on the same flat
+   control rail, separate it with spacing/dividers, and use tabular figures so
+   live updates never make neighbouring controls jump. */
+
+
+
+
+
+
+
+
+
+
+
+
+

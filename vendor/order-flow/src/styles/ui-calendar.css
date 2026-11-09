@@ -1,0 +1,16 @@
+/* Calendar authority — currently EMPTY, deliberately.
+ *
+ * This sheet used to carry the dashboard calendar adapted from calendar.html.
+ * The only calendar surface in this app was SnapshotDatePicker, which no
+ * longer exists; its day-state rules were emptied out of strike-filter.css in
+ * the same pass (see the "Snapshot calendar day states" marker there). Nothing
+ * in src renders a date grid, a day cell or an <input type="date"> today, so
+ * every rule this file held was a dead selector.
+ *
+ * It is kept as a file only because main.tsx still imports it. If a calendar
+ * comes back, it belongs here — cells on a >=32px touch target, selected /
+ * today / disabled distinguished by weight, ring and ink rather than colour
+ * alone, :focus-visible on every cell and arrow-key roving focus across the
+ * grid. Until then this file must stay empty rather than accumulate rules for
+ * markup that does not exist.
+ */

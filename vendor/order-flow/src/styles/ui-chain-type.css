@@ -1,0 +1,38 @@
+/* OPTION CHAIN TYPE, for clarity (owner, 10 Oct 2026): the chain keeps its
+   own colours and backgrounds; only weight, case and size change, after the
+   live chain at the reference design,
+   which reads every figure at one quiet weight and lets colour carry
+   direction:
+
+   header      normal weight, normal case ("1D Build", "Volume"); Strike 500
+   figures     normal weight; the LTP 500
+   changes     11px (were 10px)
+   Strike      500
+
+   No colour is set here (owner: "do not add a new color"). */
+
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead th {
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead th :is(span, button, small, b, strong, div) {
+  font-weight: inherit !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead th.th-strike {
+  font-weight: 500 !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table tbody td.chain-leg-cell :is(span, b, strong, small, em) {
+  font-weight: 400 !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table tbody td.chain-leg-cell .ltp-value {
+  font-weight: 500 !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table tbody .ltp-change-pct {
+  font-size: var(--chain-font-sm, 12px) !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table td.strike-cell .strike-cell-body {
+  font-weight: 500 !important;
+}

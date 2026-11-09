@@ -1,0 +1,93 @@
+/* Compact result rows used by the shared instrument picker. */
+.app .upk-compact-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* 44px = --tap-min. 42 was both off the 4px grid and two pixels under the
+   touch floor for the row a phone user hits first on every visit. */
+.app .upk-compact-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(86px, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.app .upk-compact-row:last-child { border-bottom: 0; }
+
+.app .upk-compact-row:focus-visible {
+  background: var(--surface-hover, var(--hover-wash));
+  outline: none;
+}
+
+@media (hover: hover) {
+  .app .upk-compact-row:hover {
+    background: var(--surface-hover, var(--hover-wash));
+  }
+}
+
+/* "The one you are on" is a selection STROKE plus a wash, not a green fill.
+   The light theme used to paint this row success-50, which reads as a rising
+   market rather than as the current instrument — and green already names
+   change and put legs everywhere else in this product. */
+.app .upk-compact-row.active {
+  background: var(--selection-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--selection-ink) 45%, transparent);
+}
+
+.app .upk-compact-symbol {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app .upk-compact-quote {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.app .upk-compact-quote strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.app .upk-compact-quote span {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.app .upk-compact-quote span.positive { color: var(--up-ink); }
+.app .upk-compact-quote span.negative { color: var(--down-ink); }
+.app .upk-compact-quote span.neutral,
+.app .upk-compact-meta { color: var(--text-muted); }
+
+.app .upk-compact-meta {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}

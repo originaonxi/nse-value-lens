@@ -1,0 +1,187 @@
+/* No remote font import. The type system is Manrope / Manrope, both
+   self-hosted from /fonts via ui-typography.css, and no rule in the app asks
+   for Inter. The Google Fonts @import that used to sit here was also blocked in
+   production on every page load — `style-src 'self' 'unsafe-inline'` and
+   `font-src 'self'` in public/.htaccess forbid fonts.googleapis.com — so it
+   only ever produced a console error. */
+@import './ui-grid.css';
+@import './ui-customize-panel.css';
+
+/* Base Document Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Sleek Scrolling Behavior — a hairline thumb that reads on both themes
+   (a share of the ink, so it never needs a per-theme value) and only
+   deepens on hover; the transparent border insets it from the edge. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary, var(--text)) 22%, transparent);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-primary, var(--text)) 42%, transparent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+
+/* Typography Enhancements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  margin-top: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Utility Colors & Text */
+.text-primary { color: var(--text-primary); }
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  /* Was a bare `0.2s ease` — the one duration/curve pair declared outside the
+     motion authority. Now on the published scale (ui-motion.css). */
+  transition: opacity var(--dur-quick) var(--ease-out);
+}
+
+@media (hover: hover) {
+  a:hover {
+    opacity: 0.8;
+  }
+}
+
+/* `.modern-glass-header` removed — the class is rendered nowhere in src, so the
+   rule (and the backdrop-filter layer it asked the compositor for) matched
+   nothing. Its dark-theme partner in ui-luxury-background.css went with it. */
+
+/* Indicators Group */
+
+
+/* Modern Badges for Time and Status */
+
+
+
+
+/* Layout Fixes for full height workspace (fixes 0px height collapse for main-content) */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+#root, .app {
+  /* Both declarations on purpose, in this order. `100vh` is the LARGE viewport
+     on iOS/iPadOS — it counts the space behind the collapsing URL bar — so the
+     app shell measured taller than the window it was in and the bottom of every
+     page sat below the fold. `100dvh` tracks the live viewport.
+
+     The `vh` line stays as the fallback rather than being replaced: a browser
+     without `dvh` support drops the second declaration and keeps the first,
+     which is the current behaviour. Nothing regresses; Safari stops
+     over-measuring. */
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-body, .main-area, .main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/*
+ * Route-level suspense fallback.
+ *
+ * The seven non-chain workspaces are lazy chunks, so there is a brief moment
+ * on a tab switch before the chunk lands. This is what fills it. It is
+ * deliberately quiet — no spinner, no skeleton pretending to be a layout it
+ * cannot know — because the wait is normally a few hundred milliseconds and a
+ * moving element for that long reads as slower than a still one.
+ *
+ * It lives in index.css because it must resolve on every route: a fallback
+ * styled by a feature sheet would be unstyled at exactly the moment that
+ * feature's chunk has not arrived.
+ */
+.ui-route-fallback {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 320px;
+  padding: 24px;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption, 12px);
+}
+.ui-route-fallback strong {
+  color: var(--text);
+  font-size: var(--text-dense, 13px);
+  font-weight: 600;
+}
+
+/*
+ * Screen-reader-only text — one definition for the whole app.
+ *
+ * `.ui-visually-hidden` is used by the heatmap H1 and the GEX plot summaries,
+ * but it was only ever declared inside gex.css and oi-heatmap.css. Any other
+ * route that reached for it rendered the "hidden" text in full: PCR and
+ * Straddle both shipped their H1 as a huge visible title on a fresh load until
+ * they switched classes. It lives here for the same reason the route fallback
+ * does — it must resolve on every route, whichever feature chunk has loaded.
+ *
+ * `!important` on the geometry because this utility loses to nothing: headings
+ * pick up margins, positioning and sizes from `#root > .app` rules across
+ * several sheets, and a hidden heading that inherits any one of them becomes
+ * visible again. Colour and font are left alone — they cannot make it show.
+ * The feature-sheet copies can go; they are the same values.
+ */
+.ui-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

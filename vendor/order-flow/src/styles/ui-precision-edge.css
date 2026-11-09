@@ -1,0 +1,79 @@
+/**
+ * Precision Edge — selected Product Design direction.
+ *
+ * Theme-aware option-chain interaction details.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Highlight ITM — side-aware repaint (UX review, 05 Aug).
+
+   Why every earlier attempt failed: the zebra layer paints EVERY chain cell
+   with an opaque `background-color: var(--surface) / var(--bg-subtle)
+   !important` (`:root[data-theme] body #root > .app.app[data-active-tab=
+   "chain"] …`), so all eighteen generations of translucent ITM tints in the
+   older sheets render invisibly underneath it. The toggle therefore "did
+   nothing". These rules out-specify that zebra rule and mix the tint INTO
+   the zebra colour, so ITM shading finally shows — and they key off the
+   strike cell's position, not the old 12-column assumption, so the tint
+   never bleeds across the strike into the other side. ATM keeps its own
+   stronger highlight. Both themes resolve through the same tokens.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ITM uses one warm orange language on both option legs. The dark theme gets
+   a richer amber wash; the light theme uses a quieter cream-orange tint so
+   numbers, bars, and state badges retain their contrast.
+
+   The unthemed :root row is the load-bearing one. `data-theme` is written by
+   the app after mount, so on the first paint neither themed block matched and
+   every reader of --chain-itm-fill fell through to a literal hex fallback the
+   colour contract forbids. Dark is the app's first-paint default, so the base
+   row carries the dark values and the light block overrides them. */
+:root {
+  --chain-itm-fill: var(--success-200);
+  --chain-itm-strength: 14%;
+  --chain-itm-strength-even: 10%;
+}
+
+:root[data-theme='dark'] {
+  --chain-itm-fill: var(--success-200);
+  --chain-itm-strength: 14%;
+  --chain-itm-strength-even: 10%;
+}
+
+:root[data-theme='light'] {
+  --chain-itm-fill: var(--success-200);
+  --chain-itm-strength: 12%;
+  --chain-itm-strength-even: 9%;
+}
+
+/* Call side = cells BEFORE the strike cell. */
+
+
+
+/* Put side = cells AFTER the strike cell. */
+
+
+
+
+/* Performance & Touch Responsiveness Optimizations (60fps Scrolling)
+ *
+ * Two declarations were removed here, both of which cost the frames they were
+ * meant to save:
+ *
+ *   `scroll-behavior: smooth` — design contract §6 forbids it on a scroll
+ *   container. It applies to direct scrollTop/scrollLeft assignment, not only
+ *   to scrollTo(), and these two elements are the ancestors the chain's
+ *   per-frame scroll writes land in. Call sites that want an animated jump
+ *   already pass { behavior: 'smooth' } from JS.
+ *
+ *   `will-change: scroll-position` — promotes both containers to their own
+ *   compositor layer permanently, for the whole session, whether or not
+ *   anything is scrolling. will-change is a hint to be applied just before a
+ *   change and removed after; left standing it is a memory cost, not an
+ *   optimisation.
+ */
+.dashboard-body,
+.main-area {
+  -webkit-overflow-scrolling: touch;
+}
+

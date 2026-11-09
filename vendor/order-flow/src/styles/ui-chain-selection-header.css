@@ -1,0 +1,423 @@
+/* The chain header uses a central expiry anchor and compact side controls. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead
+  :is(th.chain-side-nav-th.chain-side-nav-ce, th.chain-side-nav-th.chain-side-nav-pe, th.chain-side-nav-th.chain-side-nav-group) {
+  background:var(--surface) !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-th::after {
+  display:none !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-expiry-wrap {
+  box-sizing:border-box; padding:2px 3px;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-expiry-selector__trigger {
+  min-height:36px; height:36px; padding:3px 8px;
+  background:transparent !important; border:0;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-expiry-selector__trigger[aria-expanded='true'] {
+  background:transparent !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-button {
+  width:auto !important; height:32px !important; min-height:32px !important;
+  margin:4px auto !important; padding:0 8px !important; border:0 !important;
+  border-radius:6px !important; background:transparent !important;
+  color:var(--text) !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-ce .chain-side-nav-button { margin:4px auto !important; }
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-pe .chain-side-nav-button { margin:4px auto !important; }
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead :is(.chain-side-nav-label,.chain-side-nav-link) {
+  padding:0 !important; min-width:0 !important; min-height:28px !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-button[aria-pressed='true'] {
+  background:var(--surface-hover) !important; border-color:transparent !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-button[aria-hidden='true'] {
+  visibility:hidden !important;
+}
+/* The pinned equivalents keep the same appearance during horizontal panning. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+  .oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+  top:4px !important; width:auto !important; min-width:64px !important; height:32px !important; min-height:32px !important;
+  padding:0 8px !important; border:0 !important; border-radius:6px !important;
+  background:transparent !important; box-shadow:none !important;
+  font-size: var(--chain-font-cell, 12px) !important; font-weight:600 !important;
+  color:var(--text) !important; text-transform:uppercase !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay__button.is-call { margin-right:8px; }
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay__button.is-put { margin-left:8px; }
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container
+  .oc-side-nav-overlay__button.oc-side-nav-overlay__button.is-active {
+  background:var(--surface-hover) !important; border-color:transparent !important; box-shadow:none !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] :is(.chain-table thead,.oc-side-nav-overlay) .chain-side-nav-active-chip {
+  padding:0 !important; border:0 !important; background:transparent !important; gap:6px !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-arrow,
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] :is(.chain-table thead,.oc-side-nav-overlay) .chain-side-nav-close {
+  transform:none !important; transition:none !important;
+}
+/* One header band: the column header row (1D Build, Open Interest, LTP, Strike,
+   LTP, Open Interest, 1D Build) takes the Strike header's own colour,
+   --bg-subtle, so the spine no longer reads as a grey tab on a white row. It
+   stays opaque: the row is sticky over scrolling cells. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-header-row > th {
+  vertical-align:middle; background:var(--table-head-surface) !important; border-bottom:1px solid var(--line) !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-sort-button {
+  border-radius:6px; min-height:30px; padding-block:4px !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-sort-button:focus-visible {
+  background:var(--surface-hover) !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead th:is([aria-sort='ascending'],[aria-sort='descending']) .chain-sort-button {
+  background:var(--surface-sunken) !important; color:var(--text) !important;
+}
+/* Contract §8 ring colour (--accent); the muted grey read as a disabled state
+   rather than focus. Inset stays: these controls sit flush in sticky cells. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] :is(.chain-table thead,.oc-side-nav-overlay) button:focus-visible {
+  outline:2px solid var(--accent) !important; outline-offset:-2px !important; box-shadow:none !important;
+}
+@media(max-width:768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead :is(.chain-side-nav-row > th,.chain-side-expiry-wrap) { height:48px !important; min-height:48px !important; }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead :is(.chain-side-nav-button,.chain-expiry-selector__trigger) { height:44px !important; min-height:44px !important; }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-button { margin-block:2px !important; }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    top:2px !important; width:106px !important; height:44px !important; min-height:44px !important; font-size: var(--chain-font-sm, 11px) !important; padding-inline:6px !important;
+  }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay__button.is-call { margin-right:3px; }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay__button.is-put { margin-left:3px; }
+}
+
+/* ---- Guide-level finish: the grid sits in the same frame as the insight card
+   above it. The card is inset 8px with a 12px radius and a hairline; the grid
+   used to run edge to edge with a 6px radius and a resting shadow (design
+   contract §1.2: a card at rest has no shadow, depth is the hairline). ------- */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+  --chain-box-edge: color-mix(in srgb, var(--line-strong) 70%, transparent);
+  margin: 0 8px 8px !important;
+  border: 1px solid var(--chain-box-edge) !important;
+  /* The top edge is drawn by the pinned header row below, so it stays on
+     screen when the page scrolls the box's own top away (owner, 10 Oct: the
+     border must always be visible). */
+  border-top-width: 0 !important;
+  border-radius: var(--radius-lg, 12px) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .chain-table thead tr:first-child > th {
+  border-top: 1px solid var(--chain-box-edge) !important;
+}
+@media (max-width: 768px) {
+  /* Phone: the same container as every tool (owner, 10 Oct: "containers for
+     all the tools", desktop and phone alike), on the page's 12px margins. It
+     used to run flush to the edges. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+    width: auto !important;
+    margin: 0 12px 12px !important;
+    border-radius: var(--radius-card, 12px) !important;
+  }
+}
+
+/* The chain's top row, the same on desktop and phone: "‹ CALL · 13 Oct 4 DTE
+   ˅ · PUT ›" with the expiry as a compact control that always fits between
+   the two sides (it was a 156px capsule over a 64px Strike column on a phone,
+   running into both). */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-expiry-selector__trigger {
+  gap: 6px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 8px 0 12px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--surface-hover) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-expiry-selector__trigger strong {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-expiry-selector__trigger small {
+  padding-inline: 5px !important;
+  font-size: var(--text-meta, 11px) !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .oc-side-nav-overlay__button {
+  gap: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+/* Open Interest bars: the Open Interest page's softer fills are scoped to
+   `.oi-design` and never resolve here (contract §1.6), so the bars fell back to
+   the raw fill tokens and read as solid red / green slabs on light. Mix them
+   toward the row surface so the bar reads as a bar, not a block. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table.chain-table .ui-oicell.is-up {
+  --bar-leg: color-mix(in srgb, var(--up) 78%, var(--oc-grid-row, var(--surface)));
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table.chain-table .ui-oicell.is-down {
+  --bar-leg: color-mix(in srgb, var(--down) 78%, var(--oc-grid-row, var(--surface)));
+}
+
+/* The column header row is ONE band, the Strike header's colour (--bg-subtle).
+   Many older chain sheets paint these cells (panel gradients, --surface), so
+   this restates the one rule with enough weight to be final, on the route and
+   in the Terminal's Option Chain widget alike. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table.chain-table thead tr.chain-header-row > th {
+  background: var(--bg-subtle) !important;
+  background-image: none !important;
+}
+/* Light theme: the Strike header's own step (--neutral-100), not the page's
+   --bg-subtle, so the whole band is exactly the spine's colour. */
+:root[data-theme='light'] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table.chain-table thead tr.chain-header-row > th {
+  background: var(--neutral-100) !important;
+}
+
+/* ── The active CALL / PUT chip is ONE capsule ────────────────────────────────
+   The side label (a capsule with its own border and fill) used to wrap the chip
+   (another capsule), so "Call options ×" read as a pill inside a pill. While a
+   chip is showing, the label draws nothing of its own and the chip carries the
+   whole look: a light tint of the side's colour (Call red, Put green), a
+   hairline in the same tone and the inset highlight. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table thead .chain-side-nav-label:has(> .chain-side-nav-active-chip) {
+  padding: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table thead .chain-side-nav-active-chip {
+  border: 1px solid transparent !important;
+  box-shadow: var(--edge-highlight) !important;
+  padding-inline: 12px 6px !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table thead .chain-side-nav-active-chip-ce {
+  border-color: color-mix(in srgb, var(--down-ink) 32%, transparent) !important;
+  background: color-mix(in srgb, var(--down) 14%, var(--surface)) !important;
+  color: var(--down-ink) !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table thead .chain-side-nav-active-chip-pe {
+  border-color: color-mix(in srgb, var(--up-ink) 32%, transparent) !important;
+  background: color-mix(in srgb, var(--up) 14%, var(--surface)) !important;
+  color: var(--up-ink) !important;
+}
+/* The button's own `::before` is the selected-state capsule behind the label;
+   with the chip showing it would be a second outline around it. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table thead .chain-side-nav-button:has(.chain-side-nav-active-chip)::before {
+  display: none !important;
+}
+
+/* ── No animation in the Strike / Call / Put area ─────────────────────────────
+   Owner request, to stop the flicker seen when switching to Put or Call: the
+   STRIKE header cell, the Call and Put header controls (button, label, active
+   chip, close mark) and the phone's Call / Put overlay take no transition and
+   no animation, on the route and in the Terminal widget. Nothing else changes:
+   colours, sizes, behaviour and every other element keep what they had. (The
+   cell previously faded `color` and `background-color` over 0.18s, from two
+   older rules that still serve their other cells.) */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  :is(
+    .chain-table thead th.th-strike,
+    .chain-table thead th.th-strike *,
+    .chain-table thead th.chain-side-nav-th,
+    .chain-table thead th.chain-side-nav-th *,
+    .chain-table thead th.chain-side-expiry-th,
+    .oc-side-nav-overlay,
+    .oc-side-nav-overlay *
+  ),
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  :is(
+    .chain-table thead th.th-strike,
+    .chain-table thead th.th-strike *,
+    .chain-table thead th.chain-side-nav-th,
+    .chain-table thead th.chain-side-nav-th *,
+    .chain-table thead th.chain-side-expiry-th,
+    .oc-side-nav-overlay,
+    .oc-side-nav-overlay *
+  )::before,
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  :is(
+    .chain-table thead th.th-strike,
+    .chain-table thead th.th-strike *,
+    .chain-table thead th.chain-side-nav-th,
+    .chain-table thead th.chain-side-nav-th *,
+    .chain-table thead th.chain-side-expiry-th,
+    .oc-side-nav-overlay,
+    .oc-side-nav-overlay *
+  )::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Simple | Advanced: in the page bar on desktop, inside Customise on a phone
+   (owner, 10 Oct), never both. */
+.chain-mode-pagebar { display: flex; flex: none; align-items: center; }
+@media (max-width: 768px) {
+  .chain-mode-pagebar { display: none !important; }
+}
+@media (min-width: 769px) {
+  .ui-customize-panel .cz-section.cz-chain-mode { display: none; }
+}
+
+/* The side chips read in normal case, like the rest of the header ("Call",
+   not "CALL"). */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] :is(.chain-side-nav-active-chip, .oc-side-nav-overlay__button) :is(span, b) {
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+/* Desktop says "Call Options" / "Put Options" in full; a phone says "Call" /
+   "Put" (owner, 10 Oct 2026). The title tail was hidden at every width. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] :is(.chain-table thead, .oc-side-nav-overlay) :is(.chain-side-nav-chip-tail, .chain-side-nav-title-tail) {
+    display: inline !important;
+  }
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-title {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  white-space: nowrap !important;
+}
+
+/* THE PHONE HEADER: Call · date · Put, and nothing else (owner, 10 Oct 2026).
+   The pill shows the date only; the days-left chip stays in the dropdown and
+   on desktop. With the chip gone the pill is one fixed size in every view,
+   the Strike column plus 16px (it holds "30 Sept" and its caret), so it never
+   changes size with the date. In Both each button is centred in its own half
+   (see "CALL / PUT — centred in their halves" below); in Call-only / Put-only
+   the chip is centred and the pill sits at the band's end. */
+@media (max-width: 768px) {
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger small {
+    display: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container {
+    --chain-expiry-overhang: 8px;
+    --chain-side-gap: 4px;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger {
+    width: calc(var(--chain-strike-width, 64px) + 2 * var(--chain-expiry-overhang)) !important;
+    padding: 0 6px 0 10px !important;
+    gap: 4px !important;
+    justify-content: center !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger > span:first-child {
+    flex: none !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 10px !important;
+    gap: 4px !important;
+    margin-inline: 0 !important;
+    translate: none !important;
+  }
+  /* Call-only / Put-only read like the cockpit's chain bar: the "× Call" /
+     "× Put" chip in the middle of the band and the expiry at its end, the
+     same in both views (it used to sit on the Strike's side, so it swapped
+     ends between Call and Put). */
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container:is([data-table-view='calls'], [data-table-view='puts']) .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    left: 50% !important;
+    right: auto !important;
+    translate: -50% 0 !important;
+  }
+  /* In Put-only the expiry cell is pinned to the window's left edge (the
+     Strike is the Put table's first column), so the pill is placed from it to
+     the window's other end: 4px in from the edge, like Call-only's. */
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='puts'] .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger {
+    position: absolute !important;
+    top: 50% !important;
+    left: calc(var(--chain-sticky-viewport-width, 100%) - var(--chain-strike-width, 64px) - 20px) !important;
+    translate: 0 -50% !important;
+  }
+  /* The pinned buttons centre in the 50px band, on the pill's own centre line
+     (they sat at top 2px, 5px above it). */
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    top: 7px !important;
+  }
+  /* One heading-row height in every view (it was 43px in Both and 46px in
+     Call / Put, so the rows jumped 3px on each switch). On a table cell
+     `height` is a floor, so a heading that genuinely needs more still gets it. */
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-header-row > th {
+    height: 46px !important;
+  }
+  /* …and nothing needs more. In Call-only / Put-only the columns are 55px,
+     and a heading's sort button took 10px a side inside the cell's 4px, which
+     left 27px: "OI Chg %" broke onto three lines, the row grew to 59px, and
+     the whole table jumped 13px on every switch. 2px a side leaves 43px, so
+     every heading fits in two lines and the row stays 46px in every view. */
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-header-row .chain-sort-button {
+    padding-inline: 2px !important;
+  }
+}
+
+/* CALL / PUT — centred in their halves, Both view (owner, 10 Oct 2026: "Call
+   in the middle of the Call side, Put in the middle of the Put side"). They
+   used to sit against the expiry pill. A half is the window beside the Strike
+   column: (viewport − spine) / 2. The button's position cannot come from
+   `translate` (the split effect uses it to hold the button still while the
+   lane pans) or from `transform` (press states set it, and a replaced transform
+   moved the button out from under the pointer mid-click), so it comes from a
+   fixed width and a margin of half the lane, measured from the spine side,
+   which is the edge of the visible window at every pan position. The width is
+   in em so the 4K type tiers scale it with the label. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='straddle'] {
+  --chain-side-lane: calc((var(--chain-sticky-viewport-width, 100%) - var(--chain-spine-width, var(--chain-strike-width, 112px))) / 2);
+  --chain-side-button: 11.5em;
+}
+@media (min-width: 769px) {
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-nav-row :is(.chain-side-nav-ce, .chain-side-nav-pe) .chain-side-nav-button {
+    width: var(--chain-side-button) !important;
+    justify-content: center !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-nav-row .chain-side-nav-ce .chain-side-nav-button {
+    margin: 4px calc(var(--chain-side-lane) / 2 - var(--chain-side-button) / 2) 4px auto !important;
+  }
+  :root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-nav-row .chain-side-nav-pe .chain-side-nav-button {
+    margin: 4px auto 4px calc(var(--chain-side-lane) / 2 - var(--chain-side-button) / 2) !important;
+  }
+}
+/* The pinned pair (phones, and any touch table wider than its window) is
+   absolutely placed in the window, so `translate` is free to centre it: no
+   script moves it. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-chain-layout='split'][data-table-view='straddle'] .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button.is-call {
+  left: calc(var(--chain-side-lane) / 2) !important;
+  right: auto !important;
+  translate: -50% 0 !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container[data-chain-layout='split'][data-table-view='straddle'] .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button.is-put {
+  left: auto !important;
+  right: calc(var(--chain-side-lane) / 2) !important;
+  translate: 50% 0 !important;
+}
+
+/* THE EXPIRY LIST speaks the chain's type (owner, 10 Oct: "why are you using
+   the big fonts here?"): the date at the Strike's 13px, the heading at 13px,
+   the DTE and Monthly chips at the chain's 10px, weights 500/600 as in the
+   table, and 44px rows (the tap floor) instead of 52. The panel is portalled
+   to <body>, outside .app, hence the body-level selectors. */
+:root[data-theme] body .chain-expiry-selector__panel h2 {
+  font-family: inherit !important;
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 600 !important;
+  line-height: 18px !important;
+  letter-spacing: normal !important;
+}
+:root[data-theme] body .chain-expiry-selector__panel [role='option'] {
+  min-height: 44px !important;
+  height: 44px !important;
+}
+:root[data-theme] body .chain-expiry-selector__panel [role='option'] strong {
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 500 !important;
+}
+:root[data-theme] body .chain-expiry-selector__panel [role='option'][aria-selected='true'] strong {
+  font-weight: 600 !important;
+}
+:root[data-theme] body .chain-expiry-selector__panel [role='option'] :is(small, .chain-expiry-selector__kind, span:not(.chain-expiry-selector__check):not(.chain-expiry-selector__sr)) {
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+}

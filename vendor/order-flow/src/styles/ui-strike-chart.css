@@ -1,0 +1,108 @@
+/*
+ * The strike chart's own bits.
+ *
+ * Almost nothing: the plane, its candles, axes, crosshair and drawing tools
+ * are the shared engine's (lib/uiChart/ui-chart.css), and every chart in
+ * the app draws with them. What is particular to a contract is the crosshair
+ * readout — the prototype's `.ohlc`, riding over the plot on a plate rather
+ * than taking a band above it, which is the whole reason the plot keeps its
+ * own box on a phone.
+ */
+
+/* The box the plane fills. Without an explicit height the frame's own
+   `height: 100%` resolves against nothing, the plane measures zero and draws
+   neither the chart nor its empty state. */
+.ui-strike-chart-host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The plane's own box. The shell above it is `flex: none`, so this takes what
+   is left — without it the plane measured zero and drew nothing at all. */
+.ui-strike-chart-plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ui-strike-chart__readout {
+  position: absolute;
+  z-index: 3;
+  top: 6px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  /* Stops short of the price axis on the right, which is the chart's own
+     type: at full width the second line printed straight through it. */
+  max-width: calc(100% - 68px);
+  padding: 5px 8px 5px 6px;
+  border-radius: 8px;
+  /* A plate, so the caption stays readable where the series runs under it —
+     the prototype backs its own floating legend the same way. */
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--text-secondary);
+  font-family: var(--font-num, var(--font-sans));
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.ui-strike-chart__ohlc {
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ui-strike-chart__ohlc b {
+  margin: 0 3px 0 7px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.ui-strike-chart__ohlc b:first-child { margin-left: 0; }
+
+.ui-strike-chart__ohlc em.up { color: var(--up-ink, var(--up)); font-style: normal; }
+.ui-strike-chart__ohlc em.down { color: var(--down-ink, var(--down)); font-style: normal; }
+
+.ui-strike-chart__meta {
+  color: var(--text-secondary);
+  font-size: var(--text-meta, 11px);
+  white-space: nowrap;
+}
+
+.ui-strike-chart__meta b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ui-strike-chart__meta abbr {
+  text-decoration: none;
+}
+
+/* Phone: the toolbar dock lands where this plate does, so the plate drops
+   below it. Nothing is lost — both float over the plot. */
+@media (max-width: 768px) {
+  .ui-strike-chart__readout {
+    top: 44px;
+  }
+}
+
+/* Narrow phone: the plate closes up so it stays two lines at 320px. */
+@media (max-width: 400px) {
+  .ui-strike-chart__readout {
+    max-width: calc(100% - 58px);
+    font-size: var(--text-meta, 11px);
+  }
+
+  .ui-strike-chart__ohlc b { margin-left: 5px; }
+}

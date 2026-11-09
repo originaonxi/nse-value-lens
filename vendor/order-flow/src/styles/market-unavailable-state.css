@@ -1,0 +1,117 @@
+/* The "market data unavailable" state.
+   ------------------------------------------------------------------
+   This surface had markup and no stylesheet: every class below existed
+   only in App.tsx, so the state rendered as raw elements — a brand mark
+   at its natural size filling the canvas, run-together text edge to
+   edge, and the retry button dropped into the corner over the tool rail.
+
+   It went unnoticed because the state was unreachable. The option chain
+   would sit on "Connecting…" forever rather than concluding that nothing
+   was coming, so the error branch never rendered. Once the wait ceiling
+   in App.tsx made it reachable, the missing styling became visible.
+
+   Nothing here invents a colour: every value is a token the theme
+   already defines, which is what keeps `npm run audit:colours` green. */
+
+.error-state.data-gap-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 60vh;
+  min-height: 60dvh;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* The mark is a watermark, not the subject: it sits quiet above the
+   sentence that actually tells the reader what happened. */
+.error-state.data-gap-state .empty-brand-orbit {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 2px;
+}
+
+.error-state.data-gap-state .empty-brand-mark {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.4;
+}
+
+/* The mark is a WHITE svg. On the light card it was white-on-white at 22%
+   opacity, which is to say absent. Darken it to the ink with a filter (no
+   colour literal) and give it enough weight to read as a mark: about 3:1
+   against the card, matching the 3:1 the finish recipe asks of UI edges. */
+:root[data-theme='light'] .app .error-state.data-gap-state .empty-brand-mark {
+  /* ui-cards.css tints the img itself 5%, which drew a pale square behind it. */
+  background: transparent !important;
+  filter: brightness(0);
+  opacity: 0.55;
+}
+
+.error-state.data-gap-state .data-gap-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.error-state.data-gap-state .error-state-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.error-state.data-gap-state .error-state-copy {
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* The detail names the actual selection that could not be served, so it
+   is the line a reader acts on — kept distinct from the generic copy. */
+.error-state.data-gap-state .data-gap-detail {
+  max-width: 52ch;
+  padding: 9px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.error-state.data-gap-state .data-gap-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.error-state.data-gap-state .data-gap-pill {
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* The button is in the flow, not floated: unstyled it fell to the page
+   corner and sat on top of the tool rail. */
+.error-state.data-gap-state .data-gap-retry {
+  position: static;
+  margin-top: 6px;
+}
+

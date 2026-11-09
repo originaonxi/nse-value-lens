@@ -1,0 +1,73 @@
+/*
+ * the app icon contract — one family (Phosphor Regular, plus the four route
+ * glyphs drawn to its 1.5-on-24 weight), neutral-first, `currentColor` only.
+ *
+ * Deliberately NOT here:
+ *   - `vector-effect: non-scaling-stroke`. It pinned every stroke to 1.5 CSS px
+ *     at any size, so a hand-drawn icon read ~33% heavier than a Phosphor one
+ *     at 18px (1.5px against 1.125px), and the rule reached every path of a
+ *     wrapped Phosphor glyph too. Strokes now scale with the icon, which is
+ *     what keeps every icon the same weight at every size.
+ *   - a dimmed `:disabled` icon. The button already dims itself (0.4 to 0.5),
+ *     and dimming the icon again stacked to ~0.2, unreadable on a dark theme.
+ */
+.ui-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  color: inherit;
+  vertical-align: middle;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Emphasis comes from contrast, never glow: no shadow on an icon's pseudo layers. */
+
+#root :is([class*='-icon'], [class*='__icon'])::before,
+#root :is([class*='-icon'], [class*='__icon'])::after {
+  filter: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/*
+ * No-glow interface authority.
+ *
+ * Navigation and workspace controls use borders, fills and a crisp outline for
+ * state. Shadows must not be used to make icons, active items or switches
+ * appear luminous.
+ */
+#root > .app svg,
+#root > .app svg *{
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* One focus treatment for every interactive element in the app. `summary` is
+   in the list because a <details> disclosure is focusable without carrying a
+   tabindex attribute, so it used to fall through this net entirely. */
+#root > .app :is(
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  summary,
+  [role='button'],
+  [role='tab'],
+  [role='switch'],
+  [role='menuitem'],
+  [tabindex]
+):focus-visible {
+  box-shadow: none !important;
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Columns is a high-specificity workspace popover; keep its complete surface
+   and every internal control flat in both themes. */
+:root[data-theme] body #root > .app.app:is([data-active-tab='chain'], [data-active-tab='oi-heatmap'], [data-active-tab='open-interest'], [data-active-tab='oi-spurts'], [data-active-tab='pcr'], [data-active-tab='straddle'], [data-active-tab='gex'], [data-active-tab='implied-volatility'], [data-active-tab='strategy-builder'], [data-active-tab='options-scanner'], [data-active-tab='market-flow']) .workspace-columns-host .ui-customize-panel,
+:root[data-theme] body #root > .app.app:is([data-active-tab='chain'], [data-active-tab='oi-heatmap'], [data-active-tab='open-interest'], [data-active-tab='oi-spurts'], [data-active-tab='pcr'], [data-active-tab='straddle'], [data-active-tab='gex'], [data-active-tab='implied-volatility'], [data-active-tab='strategy-builder'], [data-active-tab='options-scanner'], [data-active-tab='market-flow']) .workspace-columns-host .ui-customize-panel * {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}

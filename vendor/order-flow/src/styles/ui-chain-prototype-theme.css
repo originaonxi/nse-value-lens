@@ -1,0 +1,354 @@
+/*
+ * UiCharts prototype theme bridge
+ * --------------------------------------------------------------------------
+ * Applies the prototype's typography and palette to the option-chain workspace
+ * only. Loaded last so it can normalize older chain-specific override layers.
+ */
+
+/* ----------------------------------------------------------------------------
+   RETIRED: this block used to re-alias the whole token vocabulary into a
+   --ui-proto-* layer. That map was circular (--surface resolved through
+   --ui-proto-panel while --ui-proto-ink resolved back to --surface2),
+   carried invalid var(var(--x)), and pinned color-scheme:dark, which breaks
+   principle 05 (both themes are first-class).
+
+   Token mapping now lives in exactly one place: ui-ds-bridge.css. What is
+   left here are the chain-specific LAYOUT rules further down the file, plus
+   these two aliases the rest of the file still reads.
+   ------------------------------------------------------------------------- */
+#root > .app.app[data-active-tab='chain'] {
+  --ui-proto-font        : var(--font-sans);
+  --ui-proto-bg          : var(--bg);
+  --ui-proto-panel       : var(--surface);
+  --ui-proto-panel-2     : var(--surface-raised);
+  --ui-proto-line        : var(--line);
+  --ui-proto-line-2      : var(--line-strong);
+  --ui-proto-ink         : var(--text);
+  --ui-proto-ink-2       : var(--text-muted);
+  --ui-proto-muted       : var(--text-subtle);
+  --ui-proto-green       : var(--up);
+  --ui-proto-green-soft  : color-mix(in srgb, var(--up) 14%, transparent);
+  --ui-proto-red         : var(--down);
+  --ui-proto-red-soft    : color-mix(in srgb, var(--down) 14%, transparent);
+  --ui-proto-buy         : var(--buy-fill);
+  --ui-proto-sell        : var(--sell-fill);
+  --ui-proto-accent      : var(--accent);
+  --ui-proto-accent-2    : var(--warm-500);
+  --ui-proto-chip        : var(--bg-subtle);
+  --ui-proto-accent-soft : var(--accent-wash);
+  --ui-proto-accent-line : var(--accent);
+  --ui-proto-shadow      : var(--shadow-2);
+}
+
+/* The light-theme re-alias that used to follow here (brand-50 pink panels,
+   #3D0920 wine ink, pink hairlines — all as literals) is gone. The aliases
+   above already resolve through the semantic tokens, which are themed, so a
+   second light-only map could only ever disagree with them. Verified in the
+   browser before removal (2026-09-14, straddle, Call-only and Put-only, light):
+   the pink was painted NOWHERE — every surface it targeted, the Strike spine
+   included, is repainted by ui-chain-grid-finish.css at higher specificity.
+   Its one live effect was the chain container's inherited ink, which was the
+   wine #3D0920 instead of --text. `color-scheme` is owned by
+   ui-colour-system.css for both themes. */
+
+#root > .app.app[data-active-tab='chain'] :is(button, input, select, textarea) {
+  font-family: var(--ui-proto-font) !important;
+}
+
+/* Scoped to the dense grid, which is the "older chain-specific override layer"
+   this sheet exists to normalize (see the file header). It used to select
+   :is(*, *::before, *::after) on the whole tab, which flattened every
+   contract-mandated eyebrow (+.05….06em caps) and every negative headline
+   tracking on the app's reference surface — the AI summary card, the loading
+   state, the expiry menu and the insight prose included. Nothing could opt out:
+   the rule is (1,3,1) AND !important. Table material stays at zero tracking on
+   purpose; the noise values it replaced were .002/.003/.004em, which are not
+   design decisions. Anything outside the table now gets its own tracking.
+
+   DELETED 2026-09-02, because it never applied. The selector was
+
+     #root > .app.app[data-active-tab='chain'] .chain-table
+       :is(*, *::before, *::after) { letter-spacing: 0 !important }
+
+   and `:is()` cannot represent a pseudo-element. Chrome's response is to drop
+   the whole rule: verified in the browser, the declaration is absent from the
+   CSSOM and `.chain-row td` computes `letter-spacing: normal`, not `0px`. A
+   spec-forgiving parser would instead discard only the two pseudo-element
+   entries and apply the surviving `:is(*)`, so the rule was ALSO a live
+   cross-browser inconsistency — flattening the grid in one engine and not the
+   other.
+
+   It is deleted rather than repaired. Repairing it would switch the flattener
+   on for the first time, and at (1,4,0) + !important it outranks the
+   per-element tracking the contract's ladder requires — it would silently kill
+   the -.006em on `.strike-val-lbl` and the +.05em on `.badge-atm`. The noise it
+   was written to suppress (.002/.003/.004em) was already fixed at each source,
+   which is what the paragraph above records. Removing it costs nothing today
+   and takes away a trap that reads as load-bearing.
+
+   Consequence worth knowing: the contract's caps rungs ARE reachable inside
+   `.chain-table`. Any rule that appears not to take is being overridden by a
+   real declaration in another sheet, not by a blanket flattener. */
+
+#root > .app.app[data-active-tab='chain'] :is(
+  .dashboard-shell,
+  .dashboard-body,
+  .main-area,
+  .main-content,
+  .chain-table-container
+) {
+  background: var(--ui-proto-bg) !important;
+  color: var(--ui-proto-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] :is(
+  .dashboard-body,
+  .main-area,
+  .main-content
+) {
+  font-family: var(--ui-proto-font) !important;
+}
+
+
+
+
+
+
+
+
+
+
+#root > .app.app[data-active-tab='chain'] .chain-table {
+  font-family: var(--ui-proto-font) !important;
+  color: var(--ui-proto-ink) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  border-color: var(--ui-proto-line) !important;
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table thead th,
+#root > .app.app[data-active-tab='chain'] .chain-header-row th {
+  border-color: var(--ui-proto-line) !important;
+  background: var(--ui-proto-panel) !important;
+  color: var(--ui-proto-muted) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  border-color: var(--ui-proto-line-2) !important;
+  font-family: var(--ui-proto-font) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row td {
+  border-color: var(--ui-proto-line-2) !important;
+  background: var(--ui-proto-bg) !important;
+  color: var(--ui-proto-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row-even td {
+  background: var(--ui-proto-bg) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-row-odd td {
+  background: var(--ui-proto-bg) !important;
+}
+
+
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell, .th-strike, .chain-side-expiry-th) {
+  border-color: var(--ui-proto-line) !important;
+  background: var(--ui-proto-panel) !important;
+  color: var(--ui-proto-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .atm-row td {
+  border-color: var(--ui-proto-accent-line) !important;
+  background: var(--ui-proto-accent-soft) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-cell.atm-strike,
+#root > .app.app[data-active-tab='chain'] .chain-table .atm-row .strike-cell {
+  background: var(--ui-proto-accent-soft) !important;
+  color: var(--ui-proto-accent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-proto-accent) 40%, transparent) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .strike-cell.maxpain-strike:not(.atm-strike) {
+  background: color-mix(in srgb, var(--ui-proto-accent-2) 10%, var(--ui-proto-panel)) !important;
+  color: var(--ui-proto-accent-2) !important;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ui-proto-accent-2) 42%, transparent) !important;
+}
+
+
+
+
+
+
+
+
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.bu-short-cover, .sc, .short-cover) {
+  background: color-mix(in srgb, var(--ui-proto-green) 18%, var(--ui-proto-bg)) !important;
+  color: var(--up-ink) !important;
+}
+
+
+
+
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider {
+  background: var(--ui-proto-panel) !important;
+  border-color: var(--ui-proto-line) !important;
+  color: var(--ui-proto-ink-2) !important;
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-divider::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--ui-proto-buy) 30%, transparent) 42%,
+      color-mix(in srgb, var(--ui-proto-muted) 34%, transparent) 50%,
+      color-mix(in srgb, var(--ui-proto-red) 26%, transparent) 58%,
+      transparent
+    ) !important;
+  box-shadow: none !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Final option-chain geometry authority: remove legacy gaps and make the
+   header controls read as one dedicated the app product system. */
+#root > .app.app[data-active-tab='chain'] .dashboard-body {
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--ui-proto-bg) !important;
+}
+
+/* The chain's zero-padding override keeps only the home indicator's safe
+   area at the foot (there is no navigation dock to clear any more). */
+@media (max-width: 768px) {
+  #root > .app.app[data-active-tab='chain'] .dashboard-body {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+#root > .app.app[data-active-tab='chain'] .main-area,
+#root > .app.app[data-active-tab='chain'] .main-content {
+  gap: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--ui-proto-bg) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  background: var(--ui-proto-bg) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table {
+  margin: 0 !important;
+  border-spacing: 0 !important;
+  font-family: var(--ui-proto-font) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(th, td) {
+  height: 34px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-label-ce,
+#root > .app.app[data-active-tab='chain'] .chain-table .th-ce .chain-sort-button {
+  color: var(--down-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-label-pe,
+#root > .app.app[data-active-tab='chain'] .chain-table .th-pe .chain-sort-button {
+  color: var(--up-ink) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-th.chain-side-nav-ce {
+  background: color-mix(in srgb, var(--ui-proto-red) 8%, var(--ui-proto-panel)) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .chain-side-nav-th.chain-side-nav-pe {
+  background: color-mix(in srgb, var(--ui-proto-buy) 8%, var(--ui-proto-panel)) !important;
+}
+
+/* Remove dotted/underlined tooltip treatment from option-chain headings and KPI labels. */
+
+
+#root > .app.app[data-active-tab='chain'] :is(.tt-wrap:focus .tt-label) {
+  border-bottom-color: transparent !important;
+}
+
+/* Detail/KPI heading treatment: match the clean option-table header language,
+   without changing the large top summary cards. */
+
+
+#root > .app.app[data-active-tab='chain'] .payoff-summary-card span {
+  color: var(--ui-proto-muted) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+}
+
+/* Global Font Enforcer */
+table, span, .mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Header Market Notice overrides */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* `.ui-unified-nav` was removed with the retired unified navbar; its rule
+   here matched nothing in the tree and is gone with it. */
+
+

@@ -1,0 +1,130 @@
+/* Top-navbar integration authority.
+ *
+ * The shared market strip also appears in prerendered/static contexts. These
+ * rules are deliberately scoped to the live TopBar so its responsive ladder
+ * can match the supplied navigation reference without changing those uses.
+ */
+
+/* THE READINGS LEAD THE BAR, AND THEY KEEP THEIR NATURAL WIDTH.
+ *
+ * Two ways of spending a wide window's spare room were tried here and both
+ * are recorded because both are wrong:
+ *
+ *   GROWING THE CELLS to fill the row. The cell's name column is the flexible
+ *   one, so a 360px cell put 200px of nothing between "BANKNIFTY" and
+ *   56358.70 — the free space landed INSIDE the reading, which is the one
+ *   place it must never go. A reading is a name and its figures at one
+ *   glance.
+ *
+ *   FLOATING THE SET between two auto margins, macOS-toolbar style. It
+ *   balances, but it takes the current instrument off the leading edge, and
+ *   the leading edge is where a reader starts.
+ *
+ * So the readings stay left, at their own width, and the spare room stays in
+ * the one spacer before the tools. What the pass below DOES change is what
+ * the set is made of: capsules and air, in place of rounded rects divided by
+ * vertical rules. */
+
+/* `.mobile-chain-customize` used to ride along here. The nav-chrome
+   consolidation (f5d108f2) deleted that markup and left the rule behind. */
+
+/* NO RULES BETWEEN THE READINGS.
+ *
+ * This strip used to be introduced by an 18px vertical hairline and to divide
+ * its own cells with a second one — three rules in a row that carries five
+ * capsules. The chain settled that argument for the whole product: objects on
+ * a bar are separated by AIR and by their own capsule edge, never by a stroke
+ * drawn between them, and the expiry control had its side rules taken off for
+ * exactly this reason. The lead-in hairline goes with them, and the gap grows
+ * to carry the separation the stroke used to. */
+
+
+/* `overflow: hidden` here was the second half of the dropped-figure bug: a
+   cell that did not fit was cropped in place with no way to reach it. The row
+   pans instead. `data-overflow` is written by a ResizeObserver in
+   IndexMarketStrip.tsx — a measurement of this element, never a viewport
+   query — and fades only the edge that actually has more behind it. Snapping
+   means the pan always comes to rest on a cell boundary, so a half-read
+   figure is never what you are left looking at. */
+
+/* The edge fade itself lives in ui-index-market-strip.css, on `__links`
+   rather than on the strip: masking the strip would also fade the hairline it
+   paints as a background, and the fade belongs to the thing that scrolls. */
+
+/* The tick that used to stand between two cells. Removed rather than moved:
+   see the strip's own note above. */
+
+/* The move, at the chip's own size and weight (TopBar.css `.ui-top__chg`),
+   so BANKNIFTY's −237.60 is the same object as NIFTY's +77.40 beside it. */
+
+/* `.ui-top__pickwrap` no longer exists in TopBar (removed in f5d108f2); its
+   two rules here matched nothing. */
+
+/* Still where a wide window's spare room goes — see the set note above, which
+   records why it is not spent on the readings. The floor rises to 16 so the
+   last reading and the Search capsule keep a clear step between them at the
+   width where the spacer is down to its minimum; the ladder below still
+   closes it on a tablet. */
+
+/* The market clock rendered __t / __dot / __track / __fill — there is no __k, so the
+   rule that used to sit under this one was styling nothing. */
+
+/* THE DENSITY LADDER — the whole reading on a desktop, then one thing at a
+ * time as the bar narrows, decided by the bar's own width (the `uitop`
+ * container, so an open rail or a split window counts the same as a smaller
+ * screen). A reading is NAME  level  ±points (±%).
+ *
+ *   index open                       stock open (four readings)
+ *   ≤1180  others: level ±%           ≤1480  others: level ±%
+ *   ≤1060  Search becomes its glyph   ≤1265  chip: level ±%
+ *   ≤990   chip: level ±%             ≤1225  others: level only, coloured
+ *   ≤960   type step, clock seconds   ≤1100  type step, clock seconds
+ *   ≤860   others: level only,        ≤915   Search goes (the chip opens
+ *          coloured; chip keeps ±%           the same switcher)
+ *                                     ≤875   chip: level only, coloured
+ *
+ * Every step applies to the whole row at once, so at any width all the
+ * readings of one kind share one shape. The percentage outlives the point
+ * move because it is the figure that compares across indices; the level is
+ * never dropped, and every link and the chip keep the whole reading in their
+ * spoken name. Nothing is ever cropped: whatever still does not fit (a stock
+ * open on a 769–810px bar) pans, with an edge fade
+ * (ui-index-market-strip.css). Phones (≤768) do not use this bar —
+ * MobileNav runs the same readings as a ticker.
+ *
+ * The widths are measured, not guessed (25 Sep, four-digit moves as the
+ * worst case): the row needs ~1175px whole with an index open and ~1477 with a
+ * stock; each rung sits where the form above it stops fitting. */
+
+/* ── WITH AN INDEX OPEN (two tape cells) ─────────────────────────────── */
+
+/* STEP 1 — BANKNIFTY / SENSEX keep their percentage, drop the point move. */
+
+/* STEP 2 — the chip does the same, so the whole row reads "level ±%". */
+
+/* STEP 3 — BANKNIFTY / SENSEX show name and level only, the level in the
+   move's colour (green rose, red fell; a stale level keeps its amber). The
+   chip keeps its percentage: it is the reading the page is about. */
+
+/* ── WITH A STOCK OPEN (three tape cells beside the chip) ────────────────
+   The same steps in the same order, earlier, plus two the index case never
+   needs: Search goes (the chip opens the same switcher, with its own search
+   field), and last of all the chip shows its level alone. The type step that
+   the index case takes at 960 comes in at 1100 here. */
+
+/* Keep secondary quotes in their native pan surface as workspace labels stay
+   visible. Current instrument, Search and workspace navigation remain available. */
+
+/* Portrait tablet: one type step down — names to the 11px caps rung, levels
+   to 13 — and half the air inside each cell. The
+   clock folds its seconds: they are not a market figure on a one-minute feed,
+   and the button's name and its details keep the full time. */
+
+/* The last ~20px, for the band between 769 (where the mobile header takes
+   over) and ~800: spacing only, no fold. The bar's own `gap` cannot be set
+   here — `.ui-top` IS the uitop container, and a container query never
+   matches its own container — so the flexible spacer carries it instead:
+   no 8px floor, and -4px either side turns the two 12px bar gaps around it
+   into 8px. The chip's inner column gap and the clock's padding each give up
+   2px a side, and the strip drops its lead-in margin (the bar gap still
+   stands between the chip and the strip's hairline). */

@@ -1,0 +1,1628 @@
+/*
+ * Option-chain precision grid
+ * --------------------------------------------------------------------------
+ * Final cell-surface authority. The chain stays dense, but every metric uses
+ * the same hierarchy: primary figure, comparison, meter, then quiet context.
+ * Semantic colour is reserved for market data rather than large cell washes.
+ */
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain'] {
+  /* No purple in the chain: the body cells are the very dark neutral, and the
+     Strike column is the one raised neutral surface. (History: row #0F0F0F /
+     strike #15020B wine-black, then exchanged, now neutral.) Band and row
+     rule follow the reference design: strike #383838 on a black body, rows #333333. */
+  --oc-grid-row: var(--table-body-surface);
+  --oc-grid-row-alt: var(--table-body-surface);
+  --oc-grid-strike: var(--neutral-740);
+  --oc-grid-line: var(--neutral-760);
+  --oc-grid-line-strong: var(--neutral-700);
+  --oc-grid-track: #242424;
+  --oc-grid-track-quiet: #1F1F1F;
+  /* ITM is positional context, never direction, so it wears the amber of the
+     ATM ring, not green (green means rose). One quiet step off the row. */
+  --oc-grid-itm: var(--warm-400);
+  --chain-itm-fill: var(--oc-grid-itm);
+  --chain-ce-itm-fill: var(--chain-itm-fill);
+  --chain-pe-itm-fill: var(--chain-itm-fill);
+  --chain-itm-strength: 9%;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain'] {
+  /* No purple in the chain: white body cells, and the Strike column is the one
+     raised neutral surface. (Was row #FFFFFF / strike #FEF1FA pink.) Band and
+     row rule follow the reference design light: both #E2E2E2. */
+  --oc-grid-row: var(--table-body-surface);
+  --oc-grid-row-alt: var(--table-body-surface);
+  --oc-grid-strike: var(--neutral-225);
+  --oc-grid-line: var(--neutral-225);
+  --oc-grid-line-strong: #D3D3D3;
+  --oc-grid-track: #E6E6E6;
+  --oc-grid-track-quiet: #E6E6E6;
+  --oc-grid-itm: var(--warm-500);
+  --chain-itm-fill: var(--oc-grid-itm);
+  --chain-ce-itm-fill: var(--chain-itm-fill);
+  --chain-pe-itm-fill: var(--chain-itm-fill);
+  --chain-itm-strength: 9%;
+}
+
+/* The surrounding shell previously blurred the entire workspace by 20px.
+   The chain is an information surface, so every layer behind the grid stays
+   opaque and optically sharp while the theme colours remain unchanged. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  :is(.dashboard-body, .main-area, .main-content, .chain-table-container) {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] :is(
+  .chain-table-container,
+  .chain-table,
+  .chain-table thead,
+  .chain-table tbody,
+  .chain-table tr,
+  .chain-table th,
+  .chain-table td,
+  .strike-cell,
+  .strike-cell-body,
+  .strike-cell-inner
+) {
+  box-sizing: border-box !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+  border: 1px solid var(--oc-grid-line-strong) !important;
+  border-radius: 6px !important;
+  background: var(--oc-grid-row) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+  border: 1px solid var(--oc-grid-line-strong) !important;
+  border-radius: 6px !important;
+  background: var(--oc-grid-row) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table * {
+  text-shadow: none !important;
+  font-synthesis: none !important;
+  text-rendering: geometricPrecision;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--oc-grid-row) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/*
+ * ONE line under the header, not three.
+ *
+ * The header used to carry a bottom border on `thead`, a second bottom border
+ * on every `.chain-header-row > th`, and a `box-shadow: 0 1px 0` on `thead`
+ * again (ui-chain-table-header.css) — three coincident hairlines stacking
+ * into a 2–3px slab under a 34px row. The `th` border is the one that stays,
+ * because it is the only one that follows the sticky header cell-for-cell; it
+ * takes the structural weight (`--oc-grid-line-strong`) further down.
+ */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead {
+  border-bottom: 0 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/*
+ * The one structural divider between the header and the streaming rows.
+ * `--line-strong` weight, one direction, stated after every other sheet so the
+ * three competing bottom-border colours upstream collapse to this.
+ */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row > th {
+  border-bottom: 1px solid var(--oc-grid-line-strong) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row .chain-sort-button {
+  color: var(--text) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .oi-profile-heading b {
+  color: var(--text) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .oi-profile-heading small {
+  color: color-mix(in srgb, var(--text) 72%, var(--text-muted)) !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td {
+  box-sizing: border-box !important;
+  /* --chain-row-h is published on the scroll container from CHAIN_ROW_H
+     (chainColumnLayout.ts), the same constant the virtualization row-window
+     estimate uses. Do not restate the literal; the fallback is only for a
+     render before the container effect has run. */
+  height: var(--chain-row-h, 52px) !important;
+  min-height: var(--chain-row-h, 52px) !important;
+  padding: 0 8px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+  background: var(--oc-grid-row) !important;
+  background-color: var(--oc-grid-row) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  color: var(--text) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 500 !important;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td + td {
+  border-left: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row-even td {
+  background: var(--oc-grid-row-alt) !important;
+  background-color: var(--oc-grid-row-alt) !important;
+}
+
+/* ITM is positional context, not bullish/bearish direction. Keep one amber
+   vocabulary on both sides and avoid the old full-strength brown slabs.
+
+   Scoped by view, because the row classes are not: `ce-itm` / `pe-itm` are
+   set from strike vs spot whatever the table shows. Unscoped, the Straddle
+   (combined) view tinted every summed Call+Put cell above spot as "Put ITM",
+   and the 2px leg edges below landed on the Strike column itself — the first
+   cell in Put-only and Straddle, the last in Call-only (verified 2026-09-14).
+   A leg's ITM cue belongs only where that leg's cells are. */
+/* All option columns share the same clean row background as requested:
+   "keep the columns color same just the line for the split" */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table :is(.chain-row, .chain-row-even, .atm-row, .ce-itm, .pe-itm) td:not(.strike-cell) {
+  background: var(--oc-grid-row) !important;
+  background-color: var(--oc-grid-row) !important;
+  background-image: none !important;
+}
+
+/* "Highlight ITM contracts": the ITM leg's own cells take the tint, nothing
+   else. This sits after the flat-row rule above, which used to win for every
+   cell and left the switch with nothing to show.
+
+   Side-scoped: `ce-itm` / `pe-itm` mean "this row's Call / Put leg is ITM",
+   and in the split layout the Call and Put panes share one row class, so the
+   tint has to follow the cell's own `chain-leg-ce` / `chain-leg-pe` class, not
+   the row. The Strike stays neutral, the Straddle view's summed cells carry no
+   leg class so stay untinted, and moneyness-hidden cells stay blank. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table .chain-row.ce-itm td.chain-leg-ce:not(.empty-cell) {
+  background: color-mix(in srgb, var(--chain-ce-itm-fill) var(--chain-itm-strength), var(--oc-grid-row)) !important;
+  background-color: color-mix(in srgb, var(--chain-ce-itm-fill) var(--chain-itm-strength), var(--oc-grid-row)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table.chain-table .chain-row.pe-itm td.chain-leg-pe:not(.empty-cell) {
+  background: color-mix(in srgb, var(--chain-pe-itm-fill) var(--chain-itm-strength), var(--oc-grid-row)) !important;
+  background-color: color-mix(in srgb, var(--chain-pe-itm-fill) var(--chain-itm-strength), var(--oc-grid-row)) !important;
+}
+
+/* Strike is the reading spine. It remains neutral and opaque while Call and
+   Put lanes move behind it. ATM gets a precise ring instead of a row wash. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.strike-cell {
+  padding-inline: 5px !important;
+  border-inline: 1px solid var(--oc-grid-line-strong) !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+  background: var(--oc-grid-strike) !important;
+  background-color: var(--oc-grid-strike) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+  font-size: var(--chain-font-lg, 14px) !important;
+  font-weight: 600 !important;
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: "tnum" 1, "lnum" 1 !important;
+  letter-spacing: -.006em !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.strike-cell.atm-strike {
+  border-color: var(--oc-grid-line-strong) !important;
+  background: var(--oc-grid-strike) !important;
+  background-color: var(--oc-grid-strike) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-cell-body {
+  width: 100% !important;
+  min-height: 38px !important;
+  color: inherit !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-val-lbl {
+  color: inherit !important;
+  font-size: var(--chain-font-lg, 14px) !important;
+  font-weight: 600 !important;
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: "tnum" 1, "lnum" 1 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.006em !important;
+}
+
+/* Primary prices and changes. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .val-cell {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-cell {
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  letter-spacing: -.006em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 58px;
+  line-height: 1;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-change-pct {
+  font-size: var(--chain-font-xs, 10px);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-change-pct.val-up {
+  color: var(--up-ink) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .ltp-change-pct.val-down {
+  color: var(--down-ink) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row .chg-cell {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+}
+
+/* OI and Volume share exactly the same three-line rhythm. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table td.oc-profile-cell {
+  padding: 4px 8px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell, .ui-volcell) {
+  width: 100%;
+  min-width: 0;
+  gap: 3px !important;
+  color: var(--text) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__now, .ui-volcell__fig) {
+  color: var(--text) !important;
+  font-size: var(--chain-font-md, 13px) !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.006em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__chg, .ui-volcell__change, .ui-volcell__change b) {
+  color: color-mix(in srgb, var(--text) 78%, var(--text-secondary)) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__change.ui-tone-up,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__change.ui-tone-up b {
+  color: var(--up-text, var(--up-ink)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__change.ui-tone-down,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__change.ui-tone-down b {
+  color: var(--down-text, var(--down-ink)) !important;
+}
+
+/* The OI change AMOUNT carries directional ink (user decision 2026-08-18) —
+   carve it and the toned pct badge out of the neutral wash above. Flat stays
+   neutral via inheritance. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-oicell__chg :is(.ui-oicell__amt.ui-tone-up, b.ui-tone-up) {
+  color: var(--up-text, var(--up-ink)) !important;
+}
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-oicell__chg :is(.ui-oicell__amt.ui-tone-down, b.ui-tone-down) {
+  color: var(--down-text, var(--down-ink)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__rail, .ui-volcell__rail) {
+  height: 10px !important;
+  border-radius: 2px !important;
+  background: var(--oc-grid-track) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell, .ui-volcell).is-top :is(.ui-oicell__rail, .ui-volcell__rail) {
+  height: 12px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__seg.is-base,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__dot {
+  background: color-mix(in srgb, currentColor 70%, var(--oc-grid-strike)) !important;
+  box-shadow: none !important;
+}
+
+/* The volume profile now uses the same rise/drop grammar as OI while retaining
+   the call/put series hue: hatched addition, quiet wash for the prior-session
+   extent that did not repeat today. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__seg.is-add {
+  background: var(--rungs-across-tight), color-mix(in oklab, currentColor 24%, transparent) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell__seg.is-drop {
+  background: color-mix(in srgb, currentColor 16%, var(--oc-grid-track)) !important;
+  border-left-color: color-mix(in srgb, currentColor 70%, var(--oc-grid-strike)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-volcell.is-mirror .ui-volcell__seg.is-drop {
+  border-right-color: color-mix(in srgb, currentColor 70%, var(--oc-grid-strike)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-oicell__prevrail {
+  height: 4px !important;
+  border-radius: 2px !important;
+  background: var(--oc-grid-track-quiet) !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__was, .ui-oicell__lead, .ui-volcell__previous, .ui-volcell__previous small, .ui-volcell__previous b) {
+  color: color-mix(in srgb, var(--text) 68%, var(--text-muted)) !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__dot, .ui-volcell__dot) {
+  width: 6px !important;
+  height: 6px !important;
+  box-shadow: 0 0 0 1px var(--oc-grid-row) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-oicell__code, .ui-oicell__rank, .ui-volcell__rank) {
+  padding: 1px 3px !important;
+  border: 1px solid var(--oc-grid-line-strong) !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+}
+
+/* The Volume rank tag shares the Volume cell's one-line clip box
+   (volume-cell.css: "Degrade, never collide"), so it must be no taller than
+   that 12px line: 10px/1 type inside the 1px border, no block padding. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.ui-volcell__rank, .ui-oicell__rank) {
+  padding-block: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Build-Up is the intentional high-impact exception. Keep its full-cell,
+   strength-driven gradient while aligning its typography and meter rhythm
+   with OI and Volume. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.bu-cell-v2 {
+  height: var(--chain-row-h, 52px) !important;
+  padding: 0 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell {
+  width: 100% !important;
+  /* The cell content box: one row minus the row's 1px bottom hairline. */
+  height: calc(var(--chain-row-h, 52px) - 1px) !important;
+  min-height: calc(var(--chain-row-h, 52px) - 1px) !important;
+  padding: 5px 7px !important;
+  gap: 2px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell__name {
+  color: var(--text) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  font-weight: 700 !important;
+  line-height: 1.05 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell__oi {
+  color: var(--text) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell__oipct {
+  color: color-mix(in srgb, var(--text) 72%, var(--text-muted)) !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell__rail {
+  width: 100% !important;
+  height: 8px !important;
+  border-radius: 2px !important;
+  background: var(--oc-grid-track) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Quiet reading grid: metric lanes flow without vertical rules. Strike is the
+   one boxed spine, while row boundaries remain a near-invisible hairline. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th:not(.th-strike) {
+  border-right: 0 !important;
+  border-left: 0 !important;
+  color: var(--text-muted) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th:not(.th-strike) .chain-sort-button {
+  color: var(--text-muted) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th.th-strike {
+  border-right: 1px solid var(--oc-grid-line-strong) !important;
+  border-left: 1px solid var(--oc-grid-line-strong) !important;
+  background: var(--table-head-surface) !important;
+  background-color: var(--table-head-surface) !important;
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th .chain-sort-button {
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-header-label {
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-header-row th.th-strike .chain-sort-button {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell.is-top .ui-bucell__rail {
+  height: 10px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .ui-bucell__bar {
+  min-width: 2px !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+
+/* Legacy combined-profile cells use the same quiet track and type scale. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .oc-profile-meter {
+  min-height: 0 !important;
+  padding: 4px 8px !important;
+  gap: 3px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* What sits inside a strike cell — level pills, ATM / Max Pain / Flip badges,
+   and how a crowded cell holds the 52px row — is owned by ui-market-levels.css. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .badge-atm {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 15px !important;
+  padding: 1px 5px !important;
+  border: 1px solid color-mix(in srgb, var(--atm-hue) 45%, transparent) !important;
+  border-radius: 4px !important;
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--atm-hue) 18%, transparent) !important;
+  box-shadow: none !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  letter-spacing: .04em !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table .badge-atm {
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--atm-hue) 14%, var(--capital-white)) !important;
+  border-color: color-mix(in srgb, var(--atm-hue) 45%, transparent) !important;
+}
+
+/* The ATM row carries no box and no wash (owner, 2026-10-09: "that box needs
+   to be removed"): its Strike cell and cells read exactly like every other
+   row's, with the same row separator as the grid. The ATM badge and the market
+   line mark it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row.atm-row td {
+  border-top: 0 !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+  background-color: var(--oc-grid-row) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row.atm-row td.strike-cell,
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.strike-cell.atm-strike {
+  border-top: 0 !important;
+  border-bottom: 1px solid var(--oc-grid-line) !important;
+  border-inline: 1px solid var(--oc-grid-line-strong) !important;
+  background: var(--oc-grid-strike) !important;
+  background-color: var(--oc-grid-strike) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row td {
+    height: var(--chain-row-h, 52px) !important;
+    min-height: var(--chain-row-h, 52px) !important;
+    padding-inline: 8px !important;
+    font-size: var(--chain-font-cell, 12px) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .chain-row td.strike-cell,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .strike-val-lbl {
+    font-size: var(--chain-font-md, 13px) !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table .ui-bucell {
+    height: calc(var(--chain-row-h, 52px) - 1px) !important;
+    min-height: calc(var(--chain-row-h, 52px) - 1px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table :is(.ui-bucell, .ui-oicell__bar, .ui-volcell__bar, .ui-bucell__bar) {
+    transition: none !important;
+  }
+}
+
+/* ─── ATM STRADDLE COMMAND RIBBON (ON SPOT DIVIDER) ─── */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .spot-level-cluster--spot-only {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  pointer-events: none;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 22px !important;
+  padding: 0 9px !important;
+  border-radius: 6px !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--chain-font-sm, 11px) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, var(--line)) !important;
+  background: color-mix(in srgb, var(--surface-card, #1F1F1F) 95%, var(--line)) !important;
+  color: var(--text-muted) !important;
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--capital-black) 16%, transparent) !important;
+}
+
+:root[data-theme='dark'] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill {
+  border-color: var(--oc-grid-line-strong, #272727) !important;
+  background: #1A1A1A !important;
+  color: #A3A3A3 !important;
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill {
+  border-color: var(--oc-grid-line-strong, #D3D3D3) !important;
+  background: var(--capital-white) !important;
+  color: #535353 !important;
+}
+
+/* Each side of the price is a small group: ATM Straddle on the left, Exp Move
+   on the right. (Day Low / Day High are the two ends of the price capsule, see
+   "The price gauge" in ui-market-line-authority.css.) The group owns the grid
+   track and the 8px gap to the Spot capsule; the pills inside just flow. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  pointer-events: none;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-group-left {
+  grid-column: 1 !important;
+  justify-self: end !important;
+  margin-right: 8px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-group-right {
+  grid-column: 3 !important;
+  justify-self: start !important;
+  margin-left: 8px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill .oc-wing-label {
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  letter-spacing: 0.04em !important;
+  opacity: 0.85 !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill .oc-wing-value {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+  font-family: var(--font-num, var(--font-sans)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.spot-divider-row .oc-spot-wing-pill .oc-wing-range {
+  font-size: var(--chain-font-xs, 10px) !important;
+  opacity: 0.75 !important;
+  font-family: var(--font-num, var(--font-sans)) !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table tr.spot-divider-row :is(.oc-spot-wing-pill, .oc-spot-wing-group) {
+    display: none !important;
+  }
+}
+
+/* ─── EXPECTED MOVE LADDER BRACKET MARKERS ─── */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.strike-cell.is-expected-move-range {
+  /* Strike cells are already positioned by the sticky spine contract in
+     ui-option-chain-focus.css. Replacing that with `relative` made only the
+     expected-move band fall back into the scrolling table, so the centre
+     spine tore open between otherwise pinned rows. Sticky is also a
+     positioning context for the bracket pseudo-elements below. */
+  position: sticky !important;
+}
+
+/* The 2px bar that used to run down the left and right edge of every strike
+   inside the expected-move range is gone: it made the Strike column read as
+   thick. The Exp Move pill on the market line still carries the range. */
+
+/* ─── NON-CONTIGUOUS STRIKE GAP BREAK ─── */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.oc-strike-gap-row td.oc-strike-gap-cell {
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+  text-align: center !important;
+  background: color-mix(in srgb, var(--surface) 96%, var(--line)) !important;
+  border-top: 1px dashed color-mix(in srgb, var(--text-muted) 35%, var(--line)) !important;
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-muted) 35%, var(--line)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .oc-strike-gap-label {
+  display: inline-block !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--chain-font-xs, 10px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  opacity: 0.8 !important;
+}
+
+/* ─── FLOATING RETURN TO ATM BUTTON ─── */
+.oc-return-to-atm-btn {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 45 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)) !important;
+  background: color-mix(in srgb, var(--surface-card, var(--surface-raised)) 90%, var(--accent)) !important;
+  color: var(--text) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.42) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+@media (hover: hover) {
+  .oc-return-to-atm-btn:hover {
+    transform: translateX(-50%) translateY(-2px) !important;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55) !important;
+    background: color-mix(in srgb, var(--surface-card, #1F1F1F) 80%, var(--accent, #C80E7D)) !important;
+  }
+}
+
+/* ─── STRIKE HIGHLIGHT PULSE FLASH ─── */
+@keyframes strikeFlashPulse {
+  0% { background-color: color-mix(in srgb, var(--accent, #C80E7D) 40%, transparent); }
+  50% { background-color: color-mix(in srgb, var(--accent, #C80E7D) 22%, transparent); }
+  100% { background-color: transparent; }
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table tr.strike-highlight-flash {
+  animation: strikeFlashPulse 1.8s ease-out !important;
+}
+
+
+/* ─── SINGLE-SIDE VIEWS (CALL ONLY / PUT ONLY) ─── */
+
+/* The active side's label is the same label as CALL / PUT in the mirrored
+   view — uppercase, 700, tracked — with the outline and ✕ marking the way
+   back. It used to switch to sentence case at a lighter weight, so expanding a
+   side changed the typography of the very word being clicked. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  :is(.chain-table thead, .oc-side-nav-overlay) .chain-side-nav-active-chip > span:first-child {
+  font-size: var(--chain-font-cell, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+/* A single side spreads its columns across the whole table, which stretched the
+   Open Interest and Volume bars to ~2× the width they have in the mirrored
+   view (~640px against ~260px) and made them harder to read at a glance. The
+   cells keep the width; the bar inside stops at about 1.4× its natural track
+   (200 / 150px) and centres in it. Build-up is a full-bleed wash and stays
+   flush with its cell. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container:is([data-table-view='calls'], [data-table-view='puts']) .chain-table td .ui-oicell {
+  max-width: calc(280px * var(--chain-scale, 1));
+  margin-inline: auto;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container:is([data-table-view='calls'], [data-table-view='puts']) .chain-table td .ui-volcell {
+  max-width: calc(210px * var(--chain-scale, 1));
+  margin-inline: auto;
+}
+
+/* The capped bars centre in their cell, so their headers centre over them —
+   the same alignment LTP and the plain-number columns already use. Left-aligned
+   headers sat 100–190px away from the bar they name. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container:is([data-table-view='calls'], [data-table-view='puts']) .chain-table thead
+  :is(.chain-col-oiBars, .chain-col-volume) :is(.chain-sort-button, .tt-wrap) {
+  justify-content: center !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container:is([data-table-view='calls'], [data-table-view='puts']) .chain-table thead
+  .chain-col-oiBars .oi-profile-heading {
+  justify-items: center !important;
+  text-align: center !important;
+}
+
+/* "CALL OPTIONS" / "PUT OPTIONS" keeps its second word where there is room and
+   falls back to "CALL" / "PUT" (the same word the inactive label shows) on a
+   narrow header, instead of wrapping onto two lines inside a 44px chip. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  :is(.chain-table thead, .oc-side-nav-overlay) .chain-side-nav-active-chip > span:first-child {
+  white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    :is(.chain-table thead, .oc-side-nav-overlay) .chain-side-nav-chip-tail {
+    display: none !important;
+  }
+}
+
+
+/* ─── CALL / PUT SIDE CONTROLS — capsule states ─────────────────────────────
+   Five older sheets style these buttons; ui-control-capsule-authority.css
+   (the last import) has the last word on motion. The model is the platform's
+   own toolbar control (macOS toolbar button, iOS bar button): at rest it is
+   just its label; on press the capsule deepens in colour; when the side is
+   selected the capsule stays, filled, with a circular ✕ to leave it. There is
+   no hover state (removed 2026-09-20; to be redesigned). Nothing here glows —
+   the capsule is a flat tint plus a 1px inner ring.
+
+   NOTHING ON THIS ROW MOVES OR ANIMATES. The press used to scale the button
+   (.965) and the capsule cross-faded. A control that changes shape under the
+   pointer is one the pointer can miss, and a state rule that sets `transform`
+   REPLACES the offset the table applies to keep the button beside the expiry
+   capsule: on a pane wider than its window that threw the button away from the
+   mouse at mousedown, mouseup landed on the header cell, and the click was
+   lost. The press is colour only, and no state rule may set a transform here
+   (sideSwitchContract.test.ts enforces that).
+
+   The capsule is a ::before, not the button's own background, so the tap
+   target can stay 44px on a phone while the capsule stays 32px. */
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-ce { --side-ink: var(--down-ink, #E35650); }
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-pe { --side-ink: var(--up-ink); }
+/* Straddle view belongs to neither side: the same capsule in the page's own ink. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-group { --side-ink: var(--text); }
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-active-chip-group { color: var(--text) !important; }
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button {
+  --pill-inset: 0;
+  position: relative;
+  isolation: isolate;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 4px auto !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button::before {
+  content: '';
+  position: absolute;
+  inset: var(--pill-inset);
+  z-index: -1;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--side-ink) 0%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 0%, transparent);
+  pointer-events: none;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-arrow {
+  opacity: .72 !important;
+  transform: none !important;
+}
+
+/* Press: the capsule deepens in colour; the control itself does not move. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button:active::before {
+  background: color-mix(in srgb, var(--side-ink) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 30%, transparent);
+}
+
+/* Selected side: the capsule stays, filled, with the way out on its right. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button[aria-pressed='true'] {
+  padding: 0 6px 0 14px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button[aria-pressed='true']::before {
+  background: color-mix(in srgb, var(--side-ink) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 34%, transparent);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-active-chip {
+  gap: 8px !important;
+}
+
+/* ✕ is a small circle, like the clear control in an iOS field. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-close {
+  width: 20px !important;
+  height: 20px !important;
+  flex: 0 0 20px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: color-mix(in srgb, currentColor 16%, transparent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* The keyboard ring stays a ring, on the capsule's own shape. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button:focus-visible {
+  outline: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--oc-head-focus) !important;
+}
+
+/* The active chip does NOT fade in. It replaces the label inside the capsule
+   the reader has just pressed, so animating it from opacity 0 blanked the very
+   word under their thumb for the whole 240ms — measured on a 390px viewport at
+   4x CPU throttle, the CALL capsule was still invisible 110ms after the table
+   behind it had finished painting, and it read as a blink. The press is
+   already carried by the capsule's own fill and ring, which transition. */
+
+/* On a phone the button is a 44px target; the capsule stays 32px inside it. */
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-nav-row .chain-side-nav-th .chain-side-nav-button {
+    --pill-inset: 6px 0;
+  }
+}
+
+
+/* One quiet expiry capsule; its chevron remains an unframed icon inside it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger {
+  position: relative;
+  border: 1px solid var(--ui-border-subtle, var(--line)) !important;
+  border-radius: 999px !important;
+  padding: 3px 12px 3px 14px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: -2px !important;
+}
+
+
+/* ─── CALL / PUT — the pinned copy ───────────────────────────────────────────
+   Phones, and any table wider than its window, show these instead of the
+   header buttons (which are hidden then), so this is the control most people
+   actually touch. Same capsule, same states. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+  --pill-inset: 0;
+  position: relative;
+  isolation: isolate;
+  min-width: 0 !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 14px !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.is-call { --side-ink: var(--down-ink, #E35650); }
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.is-put { --side-ink: var(--up-ink); }
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button::before {
+  content: '';
+  position: absolute;
+  inset: var(--pill-inset);
+  z-index: -1;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--side-ink) 0%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 0%, transparent);
+  pointer-events: none;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button:active::before {
+  background: color-mix(in srgb, var(--side-ink) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 30%, transparent);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.is-active {
+  padding: 0 6px 0 14px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.is-active::before {
+  background: color-mix(in srgb, var(--side-ink) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--side-ink) 34%, transparent);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .chain-side-nav-active-chip {
+  gap: 8px !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .chain-side-nav-close {
+  width: 20px !important;
+  height: 20px !important;
+  flex: 0 0 20px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: color-mix(in srgb, currentColor 16%, transparent) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button:focus-visible {
+  outline: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--oc-head-focus) !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    --pill-inset: 0;
+    height: 36px !important;
+    min-height: 36px !important;
+  }
+}
+
+
+/* ─── EXPIRY CELL — no side rules ────────────────────────────────────────────
+   The Strike column already draws its two rules down every row below this one.
+   In this top row they only ran a few pixels off the capsule's own ring and
+   read as a doubled line, so the cell drops them: Call, expiry and Put form
+   one continuous band and the capsule is the only edge in it. The row's bottom
+   rule stays, and the Strike column's rules resume in the column-head row. The
+   The expiry cell shares the Call / Put surface: a column-header fill here
+   creates a rectangular patch behind the wider capsule. This rule covers
+   both split and single-table layouts. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container .chain-table.chain-table thead th.chain-side-expiry-th.chain-side-expiry-th {
+  border-inline: 0 none !important;
+  background: var(--surface) !important;
+}
+
+
+/* ─── EXPIRY CONTROL — desktop size ──────────────────────────────────────────
+   The Strike column is fixed at 112px and its two column rules run the whole
+   height of the grid, except in this header row (see above). The capsule used
+   to fill that cell (104×38 in 110×40): its ring sat ~1px off the row rules
+   above and below. It is now a fixed 96×35 capsule in a 48px row — 8px clear at
+   the sides, 6px of the row rules — so the ring is its own object. The width is fixed (not content-sized) so the
+   capsule does not change size from "8 Oct" to "30 Sept". The row height is
+   the loading skeleton's (option-chain-loading-state.css, 48px), and every cell
+   in the row takes it: the three split panes are separate tables, and a row
+   that differed between them would tear the header. The chain measures its own
+   header (--chain-head-h), so nothing below is hard-coded to the old 41px. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-nav-row > th,
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-nav-row .chain-side-expiry-th {
+    height: 48px !important;
+    min-height: 48px !important;
+    vertical-align: middle;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    box-sizing: border-box;
+    height: 47px;
+    padding: 0 8px !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger {
+    width: 100%;
+    height: 35px !important;
+    min-height: 35px !important;
+    padding: 0 10px !important;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger > span {
+    gap: 2px;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger strong {
+    font-size: var(--chain-font-md, 13px);
+    font-weight: 650;
+    letter-spacing: -0.005em;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger small {
+    padding: 2px 7px;
+    font-size: var(--chain-font-xs, 10px);
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger > svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* The pinned Call / Put pair centres in the same 48px row. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container .oc-side-nav-overlay .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    top: 8px !important;
+  }
+}
+
+
+/* ─── EXPIRY CAPSULE — a little more room ────────────────────────────────────
+   The capsule was 96px, sized to the Strike column, with the days-left chip
+   stacked under the date. It is now 156px: the cell plus 22px each side, over
+   the Call / Put half of the header band, which is empty around the spine (the
+   band has no rules there, see "EXPIRY CELL — no side rules"). The spine pane
+   already overhangs its neighbours (spot readout wings), so nothing clips.
+   One line: the date on the left, the "4 DTE" pill beside it, then the caret,
+   so the two facts read together instead of one under the other. The chip is
+   short on purpose; the dropdown carries the full "Days to expiry (DTE)"
+   heading. Height is the existing 35px (desktop) / 44px tap target (phone), so
+   no row changes size.
+
+   The pinned Call / Put buttons that flank the spine on phones and narrow
+   tables step out by the same 22px, so they never sit under it.
+
+   On a desktop the same capsule shows in EVERY view (Both, Call, Put, Straddle
+   view), so the header never changes shape when the layout does: see the
+   desktop block below. On a phone only the mirrored view has it; the single-side
+   views share the header with the pinned Call / Put chip and keep the compact
+   stacked capsule, which leaves that chip its room. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container[data-table-view='straddle'] {
+  --chain-expiry-overhang: 22px;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger {
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  width: calc(112px + 2 * var(--chain-expiry-overhang, 0px)) !important;
+  padding: 0 12px 0 14px !important;
+}
+
+/* Date and pill side by side: the date left, the pill beside it. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger > span:first-child {
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ─── EXPIRY CAPSULE — Call, Put and Straddle view, desktop ───
+   The Both view's capsule above, in the other three. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined']) {
+    --chain-expiry-overhang: 22px;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined']) .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined']) .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger {
+    justify-content: space-between;
+    gap: 8px;
+    flex: none;
+    width: calc(112px + 2 * var(--chain-expiry-overhang, 0px)) !important;
+    padding: 0 12px 0 14px !important;
+  }
+
+  /* Date and pill side by side: the date left, the pill beside it. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined']) .chain-table thead .chain-side-expiry-th .chain-expiry-selector__trigger.chain-expiry-selector__trigger > span:first-child {
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* In Put and Straddle view the expiry cell is first in its row, and the cells
+     after it would cover the capsule's overhang. Sticky cells (table wider than
+     its window) already carry their own, higher z-index. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='puts'], [data-table-view='combined']) .chain-table thead th.chain-side-expiry-th {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Strike at the table's outer edge: the capsule sits against that edge's 8px
+     inset and grows inward. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='calls'] .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    justify-content: flex-end;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='puts'], [data-table-view='combined']) .chain-table thead .chain-side-expiry-th .chain-side-expiry-wrap {
+    justify-content: flex-start;
+  }
+}
+
+/* Call / Put pinned beside the spine step out with the capsule. Phones size
+   the button themselves (106px, ui-chain-selection-header.css), so the
+   width is capped to what the room leaves rather than tightened. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-chain-layout='split'][data-horizontal-overflow='on'][data-table-view='straddle']
+  .oc-side-nav-overlay__button.oc-side-nav-overlay__button.is-call {
+  right: calc(50% + var(--chain-spine-width, var(--chain-strike-width, 112px)) / 2 + var(--chain-expiry-overhang, 0px)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-chain-layout='split'][data-horizontal-overflow='on'][data-table-view='straddle']
+  .oc-side-nav-overlay__button.oc-side-nav-overlay__button.is-put {
+  left: calc(50% + var(--chain-spine-width, var(--chain-strike-width, 112px)) / 2 + var(--chain-expiry-overhang, 0px)) !important;
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-chain-layout='split'][data-horizontal-overflow='on'][data-table-view='straddle']
+    .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    width: min(106px, calc((var(--chain-sticky-viewport-width, 100%) - var(--chain-spine-width, 112px) - 2 * var(--chain-expiry-overhang, 0px)) / 2 - 3px)) !important;
+  }
+}
+
+
+/* ─── CALL / PUT BUTTON — beside the expiry capsule, in every layout ─────────
+   The button used to sit in the CENTRE of its header cell. That cell spans
+   every metric column, so once columns are added it is far wider than the
+   window and the centre of it is nowhere: the table had to move the button
+   onto the screen by script, and whatever undid that move (a press state's
+   transform did) threw the button out from under the pointer and lost the
+   click. It now lives against the spine, beside the expiry capsule, which is
+   where the pinned pair already sits on a phone. That place does not depend on
+   how many columns there are, so it is the same in Simple, Advanced and every
+   Customise preset, and in Both, Call, Put and Straddle view.
+
+     Both       Call ends its pane's header and Put starts its own; the split
+                effect cancels the track's shift (with `translate`) so they stay
+                against the spine while the columns scroll under them.
+     Call/Put   Sticky, pinned beside the capsule at every scroll position with
+                no script, whenever the Strike column and the capsule in it are
+                pinned (a table wider than its window). The button is aligned
+                to its cell's OUTER end so the pin always binds: a centred one
+                is only pinned once the cell has been dragged off-centre. From
+                769px up, where the wide capsule is in the header; a touch
+                screen whose table overflows shows the pinned overlay instead,
+                which takes the same place (below), and a phone's single-side
+                header has no wide capsule to be beside.
+     Straddle   Starts after the expiry cell.
+
+   --chain-side-clear is the distance from the spine's edge to the button: how
+   far the capsule reaches past the edge, plus the gap. In Both the capsule is
+   centred on the spine, so it reaches its overhang, less what a wider spine
+   (LTPs pinned beside the Strike) already puts between the two. In Call, Put
+   and Straddle it is anchored 8px from the outer edge and grows inward, so it
+   reaches twice its overhang plus that 8px. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+  --chain-side-gap: 8px;
+  --chain-side-clear: max(var(--chain-side-gap), calc(var(--chain-expiry-overhang, 0px) + var(--chain-side-gap) - (var(--chain-spine-width, 112px) - 112px) / 2));
+}
+
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table-container {
+    --chain-side-gap: 3px;
+  }
+}
+
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container:is([data-table-view='calls'], [data-table-view='puts'], [data-table-view='combined']) {
+    --chain-side-clear: calc(2 * var(--chain-expiry-overhang, 0px) + 8px + var(--chain-side-gap));
+  }
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-nav-row .chain-side-nav-ce .chain-side-nav-button {
+  margin: 4px var(--chain-side-clear) 4px auto !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='straddle'] .chain-table thead .chain-side-nav-row .chain-side-nav-pe .chain-side-nav-button {
+  margin: 4px auto 4px var(--chain-side-clear) !important;
+}
+
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='calls'] .chain-table thead .chain-side-nav-row .chain-side-nav-ce .chain-side-nav-button {
+    margin: 4px var(--chain-side-clear) 4px auto !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='puts'] .chain-table thead .chain-side-nav-row .chain-side-nav-pe .chain-side-nav-button {
+    margin: 4px auto 4px var(--chain-side-clear) !important;
+  }
+
+  /* Pinned only when the Strike column, and the capsule in it, are pinned too
+     (data-horizontal-overflow 'on', see "CALL-ONLY / PUT-ONLY" below). A table
+     that scrolls as one piece (a few px of overflow the flag ignores) carries
+     all three together, and a pinned button would be left behind by the capsule. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='calls'][data-horizontal-overflow='on'] .chain-table thead .chain-side-nav-row .chain-side-nav-ce .chain-side-nav-button {
+    position: sticky;
+    right: calc(var(--chain-strike-width, 112px) + var(--chain-side-clear));
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='puts'][data-horizontal-overflow='on'] .chain-table thead .chain-side-nav-row .chain-side-nav-pe .chain-side-nav-button {
+    position: sticky;
+    left: calc(var(--chain-strike-width, 112px) + var(--chain-side-clear));
+  }
+}
+
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='combined'] .chain-table thead .chain-side-nav-group .chain-side-nav-static {
+    justify-content: flex-start;
+    padding-left: var(--chain-side-clear);
+  }
+
+  /* The button's own `margin: auto` (above) wins over justify-content in a flex
+     row, and would centre it again. */
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-table-view='combined'] .chain-table thead .chain-side-nav-group .chain-side-nav-button {
+    margin: 4px auto 4px 0 !important;
+  }
+}
+
+
+/* The pinned copy of the pair, in Call-only and Put-only, from 769px up: beside
+   the capsule like the header button it stands in for, not centred in the
+   window. Its 8px margin (ui-chain-selection-header.css) is the gap, so the
+   offset is the capsule's whole reach: twice its overhang, plus the 8px it is
+   inset from the outer edge, past the Strike column. `translate` is what
+   centred it before; it is cleared here rather than fought. */
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-horizontal-overflow='on'][data-table-view='calls']
+    .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    left: auto !important;
+    right: calc(var(--chain-strike-width, 112px) + 2 * var(--chain-expiry-overhang, 0px) + 8px) !important;
+    translate: none !important;
+  }
+
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table-container[data-horizontal-overflow='on'][data-table-view='puts']
+    .oc-side-nav-overlay__button.oc-side-nav-overlay__button.oc-side-nav-overlay__button {
+    left: calc(var(--chain-strike-width, 112px) + 2 * var(--chain-expiry-overhang, 0px) + 8px) !important;
+    right: auto !important;
+    translate: none !important;
+  }
+}
+
+
+/* ─── CALL-ONLY / PUT-ONLY / COMBINED — the Strike stays in view ─────────────
+   Tapping Call or Put opens that side alone, in a plain scrolling table. The
+   Strike is its outer column: last in the Call table, first in the Put table.
+   On a phone that left no row readable against a strike: in Call it sat past
+   the right edge (x 437 in a 378px window) until you scrolled, and then the
+   metrics were gone; in Put it scrolled away after 160px. It now pins to its
+   own edge, the right in Call and the left in Put, the side it takes in the
+   mirrored desktop book, with the expiry cell above it, so the strike and the
+   expiry are on screen wherever the metrics are scrolled to. Only when the
+   table is wider than its window (data-horizontal-overflow), so a table that
+   fits is untouched. The cells already carry an opaque fill and their own 1px
+   rules, so the pin reads as a column with nothing added.
+
+   The Combined ("Straddle View") table shares this same plain-scrolling
+   layout — no split panes — and Strike is its first column exactly like
+   Put's, so it takes the same left pin. Without it, scrolling right to read
+   OI Profile/Volume/Analysis lost the strike reference entirely (nothing
+   built this table's own sticky column; the mirrored table's `data-table-
+   view='straddle'` sticky-strike mechanism never covers `'combined'`). */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='calls'][data-horizontal-overflow='on']
+  .chain-table :is(td.strike-cell, th.th-strike, th.chain-side-expiry-th) {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container:is([data-table-view='puts'], [data-table-view='combined'])[data-horizontal-overflow='on']
+  .chain-table :is(td.strike-cell, th.th-strike, th.chain-side-expiry-th) {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+/* The Straddle View chip's box (ui-chain-table-header.css) sticks to the
+   window's left edge — right when the Strike scrolled away with the table.
+   With Strike pinned above it now, that edge is under the Strike, and the
+   opaque Strike/expiry cells covered the chip's first letters ("…ADDLE").
+   Its box is already sized to the window minus the Strike, so it only needs
+   to start where the Strike ends. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='combined'][data-horizontal-overflow='on']
+  .chain-table .chain-side-nav-group .chain-side-nav-static {
+  left: var(--chain-strike-width, 0px);
+}
+
+/* Resting positions beside the pinned Strike. A column cut by the window's edge
+   can misread (the left of "26.75L" gone reads "6.75L"), so the column against
+   the Strike always rests whole: Put columns start where the Strike ends, Call
+   columns end where it starts. The other edge shows the next column peeking, the
+   cue that there is more that way. `proximity`, so a deliberate drag can still
+   stop anywhere, and only x, so vertical scrolling is untouched. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='puts'][data-horizontal-overflow='on'] {
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--chain-strike-width, 112px);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='calls'][data-horizontal-overflow='on'] {
+  scroll-snap-type: x proximity;
+  scroll-padding-right: var(--chain-strike-width, 112px);
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='puts'][data-horizontal-overflow='on']
+  .chain-table :is(td.chain-leg-cell, th.chain-leg-header) {
+  scroll-snap-align: start;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table-container[data-table-view='calls'][data-horizontal-overflow='on']
+  .chain-table :is(td.chain-leg-cell, th.chain-leg-header) {
+  scroll-snap-align: end;
+}
+
+/* Every plain data column reads centred under its centred heading. Only OI, OI
+   Chg and LTP were: Prev Vol, Vol/OI, High, Low, Prev, Bid, Ask and the rest sat
+   on the cell's left padding (up to 27px off centre) because they never carried
+   the basic-cell class that centred the first three. One rule for the leg cells,
+   so a column added later is centred too. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td.val-cell.chain-leg-cell {
+  text-align: center;
+}
+
+/* ── Interaction finish (hover · focus · scroll edges) ───────────────────────
+   The chain had no row hover at all: a clickable LTP cell looked identical to
+   the one beside it. Hover is a neutral 4% wash laid over whatever the cell
+   already paints (build-up tint, strike column, ITM shade) as an inset shadow,
+   so it never replaces a market colour. Hover-capable pointers only. */
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table tbody tr:is(.chain-row, .chain-row-even, .atm-row):hover > td {
+    box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--text) 5%, transparent) !important;
+  }
+  :root[data-theme] body #root > .app.app[data-active-tab='chain']
+    .chain-table tbody tr td.val-cell:is(.ltp-cell, .combined-price-cell) {
+    cursor: pointer;
+  }
+}
+
+/* Customise sheet: a hairline + soft fade where the list continues below, so a
+   clipped last row reads as "scroll", not as a cut-off. Painted by the
+   background (local/scroll) so it vanishes once the end is reached. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .workspace-columns-host .ui-customize-panel .scp-body {
+  background-image:
+    linear-gradient(var(--ui-overlay-surface, var(--surface)) 30%, transparent),
+    linear-gradient(transparent, var(--ui-overlay-surface, var(--surface)) 70%),
+    linear-gradient(color-mix(in srgb, var(--text) 10%, transparent), transparent),
+    linear-gradient(transparent, color-mix(in srgb, var(--text) 10%, transparent)) !important;
+  background-position: 0 0, 0 100%, 0 0, 0 100%;
+  background-size: 100% 24px, 100% 24px, 100% 10px, 100% 10px;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}

@@ -1,0 +1,68 @@
+/* The control tooltip (src/lib/uiTooltips.ts), after the reference design: an
+   inverted pill — light on the dark theme, dark on the light one — naming
+   the control, with its hotkey in key chips after a hairline. */
+
+.ui-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--cta-fill);
+  color: var(--cta-text);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-2);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-tap, 120ms) var(--ease-ios-out, ease-out),
+    visibility 0s linear var(--dur-tap, 120ms);
+}
+.ui-tip.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--dur-tap, 120ms) var(--ease-ios-out, ease-out),
+    visibility 0s;
+}
+/* Measured at full size before it is shown, so the first frame is placed. */
+.ui-tip.is-measuring {
+  visibility: hidden;
+  transition: none;
+}
+.ui-tip.is-long {
+  white-space: normal;
+  font-weight: 400;
+}
+.ui-tip__label {
+  min-width: 0;
+}
+.ui-tip__keys {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  padding-left: 8px;
+  border-left: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+.ui-tip__keys kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--cta-text);
+  color: var(--cta-fill);
+  font: 500 11px/1 var(--font-sans, sans-serif);
+}
