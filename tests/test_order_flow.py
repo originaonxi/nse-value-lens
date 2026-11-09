@@ -120,9 +120,10 @@ class TestPublished(unittest.TestCase):
         self.assertIn("Required Notice", d["upstream"]["notice"])
         self.assertGreater(d["backtest"]["span"]["sessions"], 100)
         for r in d["rows"]:
-            # a move with exactly unchanged open interest is NEUTRAL (no build-up either way), e.g. ANGELONE 9 Nov 2026
+            # no change on either side is no build-up: NEUTRAL when the futures price is unchanged
+            # (BPCL 9 Nov 2026: 317.55 both days) or the open interest is unchanged (ANGELONE 9 Nov 2026)
             if r["buildup"] == "NEUTRAL":
-                self.assertEqual(r["oi_chg"] or 0, 0, r["symbol"])
+                self.assertTrue(r["fut"] == r["fut_prev"] or (r["oi_chg"] or 0) == 0, r["symbol"])
                 continue
             if r["side"] == "bullish":
                 self.assertIn(r["buildup"], ("LONG_BUILD", "SHORT_COVER"))
