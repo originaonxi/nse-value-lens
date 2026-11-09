@@ -338,10 +338,72 @@ def window(X, L, df, rows, lots, start, wkey, both, nkey, minn, title, setups):
     slim = lambda r: {"rule": label(r), "side": "BUY" if r["side"] == 1 else "SELL", "trades": r["n"],
                       "win": round(r["wins"] / r["n"] * 100, 1) if r["n"] else None, "growth": round(r[wkey], 4),
                       "return_pct": round((r[wkey] - 1) * 100, 2)}
+    most = next(p for p in P if p["name"].startswith("Most money"))
+    winner = winner_view(X, L, df, [U[i] for i in best_money["units"]], most, start)
     return {"title": title, "from": str(df["session"].iloc[start]), "to": str(df["session"].iloc[-1]),
             "sessions": int(df["session"].iloc[start:].nunique()), "candidates": len(cands), "sets_tried": tried,
             "longs": [slim(r) for r in longs], "shorts": [slim(r) for r in shorts],
-            "units": [{"name": u["name"], "kind": u["kind"]} for u in U], "combos": combos, "portfolios": P}
+            "units": [{"name": u["name"], "kind": u["kind"]} for u in U], "combos": combos, "portfolios": P,
+            "winner": winner, "chart_from": N.chart_time(df.index[start], "2h")}
+
+
+def winner_view(X, L, df, units, port, start):
+    """The winning portfolio on the Nifty 50 chart: every entry and exit, its rules, today's checks and the exit plan."""
+    c, e, atr, rsi = X["c"], X["ema"], X["atr"], X["rsi"]
+    i = len(c) - 1
+    pos = {str(t)[:16]: k for k, t in enumerate(df.index)}
+    ct = lambda k: N.chart_time(df.index[k], "2h")
+    marks, trades = [], []
+    for t in port["trade_rows"]:
+        if "pnl" not in t:
+            continue
+        eb = pos[t["entry_time"]]
+        marks.append([ct(eb), "entry", t["side"], t["entry"], f"{t['side']} {t['lots']} lot{'s' if t['lots'] > 1 else ''}"])
+        if not t["open"]:
+            xb = pos[t["exit_time"]]
+            marks.append([ct(xb), "exit", t["side"], t["exit"], f"{'+' if t['pnl'] > 0 else '−'}₹{abs(t['pnl']) / 1e5:.2f}L"])
+        trades.append(t)
+    rules = [r for u in units for r in u["rules"]]
+    checks = []
+    for r in rules:
+        sd = r["side"]
+        items = [{"name": f"2-hour close {'above' if sd == 1 else 'below'} EMA 105", "ok": bool(sd * (c[i] - e[i]) > 0),
+                  "value": f"{c[i]:,.2f} vs {e[i]:,.2f}"}]
+        for f in r["filters"]:
+            info = B.INFO.get(f, f)
+            items.append({"name": f, "ok": bool((L[f][0] if sd == 1 else L[f][1])[i]), "value": info})
+        # after a TOP / target / stop exit the rule waits until price is back within 1 ATR of EMA 105 (or crosses it)
+        tr = trades_of(X, L, r, start)
+        last = tr[-1] if tr else None
+        blocked = bool(last and last[3] not in ("ema", "open") and
+                       not any(sd * (c[k] - e[k]) <= 0 or abs(X["dist"][k]) <= B.RE_ENTRY_ATR for k in range(last[1] + 1, i + 1)))
+        checks.append({"rule": label(r), "side": "BUY" if sd == 1 else "SELL", "checks": items,
+                       "all_ok": all(x["ok"] for x in items), "waiting_for_pullback": blocked})
+    open_t = next((t for t in trades if t["open"]), None)
+    plan = None
+    if open_t:
+        eb = pos[open_t["entry_time"]]
+        r = next(r for r in rules if (r["side"] == 1) == (open_t["side"] == "BUY"))
+        sd, ep, ea = r["side"], c[eb], atr[eb]
+        armed = r["rsi"] is not None and bool(any((rsi[k] >= r["rsi"]) if sd == 1 else (rsi[k] <= 100 - r["rsi"]) for k in range(eb + 1, i + 1)))
+        plan = {"rule": label(r), "side": open_t["side"], "entry_time": open_t["entry_time"], "entry": open_t["entry"],
+                "lots": open_t["lots"], "lot_size": open_t["lot_size"], "close": round(float(c[i]), 2), "ema": round(float(e[i]), 2),
+                "rsi": round(float(rsi[i]), 1), "pnl": open_t["pnl"], "points": open_t["points"],
+                "exits": ([f"a 2-hour close {'below' if sd == 1 else 'above'} EMA 105 (now {e[i]:,.2f})"]
+                          + ([f"stop at {ep - sd * r['sl'] * ea:,.2f} ({r['sl']:g} ATR from entry)"] if r["sl"] else [])
+                          + ([f"target at {ep + sd * r['tp'] * ea:,.2f} ({r['tp']:g} ATR from entry)"] if r["tp"] else [])
+                          + ([f"TOP: RSI {'reached' if armed else 'reaches'} {r['rsi'] if sd == 1 else 100 - r['rsi']}"
+                              f"{' (armed)' if armed else ''}, then sell when it falls back below {r['rsi'] - 5 if sd == 1 else 105 - r['rsi']}"
+                              f" (RSI now {rsi[i]:.1f})"] if r["rsi"] else [])
+                          + ([f"after {r['maxbars']} candles"] if r["maxbars"] else []))}
+    closed = [t for t in trades if not t["open"]]
+    return {"name": port["name"], "sleeves": [u["name"] for u in units], "rules": [label(r) for r in rules],
+            "markers": marks, "trades": trades, "checks": checks, "open": plan,
+            "as_of": str(df.index[i])[:16], "close": round(float(c[i]), 2), "ema": round(float(e[i]), 2),
+            "end": port["end"], "profit": port["profit"], "return_pct": port["return_pct"], "max_dd_pct": port["max_dd_pct"],
+            "trades_n": len(closed), "wins": sum(1 for t in closed if t["pnl"] > 0),
+            "won": sum(t["pnl"] for t in closed if t["pnl"] > 0), "lost": sum(t["pnl"] for t in closed if t["pnl"] <= 0),
+            "open_pnl": port["open_pnl"]}
 
 
 def honest(X, L, df, rows, lots, train_key, train_n, train_start, test_start, title, setups_note):
@@ -454,6 +516,9 @@ def build(now=None):
         "capital": CAPITAL, "cost_pct": COST * 100, "tax_pct": round(TAX * 100, 1), "lot_sizes": sorted(set(int(v) for v in lots.values())),
         "rules_tried": tried, "rules_with_trades": len(rows), "signals": list(L), "depth": DEPTH, "exit_settings": len(EXITS),
         "windows": {"2y": W2, "200": W200}, "honest": [H1, H2], "jev": jev,
+        "chart": {"bars": [[N.chart_time(df.index[k], "2h"), round(float(X["o"][k]), 2), round(float(X["h"][k]), 2),
+                            round(float(X["l"][k]), 2), round(float(X["c"][k]), 2)] for k in range(w0, len(X["c"]))],
+                  "ema": [round(float(X["ema"][k]), 2) for k in range(w0, len(X["c"]))]},
         "money_rules": [
             "₹1,00,00,000 on the first session of the window, split equally between the sleeves.",
             "Each trade = whole NIFTY futures lots at the 2-hour close of the Nifty 50 index: lots = sleeve cash ÷ (price × lot size), "

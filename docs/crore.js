@@ -239,7 +239,88 @@
     var ul = $("cr-limits"); ul.textContent = ""; (D.limits || []).forEach(function (t) { ul.appendChild(el("li", null, t)); });
   }
 
-  function renderAll() { renderWin(); renderAnswer(); renderPorts(); renderDetail(); renderCombos(); }
+  /* ── the winner on the Nifty 50 chart ─────────────────────────────────────── */
+  var WC = null, WS = null, WRANGE = "all";
+  function wbox(k, v, cls) { var d = el("div"); d.appendChild(el("small", null, k)); d.appendChild(el("b", cls || null, v)); return d; }
+
+  function renderWinnerChart() {
+    var w = win().winner, ch = D.chart;
+    if (!w || !ch) { $("cr-w-title").textContent = "Winner chart not available yet."; return; }
+    $("cr-w-title").textContent = w.name + " · ₹1 crore → " + cr(w.end) + " (" + spct(w.return_pct) + ")";
+    var rb = $("cr-w-rules"); rb.textContent = "";
+    w.rules.forEach(function (r, i) { if (i) rb.appendChild(el("br")); rb.appendChild(document.createTextNode(r)); });
+    var k = $("cr-w-kpis"); k.textContent = "";
+    k.appendChild(wbox("Profit", sinr(w.profit), w.profit > 0 ? "up" : "dn"));
+    k.appendChild(wbox("Closed trades", w.trades_n + " · " + w.wins + " won"));
+    k.appendChild(wbox("Worst fall", pct(w.max_dd_pct)));
+    k.appendChild(wbox("Open trade", w.open ? sinr(w.open_pnl) : "none", w.open_pnl > 0 ? "up" : null));
+    if (typeof LightweightCharts === "undefined") { $("cr-w-chart").textContent = "Chart library failed to load."; return; }
+    if (!WC) {
+      WC = LightweightCharts.createChart($("cr-w-chart"), {
+        autoSize: true, layout: { background: { color: "#ffffff" }, textColor: "#334155", fontSize: 12 },
+        grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
+        rightPriceScale: { borderColor: "#e2e8f0" }, timeScale: { borderColor: "#e2e8f0", timeVisible: true, secondsVisible: false, rightOffset: 4 }
+      });
+      WS = WC.addCandlestickSeries({ upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626",
+        wickUpColor: "#16a34a", wickDownColor: "#dc2626" });
+      WS.setData(ch.bars.map(function (b) { return { time: b[0], open: b[1], high: b[2], low: b[3], close: b[4] }; }));
+      var l = WC.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, lastValueVisible: true, title: "EMA 105" });
+      l.setData(ch.bars.map(function (b, i) { return { time: b[0], value: ch.ema[i] }; }));
+      WC._ema = l;
+    }
+    var mk = w.markers.map(function (m) {
+      var buy = m[2] === "BUY";
+      if (m[1] === "entry") return { time: m[0], position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
+        shape: buy ? "arrowUp" : "arrowDown", text: m[4] };
+      var win_ = m[4].charAt(0) === "+";
+      return { time: m[0], position: buy ? "aboveBar" : "belowBar", color: win_ ? "#15803d" : "#b91c1c", shape: "circle", text: m[4] };
+    }).sort(function (a, b) { return a.time - b.time; });
+    WS.setMarkers(mk);
+    if (WC._open) { WS.removePriceLine(WC._open); WC._open = null; }
+    if (w.open) WC._open = WS.createPriceLine({ price: w.open.entry, color: w.open.side === "BUY" ? "#16a34a" : "#dc2626", lineWidth: 1,
+      lineStyle: 2, axisLabelVisible: true, title: "open " + w.open.side + " @ " + num(w.open.entry, 2) });
+    renderRange(); renderWinnerNow(w);
+  }
+
+  function renderRange() {
+    var box = $("cr-w-range"); box.textContent = "";
+    [["all", "Whole window"], ["60", "Last 60 sessions"], ["20", "Last 20 sessions"]].forEach(function (r) {
+      var b = el("button", WRANGE === r[0] ? "on" : null, r[1]); b.type = "button";
+      b.addEventListener("click", function () { WRANGE = r[0]; renderRange(); });
+      box.appendChild(b);
+    });
+    var bars = D.chart.bars, n = bars.length, from = 0;
+    if (WRANGE === "all") { var t0 = win().chart_from; while (from < n && bars[from][0] < t0) from++; }
+    else from = Math.max(0, n - 4 * (+WRANGE));
+    WC.timeScale().setVisibleLogicalRange({ from: from, to: n + 3 });
+  }
+
+  function renderWinnerNow(w) {
+    var box = $("cr-w-now"); box.textContent = "";
+    var a = el("div");
+    a.appendChild(el("h3", null, "Right now · last 2-hour close " + w.as_of + " IST"));
+    var p = el("p"); p.appendChild(el("span", "state " + (w.open ? "in" : "wait"), w.open ? "IN TRADE · " + w.open.side : "WAITING"));
+    p.appendChild(document.createTextNode("Nifty " + num(w.close, 2) + " · EMA 105 " + num(w.ema, 2)));
+    a.appendChild(p);
+    if (w.open) {
+      var o = w.open;
+      a.appendChild(el("p", null, o.side + " " + o.lots + " lots × " + o.lot_size + " from " + o.entry_time + " at " + num(o.entry, 2) +
+        " · now " + (o.points > 0 ? "+" : "") + num(o.points, 2) + " points = " + sinr(o.pnl) + " · RSI " + num(o.rsi, 1)));
+      a.appendChild(el("b", null, "It closes on the first of:"));
+      var ul = el("ul"); o.exits.forEach(function (x) { ul.appendChild(el("li", null, x)); }); a.appendChild(ul);
+    }
+    box.appendChild(a);
+    w.checks.forEach(function (c) {
+      var d = el("div");
+      d.appendChild(el("h3", null, c.side + " rule · " + (c.all_ok ? (c.waiting_for_pullback ? "all checks pass, but waiting for a pull-back to EMA 105 after its last exit" : "all checks pass at this close") : "not all checks pass")));
+      d.appendChild(el("p", "muted", c.rule));
+      var ul = el("ul");
+      c.checks.forEach(function (x) { ul.appendChild(el("li", x.ok ? "ok" : "no", x.name + " — " + x.value)); });
+      d.appendChild(ul); box.appendChild(d);
+    });
+  }
+
+  function renderAll() { renderWin(); renderWinnerChart(); renderAnswer(); renderPorts(); renderDetail(); renderCombos(); }
 
   function boot() {
     fetch("crore.json?v=" + Date.now(), { cache: "no-store" })

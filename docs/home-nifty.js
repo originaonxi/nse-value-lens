@@ -69,11 +69,42 @@
       " rules tried · " + num(D.robust_count, 0) + " made money in every third · luck level Sharpe " + num(D.luck_sharpe, 2);
   }
 
-  var CH = null, SER = null;
+  var CH = null, SER = null, WIN = null;
   var SETS = [["A", "Setup A · best by the maths"], ["B", "Setup B · 80% win"], ["S", "Setup C · best SELL"]];
   var WHY = { ema: "close through EMA 105", top: "RSI top", target: "ATR target", stop: "ATR stop", time: "time limit" };
 
   function setupFor(key) { return key === "A" ? D.best : key === "B" ? D.setup80 : D.sell; }
+
+  function showWinner() {
+    var times = {}; D.chart.bars.forEach(function (b) { times[b[0]] = 1; });
+    var ms = WIN.markers.filter(function (m) { return times[m[0]]; });
+    SER.setMarkers(ms.map(function (m) {
+      var buy = m[2] === "BUY";
+      if (m[1] === "entry") return { time: m[0], position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
+        shape: buy ? "arrowUp" : "arrowDown", text: m[4], size: 1.2 };
+      var good = m[4].charAt(0) === "+";
+      return { time: m[0], position: buy ? "aboveBar" : "belowBar", color: good ? "#15803d" : "#b91c1c", shape: "circle", text: m[4], size: 0.9 };
+    }).sort(function (a, b) { return a.time - b.time; }));
+    Array.prototype.forEach.call($("hn-switch").children, function (x) { x.classList.toggle("on", x.dataset.k === "W"); });
+    $("hn-chart-note").textContent = "₹1 crore winner (" + WIN.name + "): " + WIN.rules.join("  ‖  ") +
+      ". ▲ = BUY, ▼ = SELL (short), ● = exit with the rupee result on ₹1 crore of whole NIFTY lots. " +
+      ms.filter(function (m) { return m[1] === "entry"; }).length + " entries in the last 140 sessions; the whole 2 years are on the ₹1 crore page.";
+  }
+
+  function addWinner() {
+    fetch("crore.json?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (c) {
+        WIN = c.windows && c.windows["2y"] && c.windows["2y"].winner;
+        if (!WIN || !SER) return;
+        var bt = el("button", null, "₹1 crore winner · " + (WIN.return_pct > 0 ? "+" : "") + WIN.return_pct.toFixed(1) + "% in 2 years");
+        bt.type = "button"; bt.dataset.k = "W";
+        bt.addEventListener("click", showWinner);
+        $("hn-switch").insertBefore(bt, $("hn-switch").firstChild);
+        showWinner();
+      })
+      .catch(function () { /* the A/B/C setups still work without it */ });
+  }
 
   function showSet(key) {
     var ch = D.chart, set = (ch.sets || {})[key] || ch.markers || [], b = setupFor(key);
@@ -113,6 +144,7 @@
       sw.appendChild(bt);
     });
     showSet("A");
+    addWinner();
     var n = ch.bars.length;
     CH.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - 300), to: n + 3 });
     // why 2-hour candles
