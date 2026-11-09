@@ -27,9 +27,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Test EMA mechanics
-        run: python -m unittest tests.test_nifty_ema tests.test_nifty_combo tests.test_nifty_daynight tests.test_nifty_best tests.test_crore tests.test_intraday15 -v
+        run: python -m unittest tests.test_nifty_ema tests.test_nifty_combo tests.test_nifty_daynight tests.test_nifty_best tests.test_crore tests.test_intraday15 tests.test_cross_lab -v
       - name: Build Nifty EMA Lab, the bhavcopy audit and the ₹1 crore test
-        run: python nifty_ema.py && python nifty_combo.py && python nifty_daynight.py && python nifty_best.py && python scripts/nifty_research_md.py && python nifty_ema105_audit.py && python crore.py && python intraday15.py
+        run: python nifty_ema.py && python nifty_combo.py && python nifty_daynight.py && python nifty_best.py && python scripts/nifty_research_md.py && python nifty_ema105_audit.py && python crore.py && python intraday15.py && python cross_lab.py
       - name: Verify output
         run: |
           python -c "
@@ -48,7 +48,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/nifty.json public/data/nifty.json docs/nifty_combo.json public/data/nifty_combo.json docs/nifty_daynight.json public/data/nifty_daynight.json docs/NIFTY_RESEARCH.md docs/nifty_best.json public/data/nifty_best.json data/order_flow/nifty_flow.csv data/nifty/ docs/nifty_ema105_audit.json public/data/nifty_ema105_audit.json docs/NIFTY_EMA105_AUDIT.md docs/crore.json public/data/crore.json docs/intraday.json public/data/intraday.json
+          git add docs/nifty.json public/data/nifty.json docs/nifty_combo.json public/data/nifty_combo.json docs/nifty_daynight.json public/data/nifty_daynight.json docs/NIFTY_RESEARCH.md docs/nifty_best.json public/data/nifty_best.json data/order_flow/nifty_flow.csv data/nifty/ docs/nifty_ema105_audit.json public/data/nifty_ema105_audit.json docs/NIFTY_EMA105_AUDIT.md docs/crore.json public/data/crore.json docs/intraday.json public/data/intraday.json docs/cross.json public/data/cross.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else

@@ -1,0 +1,11 @@
+/* EMA cross lab. Builds on intraday.css. */
+.cx-answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 10px; }
+.cx-answer { border: 1px solid #cbd7c7; border-radius: 11px; padding: 10px 14px; background: #fffdf7; }
+.cx-answer small { display: block; font-size: 10px; letter-spacing: 1.2px; color: #617967; text-transform: uppercase; }
+.cx-answer strong { display: block; font-size: 20px; margin: 2px 0; }
+.cx-answer p { margin: 2px 0 0; font-size: 13px; color: #334155; line-height: 1.45; }
+.cx-answer.no { border-color: #e7b4b4; background: #fff7f7; }
+.cx-answer.yes { border-color: #2f8a5f; background: #f1f8ee; }
+.fd-table tr.pick td { background: #f1f8ee; font-weight: 600; }
+.fd-table td.rule { font-size: 12.5px; max-width: 460px; }
+.cx-bar { display: inline-block; height: 8px; border-radius: 4px; background: #2f8a5f; vertical-align: middle; margin-right: 6px; }
