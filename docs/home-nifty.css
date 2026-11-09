@@ -1,0 +1,27 @@
+/* Homepage: NIFTY 50 best setup section. */
+.hn-section { margin: 4px 0 26px; }
+.hn-top { display: grid; grid-template-columns: minmax(280px, 400px) 1fr; gap: 14px; align-items: start; }
+.hn-live { border-radius: 12px; padding: 14px 16px; border: 1px solid #e2e8f0; background: #fff; }
+.hn-live.long { background: #16a34a10; border-color: #16a34a66; } .hn-live.short { background: #dc262610; border-color: #dc262666; }
+.hn-live.exit { background: #f59e0b14; border-color: #f59e0b88; } .hn-live.wait { background: #f8fafc; }
+.hn-live small { display: block; font-size: .68rem; letter-spacing: .06em; color: #64748b; }
+.hn-live b { display: block; font-size: 1.45rem; font-weight: 800; margin: 3px 0; }
+.hn-live p { margin: 4px 0; font-size: .86rem; line-height: 1.45; }
+.hn-checks { list-style: none; padding: 0; margin: 8px 0; font-size: .8rem; }
+.hn-checks li { padding: 2px 0; } .hn-checks li.ok span { color: #15803d; font-weight: 800; } .hn-checks li.no span { color: #b91c1c; font-weight: 800; }
+.hn-setup { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; }
+.hn-setup h2 { margin: 2px 0 4px; font-size: 1.05rem; line-height: 1.4; }
+.hn-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+.hn-kpi { background: #f8fafc; border-radius: 9px; padding: 8px 10px; }
+.hn-kpi small { display: block; font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; color: #64748b; }
+.hn-kpi strong { display: block; font-size: 1.3rem; font-weight: 800; } .hn-kpi span { font-size: .72rem; color: #64748b; }
+.hn-kpi.good strong { color: #15803d; } .hn-kpi.bad strong { color: #b91c1c; }
+.hn-chartbox { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; margin-top: 14px; }
+#hn-chart { height: 460px; width: 100%; }
+.hn-section table td.up, .hn-section table td.num.up { color: #15803d; } .hn-section table td.dn, .hn-section table td.num.dn { color: #b91c1c; }
+.hn-section table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.hn-section tr.hn-best td { background: #16a34a10; font-weight: 600; }
+.hn-section details { margin-top: 12px; } .hn-section summary { cursor: pointer; font-weight: 700; padding: 8px 10px; background: #f1f5f9; border-radius: 8px; }
+.hn-scroll { max-height: 420px; overflow: auto; }
+.hn-80 { background: #fff8eb; border: 1px solid #f1d9a8; border-radius: 8px; padding: 10px 12px; font-size: .88rem; color: #6b4e16; }
+@media (max-width: 900px) { .hn-top { grid-template-columns: 1fr; } #hn-chart { height: 360px; } }

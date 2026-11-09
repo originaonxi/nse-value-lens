@@ -3,17 +3,43 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="A focused NSE swing research desk: transparent rules, bounded trade plans, and honest historical evidence.">
-<title>NSE Value Lens · Swing desk</title>
+<title>NSE Value Lens · Nifty 50 setup, order flow and swing desk</title>
 <link rel="stylesheet" href="swing.css">
 <script src="market-context.js" defer></script>
 <script src="swing.js" defer></script>
 <link rel="stylesheet" href="market-brief.css">
 <link rel="stylesheet" href="home-nav.css">
+<link rel="stylesheet" href="fund.css?v=2">
+<link rel="stylesheet" href="home-nifty.css?v=1">
+<script src="vendor/lightweight-charts.js" defer></script>
+<script src="home-nifty.js?v=1" defer></script>
 </head>
 <body data-source="" class="home-page">
 <div class="shell">
-<header class="home-header"><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="orderflow.html">Order Flow</a><a href="quantmath.html">Bot Maths</a><a href="nifty.html">Nifty 50</a><a href="fund.html">Our Fund</a><a href="confluence.html">Top Picks</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="dma.html">DMA</a><a href="fno-play.html">&#8377;1 Play</a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="retirement.html">Opus</a><a href="indicator-lab.html">Lab</a></nav></header>
+<header class="home-header"><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav><a href="index.html" aria-current="page"><strong>Nifty 50 setup</strong></a><a href="nifty.html">Nifty 50 chart</a><a href="orderflow.html">Order Flow</a><a href="quantmath.html">Bot Maths</a><a href="fund.html">Our Fund</a><a href="confluence.html">Top Picks</a><a href="dividends.html">Dividends</a><a href="setups.html">Setups</a><a href="hhhl.html">HH/HL</a><a href="dma.html">DMA</a><a href="fno-play.html">&#8377;1 Play</a><a href="vcp.html">VCP</a><a href="options.html">Options</a><a href="kronos.html">Kronos</a><a href="market-brief.html">Jev brief</a><a href="retirement.html">Opus</a><a href="indicator-lab.html">Lab</a></nav></header>
 <main>
+<section id="hn-section" class="hn-section" aria-labelledby="hn-title">
+<div class="eyebrow"><span class="dot"></span> NIFTY 50 · 2-HOUR CANDLES · EMA 105 + EVERY SIGNAL WE RESEARCHED <span class="pill">REBUILT AFTER EVERY CLOSE</span></div>
+<h1 id="hn-title" style="margin:6px 0 4px">Nifty 50: the best setup by the numbers</h1>
+<p class="muted" id="hn-period">Loading…</p>
+<div class="hn-top">
+  <div id="hn-live" class="hn-live" role="status"></div>
+  <div class="hn-setup"><small class="muted">SETUP A · THE BEST BY THE MATHS</small><h2 id="hn-rule"></h2><div id="hn-kpis" class="hn-kpis"></div></div>
+</div>
+<div class="hn-top" id="hn-80wrap" style="margin-top:12px" hidden>
+  <div id="hn-live80" class="hn-live" role="status"></div>
+  <div class="hn-setup"><small class="muted">SETUP B · THE 80% WIN SETUP</small><h2 id="hn-rule80"></h2><div id="hn-kpis80" class="hn-kpis"></div></div>
+</div>
+<div class="hn-chartbox"><div id="hn-chart"></div><p class="muted">2-hour candles, last 140 sessions, EMA 105 in blue. Arrows = entries; dots = exits with the result after costs. <a href="nifty.html">Full Nifty 50 chart →</a> · <a href="orderflow.html">Order Flow →</a> · <a href="quantmath.html">Bot Maths →</a></p></div>
+<h2 class="fd-h2" style="margin-top:16px">How it compares</h2>
+<div class="fd-wrap"><table class="fd-table" id="hn-comp"></table></div>
+<details open><summary>Can Nifty 50 reach an 80% win rate?</summary>
+<p class="hn-80" id="hn-80"></p>
+<div class="fd-wrap hn-scroll"><table class="fd-table" id="hn-80t"></table></div></details>
+<details><summary>The finalists, ranked by their weakest third and judged by Jev</summary><div class="fd-wrap hn-scroll"><table class="fd-table" id="hn-fin"></table></div></details>
+<details><summary>Every trade of the best setup (latest 25)</summary><div class="fd-wrap hn-scroll"><table class="fd-table" id="hn-tr"></table></div></details>
+<details><summary>Limits</summary><ul id="hn-limits"></ul></details>
+</section>
 <section class="home-tools" aria-label="Nifty 200 scanners and market briefing">
 <a class="home-tool home-tool-jev" href="setups.html" style="grid-column:1/-1"><span class="home-tool-kicker">EVERY CLOSE · NIFTY 200 + F&amp;O <span aria-hidden="true">↗</span></span><strong>Daily setups: every stock in one category</strong><span>Breakout, ready to break, uptrend, sideways, structure exit, downtrend. Five indicators, buy / stop / next target, Jev rank and an options hedge, all explained in words.</span></a>
 <a class="home-tool" href="hhhl.html"><span class="home-tool-kicker">PRICE STRUCTURE <span aria-hidden="true">↗</span></span><strong>HH/HL scanner</strong><span>All 200 stocks, charts and breakout levels.</span></a>
