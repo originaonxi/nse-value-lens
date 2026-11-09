@@ -6,9 +6,9 @@
 <meta name="description" content="₹1 crore put into Nifty 50 strategies two years ago and 200 sessions ago: every combination of EMA 105 and 12 confirmations, real NIFTY lots, every trade in rupees.">
 <link rel="stylesheet" href="swing.css">
 <link rel="stylesheet" href="fund.css?v=2">
-<link rel="stylesheet" href="crore.css?v=2">
+<link rel="stylesheet" href="crore.css?v=3">
 <script src="vendor/lightweight-charts.js" defer></script>
-<script src="crore.js?v=2" defer></script>
+<script src="crore.js?v=3" defer></script>
 <link rel="stylesheet" href="site-nav.css?v=1">
 <script src="site-nav.js?v=1" defer></script>
 </head>
@@ -16,25 +16,28 @@
 <div class="shell">
 <header><a class="brand" href="index.html"><span class="brand-icon">N</span>VALUE LENS <span class="brand-sub">/ NSE</span></a><nav class="sn" aria-label="Main menu"><details class="sn-g sn-on"><summary>Nifty 50</summary><div class="sn-m"><a href="index.html"><b>Best setup</b><small>the homepage: buy / sell chart</small></a><a href="crore.html" aria-current="page"><b>₹1 crore test</b><small>every combination, real lots</small></a><a href="nifty.html"><b>Nifty 50 chart</b><small>EMA lab, day vs night</small></a><a href="orderflow.html"><b>Order Flow</b><small>futures + option OI</small></a><a href="quantmath.html"><b>Bot Maths</b><small>48 formulas</small></a><a href="nifty-chain.html"><b>Nifty chain</b><small>option chain</small></a><a href="options.html"><b>Options desk</b><small>IV, OI walls</small></a></div></details><details class="sn-g"><summary>Stocks</summary><div class="sn-m"><a href="confluence.html"><b>Top Picks</b><small>7 systems agree</small></a><a href="setups.html"><b>Daily setups</b><small>every stock in one category</small></a><a href="hhhl.html"><b>HH/HL scanner</b><small>Nifty 200 + F&amp;O, EMA 105</small></a><a href="dma.html"><b>DMA</b><small>200-day average</small></a><a href="vcp.html"><b>VCP</b><small>Minervini setups</small></a><a href="fno-play.html"><b>₹1 Play</b><small>F&amp;O futures</small></a><a href="kronos.html"><b>Kronos</b><small>100-path forecast</small></a></div></details><details class="sn-g"><summary>Invest</summary><div class="sn-m"><a href="fund.html"><b>Our Fund</b><small>best 30 of the Nifty 100</small></a><a href="dividends.html"><b>Dividends</b><small>10-year records</small></a><a href="retirement.html"><b>Opus 2031</b><small>the ₹5 crore plan</small></a></div></details><details class="sn-g"><summary>Market</summary><div class="sn-m"><a href="market-brief.html"><b>Jev brief</b><small>US + India context</small></a><a href="daily-market.html"><b>Daily market</b><small>deals and breadth</small></a><a href="global-markets.html"><b>Global markets</b><small>FX, gold, indices</small></a></div></details><details class="sn-g"><summary>Research</summary><div class="sn-m"><a href="indicator-lab.html"><b>Indicator lab</b><small>top 100 rules</small></a><a href="strategy-lab.html"><b>Strategy lab</b><small>backtests</small></a><a href="social-research.html"><b>Social research</b><small>what traders say</small></a></div></details></nav></header>
 <main>
-<section class="cr-head">
-  <div class="eyebrow"><span class="dot"></span> NIFTY 50 · 2-HOUR CANDLES · REAL LOTS · EVERY TRADE IN RUPEES <span class="pill">REBUILT AFTER EVERY CLOSE</span></div>
-  <h1>₹1 crore test</h1>
-  <p class="muted" id="cr-sub">Loading...</p>
-  <div class="cr-win" id="cr-win" role="group" aria-label="Window"></div>
+<section class="cr-head cr-head-compact">
+  <div class="cr-head-row">
+    <div><div class="eyebrow"><span class="dot"></span> NIFTY 50 · 2-HOUR CANDLES · REAL LOTS · EVERY TRADE IN RUPEES</div>
+      <h1>₹1 crore test <small id="cr-w-title" class="cr-w-title"></small></h1></div>
+    <div class="cr-win" id="cr-win" role="group" aria-label="Window"></div>
+  </div>
 </section>
 
-<section class="cr-wbox" aria-labelledby="cr-w-title">
-  <div class="cr-w-head">
-    <div><small class="muted">THE WINNER ON THE NIFTY 50 CHART · 2-HOUR CANDLES · EMA 105</small>
-      <h2 id="cr-w-title"></h2><p class="muted" id="cr-w-rules"></p></div>
-    <div class="cr-w-kpis" id="cr-w-kpis"></div>
-  </div>
+<section class="cr-next" id="cr-next" role="status" aria-label="Next signal"></section>
+
+<section class="cr-wbox" aria-label="The winner on the Nifty 50 chart">
   <div class="cr-w-tools" role="group" aria-label="Chart range">
-    <span class="muted">Show</span><span id="cr-w-range"></span>
-    <span class="cr-w-legend"><b class="up">▲ BUY</b> entry · <b class="dn">▼ SELL</b> (short) entry · <b>●</b> exit with the rupee result · blue = EMA 105</span>
+    <span id="cr-w-range"></span>
+    <span class="cr-w-legend"><b class="up">▲ BUY</b> · <b class="dn">▼ SELL</b> (short) · <b>●</b> exit with ₹ result · <b class="ema">— EMA 105</b> · dashed = trigger prices</span>
   </div>
   <div id="cr-w-chart" class="cr-w-chart"></div>
-  <div class="cr-w-now" id="cr-w-now" role="status"></div>
+  <div class="cr-w-head">
+    <p class="muted" id="cr-w-rules"></p>
+    <div class="cr-w-kpis" id="cr-w-kpis"></div>
+  </div>
+  <div class="cr-w-now" id="cr-w-now"></div>
+  <p class="muted cr-sub" id="cr-sub">Loading...</p>
 </section>
 
 <section class="cr-answer" id="cr-answer" role="status"></section>

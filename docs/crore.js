@@ -240,13 +240,47 @@
   }
 
   /* ── the winner on the Nifty 50 chart ─────────────────────────────────────── */
-  var WC = null, WS = null, WRANGE = "all";
+  var WC = null, WS = null, WRANGE = "60", WLINES = [];
   function wbox(k, v, cls) { var d = el("div"); d.appendChild(el("small", null, k)); d.appendChild(el("b", cls || null, v)); return d; }
+
+  function renderNext(w) {
+    var box = $("cr-next"); box.textContent = "";
+    var n = w.next;
+    if (!n) return;
+    var head = el("div", "cr-next-head");
+    head.appendChild(el("b", null, "NEXT SIGNAL"));
+    head.appendChild(el("span", "state " + (w.open ? "in" : "wait"), w.open ? "IN TRADE · " + w.open.side + " " + w.open.lots + " lots from " + num(w.open.entry, 2) : "NO TRADE OPEN"));
+    head.appendChild(document.createTextNode("Last 2-hour close " + w.as_of + " IST · Nifty " + num(n.as_of_close, 2) + " · EMA 105 " + num(n.ema, 2) +
+      " · RSI " + num(n.rsi, 1) + " · ATR " + num(n.atr, 0) + " pts" + (w.open ? " · open P&L " + sinr(w.open.pnl) : "")));
+    box.appendChild(head);
+    var grid = el("div", "cr-next-grid");
+    n.items.forEach(function (it, i) {
+      var c = el("div", "cr-next-item " + it.kind + (i === 0 ? " first" : ""));
+      var tag = it.kind === "exit" ? (it.side === "SELL" ? "SELL (exit)" : "BUY (exit)") : it.kind === "re-entry" ? "NEXT " + it.side : "NEXT " + it.side;
+      c.appendChild(el("small", it.side === "SELL" ? "dn" : "up", (i === 0 ? "1st · " : "") + tag));
+      c.appendChild(el("strong", null, num(it.price, 0)));
+      c.appendChild(el("span", "muted", (it.points > 0 ? "+" : "") + num(it.points, 0) + " pts (" + spct(it.pct, 2) + ") from now"));
+      c.appendChild(el("p", null, it.what));
+      grid.appendChild(c);
+    });
+    box.appendChild(grid);
+  }
+
+  function drawMarkers() {
+    var w = win().winner, zoom = WRANGE !== "all";
+    WS.setMarkers(w.markers.map(function (m) {
+      var buy = m[2] === "BUY";
+      if (m[1] === "entry") return { time: m[0], position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
+        shape: buy ? "arrowUp" : "arrowDown", text: zoom ? m[4] : "", size: zoom ? 1.3 : 0.8 };
+      var good = m[4].charAt(0) === "+";
+      return { time: m[0], position: buy ? "aboveBar" : "belowBar", color: good ? "#15803d" : "#b91c1c", shape: "circle", text: zoom ? m[4] : "", size: zoom ? 1 : 0.6 };
+    }).sort(function (a, b) { return a.time - b.time; }));
+  }
 
   function renderWinnerChart() {
     var w = win().winner, ch = D.chart;
     if (!w || !ch) { $("cr-w-title").textContent = "Winner chart not available yet."; return; }
-    $("cr-w-title").textContent = w.name + " · ₹1 crore → " + cr(w.end) + " (" + spct(w.return_pct) + ")";
+    $("cr-w-title").textContent = "winner: ₹1 crore → " + cr(w.end) + " (" + spct(w.return_pct) + ")";
     var rb = $("cr-w-rules"); rb.textContent = "";
     w.rules.forEach(function (r, i) { if (i) rb.appendChild(el("br")); rb.appendChild(document.createTextNode(r)); });
     var k = $("cr-w-kpis"); k.textContent = "";
@@ -254,37 +288,34 @@
     k.appendChild(wbox("Closed trades", w.trades_n + " · " + w.wins + " won"));
     k.appendChild(wbox("Worst fall", pct(w.max_dd_pct)));
     k.appendChild(wbox("Open trade", w.open ? sinr(w.open_pnl) : "none", w.open_pnl > 0 ? "up" : null));
+    renderNext(w);
     if (typeof LightweightCharts === "undefined") { $("cr-w-chart").textContent = "Chart library failed to load."; return; }
     if (!WC) {
       WC = LightweightCharts.createChart($("cr-w-chart"), {
         autoSize: true, layout: { background: { color: "#ffffff" }, textColor: "#334155", fontSize: 12 },
         grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
-        rightPriceScale: { borderColor: "#e2e8f0" }, timeScale: { borderColor: "#e2e8f0", timeVisible: true, secondsVisible: false, rightOffset: 4 }
+        rightPriceScale: { borderColor: "#e2e8f0" }, timeScale: { borderColor: "#e2e8f0", timeVisible: true, secondsVisible: false, rightOffset: 6 }
       });
       WS = WC.addCandlestickSeries({ upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626",
         wickUpColor: "#16a34a", wickDownColor: "#dc2626" });
       WS.setData(ch.bars.map(function (b) { return { time: b[0], open: b[1], high: b[2], low: b[3], close: b[4] }; }));
       var l = WC.addLineSeries({ color: "#2563eb", lineWidth: 2, priceLineVisible: false, lastValueVisible: true, title: "EMA 105" });
       l.setData(ch.bars.map(function (b, i) { return { time: b[0], value: ch.ema[i] }; }));
-      WC._ema = l;
     }
-    var mk = w.markers.map(function (m) {
-      var buy = m[2] === "BUY";
-      if (m[1] === "entry") return { time: m[0], position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
-        shape: buy ? "arrowUp" : "arrowDown", text: m[4] };
-      var win_ = m[4].charAt(0) === "+";
-      return { time: m[0], position: buy ? "aboveBar" : "belowBar", color: win_ ? "#15803d" : "#b91c1c", shape: "circle", text: m[4] };
-    }).sort(function (a, b) { return a.time - b.time; });
-    WS.setMarkers(mk);
-    if (WC._open) { WS.removePriceLine(WC._open); WC._open = null; }
-    if (w.open) WC._open = WS.createPriceLine({ price: w.open.entry, color: w.open.side === "BUY" ? "#16a34a" : "#dc2626", lineWidth: 1,
-      lineStyle: 2, axisLabelVisible: true, title: "open " + w.open.side + " @ " + num(w.open.entry, 2) });
+    WLINES.forEach(function (p) { WS.removePriceLine(p); }); WLINES = [];
+    if (w.open) WLINES.push(WS.createPriceLine({ price: w.open.entry, color: w.open.side === "BUY" ? "#16a34a" : "#dc2626", lineWidth: 1,
+      lineStyle: 1, axisLabelVisible: true, title: "open " + w.open.side + " " + num(w.open.entry, 0) }));
+    ((w.next || {}).items || []).forEach(function (it, i) {
+      if (it.kind === "re-entry") return;
+      WLINES.push(WS.createPriceLine({ price: it.price, color: it.side === "SELL" ? "#dc2626" : "#16a34a", lineWidth: i === 0 ? 2 : 1,
+        lineStyle: 2, axisLabelVisible: true, title: (it.kind === "exit" ? it.side + " exit " : "next " + it.side + " ") + num(it.price, 0) }));
+    });
     renderRange(); renderWinnerNow(w);
   }
 
   function renderRange() {
     var box = $("cr-w-range"); box.textContent = "";
-    [["all", "Whole window"], ["60", "Last 60 sessions"], ["20", "Last 20 sessions"]].forEach(function (r) {
+    [["20", "Last 20 sessions"], ["60", "Last 60 sessions"], ["all", "Whole window"]].forEach(function (r) {
       var b = el("button", WRANGE === r[0] ? "on" : null, r[1]); b.type = "button";
       b.addEventListener("click", function () { WRANGE = r[0]; renderRange(); });
       box.appendChild(b);
@@ -292,7 +323,8 @@
     var bars = D.chart.bars, n = bars.length, from = 0;
     if (WRANGE === "all") { var t0 = win().chart_from; while (from < n && bars[from][0] < t0) from++; }
     else from = Math.max(0, n - 4 * (+WRANGE));
-    WC.timeScale().setVisibleLogicalRange({ from: from, to: n + 3 });
+    drawMarkers();
+    WC.timeScale().setVisibleLogicalRange({ from: from, to: n + 6 });
   }
 
   function renderWinnerNow(w) {

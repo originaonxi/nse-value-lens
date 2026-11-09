@@ -36,6 +36,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 import nifty_best as B  # noqa: E402
+import nifty_combo as K  # noqa: E402
 import nifty_ema as N  # noqa: E402
 import nifty_ema105_audit as A  # noqa: E402
 
@@ -399,11 +400,67 @@ def winner_view(X, L, df, units, port, start):
     closed = [t for t in trades if not t["open"]]
     return {"name": port["name"], "sleeves": [u["name"] for u in units], "rules": [label(r) for r in rules],
             "markers": marks, "trades": trades, "checks": checks, "open": plan,
+            "next": next_signal(X, L, rules, plan, checks, i),
             "as_of": str(df.index[i])[:16], "close": round(float(c[i]), 2), "ema": round(float(e[i]), 2),
             "end": port["end"], "profit": port["profit"], "return_pct": port["return_pct"], "max_dd_pct": port["max_dd_pct"],
             "trades_n": len(closed), "wins": sum(1 for t in closed if t["pnl"] > 0),
             "won": sum(t["pnl"] for t in closed if t["pnl"] > 0), "lost": sum(t["pnl"] for t in closed if t["pnl"] <= 0),
             "open_pnl": port["open_pnl"]}
+
+
+def rsi_price(c, target, span):
+    """The next 2-hour close at which RSI(14) - computed exactly as in the backtest - equals `target`.
+    RSI rises with the next close, so bisect between close - span and close + span. None if out of reach."""
+    f = lambda p: float(K.rsi(np.r_[c, p])[-1]) - target
+    lo, hi = float(c[-1]) - span, float(c[-1]) + span
+    if f(lo) > 0 or f(hi) < 0:
+        return None
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if f(mid) < 0 else (lo, mid)
+    return (lo + hi) / 2
+
+
+def next_signal(X, L, rules, plan, checks, i):
+    """What the winner does next, in prices: the exact close that triggers each exit and what each entry still needs."""
+    c, e, atr, rsi = X["c"], X["ema"], X["atr"], X["rsi"]
+    close, ema_now, a = float(c[i]), float(e[i]), float(atr[i])
+    away = lambda p: {"price": round(p, 2), "points": round(p - close, 1), "pct": round((p / close - 1) * 100, 2)}
+    out = {"as_of_close": round(close, 2), "ema": round(ema_now, 2), "atr": round(a, 1), "rsi": round(float(rsi[i]), 1), "items": []}
+    if plan:
+        r = next(r for r in rules if (r["side"] == 1) == (plan["side"] == "BUY"))
+        sd = r["side"]
+        if r["rsi"]:
+            lvl = r["rsi"] - 5 if sd == 1 else 105 - r["rsi"]
+            p = rsi_price(c[:i + 1], lvl, 25 * a)
+            ok = float(K.rsi(np.r_[c[:i + 1], p - sd * 0.5])[-1]) if p else None   # just past p, RSI is under the line
+            if p is not None:
+                out["items"].append({"kind": "exit", "side": "SELL" if sd == 1 else "BUY",
+                                     "what": f"TOP exit: {'sell' if sd == 1 else 'buy back'} the open {plan['side']} if the next 2-hour candle closes "
+                                             f"{'below' if sd == 1 else 'above'} this price (RSI falls back under {lvl})",
+                                     **away(p), "rsi_check": round(ok, 1), "first": True})
+        out["items"].append({"kind": "exit", "side": "SELL" if sd == 1 else "BUY",
+                             "what": f"EMA exit: a 2-hour close {'below' if sd == 1 else 'above'} EMA 105",
+                             **away(ema_now), "first": False})
+    for ck, r in zip(checks, rules):
+        sd = r["side"]
+        need = [x["name"] for x in ck["checks"] if not x["ok"]]
+        if plan and (sd == 1) == (plan["side"] == "BUY"):
+            # after a TOP exit the same rule only buys again once price is back within 1 ATR of EMA 105 (or crosses it)
+            lo, hi = ema_now, ema_now + sd * B.RE_ENTRY_ATR * a
+            out["items"].append({"kind": "re-entry", "side": ck["side"],
+                                 "what": f"Next {ck['side']} after that exit: price must come back to the EMA 105 zone "
+                                         f"({min(lo, hi):,.0f}-{max(lo, hi):,.0f} today), then a 2-hour close "
+                                         f"{'above' if sd == 1 else 'below'} EMA 105 with "
+                                         + " and ".join(f for f in r["filters"]) + ". It moves every candle.",
+                                 **away(hi), "first": False})
+        elif not plan or (sd == 1) != (plan["side"] == "BUY"):
+            out["items"].append({"kind": "entry", "side": ck["side"],
+                                 "what": f"Next {ck['side']}: a 2-hour close {'above' if sd == 1 else 'below'} EMA 105 "
+                                         f"({ema_now:,.0f} today) with " + " and ".join(r["filters"])
+                                         + (f". Not met now: {', '.join(need)}" if need else ". All met now."),
+                                 **away(ema_now), "first": False})
+    return out
 
 
 def honest(X, L, df, rows, lots, train_key, train_n, train_start, test_start, title, setups_note):
