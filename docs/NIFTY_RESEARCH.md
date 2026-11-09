@@ -1,6 +1,6 @@
 # Nifty 50 research record
 
-Generated 2026-11-09 18:49 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
+Generated 2026-11-09 19:10 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
 
 **Data:** NIFTY 50 index (^NSEI, Yahoo Finance). 2-hour candles 2024-03-19 → 2026-11-09 (2,590 candles). Daily candles 2016 → 2026-11-09. Hourly 2023 → today, 5-minute last ~60 sessions.
 
@@ -189,16 +189,16 @@ No sell rule was profitable and consistent in both parts, so the setups are buy 
 
 | # | Candles | EMA | Signals | Up signals: hit · pts | Down signals: hit · pts | PF | Net pts | 140 sessions PF · net | Jev | Final |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 2h | 105 | 10 | 20.0% · +1,805 | 40.0% · +997 | 6.58 | +2,802 | 1.62 · +1,427 | weak | 58.6 |
-| 2 | 1h | 185 | 14 | 14.3% · +1,792 | 42.9% · +1,014 | 5.82 | +2,806 | 1.54 · +1,388 | weak | 58.0 |
-| 3 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +895 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 54.4 |
-| 4 | 15m | 77 | 51 | 23.1% · +1,702 | 40.0% · +874 | 2.28 | +2,577 | 2.28 · +2,577 | weak | 53.6 |
-| 5 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +928 | 2.39 | +2,684 | 2.39 · +2,684 | weak | 53.4 |
-| 6 | 15m | 76 | 51 | 26.9% · +1,737 | 40.0% · +909 | 2.36 | +2,646 | 2.36 · +2,646 | weak | 53.1 |
-| 7 | 30m | 59 | 33 | 17.6% · +1,824 | 31.2% · +804 | 2.91 | +2,628 | 2.91 · +2,628 | weak | 52.3 |
+| 1 | 1h | 185 | 14 | 14.3% · +1,792 | 42.9% · +1,014 | 5.82 | +2,806 | 1.54 · +1,388 | weak | 58.8 |
+| 2 | 2h | 105 | 10 | 20.0% · +1,805 | 40.0% · +997 | 6.58 | +2,802 | 1.62 · +1,427 | weak | 58.2 |
+| 3 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +895 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 55.0 |
+| 4 | 15m | 77 | 51 | 23.1% · +1,702 | 40.0% · +874 | 2.28 | +2,577 | 2.28 · +2,577 | weak | 54.0 |
+| 5 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +928 | 2.39 | +2,684 | 2.39 · +2,684 | weak | 53.9 |
+| 6 | 30m | 59 | 33 | 17.6% · +1,824 | 31.2% · +804 | 2.91 | +2,628 | 2.91 · +2,628 | weak | 53.3 |
+| 7 | 15m | 76 | 51 | 26.9% · +1,737 | 40.0% · +909 | 2.36 | +2,646 | 2.36 · +2,646 | weak | 53.1 |
 | 8 | 1D | 12 | 8 | 25.0% · +1,540 | 50.0% · +931 | 3.06 | +2,470 | 0.75 · -1,337 | weak | 48.4 |
-| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.5 |
-| 10 | 5m | 178 | 120 | 15.0% · +1,256 | 20.0% · +441 | 1.52 | +1,698 | 1.52 · +1,698 | weak | 44.5 |
+| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.4 |
+| 10 | 5m | 178 | 120 | 15.0% · +1,256 | 20.0% · +441 | 1.52 | +1,698 | 1.52 · +1,698 | weak | 44.4 |
 
 Your EMAs 5, 6, 9, 10, 11 (same rule, same dates):
 
@@ -310,12 +310,12 @@ Opening-range breakout, checked twice:
 
 | Rule | Reliability | Overfit risk | Jev score | Final |
 |---|---|---|---|---|
-| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 44.6 | 58.4 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 41.4 | 57.0 |
-| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 43.6 | 56.6 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 39.6 | 56.0 |
-| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 43.0 | 55.8 |
-| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 40.4 | 54.9 |
+| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 47.6 | 59.6 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 39.6 | 56.3 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 40.0 | 56.2 |
+| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 42.2 | 56.1 |
+| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 42.6 | 55.7 |
+| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 40.8 | 55.1 |
 
 ## Limits
 
