@@ -36,9 +36,12 @@ jobs:
           import json
           d = json.load(open('docs/nifty.json'))
           c = d['chosen']
-          assert len(d['bars']['15m']) > 100 and len(d['bars']['1D']) > 100
-          assert c['common']['trades'] >= 8
-          print('Nifty', d['as_of'], '| chosen', c['tf'], 'EMA', c['ema'], '| final', c['final'], '| now', c['current']['side'], '| Jev', d['jev']['status'])
+          assert len(d['charts']['15m']['bars']) > 100 and len(d['charts']['1D']['bars']) > 100
+          assert c['main']['trades'] >= 8
+          b = json.load(open('docs/nifty_best.json'))
+          k = json.load(open('docs/crore.json'))
+          assert k['windows']['2y']['winner']['next']['items'], 'no next signal'
+          print('Nifty', d['as_of'], '| chosen', c['tf'], 'EMA', c['ema'], '| final', c['final'], '| best setup', b['as_of'], '| crore to', k['windows']['2y']['to'], '| Jev', d['jev']['status'])
           "
       - name: Commit data
         id: commit
