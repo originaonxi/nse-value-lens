@@ -67,6 +67,17 @@
   <div class="fd-wrap e9-scroll"><table class="fd-table" id="b5-trades"></table></div>
 </section>
 
+<section class="section" id="tv">
+  <h2 class="fd-h2">TradingView script <small class="muted">Pine v6 · same rules, same trades as this page</small></h2>
+  <ol class="fd-rules">
+    <li>Open <b>NSE:NIFTY</b> (or <b>NSE:NIFTY1!</b>) on a <b>15-minute</b> chart.</li>
+    <li>Click <b>Copy script</b>, open <b>Pine Editor</b>, delete everything there, paste, then <b>Save</b> and <b>Add to chart</b>.</li>
+    <li>The panel at the top right shows the side, the entry, the flip level and points since start. TradingView loads limited history, so check "First candle on chart" before comparing totals.</li>
+  </ol>
+  <p><button type="button" id="b5-copy" class="e9-btn">Copy script</button> <span id="b5-copy-msg" class="muted" role="status"></span> · <a href="best15.pine" download>Download best15.pine</a></p>
+  <pre id="b5-pine" class="b5-pine" tabindex="0" aria-label="Pine script">Loading…</pre>
+</section>
+
 <section class="section">
   <h2 class="fd-h2">Data check</h2>
   <ul class="fd-limits" id="b5-data"></ul>

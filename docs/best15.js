@@ -198,6 +198,28 @@
     var l = $("b5-limits"); l.textContent = ""; D.limits.forEach(function (x) { l.appendChild(el("li", null, x)); });
   }
 
+  function loadPine() {
+    var pre = $("b5-pine"), btn = $("b5-copy"), msg = $("b5-copy-msg");
+    if (!pre) return;
+    fetch("best15.pine?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then(function (txt) {
+        pre.textContent = txt;
+        pre.dataset.ready = "true";
+        btn.addEventListener("click", function () {
+          function done(ok) { msg.textContent = ok ? "Copied. Paste it into TradingView's Pine Editor." : "Select the text below and copy it."; }
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+          } else {
+            var r = document.createRange(); r.selectNodeContents(pre);
+            var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+            var ok = false; try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+            done(ok);
+          }
+        });
+      })
+      .catch(function (e) { pre.textContent = "Could not load best15.pine: " + e.message; });
+  }
   function boot() {
     fetch("best15.json?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
@@ -210,5 +232,6 @@
       })
       .catch(function (e) { $("b5-sub").textContent = "Failed to load best15.json: " + e.message; document.body.dataset.ready = "error"; });
   }
-  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", boot) : boot();
+  function start() { loadPine(); boot(); }
+  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();
 })();

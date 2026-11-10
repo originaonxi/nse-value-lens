@@ -69,6 +69,23 @@ class Published(unittest.TestCase):
         self.assertLessEqual(sum(x["open"] for x in tr), 1)
         self.assertEqual(d["now"]["side"] == "BUY", d["now"]["ema21"] > d["now"]["ema105"])
 
+    def test_pine_script_is_paste_safe_and_matches_the_rule(self):
+        p = ROOT / "docs" / "best15.pine"
+        src = p.read_text(encoding="utf-8")
+        lines = src.split("\n")
+        self.assertTrue(lines[0].startswith("//@version=6"))
+        for i, line in enumerate(lines, 1):
+            self.assertLessEqual(len(line), 72, f"line {i} too long to copy safely")      # chat wrapping split a string before
+            self.assertTrue(all(ord(ch) < 127 for ch in line), f"line {i} has a non-ASCII character")
+            body = "" if line.lstrip().startswith("//") else line.split("//")[0]
+            self.assertEqual(body.count('"') % 2, 0, f"line {i}: string not closed on the same line")
+        for setting in ('input.int(21, "Fast EMA"', 'input.int(105, "Slow EMA"', "default_qty_value = 65",
+                        "commission_value = 0.035", "process_orders_on_close = false", "03 Jul 2023 00:00 +0530"):
+            self.assertIn(setting, src)
+        html = (ROOT / "docs" / "best15.html").read_text(encoding="utf-8")
+        self.assertIn('id="b5-pine"', html)
+        self.assertIn('href="best15.pine"', html)
+
 
 if __name__ == "__main__":
     unittest.main()
