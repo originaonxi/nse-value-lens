@@ -422,10 +422,14 @@ def build(today=None):
     last_t = df15.index[-1]
 
     def side_on15(df, up, valid):
+        """A side computed at a candle's CLOSE is usable only for 15m bars starting at/after that close.
+        (Fixed 11 Nov 2026: start-label mapping leaked up to 45 minutes of the future at flips.)"""
         s = np.where(valid, np.where(up, 1.0, -1.0), 0.0)
         if df is df15:
             return s
-        return pd.Series(s, index=df.index).reindex(df15.index).ffill().fillna(0.0).to_numpy()
+        step = 30 if df is frames["30m"] else 60
+        idx = df.index + pd.Timedelta(minutes=step)
+        return pd.Series(s, index=idx).reindex(df15.index).ffill().fillna(0.0).to_numpy().copy()
 
     out, days_union, bases = [], None, {}
     for m in METHODS:
@@ -517,6 +521,7 @@ def build(today=None):
                "methods": out, "ranking": [m["key"] for m in rank], "reasons": reasons, "race": race, "livetest": livetest,
                "total_closed_trades": sum(m["summary"]["trades"] for m in out),
                "limits": ["All ten were picked after looking at this same history; their honest shared out-of-sample record starts 10 Nov 2026.",
+                          "CORRECTION 11 Nov 2026: a lookahead bug in the ensemble timeframe mapping was found and fixed. Twin Pulse fell from +22,581 to about +9,016 points, Council from +19,185 to about +9,779, Quorum from +11,017 to about +8,757. The ranking you see uses only the corrected, causal numbers.",
                           "The Fable ensembles (Council, Quorum, Twin Pulse) reuse the five classics, so they inherit their selection bias too.",
                           "Two more Fable inventions - close vs rolling median, and the regression-slope sign - were tested the same way and REJECTED because they lost money. Only survivors are shown.",
                           "Supertrend 10/1.5 was chosen from 30 period/multiplier/timeframe combinations, so treat its edge as the least proven.",

@@ -1,0 +1,126 @@
+//@version=6
+// ----------------------------------------------------------------
+// FABLE TWIN PULSE - two friends, one trade. By Sam + Fable, 2026.
+// ----------------------------------------------------------------
+// Friend A: Supertrend(10, 1.5) on 1-HOUR candles.
+//   ATR = Wilder average of the true range over 10 hourly candles.
+//   Bands = (high+low)/2 +/- 1.5 x ATR; bands can only tighten.
+//   A says UP while the hourly close holds above the band line.
+// Friend B: close vs SMA(100) on 30-MINUTE candles.
+//   B says UP while the 30m close is above its 100-candle average.
+// THE RULE: when A and B point the SAME way, be on that side.
+//   While they argue, HOLD the last agreed side. Always in a
+//   trade (BUY or SELL). The friends speak only AFTER their
+//   candle closes - this script cannot peek (lookahead-safe).
+// Fills at the next 15-minute open. Cost 0.035% per side.
+// Honest causal backtest, 3 Jul 2023 -> 9 Nov 2026:
+//   +9,057 points after costs, zero losing years, wins ~35%,
+//   worst fall ~3,276 points. (An earlier +22,581 figure was a
+//   lookahead bug, found and fixed on 11 Nov 2026. Frame the
+//   honest number.) Not advice; paper research.
+// USE ON A 15-MINUTE CHART of NSE:NIFTY or NIFTY futures.
+strategy("Fable Twin Pulse 15m", "Twin Pulse",
+      overlay = true,
+      initial_capital = 10000000,
+      default_qty_type = strategy.fixed,
+      default_qty_value = 65,
+      commission_type = strategy.commission.percent,
+      commission_value = 0.035,
+      process_orders_on_close = false,
+      pyramiding = 0)
+
+stLen = input.int(10, "Friend A: Supertrend ATR length", minval = 1)
+stMul = input.float(1.5, "Friend A: Supertrend multiplier",
+      step = 0.1, minval = 0.1)
+maLen = input.int(100, "Friend B: 30-min SMA length", minval = 2)
+startAt = input.time(timestamp("03 Jul 2023 00:00 +0530"),
+      "Start trading from")
+
+stSide() =>
+    [line_, dir_] = ta.supertrend(stMul, stLen)
+    dir_ < 0 ? 1 : -1
+maSide() =>
+    close > ta.sma(close, maLen) ? 1 : -1
+
+// [1] + lookahead_on returns the last COMPLETED 1h / 30m candle:
+// each friend's opinion exists only after his candle has closed.
+a = request.security(syminfo.tickerid, "60", stSide()[1],
+      lookahead = barmerge.lookahead_on)
+b = request.security(syminfo.tickerid, "30", maSide()[1],
+      lookahead = barmerge.lookahead_on)
+
+agree = not na(a) and not na(b) and a == b
+var int side = 0
+if agree
+    side := int(a)
+ready = side != 0 and time >= startAt
+
+if ready and side > 0 and strategy.position_size <= 0
+    strategy.entry("BUY", strategy.long, comment = "BUY")
+if ready and side < 0 and strategy.position_size >= 0
+    strategy.entry("SELL", strategy.short, comment = "SELL")
+
+goUp = ready and side > 0 and side[1] <= 0
+goDown = ready and side < 0 and side[1] >= 0
+bgcolor(agree ? na : color.new(color.orange, 88),
+      title = "Friends arguing (holding the last side)")
+plotshape(goUp, "BUY", shape.labelup, location.belowbar,
+      color.green, text = "BUY", textcolor = color.white,
+      size = size.small)
+plotshape(goDown, "SELL", shape.labeldown, location.abovebar,
+      color.red, text = "SELL", textcolor = color.white,
+      size = size.small)
+
+// ---- the teaching panel ----
+var int firstTime = time
+lotPts = 65 * syminfo.pointvalue
+totalPts = (strategy.netprofit + strategy.openprofit) / lotPts
+closedN = strategy.closedtrades
+winPct = closedN > 0 ? 100.0 * strategy.wintrades / closedN : 0.0
+pos = strategy.position_size
+entryPx = pos != 0 ? strategy.opentrades.entry_price(0) : na
+posTxt = pos > 0 ? "LONG" : pos < 0 ? "SHORT" : "WAIT"
+if pos != 0
+    posTxt := posTxt + " " + str.tostring(entryPx, "#.##")
+aCol = na(a) ? color.gray : a > 0 ? color.green : color.red
+bCol = na(b) ? color.gray : b > 0 ? color.green : color.red
+aTxt = na(a) ? "-" : a > 0 ? "UP (BUY side)" : "DOWN (SELL side)"
+bTxt = na(b) ? "-" : b > 0 ? "UP (BUY side)" : "DOWN (SELL side)"
+agTxt = agree ? "AGREE - trade their side"
+      : "ARGUING - hold the last side"
+is15 = timeframe.period == "15"
+tfTxt = is15 ? "15 min (tested)" : "NOT 15 min - untested"
+trTxt = str.tostring(closedN) + " / " +
+      str.tostring(winPct, "0.0") + "%"
+fTxt = str.format_time(firstTime, "dd MMM yyyy", "Asia/Kolkata")
+
+row(t, r, lab, txt, col) =>
+    table.cell(t, 0, r, lab, text_color = color.gray)
+    table.cell(t, 1, r, txt, text_color = col)
+
+var table tb = table.new(position.top_right, 2, 9,
+      bgcolor = color.white, border_width = 1,
+      border_color = color.new(color.gray, 70))
+if barstate.islast
+    row(tb, 0, "Friend A (1h Supertrend)", aTxt, aCol)
+    row(tb, 1, "Friend B (30m vs SMA100)", bTxt, bCol)
+    row(tb, 2, "The two friends", agTxt,
+          agree ? color.green : color.orange)
+    row(tb, 3, "Position", posTxt,
+          pos > 0 ? color.green : pos < 0 ? color.red : color.gray)
+    row(tb, 4, "Points since start",
+          str.tostring(totalPts, "#,##0.0"),
+          totalPts >= 0 ? color.green : color.red)
+    row(tb, 5, "Closed trades / won", trTxt, color.gray)
+    row(tb, 6, "Rupees (1 lot of 65)",
+          str.tostring(totalPts * 65, "#,##0"), color.gray)
+    row(tb, 7, "First candle on chart", fTxt, color.gray)
+    row(tb, 8, "Chart", tfTxt, is15 ? color.green : color.orange)
+
+msgUp = "Twin Pulse: BUY at next 15m open. Close "
+msgDn = "Twin Pulse: SELL at next 15m open. Close "
+once = alert.freq_once_per_bar_close
+if goUp
+    alert(msgUp + str.tostring(close, "#.##"), once)
+if goDown
+    alert(msgDn + str.tostring(close, "#.##"), once)

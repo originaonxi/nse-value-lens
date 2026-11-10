@@ -126,6 +126,21 @@ class Published(unittest.TestCase):
         self.assertIn('id="m5-livetest"', (ROOT / "docs" / "methods.html").read_text(encoding="utf-8"))
         self.assertIn('id="mp-livetest"', (ROOT / "docs" / "method.html").read_text(encoding="utf-8"))
 
+    def test_twinpulse_pine_is_paste_safe_and_causal(self):
+        src = (ROOT / "docs" / "twinpulse.pine").read_text(encoding="utf-8")
+        lines = src.split("\n")
+        self.assertTrue(lines[0].startswith("//@version=6"))
+        for i, line in enumerate(lines, 1):
+            self.assertLessEqual(len(line), 72, f"line {i} too long to copy safely")
+            self.assertTrue(all(ord(ch) < 127 for ch in line), f"line {i} non-ASCII")
+            body = "" if line.lstrip().startswith("//") else line.split("//")[0]
+            self.assertEqual(body.count('"') % 2, 0, f"line {i}: string not closed")
+        for need in ('request.security(syminfo.tickerid, "60", stSide()[1]',
+                     'request.security(syminfo.tickerid, "30", maSide()[1]',
+                     "lookahead = barmerge.lookahead_on", "commission_value = 0.035",
+                     "default_qty_value = 65", "process_orders_on_close = false"):
+            self.assertIn(need, src)
+
 
 if __name__ == "__main__":
     unittest.main()
