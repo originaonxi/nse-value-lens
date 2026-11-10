@@ -336,6 +336,40 @@
     }
     renderLive();
   }
+  /* ---- optional Kotak tick layer (?kotak=1): a read-only local bridge on YOUR machine
+     (kotak_ticker.py -> http://127.0.0.1:8745/nifty) feeds second-level prices into the
+     forming candle. Flips still come only from CLOSED candles, exactly like the backtest. ---- */
+  var TICK = { on: false, last: 0 };
+  function tickMerge(ltp) {
+    var n = istNow();
+    if (!isNum(ltp) || !D || !D.live || !(LIVE.force || marketOpen(n))) return;
+    var m = Math.floor(hm(n)), b = 555 + 15 * Math.floor((m - 555) / 15);
+    var key = istStamp(n).slice(0, 10) + " " + pad2(Math.floor(b / 60)) + ":" + pad2(b % 60);
+    if (LIVE.form && LIVE.form.t === key) {
+      var f = LIVE.form;
+      f.c = ltp; f.h = Math.max(f.h, ltp); f.l = Math.min(f.l, ltp); f.m1 = m;
+    } else if (!LIVE.form || LIVE.form.t < key) {
+      LIVE.form = { t: key, m0: m, m1: m, o: ltp, h: ltp, l: ltp, c: ltp };
+    }
+    LIVE.price = ltp; LIVE.ptime = key;
+    var st = LIVE.state || { ma: maState(D.live) };
+    if (SER && LIVE.form) {
+      SER.update({ time: ts(LIVE.form.t), open: LIVE.form.o, high: LIVE.form.h, low: LIVE.form.l, close: LIVE.form.c });
+      if (LSER.ema21) {
+        var pv = maPreview(st.ma, LIVE.form.c);
+        LSER.ema21.update({ time: ts(LIVE.form.t), value: +pv[0].toFixed(2) });
+        LSER.ema105.update({ time: ts(LIVE.form.t), value: +pv[1].toFixed(2) });
+      }
+    }
+    renderLive();
+  }
+  function tickLoop() {
+    fetch("http://127.0.0.1:8745/nifty", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && isNum(j.ltp)) { TICK.last = Date.now(); tickMerge(j.ltp); } })
+      .catch(function () { });
+  }
+
   function renderLive() {
     var box = $("b5-live"); if (!box || !D || !D.live) return;
     var n = istNow(), open = LIVE.force || marketOpen(n);
@@ -355,6 +389,7 @@
     var top = el("div", "b5l-top");
     top.appendChild(el("span", "b5l-dot" + (open ? " on" : "")));
     top.appendChild(el("b", null, open ? "LIVE · NIFTY 50 · 15-MIN" : "MARKET CLOSED"));
+    if (TICK.on && Date.now() - TICK.last < 10000) top.appendChild(el("span", "b5l-tickbadge", "KOTAK TICKS"));
     top.appendChild(el("span", "b5l-price", num(price, 2)));
     if (st || LIVE.form) {
       var chg = price - D.now.close;
@@ -404,7 +439,8 @@
     if (q.live === "off") return;
     LIVE.force = q.live === "force";
     AF = 2 / (D.fast + 1); AS = 2 / (D.slow + 1);
-    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, maState: maState, maPreview: maPreview, LIVE: LIVE };
+    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, maState: maState, maPreview: maPreview, LIVE: LIVE, TICK: TICK, tickMerge: tickMerge };
+    if (q.kotak === "1") { TICK.on = true; setInterval(tickLoop, 2000); tickLoop(); }
     renderLive(); liveLoop(); setInterval(clockTick, 1000);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) { clearTimeout(LIVE.timer); liveLoop(); } });
   }
