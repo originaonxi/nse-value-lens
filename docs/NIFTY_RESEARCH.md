@@ -1,6 +1,6 @@
 # Nifty 50 research record
 
-Generated 2026-11-10 05:15 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
+Generated 2026-11-10 23:43 IST from the live engines (`nifty_ema.py`, `nifty_combo.py`, `nifty_daynight.py`). Re-run `python scripts/nifty_research_md.py` to refresh. Paper research, not advice.
 
 **Data:** NIFTY 50 index (^NSEI, Yahoo Finance). 2-hour candles 2024-03-19 → 2026-11-09 (2,590 candles). Daily candles 2016 → 2026-11-09. Hourly 2023 → today, 5-minute last ~60 sessions.
 
@@ -190,15 +190,15 @@ No sell rule was profitable and consistent in both parts, so the setups are buy 
 | # | Candles | EMA | Signals | Up signals: hit · pts | Down signals: hit · pts | PF | Net pts | 140 sessions PF · net | Jev | Final |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 2h | 105 | 10 | 20.0% · +1,805 | 40.0% · +996 | 6.57 | +2,802 | 1.62 · +1,426 | weak | 58.6 |
-| 2 | 1h | 185 | 14 | 14.3% · +1,793 | 42.9% · +1,015 | 5.83 | +2,808 | 1.54 · +1,391 | weak | 58.5 |
-| 3 | 15m | 77 | 51 | 23.1% · +1,703 | 40.0% · +876 | 2.28 | +2,578 | 2.28 · +2,578 | weak | 54.8 |
-| 4 | 30m | 81 | 21 | 18.2% · +2,061 | 30.0% · +417 | 3.95 | +2,478 | 3.95 · +2,478 | weak | 54.2 |
-| 5 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +894 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 53.9 |
-| 6 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +929 | 2.39 | +2,685 | 2.39 · +2,685 | weak | 53.8 |
-| 7 | 15m | 76 | 51 | 26.9% · +1,738 | 40.0% · +910 | 2.36 | +2,648 | 2.36 · +2,648 | weak | 52.8 |
-| 8 | 1D | 12 | 8 | 25.0% · +1,540 | 50.0% · +931 | 3.06 | +2,470 | 0.75 · -1,337 | weak | 48.4 |
-| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.6 |
-| 10 | 5m | 178 | 120 | 15.0% · +1,257 | 20.0% · +443 | 1.52 | +1,700 | 1.52 · +1,700 | weak | 44.7 |
+| 2 | 1h | 185 | 14 | 14.3% · +1,793 | 42.9% · +1,015 | 5.83 | +2,808 | 1.54 · +1,391 | weak | 58.6 |
+| 3 | 15m | 77 | 51 | 23.1% · +1,703 | 40.0% · +876 | 2.28 | +2,578 | 2.28 · +2,578 | weak | 55.1 |
+| 4 | 15m | 75 | 51 | 26.9% · +1,756 | 40.0% · +929 | 2.39 | +2,685 | 2.39 · +2,685 | weak | 54.2 |
+| 5 | 15m | 76 | 51 | 26.9% · +1,738 | 40.0% · +910 | 2.36 | +2,648 | 2.36 · +2,648 | weak | 54.1 |
+| 6 | 15m | 88 | 46 | 21.7% · +1,732 | 39.1% · +894 | 2.37 | +2,626 | 2.37 · +2,626 | weak | 54.1 |
+| 7 | 30m | 81 | 21 | 18.2% · +2,061 | 30.0% · +417 | 3.95 | +2,478 | 3.95 · +2,478 | weak | 54.0 |
+| 8 | 1D | 12 | 8 | 25.0% · +1,540 | 50.0% · +931 | 3.06 | +2,470 | 0.75 · -1,337 | weak | 47.8 |
+| 9 | 75m | 31 | 15 | 25.0% · +1,995 | 42.9% · +331 | 3.32 | +2,326 | 3.32 · +2,326 | weak | 46.3 |
+| 10 | 5m | 178 | 120 | 15.0% · +1,257 | 20.0% · +443 | 1.52 | +1,700 | 1.52 · +1,700 | weak | 44.0 |
 
 Your EMAs 5, 6, 9, 10, 11 (same rule, same dates):
 
@@ -310,12 +310,12 @@ Opening-range breakout, checked twice:
 
 | Rule | Reliability | Overfit risk | Jev score | Final |
 |---|---|---|---|---|
-| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 47.6 | 59.6 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | high | 40.2 | 56.5 |
-| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 39.0 | 55.8 |
-| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 41.2 | 55.7 |
-| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 42.4 | 55.6 |
-| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 42.0 | 55.5 |
+| EMA 105 + ADX>20 + Supertrend + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 45.4 | 58.8 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 41.6 | 57.1 |
+| EMA 105 + RSI>50 + ADX>20 + Daily>EMA50 · TOP exit RSI 68 | fair | medium | 41.0 | 56.6 |
+| EMA 105 + ADX>20 + Daily>EMA50 + DI+>DI- · TOP exit RSI 68 | fair | medium | 43.6 | 56.6 |
+| EMA 105 + ADX>20 + Daily>EMA50 · TOP exit RSI 70 | fair | medium | 45.0 | 56.6 |
+| EMA 105 + ADX>20 + Supertrend + EMA slope · TOP exit RSI 68 | fair | medium | 43.4 | 56.1 |
 
 ## Limits
 
