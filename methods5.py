@@ -329,6 +329,54 @@ def diary(out, generated_at):
     (DOCS / "methods_events.json").write_text(json.dumps(events, separators=(",", ":")), encoding="utf-8")
     return len(new)
 
+
+LIVE_TEST_START = "2026-11-10"
+LIVE_TEST_KEY = "f_twinpulse"
+LIVE_TEST_TARGET = 60
+
+
+def live_test(out):
+    """The frozen 60-trade board exam for Fable Twin Pulse (rules fixed on 10 Nov 2026).
+    PASS at 60: cumulative > 1.645*sd*sqrt(60) (beats the coin-flip at 95%, one-sided).
+    FAIL at 60: cumulative < 0. Otherwise: inconclusive, extend to 120."""
+    m = next(x for x in out if x["key"] == LIVE_TEST_KEY)
+    pre = [t["net_pts"] for t in m["trades"] if not t["open"] and t["entry_time"] < LIVE_TEST_START]
+    mean_bt = float(np.mean(pre))
+    sd_bt = float(np.std(pre, ddof=1))
+    live = [t for t in m["trades"] if t["entry_time"] >= LIVE_TEST_START]
+    closed = [t for t in live if not t["open"]]
+    k = len(closed)
+    cum = round(sum(t["net_pts"] for t in closed), 1)
+    open_t = next((t for t in live if t["open"]), None)
+    band = 1.96 * sd_bt * (max(k, 1) ** 0.5)
+    pass_pts = round(1.645 * sd_bt * LIVE_TEST_TARGET ** 0.5)
+    if k == 0:
+        status = "WAITING for the first live trade (the open trade from before 10 Nov 2026 does not count)"
+    elif k >= LIVE_TEST_TARGET:
+        status = ("PASSED: the live record beats the coin-flip hypothesis at 95%" if cum > pass_pts
+                  else "FAILED: 60 live trades ended below zero" if cum < 0
+                  else "INCONCLUSIVE at 60: extended to 120 trades")
+    elif k >= 10 and cum < -1.645 * sd_bt * k ** 0.5:
+        status = "WARNING: running below even the coin-flip band"
+    elif cum >= mean_bt * k:
+        status = "AHEAD of the backtest's expected path"
+    elif cum >= mean_bt * k - band:
+        status = "ON TRACK (inside the expected band)"
+    else:
+        status = "BEHIND the expected band (not yet failing)"
+    return {"key": LIVE_TEST_KEY, "name": m["name"], "start": LIVE_TEST_START, "target": LIVE_TEST_TARGET,
+            "mean_bt": round(mean_bt, 1), "sd_bt": round(sd_bt, 1), "pass_pts": pass_pts,
+            "rules": [f"PASS at trade {LIVE_TEST_TARGET}: cumulative better than +{pass_pts:,} points (95% one-sided vs the coin-flip).",
+                      "FAIL: cumulative below zero at trade 60.",
+                      "Anything else: inconclusive, the test extends to 120 trades.",
+                      f"Expected path if the backtest is true: {mean_bt:+.1f} points per trade, band 1.96 x {sd_bt:.0f} x sqrt(trades).",
+                      "Rules frozen on 10 Nov 2026, before the first live trade. They do not move."],
+            "closed": k, "cum_pts": cum, "cum_rs": round(cum * LOT),
+            "expected_pts": round(mean_bt * k, 1), "band_pts": round(band, 1),
+            "open_trade": {"side": open_t["side"], "entry": open_t["entry"], "entry_time": open_t["entry_time"],
+                           "net_pts": open_t["net_pts"]} if open_t else None,
+            "status": status, "trades": live}
+
 def replay(df, up, valid):
     """Always in from the first valid close at/after START; signal at close i fills at open i+1."""
     o, c = df["Open"].to_numpy(float), df["Close"].to_numpy(float)
@@ -460,12 +508,13 @@ def build(today=None):
         (DOCS / m["chart"]).write_text(json.dumps(chart_for(m["key"], frames, bases), separators=(",", ":")), encoding="utf-8")
     new_events = diary(out, generated_at)
     jev_review(out, generated_at)
+    livetest = live_test(out)
 
     payload = {"version": 3, "name": "Nifty 50 · 10 methods · daily race",
                "generated_at": generated_at, "new_events": new_events,
                "as_of": str(last_t.date()), "last_candle": str(last_t)[:16], "from": str(START.date()),
                "source": source, "cost_side_pct": COST * 100, "lot": LOT, "lots": LOTS,
-               "methods": out, "ranking": [m["key"] for m in rank], "reasons": reasons, "race": race,
+               "methods": out, "ranking": [m["key"] for m in rank], "reasons": reasons, "race": race, "livetest": livetest,
                "total_closed_trades": sum(m["summary"]["trades"] for m in out),
                "limits": ["All ten were picked after looking at this same history; their honest shared out-of-sample record starts 10 Nov 2026.",
                           "The Fable ensembles (Council, Quorum, Twin Pulse) reuse the five classics, so they inherit their selection bias too.",

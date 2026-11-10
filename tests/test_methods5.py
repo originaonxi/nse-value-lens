@@ -107,6 +107,25 @@ class Published(unittest.TestCase):
         for need in ('id="m5-jev"', 'id="m5-diary"'):
             self.assertIn(need, hub)
 
+    def test_livetest_block_is_frozen_and_consistent(self):
+        p = ROOT / "docs" / "methods.json"
+        if not p.exists():
+            self.skipTest("methods.json not generated")
+        d = json.loads(p.read_text(encoding="utf-8"))
+        L = d["livetest"]
+        self.assertEqual((L["key"], L["start"], L["target"]), ("f_twinpulse", "2026-11-10", 60))
+        self.assertTrue(all(t["entry_time"] >= L["start"] for t in L["trades"]))
+        closed = [t for t in L["trades"] if not t["open"]]
+        self.assertEqual(L["closed"], len(closed))
+        self.assertAlmostEqual(L["cum_pts"], sum(t["net_pts"] for t in closed), delta=0.5)
+        self.assertAlmostEqual(L["pass_pts"], 1.645 * L["sd_bt"] * 60 ** 0.5, delta=2)
+        self.assertTrue(L["status"])
+        tw = next(m for m in d["methods"] if m["key"] == "f_twinpulse")
+        pre = [t["net_pts"] for t in tw["trades"] if not t["open"] and t["entry_time"] < L["start"]]
+        self.assertAlmostEqual(L["mean_bt"], sum(pre) / len(pre), delta=0.1)
+        self.assertIn('id="m5-livetest"', (ROOT / "docs" / "methods.html").read_text(encoding="utf-8"))
+        self.assertIn('id="mp-livetest"', (ROOT / "docs" / "method.html").read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

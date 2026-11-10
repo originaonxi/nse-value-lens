@@ -74,6 +74,29 @@
       .catch(function () { $("m5-diary").textContent = "No diary file yet."; });
   }
 
+  function renderLiveTest() {
+    var L = D.livetest, box = $("m5-livetest");
+    if (!box || !L) return;
+    box.textContent = "";
+    var k = L.closed, pct = Math.min(100, Math.round(100 * k / L.target));
+    var top = el("div", "lt-top");
+    top.appendChild(el("b", null, "Trade " + k + " of " + L.target));
+    var st = el("span", "lt-status " + (L.status.indexOf("PASSED") === 0 || L.status.indexOf("AHEAD") === 0 ? "up"
+      : L.status.indexOf("FAIL") === 0 || L.status.indexOf("WARNING") === 0 ? "dn" : ""), L.status);
+    top.appendChild(st);
+    box.appendChild(top);
+    var bar = el("div", "lt-bar"), fill = el("i");
+    fill.style.width = (k ? Math.max(pct, 2) : 0) + "%";
+    bar.appendChild(fill); box.appendChild(bar);
+    var ul = el("ul", "fd-limits");
+    ul.appendChild(el("li", null, "Live P&L (closed live trades): " + spts(L.cum_pts) + " points = " + sinr(L.cum_rs) + " on 1 lot" +
+      (k ? " · expected if the backtest is true: " + spts(L.expected_pts) + " ± " + num(L.band_pts, 0) + " points" : "")));
+    if (L.open_trade) ul.appendChild(el("li", null, "Open live trade: " + L.open_trade.side + " since " + L.open_trade.entry_time +
+      " at " + num(L.open_trade.entry, 2) + " · " + spts(L.open_trade.net_pts) + " points (counts when it closes)"));
+    L.rules.forEach(function (r) { ul.appendChild(el("li", null, r)); });
+    box.appendChild(ul);
+  }
+
   function renderBoard() {
     var b = head($("m5-board"), [["#"], ["Method"], ["Candles"], ["Net points", "r"], ["₹ 1 lot", "r"], ["Total plus", "r"],
       ["Total minus", "r"], ["Open trade", "r"], ["Trades", "r"], ["Won", "r"], ["Profit factor", "r"],
@@ -216,7 +239,7 @@
         D = d;
         $("m5-sub").textContent = "10 always-in rules (5 classics + 5 Fable originals), one trade at every close · " + D.from + " → " + D.last_candle + " IST · " +
           D.total_closed_trades + " closed trades · rebuilt " + D.generated_at.replace("T", " ").slice(0, 16);
-        renderWhy(); renderBoard(); renderPies(); renderRace(); renderFilter(); renderTrades(); renderFoot(); renderJev(); renderDiary();
+        renderWhy(); renderBoard(); renderPies(); renderRace(); renderFilter(); renderTrades(); renderFoot(); renderJev(); renderDiary(); renderLiveTest();
         document.body.dataset.ready = "true";
       })
       .catch(function (e) { $("m5-sub").textContent = "Failed to load methods.json: " + e.message; document.body.dataset.ready = "error"; });

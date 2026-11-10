@@ -165,6 +165,29 @@
     });
   }
 
+
+  function renderLiveTest() {
+    var L = D.livetest, wrap = $("mp-livetest-wrap"), box = $("mp-livetest");
+    if (!L || !wrap || L.key !== M.key) return;
+    wrap.hidden = false;
+    box.textContent = "";
+    var k = L.closed, pct = Math.min(100, Math.round(100 * k / L.target));
+    var top = el("div", "lt-top");
+    top.appendChild(el("b", null, "Trade " + k + " of " + L.target));
+    top.appendChild(el("span", "lt-status " + (L.status.indexOf("PASSED") === 0 || L.status.indexOf("AHEAD") === 0 ? "up"
+      : L.status.indexOf("FAIL") === 0 || L.status.indexOf("WARNING") === 0 ? "dn" : ""), L.status));
+    box.appendChild(top);
+    var bar = el("div", "lt-bar"), fill = el("i");
+    fill.style.width = (k ? Math.max(pct, 2) : 0) + "%";
+    bar.appendChild(fill); box.appendChild(bar);
+    var ul = el("ul", "fd-limits");
+    ul.appendChild(el("li", null, "Live P&L (closed live trades): " + spts(L.cum_pts) + " points = " + sinr(L.cum_rs) + " on 1 lot" +
+      (k ? " · expected if the backtest is true: " + spts(L.expected_pts) + " ± " + num(L.band_pts, 0) + " points" : "")));
+    if (L.open_trade) ul.appendChild(el("li", null, "Open live trade: " + L.open_trade.side + " since " + L.open_trade.entry_time +
+      " at " + num(L.open_trade.entry, 2) + " · " + spts(L.open_trade.net_pts) + " points (counts when it closes)"));
+    L.rules.forEach(function (r) { ul.appendChild(el("li", null, r)); });
+    box.appendChild(ul);
+  }
   function renderJev() {
     fetch("methods_jev.json?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
@@ -192,7 +215,7 @@
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function (c) {
         C = c;
-        renderHead(); renderKpis(); renderNow(); renderChart(); renderYears(); renderTrades(); renderJev();
+        renderHead(); renderKpis(); renderNow(); renderChart(); renderYears(); renderTrades(); renderJev(); renderLiveTest();
         document.body.dataset.ready = "true";
       })
       .catch(function (e) { $("mp-sub").textContent = "Failed to load: " + e.message; document.body.dataset.ready = "error"; });
