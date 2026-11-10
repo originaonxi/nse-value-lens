@@ -80,6 +80,33 @@ class Published(unittest.TestCase):
         for need in ('id="m5-board"', 'id="m5-pies"', 'id="m5-race"', 'id="m5-trades"', "methods.js"):
             self.assertIn(need, html)
 
+    def test_charts_formulas_diary_and_pages(self):
+        p = ROOT / "docs" / "methods.json"
+        if not p.exists():
+            self.skipTest("methods.json not generated")
+        d = json.loads(p.read_text(encoding="utf-8"))
+        for m in d["methods"]:
+            self.assertTrue(m.get("formula"), m["key"])
+            cf = ROOT / "docs" / m["chart"]
+            self.assertTrue(cf.exists(), m["chart"])
+            c = json.loads(cf.read_text(encoding="utf-8"))
+            self.assertEqual(c["tf"], m["tf"])
+            n = len(c["bars"])
+            self.assertGreater(n, 200)
+            for ln in c["lines"] + c["aux"]:
+                self.assertEqual(len(ln["values"]), n, m["key"] + "/" + ln["name"])
+            times = [b[0] for b in c["bars"]]
+            self.assertEqual(times, sorted(times))
+            self.assertTrue(c["lines"] or c["aux"], m["key"] + " must show the series its formula watches")
+        ev = json.loads((ROOT / "docs" / "methods_events.json").read_text(encoding="utf-8"))
+        self.assertIsInstance(ev, list)
+        page = (ROOT / "docs" / "method.html").read_text(encoding="utf-8")
+        for need in ('id="mp-chart"', 'id="mp-formula"', 'id="mp-trades"', 'id="mp-jev"', "method.js"):
+            self.assertIn(need, page)
+        hub = (ROOT / "docs" / "methods.html").read_text(encoding="utf-8")
+        for need in ('id="m5-jev"', 'id="m5-diary"'):
+            self.assertIn(need, hub)
+
 
 if __name__ == "__main__":
     unittest.main()

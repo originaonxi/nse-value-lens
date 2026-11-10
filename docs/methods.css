@@ -19,3 +19,20 @@
 .m5-filter button { padding: 6px 12px; margin: 0 6px 6px 0; border: 1px solid #cbd7c7; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 600; }
 .m5-filter button.on { background: #1f6b4a; color: #fff; border-color: #1f6b4a; }
 @media (max-width: 700px) { .m5-pie { width: 46%; } .m5-race { height: 280px; } }
+
+/* single-model page */
+.mp-formula { background: #f6f8f4; border: 1px solid #cbd7c7; border-left: 4px solid #1f6b4a; border-radius: 8px;
+  padding: 12px 14px; font-size: 14.5px; line-height: 1.55; color: #1f2a22; }
+.mp-chart { height: 440px; border: 1px solid #cbd7c7; border-radius: 10px; overflow: hidden; }
+.e9-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 14px 0; }
+.e9-kpi { background: #fff; border: 1px solid #cbd7c7; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.e9-kpi small { color: #6b7d70; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+.e9-kpi strong { font-size: 20px; }
+.e9-kpi strong.up { color: #15803d; } .e9-kpi strong.dn { color: #b91c1c; }
+.e9-kpi span { font-size: 12px; color: #52606d; }
+.e9-now { border: 1.5px solid #1f6b4a; background: #f2f9f0; border-radius: 10px; padding: 12px 14px; margin: 10px 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.e9-now.sell { border-color: #b91c1c; background: #fdf2f0; }
+.e9-now .st { font-weight: 800; font-size: 18px; }
+.e9-now .st small { display: block; font-weight: 500; color: #6b7d70; font-size: 11.5px; margin-bottom: 2px; }
+.e9-now ul { margin: 0; padding-left: 18px; font-size: 14px; }
+@media (max-width: 700px) { .mp-chart { height: 320px; } }

@@ -178,6 +178,157 @@ METHODS = [
 ]
 
 
+FORMULAS = {
+    "sma5200": "SMA5 = mean of the last 5 closes; SMA200 = mean of the last 200 closes, on 15-minute candles. BUY while SMA5 > SMA200 at a close, SELL while below. The flip order fills at the next 15-minute open. 0.035% of price per side.",
+    "st1015": "TR = max(high, previous close) - min(low, previous close); ATR = Wilder average of TR over 10 one-hour candles. Bands = (high+low)/2 +- 1.5 x ATR; the upper band can only fall and the lower can only rise (ratchet). BUY while the close is above the line, flip when a 1-hour close crosses it. Fills at the next open; 0.035% per side.",
+    "psma100": "SMA100 = mean of the last 100 closes on 30-minute candles. BUY while the close is above its SMA100, SELL while below. Fills at the next open; 0.035% per side.",
+    "don55": "HH = highest close of the previous 55 fifteen-minute candles; LL = lowest. A close above HH flips to BUY; a close below LL flips to SELL; in between, keep the current side. Fills at the next open; 0.035% per side.",
+    "ema21105": "EMA with a = 2/(n+1): EMA_t = a x close + (1-a) x EMA_(t-1) (TradingView seeding), n = 21 and 105, on 15-minute candles. BUY while EMA21 > EMA105 at a close, SELL while below. Fills at the next open; 0.035% per side.",
+    "f_council": "Created by Fable. At every 15-minute close each of the 5 classics gives s = +1 (BUY) or -1 (SELL); vote = s1+s2+s3+s4+s5. BUY while vote > 0, SELL while vote < 0 (five voters, so never a tie). Fills at the next open; 0.035% per side.",
+    "f_twinpulse": "Created by Fable. a = the Supertrend 10/1.5 side on 1-hour candles; b = the close-vs-SMA100 side on 30-minute candles. When a = b, take that side; while they disagree, hold the last agreed side. Checked at every 15-minute close; fills at the next open; 0.035% per side.",
+    "f_quorum": "Created by Fable. The same vote as the Council. Flip to BUY only when vote >= +3 (at least 4 of 5 agree), to SELL only when vote <= -3; anything in between holds the previous side. Fills at the next open; 0.035% per side.",
+    "f_heartbeat": "Created by Fable. count = (up-closes) - (down-closes) over the last 155 one-hour candles. BUY while count > 0, SELL while count < 0, hold on zero. Fills at the next open; 0.035% per side.",
+    "f_centreline": "Created by Fable. mid = (highest high + lowest low of the last 55 one-hour candles) / 2. BUY while the close is above mid, SELL while below. Fills at the next open; 0.035% per side.",
+}
+
+
+def supertrend_line(df, n, m):
+    """The Supertrend line itself (lower band in an uptrend, upper band in a downtrend)."""
+    h, l, c = (df[k].to_numpy(float) for k in ("High", "Low", "Close"))
+    tr1 = np.maximum(h[1:], c[:-1]) - np.minimum(l[1:], c[:-1])
+    atr = np.r_[np.nan, pd.Series(tr1).ewm(alpha=1 / n, adjust=False).mean().to_numpy()]
+    mid = (h + l) / 2
+    ub, lb = mid + m * atr, mid - m * atr
+    N = len(c)
+    fu, fl, trend = ub.copy(), lb.copy(), np.zeros(N)
+    fu[1], fl[1] = ub[1], lb[1]
+    line = np.full(N, np.nan)
+    for i in range(2, N):
+        fu[i] = ub[i] if (ub[i] < fu[i - 1] or c[i - 1] > fu[i - 1]) else fu[i - 1]
+        fl[i] = lb[i] if (lb[i] > fl[i - 1] or c[i - 1] < fl[i - 1]) else fl[i - 1]
+        trend[i] = (-1 if c[i] < fl[i] else 1) if trend[i - 1] >= 0 else (1 if c[i] > fu[i] else -1)
+        if i > n + 2:
+            line[i] = fl[i] if trend[i] > 0 else fu[i]
+    return line
+
+
+def chart_for(key, frames, bases):
+    """One year of the method's own candles plus the exact series its formula watches."""
+    tfmap = {"sma5200": "15m", "don55": "15m", "ema21105": "15m", "f_council": "15m", "f_twinpulse": "15m",
+             "f_quorum": "15m", "psma100": "30m", "st1015": "1h", "f_heartbeat": "1h", "f_centreline": "1h"}
+    df = frames[tfmap[key]]
+    t = df.index
+    h, l, c = (df[k].to_numpy(float) for k in ("High", "Low", "Close"))
+    c0 = int(np.searchsorted(t, t[-1] - pd.Timedelta(days=365)))
+    lines, aux = [], []
+
+    def L(name, arr):
+        lines.append({"name": name, "values": [round(float(v), 2) if v == v else None for v in arr[c0:]]})
+
+    def A(name, arr):
+        aux.append({"name": name, "values": [int(v) if v == v else None for v in arr[c0:]]})
+
+    if key == "sma5200":
+        L("SMA 5", sma(c, 5)); L("SMA 200", sma(c, 200))
+    elif key == "ema21105":
+        L("EMA 21", E.pine_ema(c, 21)); L("EMA 105", E.pine_ema(c, 105))
+    elif key == "psma100":
+        L("SMA 100", sma(c, 100))
+    elif key == "don55":
+        L("55-candle high", pd.Series(c).rolling(55).max().shift(1).to_numpy())
+        L("55-candle low", pd.Series(c).rolling(55).min().shift(1).to_numpy())
+    elif key == "st1015":
+        L("Supertrend 10/1.5", supertrend_line(df, 10, 1.5))
+    elif key == "f_centreline":
+        mid = (pd.Series(h).rolling(55).max().to_numpy() + pd.Series(l).rolling(55).min().to_numpy()) / 2
+        L("Centreline (55)", mid)
+    elif key == "f_heartbeat":
+        sgn = np.r_[0.0, np.sign(np.diff(c))]
+        A("Up-closes minus down-closes (155)", pd.Series(sgn).rolling(155).sum().to_numpy())
+    elif key in ("f_council", "f_quorum"):
+        A("Vote of the 5 classics (-5..+5)", np.vstack([bases[k] for k in BASE5]).sum(axis=0))
+    elif key == "f_twinpulse":
+        a, b = bases["st1015"], bases["psma100"]
+        A("Agreement (+1 BUY, -1 SELL, 0 = holding)", np.where((a == b) & (a != 0), a, 0.0))
+    bars = [[str(x)[:16], round(float(r.Open), 2), round(float(r.High), 2), round(float(r.Low), 2), round(float(r.Close), 2)]
+            for x, r in df.iloc[c0:].iterrows()]
+    return {"key": key, "tf": tfmap[key], "bars": bars, "lines": lines, "aux": aux}
+
+
+JEV_Q = {"grade": {"type": "choice",
+                   "instructions": "This is the complete real backtest record of one always-in Nifty 50 trading rule "
+                                   "(points are after costs; every rule was selected on this same history, which the "
+                                   "record states). Judging strictly from these numbers - consistency across years, "
+                                   "profit factor, drawdown versus net, trade count - how sturdy is this rule?",
+                   "criteria": {"sturdy": None, "ordinary": None, "fragile": None}}}
+
+
+def jev_review(out, generated_at):
+    """Jev's typed view per method. Display only: the ranking itself stays pure maths."""
+    path = DOCS / "methods_jev.json"
+    try:
+        from jev_client import Client, MODEL
+        client = Client()
+    except Exception as e:
+        if not path.exists():
+            path.write_text(json.dumps({"status": f"unavailable: {e}", "answers": {}}), encoding="utf-8")
+        print(f"jev: skipped ({e})")
+        return
+    answers = {}
+    for m in out:
+        s = m["summary"]
+        state = {"name": m["name"], "timeframe": m["tf"], "family": m["family"],
+                 "selection_note": "picked after seeing this same 2023-2026 history; shared out-of-sample starts 2026-11-10",
+                 "net_pts": s["net_pts"], "gross_profit_pts": s["plus_pts"], "gross_loss_pts": s["minus_pts"],
+                 "open_trade_pts": s["open_pts"], "closed_trades": s["trades"], "win_pct": s["win_pct"],
+                 "profit_factor": s["profit_factor"], "worst_fall_pts": s["max_dd_pts"],
+                 "yearly_pts": {str(y["year"]): y["pts"] for y in m["years"]}}
+        try:
+            a = client.ask(state, JEV_Q)["grade"]
+            p = a["probabilities"]
+            answers[m["key"]] = {"grade": a["choice"], "conf": round(a["confidence"] * 100),
+                                 "score": round(100 * p.get("sturdy", 0) + 50 * p.get("ordinary", 0), 1),
+                                 "p": {k: round(v, 3) for k, v in p.items()}}
+        except Exception as e:
+            answers[m["key"]] = {"error": type(e).__name__}
+    ok = sum(1 for v in answers.values() if "error" not in v)
+    path.write_text(json.dumps({"generated_at": generated_at, "model": MODEL, "status": f"judged {ok}/{len(out)}",
+                                "note": "Jev's view is shown next to the maths; the ranking itself uses net points only.",
+                                "answers": answers}, separators=(",", ":")), encoding="utf-8")
+    print(f"jev: judged {ok}/{len(out)}")
+
+
+def diary(out, generated_at):
+    """Record every change versus the previous published state: opened, closed, flipped."""
+    prev = {}
+    try:
+        prev = {m["key"]: m for m in json.loads((DOCS / "methods.json").read_text(encoding="utf-8"))["methods"]}
+    except (OSError, ValueError, KeyError):
+        pass
+    try:
+        events = json.loads((DOCS / "methods_events.json").read_text(encoding="utf-8"))
+        assert isinstance(events, list)
+    except (OSError, ValueError, AssertionError):
+        events = []
+    new = []
+    for m in out:
+        pm = prev.get(m["key"])
+        if not pm:
+            continue
+        seen = {x["entry_time"] for x in pm["trades"] if not x["open"]}
+        for x in m["trades"]:
+            if not x["open"] and x["entry_time"] not in seen:
+                new.append({"at": generated_at, "key": m["key"], "name": m["name"],
+                            "text": f"CLOSED {x['side']} {x['entry']:,} -> {x['exit']:,} = {x['net_pts']:+,} pts ({x['rupees']:+,} rupees on 1 lot)"})
+        oldo = next((x for x in pm["trades"] if x["open"]), None)
+        newo = next((x for x in m["trades"] if x["open"]), None)
+        if newo and (not oldo or oldo["entry_time"] != newo["entry_time"]):
+            new.append({"at": generated_at, "key": m["key"], "name": m["name"],
+                        "text": f"OPENED {newo['side']} at {newo['entry']:,} ({newo['entry_time']} IST)"})
+    events = (new + events)[:400]
+    (DOCS / "methods_events.json").write_text(json.dumps(events, separators=(",", ":")), encoding="utf-8")
+    return len(new)
+
 def replay(df, up, valid):
     """Always in from the first valid close at/after START; signal at close i fills at open i+1."""
     o, c = df["Open"].to_numpy(float), df["Close"].to_numpy(float)
@@ -301,8 +452,17 @@ def build(today=None):
                f"Last session: " + ", ".join(f"{m['name']} {m['summary']['last_session_pts']:+,}" for m in rank) + " points.",
                f"Sides right now: " + ", ".join(f"{m['name']} {m['now']['side']}" for m in rank) + "."]
 
-    payload = {"version": 2, "name": "Nifty 50 · 10 methods · daily race",
-               "generated_at": datetime.now(I.IST).isoformat(timespec="minutes"),
+    for m in out:
+        m["formula"] = FORMULAS[m["key"]]
+        m["chart"] = f"method_{m['key']}.json"
+    generated_at = datetime.now(I.IST).isoformat(timespec="minutes")
+    for m in out:
+        (DOCS / m["chart"]).write_text(json.dumps(chart_for(m["key"], frames, bases), separators=(",", ":")), encoding="utf-8")
+    new_events = diary(out, generated_at)
+    jev_review(out, generated_at)
+
+    payload = {"version": 3, "name": "Nifty 50 · 10 methods · daily race",
+               "generated_at": generated_at, "new_events": new_events,
                "as_of": str(last_t.date()), "last_candle": str(last_t)[:16], "from": str(START.date()),
                "source": source, "cost_side_pct": COST * 100, "lot": LOT, "lots": LOTS,
                "methods": out, "ranking": [m["key"] for m in rank], "reasons": reasons, "race": race,

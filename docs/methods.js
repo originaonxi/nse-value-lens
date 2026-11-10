@@ -39,6 +39,41 @@
     D.reasons.forEach(function (r) { ul.appendChild(el("li", null, r)); });
   }
 
+  function renderJev() {
+    fetch("methods_jev.json?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var b = head($("m5-jev"), [["Method"], ["Jev grade"], ["Sturdiness /100", "r"], ["Confidence", "r"]]);
+        ranked().forEach(function (m) {
+          var a = (j.answers || {})[m.key], tr = el("tr");
+          var c = el("td"); c.appendChild(chip(m)); tr.appendChild(c);
+          td(tr, a && !a.error ? a.grade : "-", a && a.grade === "sturdy" ? "num up" : a && a.grade === "fragile" ? "num dn" : null);
+          td(tr, a && !a.error ? num(a.score, 1) : "-", "r");
+          td(tr, a && !a.error ? a.conf + "%" : "-", "r");
+          b.appendChild(tr);
+        });
+        $("m5-jev-note").textContent = (j.status || "") + " · " + String(j.generated_at || "").replace("T", " ").slice(0, 16) +
+          " · Jev's view is display only: the ranking above uses net points and nothing else.";
+      })
+      .catch(function () { $("m5-jev-note").textContent = "No Jev assessment file yet."; });
+  }
+
+  function renderDiary() {
+    fetch("methods_events.json?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (ev) {
+        var ul = $("m5-diary"); ul.textContent = "";
+        if (!ev.length) { ul.appendChild(el("li", null, "No changes recorded yet. From the next refresh on, every opened and closed trade lands here automatically.")); return; }
+        ev.slice(0, 60).forEach(function (x) {
+          var li = el("li");
+          li.appendChild(el("b", null, String(x.at).replace("T", " ").slice(0, 16) + " · " + x.name + ": "));
+          li.appendChild(document.createTextNode(x.text));
+          ul.appendChild(li);
+        });
+      })
+      .catch(function () { $("m5-diary").textContent = "No diary file yet."; });
+  }
+
   function renderBoard() {
     var b = head($("m5-board"), [["#"], ["Method"], ["Candles"], ["Net points", "r"], ["₹ 1 lot", "r"], ["Total plus", "r"],
       ["Total minus", "r"], ["Open trade", "r"], ["Trades", "r"], ["Won", "r"], ["Profit factor", "r"],
@@ -47,7 +82,8 @@
       var s = m.summary, tr = el("tr");
       td(tr, String(i + 1));
       var c = el("td"); c.appendChild(chip(m));
-      if (m.page) { var a = el("a", null, " chart"); a.href = m.page; c.appendChild(a); }
+      var a = el("a", null, " chart + trades"); a.href = "method.html?m=" + m.key; c.appendChild(a);
+      if (m.page) { var a2 = el("a", null, " · best page"); a2.href = m.page; c.appendChild(a2); }
       tr.appendChild(c);
       td(tr, m.tf + " · " + m.family);
       td(tr, spts(s.net_pts), "r " + tone(s.net_pts));
@@ -93,6 +129,7 @@
     box.appendChild(svg);
     var cap = el("figcaption");
     cap.appendChild(chip(m));
+    var cl = el("a", null, "open chart →"); cl.href = "method.html?m=" + m.key; cap.appendChild(cl);
     cap.appendChild(el("div", "m5-capline", "+" + num(plus, 0) + " won · −" + num(minus, 0) + " lost"));
     cap.appendChild(el("div", "m5-capline", sinr(s.net_rs) + " on 1 lot · " + (m.now.side || "-") + " now"));
     box.appendChild(cap);
@@ -179,7 +216,7 @@
         D = d;
         $("m5-sub").textContent = "10 always-in rules (5 classics + 5 Fable originals), one trade at every close · " + D.from + " → " + D.last_candle + " IST · " +
           D.total_closed_trades + " closed trades · rebuilt " + D.generated_at.replace("T", " ").slice(0, 16);
-        renderWhy(); renderBoard(); renderPies(); renderRace(); renderFilter(); renderTrades(); renderFoot();
+        renderWhy(); renderBoard(); renderPies(); renderRace(); renderFilter(); renderTrades(); renderFoot(); renderJev(); renderDiary();
         document.body.dataset.ready = "true";
       })
       .catch(function (e) { $("m5-sub").textContent = "Failed to load methods.json: " + e.message; document.body.dataset.ready = "error"; });
