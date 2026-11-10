@@ -18,6 +18,7 @@ GROUPS = [
         ("best5200.html", "Trade Nifty · SMA 5/200 · 15-min", "new No.1 of 3,081 rules: most points, every year green"),
         ("best15.html", "Trade Nifty · EMA 21/105 · 15-min", "always in a trade; made money every year since Jul 2023"),
         ("fund.html", "Invest · Our Fund", "best 30 of the Nifty 100, rebalanced monthly"),
+        ("methods.html", "10 methods · daily race", "5 classics + 5 Fable originals: who makes the most, and why"),
     ]),
     ("Stocks", [
         ("confluence.html", "Top Picks", "7 systems agree"),
