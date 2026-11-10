@@ -3,6 +3,7 @@
 (function () {
   "use strict";
   var D = null, CH = null, SER = null, RANGE = "125";
+  var LSER = {}, LIVE = { force: false, state: null, form: null, price: null, ptime: null, flipLine: null, timer: null, fails: 0, flips: [] };
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
   function isNum(v) { return typeof v === "number" && isFinite(v); }
@@ -74,6 +75,7 @@
     [["ema21", "#f97316", "EMA 21"], ["ema105", "#7c3aed", "EMA 105"]].forEach(function (z) {
       var l = CH.addLineSeries({ color: z[1], lineWidth: 2, priceLineVisible: false, lastValueVisible: true, title: z[2] });
       l.setData(ch.bars.map(function (b, j) { return ch[z[0]][j] == null ? { time: ts(b[0]) } : { time: ts(b[0]), value: ch[z[0]][j] }; }));
+      LSER[z[0]] = l;
     });
     var op = openTrade();
     if (op) SER.createPriceLine({ price: op.entry, color: op.side === "BUY" ? "#15803d" : "#b91c1c", lineWidth: 1, lineStyle: 2, axisLabelVisible: true,
@@ -93,6 +95,11 @@
         m.push({ time: x, position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626", shape: buy ? "arrowUp" : "arrowDown", text: zoom ? txt : "" });
       }
       prev = t;
+    });
+    (LIVE.flips || []).forEach(function (f) {
+      var buy = f.side === "BUY";
+      m.push({ time: ts(f.entry_time), position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
+               shape: buy ? "arrowUp" : "arrowDown", text: zoom ? f.side + " LIVE" : "" });
     });
     SER.setMarkers(m);
   }
@@ -220,6 +227,168 @@
       })
       .catch(function (e) { pre.textContent = "Could not load best15.pine: " + e.message; });
   }
+
+  /* ---- live: during market hours the browser extends the chart straight from Upstox's public
+     candle API (it sends CORS headers for this site; no account, no keys). The maths is the same
+     recursion as the engine: EMA = a*close + (1-a)*previous, flips fill at the next 15-min open. ---- */
+  var A21 = 2 / 22, A105 = 2 / 106;
+  function emaStep(prev, close, a) { return a * close + (1 - a) * prev; }
+  function flipPrice(e21, e105) { return ((1 - A105) * e105 - (1 - A21) * e21) / (A21 - A105); }
+  function istNow() { var d = new Date(); return new Date(d.getTime() + (330 + d.getTimezoneOffset()) * 60000); }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function istStamp(d) {
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+  function hm(d) { return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60; }
+  function marketOpen(d) { return d.getDay() > 0 && d.getDay() < 6 && hm(d) >= 555 && hm(d) < 930.5; }
+  function nextOpen(d) {
+    var x = new Date(d.getTime());
+    if (hm(x) >= 555) x.setDate(x.getDate() + 1);
+    while (x.getDay() === 0 || x.getDay() === 6) x.setDate(x.getDate() + 1);
+    return istStamp(x).slice(0, 10) + " 09:15";
+  }
+  /* 1-minute rows [ts,o,h,l,c,...] in any order -> ascending 15-minute candles anchored at 09:15 */
+  function agg15(rows) {
+    var by = {};
+    rows.forEach(function (r) {
+      var t = String(r[0]).replace("T", " ").slice(0, 16);
+      var m = +t.slice(11, 13) * 60 + +t.slice(14, 16);
+      if (m < 555 || m >= 930) return;
+      var b = 555 + 15 * Math.floor((m - 555) / 15);
+      var k = t.slice(0, 10) + " " + pad2(Math.floor(b / 60)) + ":" + pad2(b % 60);
+      var x = by[k];
+      if (!x) by[k] = { t: k, m0: m, m1: m, o: +r[1], h: +r[2], l: +r[3], c: +r[4] };
+      else {
+        x.h = Math.max(x.h, +r[2]); x.l = Math.min(x.l, +r[3]);
+        if (m < x.m0) { x.m0 = m; x.o = +r[1]; }
+        if (m >= x.m1) { x.m1 = m; x.c = +r[4]; }
+      }
+    });
+    return Object.keys(by).sort().map(function (k) { return by[k]; });
+  }
+  /* continue the EMAs over completed candles; a pending flip fills at the next candle's open */
+  function contState(base, done) {
+    var s = { ema21: base.ema21, ema105: base.ema105, want: base.side, path: [], flips: [],
+              trade: { side: base.pending ? (base.side === "BUY" ? "SELL" : "BUY") : base.side, entry: base.entry, entry_time: base.entry_time } };
+    done.forEach(function (c) {
+      if (s.want !== s.trade.side) { s.trade = { side: s.want, entry: c.o, entry_time: c.t }; s.flips.push(s.trade); }
+      s.ema21 = emaStep(s.ema21, c.c, A21); s.ema105 = emaStep(s.ema105, c.c, A105);
+      s.want = s.ema21 > s.ema105 ? "BUY" : "SELL";
+      s.path.push({ t: c.t, e21: s.ema21, e105: s.ema105 });
+    });
+    return s;
+  }
+  function liveApply(all) {
+    var Lb = D.live, nowI = istNow(), nm = hm(nowI), today = istStamp(nowI).slice(0, 10);
+    var done = [], form = null;
+    all.forEach(function (c) {
+      if (c.t <= Lb.time) return;
+      var b = +c.t.slice(11, 13) * 60 + +c.t.slice(14, 16);
+      var later = all.some(function (x) { return x.t.slice(0, 10) === c.t.slice(0, 10) && x.m0 >= b + 15; });
+      var byClock = !LIVE.force && (c.t.slice(0, 10) < today || nm >= b + 15.3);
+      if (later || byClock) done.push(c); else form = c;
+    });
+    LIVE.gap = 0;
+    if (all.length) {   // weekdays missing between the published state and the feed's day (holiday or a missed rebuild)
+      var d0 = new Date(Lb.time.slice(0, 10) + "T12:00:00Z"), d1 = new Date(all[0].t.slice(0, 10) + "T12:00:00Z");
+      for (var g = new Date(d0.getTime() + 864e5); g < d1; g = new Date(g.getTime() + 864e5)) {
+        if (g.getUTCDay() > 0 && g.getUTCDay() < 6) LIVE.gap++;
+      }
+    }
+    var st = contState(Lb, done);
+    LIVE.state = st; LIVE.form = form;
+    LIVE.price = form ? form.c : done.length ? done[done.length - 1].c : D.now.close;
+    LIVE.ptime = form ? form.t : done.length ? done[done.length - 1].t : D.now.time;
+    if (SER) {
+      done.concat(form ? [form] : []).forEach(function (c) { SER.update({ time: ts(c.t), open: c.o, high: c.h, low: c.l, close: c.c }); });
+      st.path.forEach(function (p) {
+        if (!LSER.ema21) return;
+        LSER.ema21.update({ time: ts(p.t), value: +p.e21.toFixed(2) });
+        LSER.ema105.update({ time: ts(p.t), value: +p.e105.toFixed(2) });
+      });
+      if (form && LSER.ema21) {
+        LSER.ema21.update({ time: ts(form.t), value: +emaStep(st.ema21, form.c, A21).toFixed(2) });
+        LSER.ema105.update({ time: ts(form.t), value: +emaStep(st.ema105, form.c, A105).toFixed(2) });
+      }
+      if (st.flips.length) { LIVE.flips = st.flips; drawMarkers(); }
+      var fp = flipPrice(st.ema21, st.ema105);
+      if (LIVE.flipLine) SER.removePriceLine(LIVE.flipLine);
+      LIVE.flipLine = SER.createPriceLine({ price: +fp.toFixed(2), color: "#b8860b", lineWidth: 1, lineStyle: 3, axisLabelVisible: true,
+        title: (st.want === "BUY" ? "flip to SELL " : "flip to BUY ") + Math.round(fp) });
+    }
+    renderLive();
+  }
+  function renderLive() {
+    var box = $("b5-live"); if (!box || !D || !D.live) return;
+    var n = istNow(), open = LIVE.force || marketOpen(n);
+    var base = D.live, st = LIVE.state;
+    var e21 = st ? st.ema21 : base.ema21, e105 = st ? st.ema105 : base.ema105;
+    var want = st ? st.want : base.side;
+    var tr = st ? st.trade : { side: base.pending ? (base.side === "BUY" ? "SELL" : "BUY") : base.side, entry: base.entry, entry_time: base.entry_time };
+    var price = LIVE.price != null ? LIVE.price : D.now.close;
+    var pending = want !== tr.side;
+    var fp = flipPrice(e21, e105);
+    var opn = isNum(tr.entry) ? (tr.side === "BUY" ? price - tr.entry : tr.entry - price) : null;
+    box.textContent = "";
+    box.className = "b5-live " + (pending ? "flip" : tr.side === "BUY" ? "buy" : "sell");
+    box.dataset.side = tr.side; box.dataset.want = want; box.dataset.live = open ? "on" : "off";
+    box.dataset.e21 = e21.toFixed(4); box.dataset.e105 = e105.toFixed(4); box.dataset.flip = fp.toFixed(2);
+    box.dataset.entry = isNum(tr.entry) ? String(tr.entry) : ""; box.dataset.price = String(price);
+    var top = el("div", "b5l-top");
+    top.appendChild(el("span", "b5l-dot" + (open ? " on" : "")));
+    top.appendChild(el("b", null, open ? "LIVE · NIFTY 50 · 15-MIN" : "MARKET CLOSED"));
+    top.appendChild(el("span", "b5l-price", num(price, 2)));
+    if (st || LIVE.form) {
+      var chg = price - D.now.close;
+      top.appendChild(el("span", "b5l-chg " + (chg >= 0 ? "up" : "dn"), spts(chg) + " vs last published close"));
+    }
+    if (!open) top.appendChild(el("span", "b5l-when", "last candle " + (LIVE.ptime || D.now.time) + " IST · live again " + nextOpen(n) + " IST"));
+    var ck = el("span", "b5l-clock"); ck.id = "b5l-clock"; top.appendChild(ck);
+    box.appendChild(top);
+    var act = el("div", "b5l-act");
+    act.textContent = pending ? "FLIP: " + want + " AT THE NEXT 15-MINUTE OPEN"
+      : open ? "STAY IN " + tr.side : tr.side + " — unchanged while the market is closed";
+    box.appendChild(act);
+    if (isNum(tr.entry)) box.appendChild(el("div", "b5l-sub", tr.side + " since " + tr.entry_time + " at " + num(tr.entry, 2) +
+      " · open " + spts(opn) + " pts = " + sinr(opn * D.lot) + " on 1 lot · " + sinr(opn * D.lot * D.lots) + " on " + D.lots + " lots"));
+    var dist = want === "BUY" ? price - fp : fp - price;
+    box.appendChild(el("div", "b5l-next", "NEXT OPPORTUNITY → " + (want === "BUY" ? "SELL" : "BUY") + " if a 15-minute candle CLOSES " +
+      (want === "BUY" ? "below " : "above ") + num(fp, 2) + " · " + num(Math.abs(dist), 0) + " pts away · EMA 21 " + num(e21, 2) +
+      " · EMA 105 " + num(e105, 2) + " · not in yet? the side to be on is " + want + ", entries always at the next 15-min open"));
+    if (LIVE.fails > 1) box.appendChild(el("div", "b5l-err", "Live feed unreachable (try " + LIVE.fails + ") — retrying with the last good state."));
+    if (LIVE.gap > 0) box.appendChild(el("div", "b5l-err", "Note: " + LIVE.gap + " weekday session(s) between the published state (" +
+      D.live.time + ") and today are not in the EMAs yet (holiday or a missed rebuild). Tonight's rebuild corrects this."));
+    if (st && st.flips.length) box.appendChild(el("div", "b5l-flipnote", "FLIPPED TODAY: " + st.flips.map(function (f) {
+      return f.side + " at " + num(f.entry, 2) + " (" + f.entry_time.slice(11) + ")"; }).join(" · ")));
+    clockTick();
+  }
+  function clockTick() {
+    var c = $("b5l-clock"); if (!c) return;
+    var n = istNow();
+    if (!(LIVE.force || marketOpen(n))) { c.textContent = ""; return; }
+    var left = Math.max(0, Math.round((15 - ((hm(n) - 555) % 15)) * 60));
+    c.textContent = istStamp(n).slice(11) + ":" + pad2(n.getSeconds()) + " IST · candle closes in " + Math.floor(left / 60) + ":" + pad2(left % 60);
+  }
+  function liveLoop() {
+    var n = istNow(), open = LIVE.force || marketOpen(n);
+    if (open) {
+      fetch(D.live.feed, { cache: "no-store" })
+        .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (j) { LIVE.fails = 0; liveApply(agg15((j.data && j.data.candles) || [])); })
+        .catch(function () { LIVE.fails++; renderLive(); });
+    } else renderLive();
+    var ms = open ? (D.live.poll_s || 30) * 1000 : 60000;
+    LIVE.timer = setTimeout(liveLoop, document.hidden ? Math.max(ms, 120000) : ms);
+  }
+  function liveInit() {
+    if (!D.live || !$("b5-live")) return;
+    var q = {}; location.search.replace(/[?&]([^=&]+)=([^&]*)/g, function (a, k, v) { q[k] = v; return a; });
+    if (q.live === "off") return;
+    LIVE.force = q.live === "force";
+    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, LIVE: LIVE, A21: A21, A105: A105 };
+    renderLive(); liveLoop(); setInterval(clockTick, 1000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) { clearTimeout(LIVE.timer); liveLoop(); } });
+  }
   function boot() {
     fetch("best15.json?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
@@ -228,6 +397,7 @@
         $("b5-sub").textContent = "EMA 21 / EMA 105 on 15-minute Nifty candles · " + D.from + " → " + D.last_candle + " IST · " + D.summary.trades +
           " closed trades · rebuilt " + D.generated_at.replace("T", " ").slice(0, 16);
         renderNow(); renderKpis(); renderChart(); renderCurve(); renderYears(); renderSides(); renderMonths(); renderTrades(); renderFoot();
+        liveInit();
         document.body.dataset.ready = "true";
       })
       .catch(function (e) { $("b5-sub").textContent = "Failed to load best15.json: " + e.message; document.body.dataset.ready = "error"; });

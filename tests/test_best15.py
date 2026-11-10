@@ -69,6 +69,20 @@ class Published(unittest.TestCase):
         self.assertLessEqual(sum(x["open"] for x in tr), 1)
         self.assertEqual(d["now"]["side"] == "BUY", d["now"]["ema21"] > d["now"]["ema105"])
 
+    def test_live_block_for_the_browser(self):
+        d = json.loads((ROOT / "docs" / "best15.json").read_text(encoding="utf-8"))
+        L = d["live"]
+        self.assertEqual(L["time"], d["last_candle"])
+        self.assertAlmostEqual(L["ema21"], d["now"]["ema21"], delta=0.01)
+        self.assertAlmostEqual(L["ema105"], d["now"]["ema105"], delta=0.01)
+        self.assertIn(L["side"], ("BUY", "SELL"))
+        self.assertTrue(L["feed"].startswith("https://api.upstox.com/"))
+        self.assertGreaterEqual(L["poll_s"], 15)
+        if L["entry"] is not None:
+            self.assertEqual(L["entry"], d["trades"][-1]["entry"])
+        html = (ROOT / "docs" / "best15.html").read_text(encoding="utf-8")
+        self.assertIn('id="b5-live"', html)
+
     def test_pine_script_is_paste_safe_and_matches_the_rule(self):
         p = ROOT / "docs" / "best15.pine"
         src = p.read_text(encoding="utf-8")

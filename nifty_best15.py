@@ -148,6 +148,13 @@ def build(today=None):
     now = {"time": str(last_t)[:16], "close": round(float(c[-1]), 2), "ema21": round(float(ef[-1]), 2), "ema105": round(float(es[-1]), 2),
            "side": side, "state": state, "what": what, "flip": round(float(trig), 2), "flip_pts": round(float(trig - c[-1]), 1)}
 
+    # state the browser needs to continue the EMAs live during market hours (Upstox allows CORS from the site)
+    live = {"time": str(last_t)[:16], "ema21": round(float(ef[-1]), 4), "ema105": round(float(es[-1]), 4),
+            "side": side, "pending": bool(pending),
+            "entry": op["entry"] if op else None, "entry_time": op["entry_time"] if op else None,
+            "feed": "https://api.upstox.com/v3/historical-candle/intraday/NSE_INDEX%7CNifty%2050/minutes/1",
+            "session_ist": ["09:15", "15:30"], "poll_s": 30}
+
     # daily curve (last value of each day) vs holding Nifty
     day = pd.Series(curve_pts, index=t[start_i:]).groupby(t[start_i:].normalize()).last()
     hold_day = pd.Series(c[start_i:] - o[start_i], index=t[start_i:]).groupby(t[start_i:].normalize()).last()
@@ -179,7 +186,7 @@ def build(today=None):
         "why": [f"Picked from 2,055 EMA rules on Nifty (10-minute, 15-minute, 1-hour, 2-hour and daily candles; BUY+SELL, BUY only, SELL only).",
                 "It made money in every year since July 2023, including 2026 when Nifty fell, and did as well after 1 Jan 2025 as before.",
                 "The rules next to it (EMA 13, 15, 20, 25 against EMA 100, 105, 144) also made money every year, so 21 / 105 is not a lucky pair."],
-        "summary": summary, "now": now, "trades": trades, "months": E.periods(trades, 7), "years": E.periods(trades, 4), "years_mtm": years_mtm,
+        "summary": summary, "now": now, "live": live, "trades": trades, "months": E.periods(trades, 7), "years": E.periods(trades, 4), "years_mtm": years_mtm,
         "curve": curve, "chart": chart, "data": check,
         "limits": [
             "Picked after looking at this same history. The 10-minute EMA 8 / 200 made more in total but fell to +506 points in 2026; this one was steadier.",
