@@ -83,22 +83,55 @@ class Published(unittest.TestCase):
         html = (ROOT / "docs" / "best15.html").read_text(encoding="utf-8")
         self.assertIn('id="b5-live"', html)
 
-    def test_pine_script_is_paste_safe_and_matches_the_rule(self):
-        p = ROOT / "docs" / "best15.pine"
-        src = p.read_text(encoding="utf-8")
-        lines = src.split("\n")
-        self.assertTrue(lines[0].startswith("//@version=6"))
-        for i, line in enumerate(lines, 1):
-            self.assertLessEqual(len(line), 72, f"line {i} too long to copy safely")      # chat wrapping split a string before
-            self.assertTrue(all(ord(ch) < 127 for ch in line), f"line {i} has a non-ASCII character")
-            body = "" if line.lstrip().startswith("//") else line.split("//")[0]
-            self.assertEqual(body.count('"') % 2, 0, f"line {i}: string not closed on the same line")
-        for setting in ('input.int(21, "Fast EMA"', 'input.int(105, "Slow EMA"', "default_qty_value = 65",
-                        "commission_value = 0.035", "process_orders_on_close = false", "03 Jul 2023 00:00 +0530"):
-            self.assertIn(setting, src)
-        html = (ROOT / "docs" / "best15.html").read_text(encoding="utf-8")
-        self.assertIn('id="b5-pine"', html)
-        self.assertIn('href="best15.pine"', html)
+    def test_best5200_payload_and_live_window(self):
+        p = ROOT / "docs" / "best5200.json"
+        if not p.exists():
+            self.skipTest("best5200.json not generated")
+        d = json.loads(p.read_text(encoding="utf-8"))
+        self.assertEqual((d["kind"], d["fast"], d["slow"]), ("sma", 5, 200))
+        self.assertEqual((d["fast_label"], d["slow_label"]), ("SMA 5", "SMA 200"))
+        s, tr = d["summary"], d["trades"]
+        closed = [x for x in tr if not x["open"]]
+        self.assertEqual(s["trades"], len(closed))
+        self.assertAlmostEqual(s["total_pts"], s["realised_pts"] + s["open_pts"], delta=1)
+        self.assertAlmostEqual(sum(y["pts"] for y in d["years_mtm"]), s["total_pts"], delta=1)
+        self.assertTrue(all(y["pts"] > 0 for y in d["years_mtm"]), "zero losing years is the whole claim")
+        self.assertEqual(len(d["chart"]["bars"]), len(d["chart"]["ema21"]))
+        L = d["live"]
+        self.assertEqual(L["kind"], "sma")
+        self.assertEqual(len(L["closes"]), d["slow"] - 1)
+        self.assertAlmostEqual(L["closes"][-1], d["now"]["close"], delta=0.01)
+        self.assertAlmostEqual(sum(L["closes"][-(d["fast"] - 1):]) / (d["fast"] - 1), L["ema21"], delta=3,
+                               msg="the fast SMA must be close to the mean of its window tail")
+        # the published flip price really puts SMA 5 on SMA 200
+        w = L["closes"]
+        x = d["now"]["flip"]
+        f5 = (sum(w[-4:]) + x) / 5
+        f200 = (sum(w[-199:]) + x) / 200
+        self.assertAlmostEqual(f5, f200, delta=0.05)
+        html = (ROOT / "docs" / "best5200.html").read_text(encoding="utf-8")
+        self.assertIn('data-src="best5200.json"', html)
+        self.assertIn('data-pine="best5200.pine"', html)
+        self.assertIn('href="best5200.pine"', html)
+
+    def test_pine_scripts_are_paste_safe_and_match_the_rules(self):
+        cases = [("best15.pine", ('input.int(21, "Fast EMA"', 'input.int(105, "Slow EMA"'), "best15.html", "best15.pine"),
+                 ("best5200.pine", ('input.int(5, "Fast SMA"', 'input.int(200, "Slow SMA"'), "best5200.html", "best5200.pine")]
+        for fname, pair_settings, page, pine_href in cases:
+            src = (ROOT / "docs" / fname).read_text(encoding="utf-8")
+            lines = src.split("\n")
+            self.assertTrue(lines[0].startswith("//@version=6"), fname)
+            for i, line in enumerate(lines, 1):
+                self.assertLessEqual(len(line), 72, f"{fname} line {i} too long to copy safely")
+                self.assertTrue(all(ord(ch) < 127 for ch in line), f"{fname} line {i} has a non-ASCII character")
+                body = "" if line.lstrip().startswith("//") else line.split("//")[0]
+                self.assertEqual(body.count('"') % 2, 0, f"{fname} line {i}: string not closed on the same line")
+            for setting in pair_settings + ("default_qty_value = 65", "commission_value = 0.035",
+                                            "process_orders_on_close = false", "03 Jul 2023 00:00 +0530"):
+                self.assertIn(setting, src, fname)
+            html = (ROOT / "docs" / page).read_text(encoding="utf-8")
+            self.assertIn('id="b5-pine"', html)
+            self.assertIn('href="' + pine_href + '"', html)
 
 
 if __name__ == "__main__":

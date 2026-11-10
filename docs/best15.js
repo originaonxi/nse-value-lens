@@ -41,8 +41,8 @@
     var st = el("div", "st"); st.appendChild(el("small", null, "Right now · last 15-minute candle " + n.time + " IST")); st.appendChild(document.createTextNode(n.state));
     box.appendChild(st);
     var ul = el("ul");
-    ul.appendChild(el("li", null, "Nifty " + num(n.close, 2) + " · EMA 21 " + num(n.ema21, 2) + " · EMA 105 " + num(n.ema105, 2) +
-      " (" + (n.ema21 > n.ema105 ? "21 above 105" : "21 below 105") + ")"));
+    ul.appendChild(el("li", null, "Nifty " + num(n.close, 2) + " · " + D.fast_label + " " + num(n.ema21, 2) + " · " + D.slow_label + " " + num(n.ema105, 2) +
+      " (" + (n.ema21 > n.ema105 ? "fast above slow" : "fast below slow") + ")"));
     if (op) ul.appendChild(el("li", null, op.side + " since " + op.entry_time + " at " + num(op.entry, 2) + " · now " + spts(op.net_pts) + " points = " +
       sinr(op.rupees) + " on 1 lot, " + sinr(op.rupees * D.lots) + " on " + D.lots + " lots"));
     ul.appendChild(el("li", null, n.what));
@@ -72,7 +72,7 @@
     });
     SER = CH.addCandlestickSeries({ upColor: "#16a34a", downColor: "#dc2626", borderUpColor: "#16a34a", borderDownColor: "#dc2626", wickUpColor: "#16a34a", wickDownColor: "#dc2626" });
     SER.setData(ch.bars.map(function (b) { return { time: ts(b[0]), open: b[1], high: b[2], low: b[3], close: b[4] }; }));
-    [["ema21", "#f97316", "EMA 21"], ["ema105", "#7c3aed", "EMA 105"]].forEach(function (z) {
+    [["ema21", "#f97316", D.fast_label || "EMA 21"], ["ema105", "#7c3aed", D.slow_label || "EMA 105"]].forEach(function (z) {
       var l = CH.addLineSeries({ color: z[1], lineWidth: 2, priceLineVisible: false, lastValueVisible: true, title: z[2] });
       l.setData(ch.bars.map(function (b, j) { return ch[z[0]][j] == null ? { time: ts(b[0]) } : { time: ts(b[0]), value: ch[z[0]][j] }; }));
       LSER[z[0]] = l;
@@ -208,7 +208,7 @@
   function loadPine() {
     var pre = $("b5-pine"), btn = $("b5-copy"), msg = $("b5-copy-msg");
     if (!pre) return;
-    fetch("best15.pine?v=" + Date.now(), { cache: "no-store" })
+    fetch((document.body.dataset.pine || "best15.pine") + "?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
       .then(function (txt) {
         pre.textContent = txt;
@@ -225,15 +225,31 @@
           }
         });
       })
-      .catch(function (e) { pre.textContent = "Could not load best15.pine: " + e.message; });
+      .catch(function (e) { pre.textContent = "Could not load the script: " + e.message; });
   }
 
   /* ---- live: during market hours the browser extends the chart straight from Upstox's public
      candle API (it sends CORS headers for this site; no account, no keys). The maths is the same
      recursion as the engine: EMA = a*close + (1-a)*previous, flips fill at the next 15-min open. ---- */
-  var A21 = 2 / 22, A105 = 2 / 106;
+  var AF = 2 / 22, AS = 2 / 106;              // set from D in liveInit
   function emaStep(prev, close, a) { return a * close + (1 - a) * prev; }
-  function flipPrice(e21, e105) { return ((1 - A105) * e105 - (1 - A21) * e21) / (A21 - A105); }
+  function sumTail(w, n) { var s = 0, k = Math.min(n, w.length); for (var i = w.length - k; i < w.length; i++) s += w[i]; return s; }
+  function avgTail(w, n) { return sumTail(w, n) / Math.min(n, w.length); }
+  function maState(base) { return { f: base.ema21, s: base.ema105, win: base.closes ? base.closes.slice() : null }; }
+  function maPush(st, close) {              // a COMPLETED candle extends the averages
+    if (st.win) {
+      st.win.push(close); if (st.win.length > D.slow) st.win.shift();
+      st.f = avgTail(st.win, D.fast); st.s = avgTail(st.win, D.slow);
+    } else { st.f = emaStep(st.f, close, AF); st.s = emaStep(st.s, close, AS); }
+  }
+  function maPreview(st, close) {           // what the averages would be if the forming candle closed now
+    if (st.win) { var w = st.win.concat([close]); return [avgTail(w, D.fast), avgTail(w, D.slow)]; }
+    return [emaStep(st.f, close, AF), emaStep(st.s, close, AS)];
+  }
+  function flipPrice(st) {                  // the one next close that puts fast exactly on slow
+    if (st.win) return (D.fast * sumTail(st.win, D.slow - 1) - D.slow * sumTail(st.win, D.fast - 1)) / (D.slow - D.fast);
+    return ((1 - AS) * st.s - (1 - AF) * st.f) / (AF - AS);
+  }
   function istNow() { var d = new Date(); return new Date(d.getTime() + (330 + d.getTimezoneOffset()) * 60000); }
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
   function istStamp(d) {
@@ -268,14 +284,15 @@
   }
   /* continue the EMAs over completed candles; a pending flip fills at the next candle's open */
   function contState(base, done) {
-    var s = { ema21: base.ema21, ema105: base.ema105, want: base.side, path: [], flips: [],
+    var s = { ma: maState(base), want: base.side, path: [], flips: [],
               trade: { side: base.pending ? (base.side === "BUY" ? "SELL" : "BUY") : base.side, entry: base.entry, entry_time: base.entry_time } };
     done.forEach(function (c) {
       if (s.want !== s.trade.side) { s.trade = { side: s.want, entry: c.o, entry_time: c.t }; s.flips.push(s.trade); }
-      s.ema21 = emaStep(s.ema21, c.c, A21); s.ema105 = emaStep(s.ema105, c.c, A105);
-      s.want = s.ema21 > s.ema105 ? "BUY" : "SELL";
-      s.path.push({ t: c.t, e21: s.ema21, e105: s.ema105 });
+      maPush(s.ma, c.c);
+      s.want = s.ma.f > s.ma.s ? "BUY" : "SELL";
+      s.path.push({ t: c.t, e21: s.ma.f, e105: s.ma.s });
     });
+    s.ema21 = s.ma.f; s.ema105 = s.ma.s;
     return s;
   }
   function liveApply(all) {
@@ -307,11 +324,12 @@
         LSER.ema105.update({ time: ts(p.t), value: +p.e105.toFixed(2) });
       });
       if (form && LSER.ema21) {
-        LSER.ema21.update({ time: ts(form.t), value: +emaStep(st.ema21, form.c, A21).toFixed(2) });
-        LSER.ema105.update({ time: ts(form.t), value: +emaStep(st.ema105, form.c, A105).toFixed(2) });
+        var pv = maPreview(st.ma, form.c);
+        LSER.ema21.update({ time: ts(form.t), value: +pv[0].toFixed(2) });
+        LSER.ema105.update({ time: ts(form.t), value: +pv[1].toFixed(2) });
       }
       if (st.flips.length) { LIVE.flips = st.flips; drawMarkers(); }
-      var fp = flipPrice(st.ema21, st.ema105);
+      var fp = flipPrice(st.ma);
       if (LIVE.flipLine) SER.removePriceLine(LIVE.flipLine);
       LIVE.flipLine = SER.createPriceLine({ price: +fp.toFixed(2), color: "#b8860b", lineWidth: 1, lineStyle: 3, axisLabelVisible: true,
         title: (st.want === "BUY" ? "flip to SELL " : "flip to BUY ") + Math.round(fp) });
@@ -327,7 +345,7 @@
     var tr = st ? st.trade : { side: base.pending ? (base.side === "BUY" ? "SELL" : "BUY") : base.side, entry: base.entry, entry_time: base.entry_time };
     var price = LIVE.price != null ? LIVE.price : D.now.close;
     var pending = want !== tr.side;
-    var fp = flipPrice(e21, e105);
+    var fp = flipPrice(st ? st.ma : maState(base));
     var opn = isNum(tr.entry) ? (tr.side === "BUY" ? price - tr.entry : tr.entry - price) : null;
     box.textContent = "";
     box.className = "b5-live " + (pending ? "flip" : tr.side === "BUY" ? "buy" : "sell");
@@ -353,8 +371,8 @@
       " · open " + spts(opn) + " pts = " + sinr(opn * D.lot) + " on 1 lot · " + sinr(opn * D.lot * D.lots) + " on " + D.lots + " lots"));
     var dist = want === "BUY" ? price - fp : fp - price;
     box.appendChild(el("div", "b5l-next", "NEXT OPPORTUNITY → " + (want === "BUY" ? "SELL" : "BUY") + " if a 15-minute candle CLOSES " +
-      (want === "BUY" ? "below " : "above ") + num(fp, 2) + " · " + num(Math.abs(dist), 0) + " pts away · EMA 21 " + num(e21, 2) +
-      " · EMA 105 " + num(e105, 2) + " · not in yet? the side to be on is " + want + ", entries always at the next 15-min open"));
+      (want === "BUY" ? "below " : "above ") + num(fp, 2) + " · " + num(Math.abs(dist), 0) + " pts away · " + D.fast_label + " " + num(e21, 2) +
+      " · " + D.slow_label + " " + num(e105, 2) + " · not in yet? the side to be on is " + want + ", entries always at the next 15-min open"));
     if (LIVE.fails > 1) box.appendChild(el("div", "b5l-err", "Live feed unreachable (try " + LIVE.fails + ") — retrying with the last good state."));
     if (LIVE.gap > 0) box.appendChild(el("div", "b5l-err", "Note: " + LIVE.gap + " weekday session(s) between the published state (" +
       D.live.time + ") and today are not in the EMAs yet (holiday or a missed rebuild). Tonight's rebuild corrects this."));
@@ -385,22 +403,23 @@
     var q = {}; location.search.replace(/[?&]([^=&]+)=([^&]*)/g, function (a, k, v) { q[k] = v; return a; });
     if (q.live === "off") return;
     LIVE.force = q.live === "force";
-    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, LIVE: LIVE, A21: A21, A105: A105 };
+    AF = 2 / (D.fast + 1); AS = 2 / (D.slow + 1);
+    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, maState: maState, maPreview: maPreview, LIVE: LIVE };
     renderLive(); liveLoop(); setInterval(clockTick, 1000);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) { clearTimeout(LIVE.timer); liveLoop(); } });
   }
   function boot() {
-    fetch("best15.json?v=" + Date.now(), { cache: "no-store" })
+    fetch((document.body.dataset.src || "best15.json") + "?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function (d) {
         D = d;
-        $("b5-sub").textContent = "EMA 21 / EMA 105 on 15-minute Nifty candles · " + D.from + " → " + D.last_candle + " IST · " + D.summary.trades +
+        $("b5-sub").textContent = D.fast_label + " / " + D.slow_label + " on 15-minute Nifty candles · " + D.from + " → " + D.last_candle + " IST · " + D.summary.trades +
           " closed trades · rebuilt " + D.generated_at.replace("T", " ").slice(0, 16);
         renderNow(); renderKpis(); renderChart(); renderCurve(); renderYears(); renderSides(); renderMonths(); renderTrades(); renderFoot();
         liveInit();
         document.body.dataset.ready = "true";
       })
-      .catch(function (e) { $("b5-sub").textContent = "Failed to load best15.json: " + e.message; document.body.dataset.ready = "error"; });
+      .catch(function (e) { $("b5-sub").textContent = "Failed to load the data: " + e.message; document.body.dataset.ready = "error"; });
   }
   function start() { loadPine(); boot(); }
   document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();

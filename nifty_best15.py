@@ -29,6 +29,7 @@ import intraday15 as I  # noqa: E402
 
 DOCS, PUBLIC = ROOT / "docs", ROOT / "public" / "data"
 FAST, SLOW = 21, 105
+KIND, OUT = "ema", "best15"                 # --sma F S --out NAME builds the same page for an SMA pair
 COST = 0.00035
 LOT, LOTS = 65, 10
 START = pd.Timestamp("2023-07-03")          # first trading day after the EMAs have 6 months of candles
@@ -36,8 +37,17 @@ SPLIT = pd.Timestamp("2025-01-01")          # rule chosen on data before this; a
 CHART_DAYS = 365
 
 
-def flip_price(e_fast, e_slow):
-    """The next 15-minute close at which EMA 21 lands exactly on EMA 105."""
+def ma(c, n):
+    """The rule's moving average: SMA-seeded EMA (TradingView ta.ema) or a plain SMA."""
+    return E.pine_ema(c, n) if KIND == "ema" else pd.Series(c).rolling(n).mean().to_numpy()
+
+
+def flip_price(e_fast, e_slow, closes=None):
+    """The next 15-minute close at which the fast average lands exactly on the slow one."""
+    if KIND == "sma":
+        cf = float(np.sum(closes[-(FAST - 1):]))
+        cs = float(np.sum(closes[-(SLOW - 1):]))
+        return (FAST * cs - SLOW * cf) / (SLOW - FAST)
     a, b = 2 / (FAST + 1), 2 / (SLOW + 1)
     return ((1 - b) * e_slow - (1 - a) * e_fast) / (a - b)
 
@@ -46,7 +56,7 @@ def replay(df, start_i):
     """Always in from the first close at/after start_i. Signal at close i -> fill at open i+1."""
     o, c = df["Open"].to_numpy(float), df["Close"].to_numpy(float)
     t = df.index
-    ef, es = E.pine_ema(c, FAST), E.pine_ema(c, SLOW)
+    ef, es = ma(c, FAST), ma(c, SLOW)
     up = np.nan_to_num(ef) > np.nan_to_num(es)
     pos, entry, ent_i = 0, 0.0, None
     trades, real = [], 0.0
@@ -93,6 +103,8 @@ def build(today=None):
         df = pd.read_csv(I.CACHE, index_col=0, parse_dates=True)
         source = "Upstox 15-minute candles from the cache (refresh failed this run)"
     df = df[["Open", "High", "Low", "Close"]].astype(float)
+    flbl = f"{KIND.upper()} {FAST}"
+    slbl = f"{KIND.upper()} {SLOW}"
     check = I.check_data(df)
     t = df.index
     start_i = int(np.searchsorted(t, START))
@@ -133,27 +145,29 @@ def build(today=None):
     }
 
     last_t = t[-1]
-    trig = flip_price(ef[-1], es[-1])
+    trig = flip_price(ef[-1], es[-1], c)
     side = "BUY" if up[-1] else "SELL"
     pending = op is not None and op["side"] != side
     if pending:
         state = f"{side} at the next 15-minute candle's open"
-        what = f"EMA 21 crossed {'above' if up[-1] else 'below'} EMA 105 on the last candle; the position flips to {side} at the next open."
+        what = f"{flbl} crossed {'above' if up[-1] else 'below'} {slbl} on the last candle; the position flips to {side} at the next open."
     else:
         state = f"IN TRADE · {side}"
-        what = (f"Stays BUY until EMA 21 crosses below EMA 105. One single 15-minute close below about {trig:,.2f} would do it right now; "
+        what = (f"Stays BUY until {flbl} crosses below {slbl}. One single 15-minute close below about {trig:,.2f} would do it right now; "
                 "normally it comes after a slide over many candles." if side == "BUY"
-                else f"Stays SELL until EMA 21 crosses above EMA 105. One single 15-minute close above about {trig:,.2f} would do it right now; "
+                else f"Stays SELL until {flbl} crosses above {slbl}. One single 15-minute close above about {trig:,.2f} would do it right now; "
                 "normally it comes after a rise over many candles.")
     now = {"time": str(last_t)[:16], "close": round(float(c[-1]), 2), "ema21": round(float(ef[-1]), 2), "ema105": round(float(es[-1]), 2),
            "side": side, "state": state, "what": what, "flip": round(float(trig), 2), "flip_pts": round(float(trig - c[-1]), 1)}
 
-    # state the browser needs to continue the EMAs live during market hours (Upstox allows CORS from the site)
-    live = {"time": str(last_t)[:16], "ema21": round(float(ef[-1]), 4), "ema105": round(float(es[-1]), 4),
+    # state the browser needs to continue the averages live during market hours (Upstox allows CORS from the site)
+    live = {"time": str(last_t)[:16], "ema21": round(float(ef[-1]), 4), "ema105": round(float(es[-1]), 4), "kind": KIND,
             "side": side, "pending": bool(pending),
             "entry": op["entry"] if op else None, "entry_time": op["entry_time"] if op else None,
             "feed": "https://api.upstox.com/v3/historical-candle/intraday/NSE_INDEX%7CNifty%2050/minutes/1",
             "session_ist": ["09:15", "15:30"], "poll_s": 30}
+    if KIND == "sma":
+        live["closes"] = [round(float(x), 2) for x in c[-(SLOW - 1):]]      # the browser's rolling window
 
     # daily curve (last value of each day) vs holding Nifty
     day = pd.Series(curve_pts, index=t[start_i:]).groupby(t[start_i:].normalize()).last()
@@ -174,22 +188,32 @@ def build(today=None):
              "ema21": [round(float(x), 2) if x == x else None for x in ef[c0:]],
              "ema105": [round(float(x), 2) if x == x else None for x in es[c0:]]}
 
+    if KIND == "ema":
+        why = ["Picked from 2,055 EMA rules on Nifty (10-minute, 15-minute, 1-hour, 2-hour and daily candles; BUY+SELL, BUY only, SELL only).",
+               "It made money in every year since July 2023, including 2026 when Nifty fell, and did as well after 1 Jan 2025 as before.",
+               "The rules next to it (EMA 13, 15, 20, 25 against EMA 100, 105, 144) also made money every year, so 21 / 105 is not a lucky pair."]
+        pick_limit = "Picked after looking at this same history. The 10-minute EMA 8 / 200 made more in total but fell to +506 points in 2026; this one was steadier."
+    else:
+        why = ["Found by widening the search beyond EMAs: 401 rules from 6 families (Supertrend, Donchian, MACD, RSI, SMA pairs, price-vs-SMA) after 2,680 EMA tests. This made the most points of every rule with zero losing years.",
+               "Its whole neighbourhood works: every SMA pair from 3-8 against 180-220 made money with no losing year, so 5 / 200 is a plateau, not a lucky spike.",
+               "Ranked No.1 on 2023-24 data alone, then made +4,278 points on 2025-26 it had never seen, and was positive in BOTH halves of the last 200 sessions (EMA 21/105 was not).",
+               "Confirmation filters were tested and rejected: waiting for the next candle to confirm the cross turned the profit negative; entering plainly at the next open kept it."]
+        pick_limit = "First published 10 Nov 2026, picked after looking at this same history: its honest out-of-sample record only starts now."
     payload = {
-        "version": 1, "name": "Nifty 50 · EMA 21 / EMA 105 · 15-minute · always in",
+        "version": 1, "name": f"Nifty 50 · {flbl} / {slbl} · 15-minute · always in",
         "generated_at": datetime.now(I.IST).isoformat(timespec="minutes"),
         "as_of": str(last_t.date()), "last_candle": str(last_t)[:16], "from": str(t[start_i])[:10], "split": str(SPLIT.date()),
-        "source": source, "fast": FAST, "slow": SLOW, "cost_side_pct": COST * 100, "lot": LOT, "lots": LOTS,
-        "rule": [f"BUY when a 15-minute candle closes with EMA {FAST} above EMA {SLOW}. The order fills at the next candle's open.",
-                 f"SELL (short) when a 15-minute candle closes with EMA {FAST} below EMA {SLOW}. The position flips straight from BUY to SELL: always in a trade.",
+        "source": source, "fast": FAST, "slow": SLOW, "kind": KIND, "fast_label": flbl, "slow_label": slbl,
+        "cost_side_pct": COST * 100, "lot": LOT, "lots": LOTS,
+        "rule": [f"BUY when a 15-minute candle closes with {flbl} above {slbl}. The order fills at the next candle's open.",
+                 f"SELL (short) when a 15-minute candle closes with {flbl} below {slbl}. The position flips straight from BUY to SELL: always in a trade.",
                  "No stop and no target: the next crossover is the exit. Positions are held overnight.",
                  f"{COST * 100:.3f}% of price on every buy and every sell. Rupees: 1 lot = {LOT}, and {LOTS} lots."],
-        "why": [f"Picked from 2,055 EMA rules on Nifty (10-minute, 15-minute, 1-hour, 2-hour and daily candles; BUY+SELL, BUY only, SELL only).",
-                "It made money in every year since July 2023, including 2026 when Nifty fell, and did as well after 1 Jan 2025 as before.",
-                "The rules next to it (EMA 13, 15, 20, 25 against EMA 100, 105, 144) also made money every year, so 21 / 105 is not a lucky pair."],
+        "why": why,
         "summary": summary, "now": now, "live": live, "trades": trades, "months": E.periods(trades, 7), "years": E.periods(trades, 4), "years_mtm": years_mtm,
         "curve": curve, "chart": chart, "data": check,
         "limits": [
-            "Picked after looking at this same history. The 10-minute EMA 8 / 200 made more in total but fell to +506 points in 2026; this one was steadier.",
+            pick_limit,
             "About 64% of trades lose. The profit comes from a few long trends, and long losing runs are normal.",
             "Positions are held overnight, so an opening gap can move the trade a long way before you can act.",
             f"Fills are assumed exactly at each 15-minute open. {LOTS} lots of {LOT} is about Rs {LOTS * LOT * float(c[-1]) / 1e7:.1f} crore of Nifty: check margin before trading that size.",
@@ -198,15 +222,24 @@ def build(today=None):
         ],
     }
     text = json.dumps(payload, separators=(",", ":"), default=str)
-    for out in (DOCS / "best15.json", PUBLIC / "best15.json"):
+    for out in (DOCS / f"{OUT}.json", PUBLIC / f"{OUT}.json"):
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding="utf-8")
     s = summary
-    print(f"best15.json {payload['from']} -> {payload['last_candle']} | {s['trades']} closed trades, won {s['win_pct']}% | "
+    print(f"{OUT}.json {payload['from']} -> {payload['last_candle']} | {s['trades']} closed trades, won {s['win_pct']}% | "
           f"total {s['total_pts']} pts = Rs {s['total_rs']:,} (1 lot) / Rs {s['total_rs_10']:,} (10 lots) | hold {s['hold_pts']} pts | "
           f"worst fall {s['max_dd_pts']} pts | now {now['state']} | {len(text) // 1024}KB")
     return payload
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Build the best-setup page data (default: EMA 21/105 -> best15.json)")
+    ap.add_argument("--sma", nargs=2, type=int, metavar=("FAST", "SLOW"), help="use an SMA pair instead of EMA 21/105")
+    ap.add_argument("--out", help="output name, e.g. best5200")
+    args = ap.parse_args()
+    if args.sma:
+        KIND, FAST, SLOW = "sma", args.sma[0], args.sma[1]
+    if args.out:
+        OUT = args.out
     build()
