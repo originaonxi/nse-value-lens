@@ -1,6 +1,6 @@
 {
  "as_of": "2026-11-11",
- "universe": "Nifty 200 (200 stocks)",
+ "universe": "Nifty 200 (199 stocks)",
  "method": "Dow HH/HL/LH/LL on 5-bar fractals + BOS/CHoCH labels + Wyckoff volume phase. Informational \u2014 not action-changing until calibrated.",
  "counts": {
   "REVERSAL_UP": 25,
@@ -8,7 +8,7 @@
   "UPTREND_BROKEN": 1,
   "DOWNTREND_BROKEN": 61,
   "UPTREND": 21,
-  "DOWNTREND": 60,
+  "DOWNTREND": 59,
   "MIXED": 31
  },
  "second_ll": [
@@ -11461,102 +11461,6 @@
    "at_second_hh": false
   },
   {
-   "symbol": "ABB",
-   "name": "ABB India Ltd.",
-   "close": 6963.0,
-   "structure": "DOWNTREND",
-   "raw_structure": "DOWNTREND",
-   "structure_label": "Downtrend (LH + LL)",
-   "last_high": {
-    "label": "LH",
-    "price": 7038.0,
-    "date": "2026-10-21"
-   },
-   "last_low": {
-    "label": "LL",
-    "price": 6064.0,
-    "date": "2026-10-26"
-   },
-   "consec_hh": 0,
-   "consec_ll": 5,
-   "consec_lh": 5,
-   "consec_hl": 0,
-   "reversal_trigger": null,
-   "reversal_invalidate": null,
-   "extended_warning": "5 consecutive LL \u2014 extended downtrend, watch for first HL",
-   "bos": {},
-   "bos_fired": false,
-   "bos_dir": null,
-   "choch": {},
-   "choch_fired": false,
-   "choch_dir": null,
-   "wyckoff": {
-    "phase": "MARKDOWN",
-    "conviction": "LOW",
-    "vol_at_last_high": 656683,
-    "vol_at_last_low": 212650,
-    "note": "MARKDOWN \u2014 breakdown lows on 2.1L vs bounce highs 6.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion."
-   },
-   "wyckoff_phase": "MARKDOWN",
-   "wyckoff_conviction": "LOW",
-   "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 2.1L vs bounce highs 6.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion.",
-   "sequence": [
-    {
-     "date": "2026-08-26",
-     "price": 7699.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-02",
-     "price": 7258.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-09",
-     "price": 7480.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-16",
-     "price": 6905.5,
-     "label": "LL"
-    },
-    {
-     "date": "2026-09-22",
-     "price": 7405.5,
-     "label": "LH"
-    },
-    {
-     "date": "2026-09-29",
-     "price": 6660.5,
-     "label": "LL"
-    },
-    {
-     "date": "2026-10-06",
-     "price": 7140.5,
-     "label": "LH"
-    },
-    {
-     "date": "2026-10-09",
-     "price": 6575.0,
-     "label": "LL"
-    },
-    {
-     "date": "2026-10-21",
-     "price": 7038.0,
-     "label": "LH"
-    },
-    {
-     "date": "2026-10-26",
-     "price": 6064.0,
-     "label": "LL"
-    }
-   ],
-   "plain": "DOWNTREND \u2014 lower highs + lower lows. Last LH \u20b97038.0 is ceiling; rallies into it get sold. Close above = first turn signal. Wyckoff: MARKDOWN \u2014 breakdown lows on 2.1L vs bounce highs 6.6L. \u26a0\ufe0f Selling on low volume \u2014 potential exhaustion. \u26a0\ufe0f 5 consecutive LL \u2014 extended downtrend, watch for first HL.",
-   "at_second_ll": false,
-   "at_second_hh": false
-  },
-  {
    "symbol": "ADANIENT",
    "name": "Adani Enterprises Ltd.",
    "close": 2714.5,
@@ -12755,14 +12659,14 @@
    "wyckoff_note": "MARKDOWN \u2014 breakdown lows on 2.1Cr vs bounce highs 74.2L. Real sellers driving down.",
    "sequence": [
     {
-     "date": "2026-07-14",
-     "price": 414.68,
-     "label": "LH"
-    },
-    {
      "date": "2026-07-29",
      "price": 385.94,
      "label": "LL"
+    },
+    {
+     "date": "2026-08-05",
+     "price": 402.02,
+     "label": "LH"
     },
     {
      "date": "2026-08-20",
