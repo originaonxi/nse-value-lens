@@ -1,0 +1,103 @@
+//@version=6
+// Nifty 50 SMA 6 / SMA 200, 15-minute candles.
+// BUY when a candle closes with SMA 6 above SMA 200.
+// SELL (short) when it closes with SMA 6 below SMA 200.
+// Orders fill at the next candle's open. Always in a trade.
+// No target, no extra stop. 1 lot = 65. Cost 0.035% per side.
+// Test 3 Jul 2023 - 13 Nov 2026: +10,947 points after costs.
+// Source: originaonxi.github.io/nse-value-lens/best6200.html
+strategy("Nifty SMA 6/200 15m", "SMA 6/200 15m",
+      overlay = true,
+      initial_capital = 10000000,
+      default_qty_type = strategy.fixed,
+      default_qty_value = 65,
+      commission_type = strategy.commission.percent,
+      commission_value = 0.035,
+      process_orders_on_close = false,
+      pyramiding = 0)
+
+mode = input.string("Always in", "Mode",
+      options = ["Always in", "BUY or WATCH", "SELL or WATCH"])
+fastLen = input.int(6, "Fast SMA", minval = 1)
+slowLen = input.int(200, "Slow SMA", minval = 2)
+startAt = input.time(timestamp("03 Jul 2023 00:00 +0530"), "Start trading from")
+
+fastMa = ta.sma(close, fastLen)
+slowMa = ta.sma(close, slowLen)
+ready = bar_index >= slowLen and time >= startAt
+up = fastMa > slowMa
+goUp = ready and up and not up[1]
+goDown = ready and not up and up[1]
+
+longOk = mode != "SELL or WATCH"
+shortOk = mode != "BUY or WATCH"
+
+if ready and up and strategy.position_size <= 0
+    if longOk
+        strategy.entry("BUY", strategy.long, comment = "BUY")
+    else
+        strategy.close("SELL", comment = "COVER")
+if ready and not up and strategy.position_size >= 0
+    if shortOk
+        strategy.entry("SELL", strategy.short, comment = "SELL")
+    else
+        strategy.close("BUY", comment = "EXIT")
+
+// Next 15-minute close that would put SMA 6 exactly on SMA 200.
+sumF = math.sum(close, fastLen - 1)
+sumS = math.sum(close, slowLen - 1)
+flipAt = (fastLen * sumS - slowLen * sumF) / (slowLen - fastLen)
+
+upFill = color.new(color.green, 85)
+dnFill = color.new(color.red, 85)
+pf = plot(fastMa, "SMA 6", color = color.orange, linewidth = 2)
+ps = plot(slowMa, "SMA 200", color = color.purple, linewidth = 2)
+fill(pf, ps, color = up ? upFill : dnFill, title = "Trend")
+plotshape(goUp, "BUY", shape.labelup, location.belowbar, color.green, text = "BUY", textcolor = color.white, size = size.small)
+plotshape(goDown, "SELL", shape.labeldown, location.abovebar, color.red, text = "SELL", textcolor = color.white, size = size.small)
+
+var int firstTime = time
+lotPts = 65 * syminfo.pointvalue
+pnl = strategy.netprofit + strategy.openprofit
+totalPts = pnl / lotPts
+closedN = strategy.closedtrades
+winPct = closedN > 0 ? 100.0 * strategy.wintrades / closedN : 0.0
+pos = strategy.position_size
+entryPx = pos != 0 ? strategy.opentrades.entry_price(0) : na
+posTxt = pos > 0 ? "LONG" : pos < 0 ? "SHORT" : "WATCH"
+if pos != 0
+    posTxt := posTxt + " since " + str.tostring(entryPx, "#.##")
+posCol = pos > 0 ? color.green : pos < 0 ? color.red : color.gray
+flipTxt = up ? "Flips to SELL below" : "Flips to BUY above"
+is15 = timeframe.period == "15"
+tfTxt = is15 ? "15 min (tested)" : "NOT 15 min - untested"
+trendTxt = up ? "UP - BUY side" : "DOWN - SELL side"
+ptsTxt = str.tostring(totalPts, "#,##0.0")
+wonTxt = str.tostring(winPct, "0.0") + "%"
+tradesTxt = str.tostring(closedN) + " / " + wonTxt
+firstTxt = str.format_time(firstTime, "dd MMM yyyy", "Asia/Kolkata")
+
+row(t, r, label, txt, col) =>
+    table.cell(t, 0, r, label, text_color = color.gray)
+    table.cell(t, 1, r, txt, text_color = col)
+
+var table tb = table.new(position.top_right, 2, 9, bgcolor = color.white, border_width = 1, border_color = color.new(color.gray, 70))
+if barstate.islast
+    row(tb, 0, "SMA 6", str.tostring(fastMa, "#.##"), color.orange)
+    row(tb, 1, "SMA 200", str.tostring(slowMa, "#.##"), color.purple)
+    row(tb, 2, "Trend", trendTxt, up ? color.green : color.red)
+    row(tb, 3, "Position", posTxt, posCol)
+    row(tb, 4, flipTxt, str.tostring(flipAt, "#.##"), color.gray)
+    row(tb, 5, "Points since start", ptsTxt, totalPts >= 0 ? color.green : color.red)
+    row(tb, 6, "Closed trades / won", tradesTxt, color.gray)
+    row(tb, 7, "First candle on chart", firstTxt, color.gray)
+    row(tb, 8, "Chart", tfTxt, is15 ? color.green : color.orange)
+
+// ---- alerts: Alert > Condition "SMA 6/200 15m" > any alert() ----
+msgUp = "Nifty SMA 6/200: BUY at next 15m open. Close "
+msgDn = "Nifty SMA 6/200: SELL at next 15m open. Close "
+once = alert.freq_once_per_bar_close
+if goUp
+    alert(msgUp + str.tostring(close, "#.##"), once)
+if goDown
+    alert(msgDn + str.tostring(close, "#.##"), once)
