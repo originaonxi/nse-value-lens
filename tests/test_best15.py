@@ -101,8 +101,8 @@ class Published(unittest.TestCase):
         self.assertEqual(L["kind"], "sma")
         self.assertEqual(len(L["closes"]), d["slow"] - 1)
         self.assertAlmostEqual(L["closes"][-1], d["now"]["close"], delta=0.01)
-        self.assertAlmostEqual(sum(L["closes"][-(d["fast"] - 1):]) / (d["fast"] - 1), L["ema21"], delta=3,
-                               msg="the fast SMA must be close to the mean of its window tail")
+        self.assertAlmostEqual(sum(L["closes"][-d["fast"]:]) / d["fast"], L["ema21"], delta=0.01,
+                               msg="the published fast SMA must equal the mean of the last `fast` closes")
         # the published flip price really puts SMA 5 on SMA 200
         w = L["closes"]
         x = d["now"]["flip"]
