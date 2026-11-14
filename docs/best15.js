@@ -59,6 +59,10 @@
     kpi(box, "Worst fall", spts(-s.max_dd_pts) + " pts", inr(-s.max_dd_rs) + " on 1 lot" + (s.max_dd_on ? " · low " + s.max_dd_on : ""));
     kpi(box, "Before " + D.split + " / after", spts(s.pick_period_pts) + " / " + spts(s.unseen_period_pts), "points: the rule held up after it");
     kpi(box, "Open trade now", spts(s.open_pts) + " pts", "longest losing run: " + s.longest_losing_run + " trades", "", s.open_pts > 0 ? "up" : s.open_pts < 0 ? "dn" : null);
+    if (D.compare) {
+      var dv = s.total_pts - D.compare.always_in.total_pts;
+      kpi(box, "vs always-in · same entries", spts(dv) + " pts", sinr(dv * D.lot * L) + " on " + L + " lots · " + D.compare.booked_exits + " profits booked", "", dv > 0 ? "up" : "dn");
+    }
   }
 
   function renderChart() {
@@ -80,6 +84,7 @@
     var op = openTrade();
     if (op) SER.createPriceLine({ price: op.entry, color: op.side === "BUY" ? "#15803d" : "#b91c1c", lineWidth: 1, lineStyle: 2, axisLabelVisible: true,
       title: "open " + op.side + " " + num(op.entry, 0) });
+    if (D.book) drawBookLine(baseTrade());
     drawMarkers(); renderRange();
     $("b5-chart-note").textContent = "15-minute candles in IST, the last " + ch.bars.length + " candles from " + ch.bars[0][0].slice(0, 10) +
       ". Each arrow sits on the candle the order fills at (the open of the candle after the crossover close). Drag to move, scroll to zoom.";
@@ -91,8 +96,12 @@
       var x = ts(t.entry_time);
       if (x >= first) {
         var buy = t.side === "BUY", txt = t.side;
-        if (zoom && prev && !prev.open) txt += " " + sinr(prev.rupees);
+        if (zoom && prev && !prev.open && prev.exit_reason !== "book") txt += " " + sinr(prev.rupees);
         m.push({ time: x, position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626", shape: buy ? "arrowUp" : "arrowDown", text: zoom ? txt : "" });
+      }
+      if (t.exit_reason === "book" && ts(t.exit_time) >= first) {     // fib profit booking (booking pages only)
+        m.push({ time: ts(t.exit_time), position: t.side === "BUY" ? "aboveBar" : "belowBar", color: "#b45309", shape: "circle",
+                 text: zoom ? "BOOK " + sinr(t.rupees) : "" });
       }
       prev = t;
     });
@@ -101,6 +110,10 @@
       m.push({ time: ts(f.entry_time), position: buy ? "belowBar" : "aboveBar", color: buy ? "#16a34a" : "#dc2626",
                shape: buy ? "arrowUp" : "arrowDown", text: zoom ? f.side + " LIVE" : "" });
     });
+    (LIVE.books || []).forEach(function (f) {
+      m.push({ time: ts(f.time), position: f.side === "BUY" ? "aboveBar" : "belowBar", color: "#b45309", shape: "circle", text: zoom ? "BOOK LIVE" : "" });
+    });
+    m.sort(function (a, b) { return a.time - b.time; });
     SER.setMarkers(m);
   }
 
@@ -173,15 +186,23 @@
   }
 
   function renderTrades() {
-    var all = D.trades, acc = 0, run = [];
+    var all = D.trades, acc = 0, run = [], bk = !!D.book;
     all.forEach(function (t) { acc += t.net_pts; run.push(acc); });
-    $("b5-tr-n").textContent = "· " + D.summary.trades + " closed" + (openTrade() ? " + 1 open" : "") + " since " + D.from + ", newest first";
-    var b = head($("b5-trades"), [["#", "num"], ["Side"], ["Signal (close)"], ["Entry (open)"], ["Entry", "num"], ["Exit (open)"], ["Exit", "num"],
-      ["Held", "num"], ["Points", "num"], ["1 lot", "num"], [D.lots + " lots", "num"], ["Running pts", "num"]]);
+    $("b5-tr-n").textContent = "· " + D.summary.trades + " closed" + (openTrade() ? " + 1 open" : "") + " since " + D.from + ", newest first" +
+      (bk && D.compare ? " · " + D.compare.booked_exits + " booked, " + D.compare.crossover_exits + " closed by the next crossover" : "");
+    var cols = [["#", "num"], ["Side"], ["Signal (close)"], ["Entry (open)"], ["Entry", "num"], ["Exit (open)"], ["Exit", "num"]];
+    if (bk) cols = cols.concat([["Exit by"], ["Best price", "num"], ["Book line", "num"]]);
+    cols = cols.concat([["Held", "num"], ["Points", "num"], ["1 lot", "num"], [D.lots + " lots", "num"], ["Running pts", "num"]]);
+    var b = head($("b5-trades"), cols);
     all.slice().reverse().forEach(function (t, k) {
       var i = all.length - 1 - k, tr = el("tr", t.open ? "open" : null);
       td(tr, String(i + 1), "num"); td(tr, t.side, "side-" + t.side); td(tr, t.signal_time); td(tr, t.entry_time); td(tr, num(t.entry, 2), "num");
-      td(tr, t.open ? "OPEN · last close" : t.exit_time); td(tr, num(t.exit, 2), "num"); td(tr, t.days + "d · " + t.candles + " candles", "num");
+      td(tr, t.open ? "OPEN · last close" : t.exit_time); td(tr, num(t.exit, 2), "num");
+      if (bk) {
+        td(tr, t.open ? "-" : t.exit_reason === "book" ? "BOOK (fib)" : "crossover", t.exit_reason === "book" ? "side-BOOK" : null);
+        td(tr, num(t.best, 2), "num"); td(tr, t.book_level == null ? "-" : num(t.book_level, 2), "num");
+      }
+      td(tr, t.days + "d · " + t.candles + " candles", "num");
       td(tr, spts(t.net_pts), tone(t.net_pts)); td(tr, sinr(t.rupees), tone(t.rupees)); td(tr, sinr(t.rupees * D.lots), tone(t.rupees));
       td(tr, spts(run[i]), tone(run[i]));
       tr.title = "Show this trade on the chart";
@@ -203,6 +224,44 @@
     }
     if (d.vs_yahoo_15m) ul.appendChild(el("li", null, "Against the Yahoo Finance 15-minute candles we keep: " + d.vs_yahoo_15m.bars + " candles, median close gap " + d.vs_yahoo_15m.median_pts + " points."));
     var l = $("b5-limits"); l.textContent = ""; D.limits.forEach(function (x) { l.appendChild(el("li", null, x)); });
+  }
+
+  /* booking pages only: always-in vs fib booking, and the current trade's booking maths step by step */
+  function renderBook() {
+    if (!$("b5-book") || !D.compare) return;
+    var a = D.compare.always_in, c = D.compare.book, L = D.lots, lp = D.lot * L, B = D.book;
+    var tb = head($("b5-book-cmp"), [["Since " + D.from], ["Always in (6/200 page)", "num"], ["With fib booking", "num"], ["Difference", "num"]]);
+    function fmt(v, k) { return k === "rs" ? sinr(v) : k === "pct" ? num(v, 1) + "%" : k === "n" ? num(v, 0) : spts(v); }
+    function row(label, x, y, k) {
+      var tr = el("tr"), d = y - x;
+      td(tr, label); td(tr, fmt(x, k), "num"); td(tr, fmt(y, k), "num");
+      td(tr, k === "rs" ? sinr(d) : k === "n" ? String(d) : spts(d) + (k === "pct" ? " pts" : ""), k === "n" ? "num" : tone(d));
+      tb.appendChild(tr);
+    }
+    row("Total points", a.total_pts, c.total_pts, "pts");
+    row("₹ on " + L + " lots", a.total_pts * lp, c.total_pts * lp, "rs");
+    row("Last 200 sessions (points)", a.last200_pts, c.last200_pts, "pts");
+    row("Worst fall (points)", -a.max_dd_pts, -c.max_dd_pts, "pts");
+    row("Won", a.win_pct, c.win_pct, "pct");
+    row("Closed trades", a.trades, c.trades, "n");
+    var n = D.now.book, ul = $("b5-book-now"), op = openTrade(); ul.textContent = "";
+    if (!n.position || !op) { ul.appendChild(el("li", null, "No open trade: the last trade's profit was booked. " + D.now.what)); }
+    else {
+      var p = n.position === "BUY" ? 1 : -1, g = p * (n.best - op.entry);
+      ul.appendChild(el("li", null, n.position + " entry " + num(op.entry, 2) + " (" + op.entry_time + ") · best price since the entry " + num(n.best, 2) +
+        " · best open profit " + spts(g) + " points"));
+      ul.appendChild(el("li", null, "Booking switches on at entry × (1 " + (p > 0 ? "+" : "−") + " " + B.act_pct + "%) = " + num(n.activate_at, 2) +
+        (n.armed ? " · reached" : " · not reached yet")));
+      if (n.armed) {
+        ul.appendChild(el("li", null, "Booking line = best " + (p > 0 ? "−" : "+") + " " + B.frac + " × best open profit = " + num(n.best, 2) +
+          (p > 0 ? " − " : " + ") + B.frac + " × " + num(g, 2) + " = " + num(n.level, 2)));
+        ul.appendChild(el("li", null, "A 15-minute close " + (p > 0 ? "below " : "above ") + num(n.level, 2) + " books the trade at the next open: about " +
+          spts(n.locked_pts) + " points after costs = " + sinr(n.locked_pts * lp) + " on " + L + " lots, before the " + B.slip_pts + "-point slippage."));
+      }
+    }
+    ul.appendChild(el("li", null, "Check any booked trade in the table below: book line = best − " + B.frac + " × (best − entry) for a BUY, best + " + B.frac +
+      " × (entry − best) for a SELL; exit = the next open " + "− " + B.slip_pts + " points for a BUY (+ for a SELL); points = (exit − entry) for a BUY, " +
+      "(entry − exit) for a SELL, minus " + D.cost_side_pct.toFixed(3) + "% × (entry + exit)."));
   }
 
   function loadPine() {
@@ -295,6 +354,47 @@
     s.ema21 = s.ma.f; s.ema105 = s.ma.s;
     return s;
   }
+  /* booking pages: same averages and crossover fills, plus the fib booking; flat after a booking until the next crossover */
+  function bookLevel(t) {
+    var B = D.live.book, p = t.side === "BUY" ? 1 : -1, g = p * (t.best - t.entry);
+    return g > 0 && g >= t.entry * B.act ? t.best - p * B.frac * g : null;
+  }
+  function baseTrade() {
+    var B = D.live.book;
+    return B && B.pos ? { side: B.pos, entry: D.live.entry, entry_time: D.live.entry_time, best: B.best } : null;
+  }
+  function contBook(base, done) {
+    var s = { ma: maState(base), want: base.side, path: [], flips: [], books: [], cross: !!base.pending, pend: !!base.book.pend, trade: baseTrade() };
+    done.forEach(function (c) {
+      if (s.cross) {
+        s.trade = { side: s.want, entry: c.o, entry_time: c.t, best: c.o }; s.flips.push(s.trade); s.pend = false;
+      } else if (s.pend && s.trade) {
+        s.books.push({ side: s.trade.side, time: c.t, price: c.o - (s.trade.side === "BUY" ? 1 : -1) * D.live.book.slip });
+        s.trade = null; s.pend = false;
+      }
+      var prev = s.want;
+      maPush(s.ma, c.c);
+      s.want = s.ma.f > s.ma.s ? "BUY" : "SELL";
+      s.cross = s.want !== prev;
+      if (s.trade) {
+        var t = s.trade, p = t.side === "BUY" ? 1 : -1;
+        t.best = p > 0 ? Math.max(t.best, c.h) : Math.min(t.best, c.l);
+        var lv = bookLevel(t);
+        if (lv != null && (p > 0 ? c.c <= lv : c.c >= lv)) s.pend = true;
+      }
+      s.path.push({ t: c.t, e21: s.ma.f, e105: s.ma.s });
+    });
+    s.ema21 = s.ma.f; s.ema105 = s.ma.s;
+    return s;
+  }
+  function drawBookLine(tr) {
+    if (!SER || !D.book) return;
+    if (LIVE.bookLine) { SER.removePriceLine(LIVE.bookLine); LIVE.bookLine = null; }
+    if (!tr) return;
+    var p = tr.side === "BUY" ? 1 : -1, lv = bookLevel(tr), on = lv != null, px = on ? lv : tr.entry * (1 + p * D.live.book.act);
+    LIVE.bookLine = SER.createPriceLine({ price: +px.toFixed(2), color: "#b45309", lineWidth: 2, lineStyle: on ? 0 : 1, axisLabelVisible: true,
+      title: on ? "book profit " + Math.round(px) : "booking starts " + Math.round(px) });
+  }
   function liveApply(all) {
     var Lb = D.live, nowI = istNow(), nm = hm(nowI), today = istStamp(nowI).slice(0, 10);
     var done = [], form = null;
@@ -312,7 +412,7 @@
         if (g.getUTCDay() > 0 && g.getUTCDay() < 6) LIVE.gap++;
       }
     }
-    var st = contState(Lb, done);
+    var st = D.book ? contBook(Lb, done) : contState(Lb, done);
     LIVE.state = st; LIVE.form = form;
     LIVE.price = form ? form.c : done.length ? done[done.length - 1].c : D.now.close;
     LIVE.ptime = form ? form.t : done.length ? done[done.length - 1].t : D.now.time;
@@ -328,11 +428,12 @@
         LSER.ema21.update({ time: ts(form.t), value: +pv[0].toFixed(2) });
         LSER.ema105.update({ time: ts(form.t), value: +pv[1].toFixed(2) });
       }
-      if (st.flips.length) { LIVE.flips = st.flips; drawMarkers(); }
+      if (st.flips.length || (st.books && st.books.length)) { LIVE.flips = st.flips; LIVE.books = st.books || []; drawMarkers(); }
       var fp = flipPrice(st.ma);
       if (LIVE.flipLine) SER.removePriceLine(LIVE.flipLine);
       LIVE.flipLine = SER.createPriceLine({ price: +fp.toFixed(2), color: "#b8860b", lineWidth: 1, lineStyle: 3, axisLabelVisible: true,
         title: (st.want === "BUY" ? "flip to SELL " : "flip to BUY ") + Math.round(fp) });
+      if (D.book) drawBookLine(st.trade);
     }
     renderLive();
   }
@@ -370,8 +471,64 @@
       .catch(function () { });
   }
 
+  function liveTop(box, open, n, price) {
+    var top = el("div", "b5l-top");
+    top.appendChild(el("span", "b5l-dot" + (open ? " on" : "")));
+    top.appendChild(el("b", null, open ? "LIVE · NIFTY 50 · 15-MIN" : "MARKET CLOSED"));
+    if (TICK.on && Date.now() - TICK.last < 10000) top.appendChild(el("span", "b5l-tickbadge", "KOTAK TICKS"));
+    top.appendChild(el("span", "b5l-price", num(price, 2)));
+    if (LIVE.state || LIVE.form) {
+      var chg = price - D.now.close;
+      top.appendChild(el("span", "b5l-chg " + (chg >= 0 ? "up" : "dn"), spts(chg) + " vs last published close"));
+    }
+    if (!open) top.appendChild(el("span", "b5l-when", "last candle " + (LIVE.ptime || D.now.time) + " IST · live again " + nextOpen(n) + " IST"));
+    var ck = el("span", "b5l-clock"); ck.id = "b5l-clock"; top.appendChild(ck);
+    box.appendChild(top);
+  }
+  function renderLiveBook() {
+    var box = $("b5-live"), n = istNow(), open = LIVE.force || marketOpen(n);
+    var base = D.live, st = LIVE.state, B = base.book;
+    var e21 = st ? st.ema21 : base.ema21, e105 = st ? st.ema105 : base.ema105;
+    var want = st ? st.want : base.side;
+    var tr = st ? st.trade : baseTrade();
+    var cross = st ? st.cross : !!base.pending, pend = !cross && (st ? st.pend : !!B.pend) && !!tr;
+    var price = LIVE.price != null ? LIVE.price : D.now.close;
+    var fp = flipPrice(st ? st.ma : maState(base)), lv = tr ? bookLevel(tr) : null;
+    box.textContent = "";
+    box.className = "b5-live " + (cross || pend ? "flip" : !tr ? "flat" : tr.side === "BUY" ? "buy" : "sell");
+    box.dataset.side = tr ? tr.side : "FLAT"; box.dataset.want = want; box.dataset.live = open ? "on" : "off";
+    box.dataset.e21 = e21.toFixed(4); box.dataset.e105 = e105.toFixed(4); box.dataset.flip = fp.toFixed(2);
+    box.dataset.book = lv != null ? lv.toFixed(2) : ""; box.dataset.price = String(price);
+    liveTop(box, open, n, price);
+    var act = el("div", "b5l-act");
+    act.textContent = cross ? "NEW SIGNAL: " + want + " AT THE NEXT 15-MINUTE OPEN"
+      : pend ? "BOOK " + tr.side + " PROFIT AT THE NEXT 15-MINUTE OPEN"
+      : !tr ? "FLAT · profit booked, wait for the next 6/200 signal"
+      : open ? "STAY IN " + tr.side : tr.side + " — unchanged while the market is closed";
+    box.appendChild(act);
+    if (tr) {
+      var p = tr.side === "BUY" ? 1 : -1, opn = p * (price - tr.entry);
+      box.appendChild(el("div", "b5l-sub", tr.side + " since " + tr.entry_time + " at " + num(tr.entry, 2) + " · best " + num(tr.best, 2) + " · open " +
+        spts(opn) + " pts = " + sinr(opn * D.lot) + " on 1 lot · " + sinr(opn * D.lot * D.lots) + " on " + D.lots + " lots"));
+      box.appendChild(el("div", "b5l-next", lv != null
+        ? "PROFIT BOOKING LINE → book if a 15-minute candle CLOSES " + (p > 0 ? "below " : "above ") + num(lv, 2) + " (half of the best open profit) · " +
+          num(Math.abs(price - lv), 0) + " pts away · keeps about " + spts(p * (lv - tr.entry)) + " pts"
+        : "PROFIT BOOKING switches on at " + num(tr.entry * (1 + p * B.act), 2) + " (+" + num(B.act * 100, 1) + "% from the entry)"));
+    }
+    box.appendChild(el("div", "b5l-next", "NEXT 6/200 SIGNAL → " + (want === "BUY" ? "SELL" : "BUY") + " if a 15-minute candle CLOSES " +
+      (want === "BUY" ? "below " : "above ") + num(fp, 2) + " · " + num(Math.abs(price - fp), 0) + " pts away · " + D.fast_label + " " + num(e21, 2) +
+      " · " + D.slow_label + " " + num(e105, 2)));
+    if (LIVE.fails > 1) box.appendChild(el("div", "b5l-err", "Live feed unreachable (try " + LIVE.fails + ") — retrying with the last good state."));
+    if (LIVE.gap > 0) box.appendChild(el("div", "b5l-err", "Note: " + LIVE.gap + " weekday session(s) between the published state (" +
+      D.live.time + ") and today are not in the averages yet (holiday or a missed rebuild). Tonight's rebuild corrects this."));
+    var notes = (st ? st.flips : []).map(function (f) { return f.side + " at " + num(f.entry, 2) + " (" + f.entry_time.slice(11) + ")"; })
+      .concat((st ? st.books : []).map(function (b) { return "BOOKED " + b.side + " at " + num(b.price, 2) + " (" + b.time.slice(11) + ")"; }));
+    if (notes.length) box.appendChild(el("div", "b5l-flipnote", "TODAY: " + notes.join(" · ")));
+    clockTick();
+  }
   function renderLive() {
     var box = $("b5-live"); if (!box || !D || !D.live) return;
+    if (D.book) { renderLiveBook(); return; }
     var n = istNow(), open = LIVE.force || marketOpen(n);
     var base = D.live, st = LIVE.state;
     var e21 = st ? st.ema21 : base.ema21, e105 = st ? st.ema105 : base.ema105;
@@ -386,18 +543,7 @@
     box.dataset.side = tr.side; box.dataset.want = want; box.dataset.live = open ? "on" : "off";
     box.dataset.e21 = e21.toFixed(4); box.dataset.e105 = e105.toFixed(4); box.dataset.flip = fp.toFixed(2);
     box.dataset.entry = isNum(tr.entry) ? String(tr.entry) : ""; box.dataset.price = String(price);
-    var top = el("div", "b5l-top");
-    top.appendChild(el("span", "b5l-dot" + (open ? " on" : "")));
-    top.appendChild(el("b", null, open ? "LIVE · NIFTY 50 · 15-MIN" : "MARKET CLOSED"));
-    if (TICK.on && Date.now() - TICK.last < 10000) top.appendChild(el("span", "b5l-tickbadge", "KOTAK TICKS"));
-    top.appendChild(el("span", "b5l-price", num(price, 2)));
-    if (st || LIVE.form) {
-      var chg = price - D.now.close;
-      top.appendChild(el("span", "b5l-chg " + (chg >= 0 ? "up" : "dn"), spts(chg) + " vs last published close"));
-    }
-    if (!open) top.appendChild(el("span", "b5l-when", "last candle " + (LIVE.ptime || D.now.time) + " IST · live again " + nextOpen(n) + " IST"));
-    var ck = el("span", "b5l-clock"); ck.id = "b5l-clock"; top.appendChild(ck);
-    box.appendChild(top);
+    liveTop(box, open, n, price);
     var act = el("div", "b5l-act");
     act.textContent = pending ? "FLIP: " + want + " AT THE NEXT 15-MINUTE OPEN"
       : open ? "STAY IN " + tr.side : tr.side + " — unchanged while the market is closed";
@@ -439,7 +585,8 @@
     if (q.live === "off") return;
     LIVE.force = q.live === "force";
     AF = 2 / (D.fast + 1); AS = 2 / (D.slow + 1);
-    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, flipPrice: flipPrice, maState: maState, maPreview: maPreview, LIVE: LIVE, TICK: TICK, tickMerge: tickMerge };
+    window.__b5 = { agg15: agg15, emaStep: emaStep, contState: contState, contBook: contBook, bookLevel: bookLevel, flipPrice: flipPrice, maState: maState,
+                    maPreview: maPreview, LIVE: LIVE, TICK: TICK, tickMerge: tickMerge };
     if (q.kotak === "1") { TICK.on = true; setInterval(tickLoop, 2000); tickLoop(); }
     renderLive(); liveLoop(); setInterval(clockTick, 1000);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) { clearTimeout(LIVE.timer); liveLoop(); } });
@@ -451,7 +598,7 @@
         D = d;
         $("b5-sub").textContent = D.fast_label + " / " + D.slow_label + " on 15-minute Nifty candles · " + D.from + " → " + D.last_candle + " IST · " + D.summary.trades +
           " closed trades · rebuilt " + D.generated_at.replace("T", " ").slice(0, 16);
-        renderNow(); renderKpis(); renderChart(); renderCurve(); renderYears(); renderSides(); renderMonths(); renderTrades(); renderFoot();
+        renderNow(); renderKpis(); renderChart(); renderCurve(); renderYears(); renderSides(); renderMonths(); renderTrades(); renderFoot(); renderBook();
         liveInit();
         document.body.dataset.ready = "true";
       })

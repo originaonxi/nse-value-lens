@@ -49,6 +49,38 @@ class Mechanics(unittest.TestCase):
         op = trades[-1]["net_pts"] if trades[-1]["open"] else 0.0
         self.assertAlmostEqual(eq[-1], sum(x["net_pts"] for x in closed) + op, delta=0.05 * len(trades) + 0.5)
 
+    def test_replay_book_matches_always_in_when_booking_never_triggers(self):
+        df = synthetic()
+        a = B.replay(df, 200)
+        b = B.replay_book(df, 200, 0.5, 1e9)
+        self.assertEqual([(x["side"], x["entry_time"], x["exit_time"], x["net_pts"]) for x in a[0]],
+                         [(x["side"], x["entry_time"], x["exit_time"], x["net_pts"]) for x in b[0]])
+        self.assertTrue(np.allclose(a[1], b[1]))
+
+    def test_replay_book_fib_booking_and_wait_for_next_cross(self):
+        df = synthetic(days=90, seed=11)
+        trades, eq, ef, es, up, st = B.replay_book(df, 200, 0.5, 0.3, slip=5.0)
+        t = list(df.index.strftime("%Y-%m-%d %H:%M"))
+        o, c = df["Open"].to_numpy(), df["Close"].to_numpy()
+        booked = [x for x in trades if x["exit_reason"] == "book"]
+        self.assertGreater(len(booked), 0, "the synthetic path must exercise a booking")
+        for x in trades:                                               # every entry is a crossover (or the first signal)
+            i = t.index(x["entry_time"])
+            self.assertEqual(up[i - 1], x["side"] == "BUY")
+            self.assertTrue(i == 201 or up[i - 1] != up[i - 2], f"entry {x['entry_time']} is not on a crossover")
+        for x in booked:
+            p = 1 if x["side"] == "BUY" else -1
+            g = p * (x["best"] - x["entry"])
+            self.assertGreaterEqual(g, x["entry"] * 0.003 - 0.02)      # booking only after the trade was up 0.3%
+            self.assertAlmostEqual(x["book_level"], x["best"] - p * 0.5 * g, delta=0.02)
+            j = t.index(x["exit_signal_time"])
+            self.assertTrue(c[j] <= x["book_level"] + 0.01 if p > 0 else c[j] >= x["book_level"] - 0.01)
+            self.assertAlmostEqual(x["exit"], round(o[j + 1] - p * 5.0, 2), places=2)
+            self.assertAlmostEqual(x["net_pts"], p * (x["exit"] - x["entry"]) - B.COST * (x["entry"] + x["exit"]), delta=0.02)
+        closed = [x for x in trades if not x["open"]]
+        op = trades[-1]["net_pts"] if trades[-1]["open"] else 0.0
+        self.assertAlmostEqual(eq[-1], sum(x["net_pts"] for x in closed) + op, delta=0.05 * len(trades) + 0.5)
+
 
 class Published(unittest.TestCase):
     def test_payload(self):
@@ -132,6 +164,52 @@ class Published(unittest.TestCase):
             html = (ROOT / "docs" / page).read_text(encoding="utf-8")
             self.assertIn('id="b5-pine"', html)
             self.assertIn('href="' + pine_href + '"', html)
+
+    def test_best6200fib_payload_booking_and_page(self):
+        p = ROOT / "docs" / "best6200fib.json"
+        if not p.exists():
+            self.skipTest("best6200fib.json not generated")
+        d = json.loads(p.read_text(encoding="utf-8"))
+        self.assertEqual((d["kind"], d["fast"], d["slow"], d["from"]), ("sma", 6, 200, "2023-01-12"))
+        self.assertEqual((d["book"]["frac"], d["book"]["act_pct"], d["book"]["slip_pts"]), (0.5, 1.0, 5.0))
+        s, tr, cmp_ = d["summary"], d["trades"], d["compare"]
+        closed = [x for x in tr if not x["open"]]
+        self.assertEqual(s["trades"], len(closed))
+        self.assertAlmostEqual(s["total_pts"], s["realised_pts"] + s["open_pts"], delta=1)
+        self.assertAlmostEqual(sum(y["pts"] for y in d["years_mtm"]), s["total_pts"], delta=1)
+        self.assertEqual(cmp_["booked_exits"] + cmp_["crossover_exits"], len(closed))
+        self.assertAlmostEqual(cmp_["book"]["total_pts"], s["total_pts"], delta=0.1)
+        a = json.loads((ROOT / "docs" / "best6200.json").read_text(encoding="utf-8"))
+        self.assertAlmostEqual(cmp_["always_in"]["total_pts"], a["summary"]["total_pts"], delta=0.1,
+                               msg="the comparison must be against the published always-in 6/200 page")
+        for x in closed:
+            if x["exit_reason"] == "book":
+                q = 1 if x["side"] == "BUY" else -1
+                self.assertAlmostEqual(x["book_level"], x["best"] - q * 0.5 * q * (x["best"] - x["entry"]), delta=0.02)
+        L, nb = d["live"], d["now"]["book"]
+        self.assertEqual(L["book"]["pos"], nb["position"])
+        if nb["position"]:
+            self.assertEqual(L["entry"], tr[-1]["entry"])
+            self.assertEqual(L["book"]["best"], nb["best"])
+            if nb["armed"]:
+                q = 1 if nb["position"] == "BUY" else -1
+                self.assertAlmostEqual(nb["level"], nb["best"] - q * 0.5 * q * (nb["best"] - L["entry"]), delta=0.02)
+        html = (ROOT / "docs" / "best6200fib.html").read_text(encoding="utf-8")
+        for s_ in ('data-src="best6200fib.json"', 'data-pine="best6200fib.pine"', 'href="best6200fib.pine"', 'id="b5-book-cmp"',
+                   'id="b5-book-now"', 'id="b5-chart"', 'id="b5-live"'):
+            self.assertIn(s_, html)
+        src = (ROOT / "docs" / "best6200fib.pine").read_text(encoding="utf-8")
+        lines = src.split("\n")
+        self.assertTrue(lines[0].startswith("//@version=6"))
+        for i, line in enumerate(lines, 1):
+            self.assertLessEqual(len(line), 72, f"best6200fib.pine line {i} too long to copy safely")
+            self.assertTrue(all(ord(ch) < 127 for ch in line), f"best6200fib.pine line {i} has a non-ASCII character")
+            body = "" if line.lstrip().startswith("//") else line.split("//")[0]
+            self.assertEqual(body.count('"') % 2, 0, f"best6200fib.pine line {i}: string not closed on the same line")
+        for setting in ('input.int(6, "Fast SMA"', 'input.int(200, "Slow SMA"', 'input.float(1.0, "Booking', 'input.float(0.5, "Give-back',
+                        "default_qty_value = 65", "commission_value = 0.035", "process_orders_on_close = false", "12 Jan 2023 00:00 +0530",
+                        'strategy.close("BUY", comment = "BOOK")'):
+            self.assertIn(setting, src)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,8 @@ LOT, LOTS = 65, 10
 START = pd.Timestamp("2023-07-03")          # first trading day after the EMAs have 6 months of candles
 SPLIT = pd.Timestamp("2025-01-01")          # rule chosen on data before this; after it is the unseen part
 CHART_DAYS = 365
+BOOK = None                                 # --book FRAC ACT_PCT: fib profit booking (e.g. 0.5 1), flat until the next crossover
+BOOK_SLIP = 5.0                             # Nifty points lost on every booking fill
 
 
 def ma(c, n):
@@ -87,6 +89,70 @@ def replay(df, start_i):
     return trades, eq, ef, es, up
 
 
+def replay_book(df, start_i, frac, act_pct, slip=None):
+    """replay() entries plus fib profit booking; flat until the next crossover.
+
+    Once the open trade is up act_pct % from its entry, draw a fib from the entry to the best price since the entry.
+    A 15-minute CLOSE beyond the `frac` line (0.5 = half of the best open profit given back) books the trade at the
+    next candle's open, minus `slip` points. After a booking there is no position until the next crossover, which
+    always closes any open trade and opens the new side exactly like replay()."""
+    slip = BOOK_SLIP if slip is None else slip
+    o, h, l, c = (df[k].to_numpy(float) for k in ("Open", "High", "Low", "Close"))
+    t = df.index
+    ef, es = ma(c, FAST), ma(c, SLOW)
+    up = np.nan_to_num(ef) > np.nan_to_num(es)
+    pos, entry, ent_i, best, pend, level = 0, 0.0, None, 0.0, False, None
+    trades, real = [], 0.0
+    eq = np.zeros(len(c))
+
+    def record(i, px, reason):
+        net = pos * (px - entry) - COST * (entry + px)
+        trades.append({"side": "BUY" if pos > 0 else "SELL", "signal_time": str(t[ent_i - 1])[:16],
+                       "entry_time": str(t[ent_i])[:16], "entry": round(entry, 2),
+                       "exit_signal_time": str(t[i - 1])[:16], "exit_time": str(t[i])[:16], "exit": round(px, 2),
+                       "net_pts": round(net, 2), "rupees": round(net * LOT), "candles": i - ent_i,
+                       "days": (t[i].normalize() - t[ent_i].normalize()).days, "open": False,
+                       "exit_reason": reason, "best": round(best, 2),
+                       "book_level": round(level, 2) if reason == "book" else None})
+        return net
+
+    for i in range(start_i, len(c)):
+        if i > start_i:
+            if i == start_i + 1 or up[i - 1] != up[i - 2]:
+                d = 1 if up[i - 1] else -1
+                px = float(o[i])
+                if pos != 0:
+                    real += record(i, px, "crossover")
+                pos, entry, ent_i, best, pend, level = d, px, i, px, False, None
+            elif pend and pos != 0:
+                px = float(o[i]) - pos * slip
+                real += record(i, px, "book")
+                pos, pend = 0, False
+        if pos != 0:
+            best = max(best, float(h[i])) if pos > 0 else min(best, float(l[i]))
+            gain = pos * (best - entry)
+            if gain > 0 and gain >= entry * act_pct / 100:
+                lv = best - pos * frac * gain
+                if (pos > 0 and c[i] <= lv) or (pos < 0 and c[i] >= lv):
+                    pend, level = True, lv
+        unreal = pos * (c[i] - entry) - COST * entry if pos else 0.0
+        eq[i] = real + unreal
+    if pos:
+        last = float(c[-1])
+        net = pos * (last - entry) - COST * entry
+        trades.append({"side": "BUY" if pos > 0 else "SELL", "signal_time": str(t[ent_i - 1])[:16], "entry_time": str(t[ent_i])[:16],
+                       "entry": round(entry, 2), "exit_signal_time": None, "exit_time": None, "exit": round(last, 2),
+                       "net_pts": round(net, 2), "rupees": round(net * LOT), "candles": len(c) - 1 - ent_i,
+                       "days": (t[-1].normalize() - t[ent_i].normalize()).days, "open": True,
+                       "exit_reason": None, "best": round(best, 2), "book_level": None})
+    gain = pos * (best - entry) if pos else 0.0
+    armed = bool(pos and gain > 0 and gain >= entry * act_pct / 100)
+    state = {"pos": pos, "entry": entry, "best": best, "pend": bool(pend and pos), "armed": armed,
+             "level": (best - pos * frac * gain) if armed else None,
+             "activate_at": entry * (1 + pos * act_pct / 100) if pos else None}
+    return trades, eq, ef, es, up, state
+
+
 def side_stats(tr):
     p = np.array([x["net_pts"] for x in tr], float)
     if not len(p):
@@ -108,7 +174,11 @@ def build(today=None):
     check = I.check_data(df)
     t = df.index
     start_i = int(np.searchsorted(t, START))
-    trades, eq, ef, es, up = replay(df, start_i)
+    bstate = None
+    if BOOK:
+        trades, eq, ef, es, up, bstate = replay_book(df, start_i, *BOOK)
+    else:
+        trades, eq, ef, es, up = replay(df, start_i)
     o, c = df["Open"].to_numpy(float), df["Close"].to_numpy(float)
 
     closed = [x for x in trades if not x["open"]]
@@ -169,6 +239,61 @@ def build(today=None):
     if KIND == "sma":
         live["closes"] = [round(float(x), 2) for x in c[-(SLOW - 1):]]      # the browser's rolling window
 
+    compare = None
+    if BOOK:                                    # fib profit booking: the state, the live seed and the always-in comparison
+        frac, act = BOOK
+        pside = op["side"] if op else None
+        p = 1 if pside == "BUY" else -1 if pside == "SELL" else 0
+        cross = bool(up[-1] != up[-2])
+        nxt = "SELL" if side == "BUY" else "BUY"
+        word = "below" if side == "BUY" else "above"
+        lv, arm = bstate["level"], bstate["armed"]
+        if cross:
+            state = f"{side} at the next 15-minute candle's open"
+            what = (f"{flbl} crossed {'above' if up[-1] else 'below'} {slbl} on the last candle: a new {side} trade opens at the next open"
+                    + (f" and the open {pside} trade closes there." if pside else "."))
+        elif bstate["pend"] and pside:
+            state = f"BOOK {pside} PROFIT at the next 15-minute open"
+            what = (f"The last candle closed {'below' if p > 0 else 'above'} the booking line {lv:,.2f}: the {pside} trade books at the next open, "
+                    f"then there is no trade until the next {flbl} / {slbl} crossover.")
+        elif pside:
+            state = f"IN TRADE · {pside}"
+            exit_txt = f"otherwise it runs until {flbl} crosses {word} {slbl} (one close {word} about {trig:,.2f} would do it right now)"
+            if arm:
+                what = (f"Booking line {lv:,.2f}: a 15-minute close {'below' if p > 0 else 'above'} it books the profit at the next open "
+                        f"(half of the best open profit; best price {bstate['best']:,.2f}); {exit_txt}.")
+            else:
+                what = f"Booking switches on once price reaches {bstate['activate_at']:,.2f} (+{act:g}% from the entry); {exit_txt}."
+        else:
+            state = "FLAT · profit booked, waiting for the next signal"
+            what = (f"No trade until the next crossover: {nxt} when {flbl} crosses {word} {slbl}. "
+                    f"One 15-minute close {word} about {trig:,.2f} would do it right now.")
+        locked = round(p * (lv - op["entry"]) - COST * (op["entry"] + lv), 1) if (pside and lv is not None) else None
+        now.update({"state": state, "what": what, "position": pside,
+                    "book": {"frac": frac, "act_pct": act, "position": pside, "pending_book": bool(bstate["pend"]) and not cross,
+                             "armed": arm, "best": round(bstate["best"], 2) if pside else None,
+                             "level": round(lv, 2) if lv is not None else None,
+                             "activate_at": round(bstate["activate_at"], 2) if pside else None, "locked_pts": locked}})
+        live.update({"pending": cross, "book": {"frac": frac, "act": act / 100, "slip": BOOK_SLIP, "pos": pside,
+                                                "best": round(bstate["best"], 2) if pside else None, "pend": bool(bstate["pend"])}})
+        a_tr, a_eq = replay(df, start_i)[:2]
+
+        def l200(v):
+            d = pd.Series(v[start_i:], index=t[start_i:]).groupby(t[start_i:].normalize()).last().to_numpy()
+            return round(float(d[-1] - d[-201]), 1) if len(d) > 200 else None
+
+        def mdd(v):
+            cp = np.r_[0.0, v[start_i:]]
+            return round(float((np.maximum.accumulate(cp) - cp).max()), 1)
+        a_closed = [x for x in a_tr if not x["open"]]
+        compare = {
+            "always_in": {"total_pts": round(float(a_eq[-1]), 1), "last200_pts": l200(a_eq), "max_dd_pts": mdd(a_eq), "trades": len(a_closed),
+                          "win_pct": round(100 * float(np.mean([x["net_pts"] > 0 for x in a_closed])), 1)},
+            "book": {"total_pts": round(total, 1), "last200_pts": l200(eq), "max_dd_pts": mdd(eq), "trades": len(closed),
+                     "win_pct": summary["win_pct"]},
+            "booked_exits": sum(x["exit_reason"] == "book" for x in closed),
+            "crossover_exits": sum(x["exit_reason"] == "crossover" for x in closed)}
+
     # daily curve (last value of each day) vs holding Nifty
     day = pd.Series(curve_pts, index=t[start_i:]).groupby(t[start_i:].normalize()).last()
     hold_day = pd.Series(c[start_i:] - o[start_i], index=t[start_i:]).groupby(t[start_i:].normalize()).last()
@@ -221,6 +346,31 @@ def build(today=None):
             "Paper research. Not SEBI-registered advice. No orders are placed by this website.",
         ],
     }
+    if BOOK:
+        frac, act = BOOK
+        payload.update({
+            "name": f"Nifty 50 · {flbl} / {slbl} · 15-minute · fib profit booking",
+            "book": {"frac": frac, "act_pct": act, "slip_pts": BOOK_SLIP}, "compare": compare,
+            "rule": [f"BUY when a 15-minute candle closes with {flbl} crossing above {slbl}; SELL (short) when it closes with {flbl} crossing below {slbl}. "
+                     "The order fills at the next candle's open.",
+                     f"Profit booking: once the trade is up {act:g}% from its entry, draw a fib from the entry to the best price since the entry. "
+                     f"If a 15-minute candle CLOSES beyond the {frac * 100:g}% line (that much of the best open profit given back), the profit is booked at the next open.",
+                     f"After a booking there is no trade until the next {flbl} / {slbl} crossover. A crossover always closes any open trade and opens the new side, "
+                     "exactly like the always-in page.",
+                     f"{COST * 100:.3f}% of price on every buy and every sell, plus {BOOK_SLIP:g} points of slippage on every booking. "
+                     f"Rupees: 1 lot = {LOT}, and {LOTS} lots."],
+            "why": ["Same entries as the SMA 6/200 page; only the exit differs. The always-in page gave back a median of about 226 points per trade "
+                    "from its best price, and 29 trades that were up more than 1% still ended as losers.",
+                    "Tested on 48 nearby settings (give back 38-70% after +0.6% to +1.75%): 41 made more than always-in. The same exit, unchanged, "
+                    "also improved SMA 5/200, 4/180, 6/190, 7/200 and 5/195.",
+                    "Picked on 2023-24 data alone, the nearby setting (50% after +1.5%) still beat always-in on 2025-26. Fixed profit targets and fib "
+                    "extension targets were tested and rejected: they cut the few big trends that make the money."],
+            "limits": ["Picked after looking at this same history (about 3.8 years of one market). Paper-trade it beside the always-in page before using real money.",
+                       f"Bookings are assumed to fill at the next 15-minute open minus {BOOK_SLIP:g} points; a fast market can fill worse.",
+                       f"About {100 - summary['win_pct']:.0f}% of trades lose. The profit comes from a few long trends, and long losing runs are normal.",
+                       "Positions are held overnight, so an opening gap can move the trade a long way before you can act.",
+                       "TradingView's 15-minute candles can differ by a few points, so a signal there can be one candle apart.",
+                       "Paper research. Not SEBI-registered advice. No orders are placed by this website."]})
     text = json.dumps(payload, separators=(",", ":"), default=str)
     for out in (DOCS / f"{OUT}.json", PUBLIC / f"{OUT}.json"):
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -238,6 +388,8 @@ if __name__ == "__main__":
     ap.add_argument("--sma", nargs=2, type=int, metavar=("FAST", "SLOW"), help="use an SMA pair instead of EMA 21/105")
     ap.add_argument("--out", help="output name, e.g. best5200")
     ap.add_argument("--start", help="first trading date to use, e.g. 2023-01-12; default remains 2023-07-03")
+    ap.add_argument("--book", nargs=2, type=float, metavar=("FRAC", "ACT_PCT"),
+                    help="fib profit booking: e.g. 0.5 1 = book when half of the best open profit is given back, once up 1%%")
     args = ap.parse_args()
     if args.sma:
         KIND, FAST, SLOW = "sma", args.sma[0], args.sma[1]
@@ -245,4 +397,6 @@ if __name__ == "__main__":
         OUT = args.out
     if args.start:
         START = pd.Timestamp(args.start)
+    if args.book:
+        BOOK = (args.book[0], args.book[1])
     build()

@@ -1,0 +1,113 @@
+//@version=6
+// Nifty 50 SMA 6 / SMA 200 entries + fib profit booking, 15-min.
+// BUY when a candle closes with SMA 6 crossing above SMA 200.
+// SELL (short) when it closes with SMA 6 crossing below SMA 200.
+// Booking: once a trade is up 1%, a close that gives back half of
+// the best open profit books it at the next open. Then no trade
+// until the next 6/200 crossover. 1 lot = 65. Cost 0.035% a side.
+// The website also assumes 5 points slippage on every booking.
+// Source: originaonxi.github.io/nse-value-lens/best6200fib.html
+strategy("Nifty SMA 6/200 fib booking 15m", "SMA 6/200 book",
+      overlay = true,
+      initial_capital = 10000000,
+      default_qty_type = strategy.fixed,
+      default_qty_value = 65,
+      commission_type = strategy.commission.percent,
+      commission_value = 0.035,
+      process_orders_on_close = false,
+      pyramiding = 0)
+
+fastLen = input.int(6, "Fast SMA", minval = 1)
+slowLen = input.int(200, "Slow SMA", minval = 2)
+actPct = input.float(1.0, "Booking switches on after +%",
+      minval = 0.1)
+giveBack = input.float(0.5, "Give-back fraction",
+      minval = 0.1, maxval = 0.9)
+startAt = input.time(timestamp("12 Jan 2023 00:00 +0530"),
+      "Start trading from")
+
+fastMa = ta.sma(close, fastLen)
+slowMa = ta.sma(close, slowLen)
+ready = bar_index >= slowLen and time >= startAt
+up = fastMa > slowMa
+var bool started = false
+isFirst = ready and not started
+goUp = ready and up and (isFirst or not up[1])
+goDown = ready and not up and (isFirst or up[1])
+if isFirst
+    started := true
+
+if goUp
+    strategy.entry("BUY", strategy.long, comment = "BUY")
+if goDown
+    strategy.entry("SELL", strategy.short, comment = "SELL")
+
+// best price since the entry and the fib booking line
+pos = strategy.position_size
+entryPx = pos != 0 ? strategy.opentrades.entry_price(0) : na
+entryBar = pos != 0 ? strategy.opentrades.entry_bar_index(0) : na
+var float best = na
+if pos == 0
+    best := na
+else if entryBar == bar_index or na(best)
+    best := pos > 0 ? math.max(entryPx, high) :
+          math.min(entryPx, low)
+else
+    best := pos > 0 ? math.max(best, high) : math.min(best, low)
+gain = pos > 0 ? best - entryPx : pos < 0 ? entryPx - best : na
+armed = pos != 0 and gain > 0 and gain >= entryPx * actPct / 100
+bookAt = pos > 0 ? best - giveBack * gain : best + giveBack * gain
+bookLong = armed and pos > 0 and close <= bookAt and not goDown
+bookShort = armed and pos < 0 and close >= bookAt and not goUp
+if bookLong
+    strategy.close("BUY", comment = "BOOK")
+if bookShort
+    strategy.close("SELL", comment = "BOOK")
+
+pf = plot(fastMa, "SMA 6", color = color.orange, linewidth = 2)
+ps = plot(slowMa, "SMA 200", color = color.purple, linewidth = 2)
+upFill = color.new(color.green, 85)
+dnFill = color.new(color.red, 85)
+fill(pf, ps, color = up ? upFill : dnFill, title = "Trend")
+bookCol = color.new(color.orange, 0)
+plot(armed ? bookAt : na, "Booking line", color = bookCol,
+      linewidth = 2, style = plot.style_linebr)
+plotshape(goUp, "BUY", shape.labelup, location.belowbar,
+      color.green, text = "BUY", textcolor = color.white)
+plotshape(goDown, "SELL", shape.labeldown, location.abovebar,
+      color.red, text = "SELL", textcolor = color.white)
+plotshape(bookLong or bookShort, "BOOK", shape.circle,
+      location.abovebar, color.orange, text = "BOOK")
+
+lotPts = 65 * syminfo.pointvalue
+totalPts = (strategy.netprofit + strategy.openprofit) / lotPts
+posTxt = pos > 0 ? "LONG" : pos < 0 ? "SHORT" : "FLAT - wait"
+bookTxt = armed ? str.tostring(bookAt, "#.##") : "not active"
+
+row(t, r, label, txt, col) =>
+    table.cell(t, 0, r, label, text_color = color.gray)
+    table.cell(t, 1, r, txt, text_color = col)
+
+var table tb = table.new(position.top_right, 2, 6,
+      bgcolor = color.white, border_width = 1,
+      border_color = color.new(color.gray, 70))
+if barstate.islast
+    row(tb, 0, "SMA 6", str.tostring(fastMa, "#.##"), color.orange)
+    row(tb, 1, "SMA 200", str.tostring(slowMa, "#.##"), color.purple)
+    row(tb, 2, "Position", posTxt, pos > 0 ? color.green :
+          pos < 0 ? color.red : color.gray)
+    row(tb, 3, "Booking line", bookTxt, color.orange)
+    row(tb, 4, "Points since start",
+          str.tostring(totalPts, "#,##0.0"), totalPts >= 0 ?
+          color.green : color.red)
+    row(tb, 5, "Chart", timeframe.period == "15" ?
+          "15 min (tested)" : "NOT 15 min", color.gray)
+
+// ---- alerts: Alert > Condition "SMA 6/200 book" > any alert() ----
+once = alert.freq_once_per_bar_close
+if goUp
+    alert("Nifty 6/200: BUY at next 15m open", once)
+if goDown
+    alert("Nifty 6/200: SELL at next 15m open", once)
+if bookLong or bookShort
+    alert("Nifty 6/200: BOOK profit at next 15m open", once)

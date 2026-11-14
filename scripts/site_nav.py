@@ -18,6 +18,7 @@ GROUPS = [
         ("best4180.html", "Trade Nifty · SMA 4/180 · 15-min", "most points of 940 rules re-tested to Nov 2026; every year green"),
         ("best5200.html", "Trade Nifty · SMA 5/200 · 15-min", "baseline comparison; pure 200-session tested; every year green"),
         ("best6200.html", "Trade Nifty · SMA 6/200 · 15-min", "durable candidate; pure 200-session tested; part of the SMA plateau"),
+        ("best6200fib.html", "Trade Nifty · SMA 6/200 + fib booking", "paper-trade: 6/200 entries, book profit on a 50% give-back, wait for the next signal"),
         ("best15.html", "Trade Nifty · EMA 21/105 · 15-min", "always in a trade; made money every year since Jul 2023"),
         ("fund.html", "Invest · Our Fund", "best 30 of the Nifty 100, rebalanced monthly"),
         ("methods.html", "10 methods · daily race", "5 classics + 5 Fable originals: who makes the most, and why"),
