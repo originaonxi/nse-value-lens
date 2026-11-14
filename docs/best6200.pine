@@ -4,7 +4,7 @@
 // SELL (short) when it closes with SMA 6 below SMA 200.
 // Orders fill at the next candle's open. Always in a trade.
 // No target, no extra stop. 1 lot = 65. Cost 0.035% per side.
-// Test 3 Jul 2023 - 13 Nov 2026: +10,947 points after costs.
+// Test 12 Jan 2023 - 13 Nov 2026: +11,461 points after costs (maximum available 15m history; not five full years).
 // Source: originaonxi.github.io/nse-value-lens/best6200.html
 strategy("Nifty SMA 6/200 15m", "SMA 6/200 15m",
       overlay = true,
@@ -20,7 +20,7 @@ mode = input.string("Always in", "Mode",
       options = ["Always in", "BUY or WATCH", "SELL or WATCH"])
 fastLen = input.int(6, "Fast SMA", minval = 1)
 slowLen = input.int(200, "Slow SMA", minval = 2)
-startAt = input.time(timestamp("03 Jul 2023 00:00 +0530"), "Start trading from")
+startAt = input.time(timestamp("12 Jan 2023 00:00 +0530"), "Start trading from")
 
 fastMa = ta.sma(close, fastLen)
 slowMa = ta.sma(close, slowLen)

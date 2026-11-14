@@ -237,9 +237,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Build the best-setup page data (default: EMA 21/105 -> best15.json)")
     ap.add_argument("--sma", nargs=2, type=int, metavar=("FAST", "SLOW"), help="use an SMA pair instead of EMA 21/105")
     ap.add_argument("--out", help="output name, e.g. best5200")
+    ap.add_argument("--start", help="first trading date to use, e.g. 2023-01-12; default remains 2023-07-03")
     args = ap.parse_args()
     if args.sma:
         KIND, FAST, SLOW = "sma", args.sma[0], args.sma[1]
     if args.out:
         OUT = args.out
+    if args.start:
+        START = pd.Timestamp(args.start)
     build()
